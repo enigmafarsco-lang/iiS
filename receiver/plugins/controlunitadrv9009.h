@@ -7,6 +7,7 @@
 #include <QStringList>
 #include "qdebug.h"
 #include <receiver/globals.h>
+#include <receiver/plugins/drfmregisterio.h>
 
 namespace Ui {
 class ControlUnitADRV9009;
@@ -59,14 +60,24 @@ private:
     void resolveRegisterDevices();
     bool writeRegisterVerified(quint32 offset, quint32 value,
                                const QString &label, QString *details);
-    // Single low-level transaction used by both the original TH1/TH2
-    // buttons and the new DRFM/Amply/VGPO controls.  This keeps the new
-    // controls on exactly the same IIO/mwipcore register-write path that
-    // is already proven in the project.
+    // Historical mwipcore0:mmwr0 transaction (reg_access + reg_write),
+    // kept unchanged for every tab/menu outside the DRFM tab.
     bool writeRegisterLikeThreshold(quint32 offset, quint32 value,
                                     const QString &label, QString *details = nullptr);
+    // Corrected write path for the DRFM tab controls ONLY (th0/amplify,
+    // dacsel, pdw/VGPO, inchannel, thcw).  Routes through DrfmRegisterIO:
+    // named IIO debug attributes of the led-count device (the iio-oscilloscope
+    // Debug tab registers th0/dacsel/...), matching IIO channel attributes
+    // (e.g. frequency on voltage0/1), then direct led-count register access -
+    // with mwipcore0:mmwr0 only as a fallback for old bitstreams.  The
+    // software never opens the UART; every write prints the echo/cat command
+    // to confirm the value in the board console (picocom).
+    bool writeRegisterToHw(quint32 offset, quint32 value,
+                           const QString &label, QString *details = nullptr);
     bool tryReadRegister(quint32 offset, quint32 *value);
     QString deviceDisplayName(struct iio_device *dev) const;
+
+    DrfmRegisterIO registerIo;
 
 public:
     // Hardware map confirmed from the supplied tcl07020.tcl,
@@ -96,6 +107,13 @@ public:
     // Compatibility overload: phase offset defaults to zero.
     bool setVgpoValue(qint32 phaseStep, bool enabled = true, QString *details = nullptr)
     { return setVgpoValue(0u, phaseStep, enabled, details); }
+    // Writes the IIO channel register "frequency" that is represented by the
+    // voltage0 / voltage1 channels (in_voltage0_frequency etc. in sysfs).
+    bool setIioFrequency(double frequency, QString *details = nullptr);
+
+    // Scan report: every led-count IIO debug attribute (name = value) and the
+    // register it represents (th0/dacsel/...).  Pure IIO - no UART.
+    QString scanIioRegisters() { return registerIo.scanReport(); }
     QString registerBackendInfo();
 
 public slots:

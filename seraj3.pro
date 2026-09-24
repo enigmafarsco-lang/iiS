@@ -184,6 +184,7 @@ HEADERS += \
     receiver/plugins/adrv9009_adv.h \
     receiver/plugins/controlunitadrv9009.h \
     receiver/plugins/dacDataManager.h \
+    receiver/plugins/drfmregisterio.h \
     receiver/settings.h \
     receiver/receivermain.h \
     receiver/utils/filedialog.h \

@@ -8,16 +8,23 @@
 #include <QFileInfo>
 #include <limits>
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleValidator>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QIntValidator>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QScrollBar>
 #include <QVBoxLayout>
+
+#include <receiver/plugins/drfmregisterio.h>
 
 
 ReceiverMain::ReceiverMain(QWidget *parent) :
@@ -614,8 +621,14 @@ void ReceiverMain::setupDrfmControlTab()
     //   MUXDACS_ip.v:
     //       DacSel=1 -> DRFM/processed path, DacSel=0 -> DMA/noise path.
     //
-    // The new controls intentionally use the same IIO/mwipcore register-write
-    // transaction as the original TH1/TH2 Write buttons.
+    // Register writes go through DrfmRegisterIO: named IIO debug attributes
+    // of the led-count device (the th0/dacsel/... raw-data registers of the
+    // iio-oscilloscope Debug tab), matching IIO channel attributes
+    // (e.g. "frequency" on voltage0/1), then direct led-count register
+    // access; the old mwipcore0:mmwr0 bridge is only a fallback.  Because
+    // the AXI read mux cannot return these control registers, every Set
+    // prints the echo/cat command to confirm the value manually in the
+    // board console (picocom) - the software never opens the UART itself.
 
     QWidget *page = new QWidget(ui->tabWidgetSetting);
     page->setObjectName(QStringLiteral("tabDrfmControl"));
@@ -729,6 +742,75 @@ void ReceiverMain::setupDrfmControlTab()
     vgpoLayout->addWidget(vgpoSet, 3, 4);
     pageLayout->addWidget(vgpoGroup);
 
+    // -------------------- IIO channel registers (voltage0/1) --------------------
+    QGroupBox *iioGroup = new QGroupBox(
+                tr("IIO channel registers (voltage0 / voltage1 \"frequency\")"), page);
+    QGridLayout *iioLayout = new QGridLayout(iioGroup);
+    QLineEdit *freqEdit = new QLineEdit(iioGroup);
+    QPushButton *freqSet = new QPushButton(tr("Write frequency"), iioGroup);
+    freqEdit->setObjectName(QStringLiteral("txtDrfmFrequency"));
+    freqSet->setObjectName(QStringLiteral("btnSetDrfmFrequency"));
+    freqEdit->setValidator(new QDoubleValidator(0.0, 1.0e12, 6, freqEdit));
+    freqEdit->setText(QStringLiteral("0"));
+    freqEdit->setPlaceholderText(QStringLiteral("frequency in Hz"));
+    freqEdit->setToolTip(tr("Writes the IIO channel register \"frequency\" of voltage0 and\n"
+                            "voltage1 (in_voltage0_frequency, out_voltage1_frequency, ...)\n"
+                            "through the same IIO context as th0/dacsel."));
+    iioLayout->addWidget(new QLabel(tr("Frequency"), iioGroup), 0, 0);
+    iioLayout->addWidget(freqEdit, 0, 1);
+    iioLayout->addWidget(freqSet, 0, 2);
+    pageLayout->addWidget(iioGroup);
+
+    // -------------------- Board console check commands (manual) --------------------
+    // The software never opens the UART/USB.  The user verifies the registers
+    // separately in a terminal, e.g.
+    //     sudo picocom -b 115200 -l -r /dev/ttyUSB0
+    // and runs these echo/cat commands on the board shell.  Every Set above
+    // prints the exact command for the written register as well.
+    QGroupBox *consoleGroup = new QGroupBox(
+                tr("Board console check (picocom: echo / cat /sys/bus/iio/devices/...)"),
+                page);
+    QGridLayout *consoleLayout = new QGridLayout(consoleGroup);
+
+    QPushButton *btnScanIio = new QPushButton(tr("Scan led-count IIO registers (via IIO)"),
+                                              consoleGroup);
+    btnScanIio->setObjectName(QStringLiteral("btnScanDrfmIioRegisters"));
+    btnScanIio->setToolTip(tr("Lists the IIO debug attributes of the led-count device and\n"
+                              "which one represents th0/dacsel/... - no UART involved."));
+
+    QPlainTextEdit *txtConsoleHelp = new QPlainTextEdit(consoleGroup);
+    txtConsoleHelp->setObjectName(QStringLiteral("txtDrfmConsoleHelp"));
+    txtConsoleHelp->setReadOnly(true);
+    txtConsoleHelp->setMaximumBlockCount(200);
+    txtConsoleHelp->setMinimumHeight(150);
+    QFont consoleFont(QStringLiteral("Monospace"));
+    consoleFont.setStyleHint(QFont::TypeWriter);
+    txtConsoleHelp->setFont(consoleFont);
+    txtConsoleHelp->setPlainText(
+                tr("The software does NOT open the UART.  Connect separately with:\n"
+                   "  sudo picocom -b 115200 -l -r /dev/ttyUSB0\n"
+                   "\n"
+                   "-- scan: list the led-count IIO registers (th0/dacsel/...) + values --\n"
+                   "for d in /sys/bus/iio/devices/iio:device*; do echo \"== $d name=$(cat $d/name 2>/dev/null)\"; for f in $d/* $d/debug/*; do [ -f \"$f\" ] && echo \"  ${f##*/} = $(cat $f 2>/dev/null)\"; done; done\n"
+                   "(led-count = the device whose name contains led/count; its registers are\n"
+                   " th0/th1/th2, dacsel, pdw, inchannel, thcw, amplify ... - either directly\n"
+                   " in the device folder or in its debug/ subfolder)\n"
+                   "\n"
+                   "-- read one register (confirm a value written from the DRFM tab) --\n"
+                   "for f in /sys/bus/iio/devices/iio:device*/th0 /sys/bus/iio/devices/iio:device*/debug/th0; do [ -f \"$f\" ] && { echo $f; cat $f; break; }; done\n"
+                   "(replace th0 with dacsel / pdw / inchannel / thcw / amplify ...)\n"
+                   "\n"
+                   "-- write by hand (same raw data as the iio-oscilloscope Debug tab) --\n"
+                   "echo 200 > /sys/bus/iio/devices/iio:deviceX/th0\n"
+                   "echo 1 > /sys/bus/iio/devices/iio:deviceX/dacsel\n"
+                   "\n"
+                   "-- frequency channel registers (voltage0/1) --\n"
+                   "cat /sys/bus/iio/devices/iio:deviceX/in_voltage0_frequency"));
+
+    consoleLayout->addWidget(btnScanIio, 0, 0);
+    consoleLayout->addWidget(txtConsoleHelp, 1, 0);
+    pageLayout->addWidget(consoleGroup);
+
     // -------------------- Hardware transaction output --------------------
     QLabel *backendLabel = new QLabel(tr("Register backend: waiting for board connection."), page);
     backendLabel->setObjectName(QStringLiteral("lblDrfmRegisterBackend"));
@@ -747,8 +829,11 @@ void ReceiverMain::setupDrfmControlTab()
     registerOutput->setMinimumHeight(150);
     registerOutput->setPlainText(
                 tr("Vivado map: led_count_ip_0 @ 0x43C30000.\n"
-                   "The controls below use the same mwipcore/IIO register-write path as TH1 and TH2.\n"
-                   "Every successful Set/On/Off operation prints the exact AXI address and raw value here."));
+                   "Writes use the IIO led-count device: named debug attributes (the th0/dacsel\n"
+                   "raw-data registers of the iio-oscilloscope Debug tab), then voltage0/1 channel\n"
+                   "attributes, then direct IIO register access; mwipcore0:mmwr0 is only a fallback.\n"
+                   "Every successful Set/On/Off operation prints the exact AXI address, raw value and\n"
+                   "the echo/cat command to confirm it in the board console (picocom)."));
     pageLayout->addWidget(registerOutput);
     pageLayout->addStretch(1);
 
@@ -833,6 +918,20 @@ void ReceiverMain::setupDrfmControlTab()
         showResult(unit, ok, details);
     };
 
+    auto applyFrequency = [controlUnit, freqEdit, statusLabel, showResult, noBoard]() {
+        bool freqOk = false;
+        const double frequency = freqEdit->text().toDouble(&freqOk);
+        if (!freqOk) {
+            statusLabel->setText(QObject::tr("Frequency must be a number (Hz)."));
+            return;
+        }
+        ControlUnitADRV9009 *unit = controlUnit();
+        if (!unit) { noBoard(); return; }
+        QString details;
+        const bool ok = unit->setIioFrequency(frequency, &details);
+        showResult(unit, ok, details);
+    };
+
     // ON/OFF buttons are real hardware commands, not just UI state changes.
     // Set re-applies the selected state/value, matching the original TH1/TH2
     // model where a button click performs the actual register transaction.
@@ -847,6 +946,20 @@ void ReceiverMain::setupDrfmControlTab()
     connect(vgpoOn,  &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoOff, &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoSet, &QPushButton::clicked, this, applyVgpoSet);
+    connect(freqSet, &QPushButton::clicked, this, applyFrequency);
+
+    // IIO-side scan: which debug attributes represent th0/dacsel/...
+    // (identical list to the iio-oscilloscope Debug tab - no UART involved).
+    connect(btnScanIio, &QPushButton::clicked, this,
+            [controlUnit, registerOutput, statusLabel]() {
+        ControlUnitADRV9009 *unit = controlUnit();
+        if (!unit) {
+            statusLabel->setText(QObject::tr("Board control is not connected yet."));
+            return;
+        }
+        registerOutput->appendPlainText(unit->scanIioRegisters());
+        statusLabel->setText(QObject::tr("IIO register scan finished (see output above)."));
+    });
 }
 
 void ReceiverMain::showNoiseStatus(QString activeMode= "",QString msg="")

@@ -549,10 +549,8 @@ void ControlUnitADRV9009::resolveRegisterDevices()
 QString ControlUnitADRV9009::registerBackendInfo()
 {
     resolveRegisterDevices();
-    return QStringLiteral("AXI led_count_ip base 0x%1 | write bridge: %2 | read bridge: %3")
-            .arg(QString::number(LED_COUNT_AXI_BASE, 16).toUpper())
-            .arg(deviceDisplayName(writeDev))
-            .arg(deviceDisplayName(readDev));
+    return QStringLiteral("%1 | legacy read bridge: %2")
+            .arg(registerIo.backendInfo(), deviceDisplayName(readDev));
 }
 
 bool ControlUnitADRV9009::tryReadRegister(quint32 offset, quint32 *value)
@@ -703,6 +701,29 @@ bool ControlUnitADRV9009::writeRegisterVerified(quint32 offset, quint32 value,
     return true;
 }
 
+bool ControlUnitADRV9009::writeRegisterToHw(quint32 offset, quint32 value,
+                                             const QString &label,
+                                             QString *details)
+{
+    // Hardware-write entry point for the DRFM tab controls ONLY (th0/amplify,
+    // dacsel, pdw/VGPO, inchannel, thcw).  Every other tab, menu and legacy
+    // button keeps its historical writeRegisterLikeThreshold/mwipcore
+    // transaction untouched.  DrfmRegisterIO performs the corrected write
+    // sequence:
+    //   1. named IIO debug attributes of the led-count device (th0, dacsel,
+    //      amplify, ...) - the raw-data mechanism of the iio-oscilloscope
+    //      Debug tab;
+    //   2. matching IIO channel attributes (e.g. "frequency" on voltage0/1);
+    //   3. direct IIO register access on the led-count device (AXI base
+    //      0x43C30000 + offset);
+    //   4. legacy mwipcore0:mmwr0 + reg_access only as a fallback.
+    // Values are confirmed manually in the board console (picocom) with the
+    // echo/cat commands printed with every write - the software itself never
+    // opens the UART/USB.
+    resolveRegisterDevices();
+    return registerIo.writeRegister(offset, value, label, details);
+}
+
 bool ControlUnitADRV9009::writeRegisterLikeThreshold(quint32 offset, quint32 value,
                                                        const QString &label,
                                                        QString *details)
@@ -710,6 +731,7 @@ bool ControlUnitADRV9009::writeRegisterLikeThreshold(quint32 offset, quint32 val
     // IMPORTANT: this is deliberately the same transaction used by the
     // original TH1/TH2 Write buttons: resolve mwipcore -> enable reg_access ->
     // iio_device_reg_write(offset,value) -> disable reg_access.
+    // Kept unchanged for every tab/menu outside the DRFM tab.
     resolveRegisterDevices();
 
     const quint32 physicalAddress = LED_COUNT_AXI_BASE + offset;
@@ -771,7 +793,7 @@ bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
     // DacSel=0 => DMA path used by the noise waveform.
     const quint32 value = enabled ? 1u : 0u;
     writeItemValues["dacselect"] = value;
-    return writeRegisterLikeThreshold(REG_DRFM_SELECT, value,
+    return writeRegisterToHw(REG_DRFM_SELECT, value,
                                       enabled ? QStringLiteral("DRFM ON / DACSEL=1")
                                               : QStringLiteral("NOISE / DACSEL=0"),
                                       details);
@@ -791,7 +813,7 @@ bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *
         ui->txtTH0->setValue(static_cast<int>(appliedValue));
 
     QString local;
-    const bool ok = writeRegisterLikeThreshold(REG_AMPLY, appliedValue,
+    const bool ok = writeRegisterToHw(REG_AMPLY, appliedValue,
                                                 enabled ? QStringLiteral("AMPLY ON / TH0")
                                                         : QStringLiteral("AMPLY OFF / TH0=1"),
                                                 &local);
@@ -812,7 +834,7 @@ bool ControlUnitADRV9009::setVgpoEnabled(bool enabled, QString *details)
     if (ui && ui->chkPDW)
         ui->chkPDW->setChecked(enabled);
 
-    return writeRegisterLikeThreshold(REG_VGPO_ENABLE, value,
+    return writeRegisterToHw(REG_VGPO_ENABLE, value,
                                       enabled ? QStringLiteral("VGPO/DOPPLER ON / PDW=1")
                                               : QStringLiteral("VGPO/DOPPLER OFF / PDW=0"),
                                       details);
@@ -843,11 +865,11 @@ bool ControlUnitADRV9009::setVgpoParameters(quint32 phaseOffset, qint32 phaseSte
     }
 
     QString offsetDetails;
-    const bool offsetOk = writeRegisterLikeThreshold(REG_VGPO_OFFSET, phaseOffset,
+    const bool offsetOk = writeRegisterToHw(REG_VGPO_OFFSET, phaseOffset,
                                                       QStringLiteral("VGPO PHASE OFFSET / INchann"),
                                                       &offsetDetails);
     QString stepDetails;
-    const bool stepOk = writeRegisterLikeThreshold(REG_VGPO_STEP, rawStep,
+    const bool stepOk = writeRegisterToHw(REG_VGPO_STEP, rawStep,
                                                     QStringLiteral("VGPO PHASE STEP / thcw"),
                                                     &stepDetails);
 
@@ -875,6 +897,19 @@ bool ControlUnitADRV9009::setVgpoValue(quint32 phaseOffset, qint32 phaseStep,
     return paramsOk && enableOk;
 }
 
+bool ControlUnitADRV9009::setIioFrequency(double frequency, QString *details)
+{
+    // Some led-count registers are represented as IIO channel attributes of
+    // voltage0 / voltage1 ("frequency" shows up as in_voltage0_frequency etc.
+    // in sysfs).  Write them through the same IIO context so the values land
+    // beside the raw th0/dacsel registers.
+    QString local;
+    const bool ok = registerIo.writeChannelFrequency(frequency, &local);
+    if (details)
+        *details = local;
+    return ok;
+}
+
 /**
  * @brief ControlUnitADRV9009::WriteAll
  */
@@ -900,8 +935,8 @@ void ControlUnitADRV9009::WriteAll()
 void ControlUnitADRV9009::Write(uint32_t address,uint32_t val)
 {
     // Original TH1/TH2 and every legacy register button arrive here.
-    // Route them through the same transaction used by the new tab so there
-    // is only one hardware-write implementation in the application.
+    // They keep the historical mwipcore transaction unchanged; only the DRFM
+    // tab controls use the corrected DrfmRegisterIO write path.
     QString details;
     writeRegisterLikeThreshold(address, val, QStringLiteral("LEGACY REGISTER WRITE"), &details);
 }
