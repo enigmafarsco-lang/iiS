@@ -585,7 +585,10 @@ int dacDataManager::dac_channels_assign(dds_dac *ddac)
         char *s;
 
         if (!(s = strstr(ch_name, "TX")))
+        {
             freeChannel(ch_name);
+            continue;
+        }
 
         tx_index = atoi(&s[2]);
 
@@ -1628,7 +1631,7 @@ void dacDataManager::save_scale_widget_value(void *data)
     struct iio_widget *scale_pair_w = (tone->number == 1) ? &dds_ch->t2.iio_scale : &dds_ch->t1.iio_scale;
     double old_val, val1, val2;
 
-    val1 = db_full_scale_convert(((QDoubleSpinBox)(scale_w->widget)).value(), false);
+    val1 = db_full_scale_convert(static_cast<QDoubleSpinBox*>(scale_w->widget)->value(), false);
     iio_channel_attr_read_double(scale_w->chn, scale_w->attr_name, &old_val);
     iio_channel_attr_read_double(scale_pair_w->chn, scale_pair_w->attr_name, &val2);
 

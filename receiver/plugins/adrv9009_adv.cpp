@@ -899,6 +899,10 @@ QWidget * adrv9009_adv::init()
         ui->btn_save_settings->setVisible(page!=15);
     });
 
+    // Falling off the end of this QWidget*-returning function is undefined
+    // behavior: with optimization GCC emits no ret here and execution runs
+    // into the next function's bytes, killing the app with SIGILL.
+    return NULL;
 }
 
 /**

@@ -833,6 +833,9 @@ QWidget * ad9371_adv::init()
 
     globals::connect_widgets(new QWidget());
 
+    // Missing return: falling off the end of a QWidget*-returning function is
+    // undefined behavior and can abort with SIGILL on optimized builds.
+    return NULL;
 }
 
 void ad9371_adv::on_btn_save_settings_clicked()
