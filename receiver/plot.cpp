@@ -1,4 +1,4 @@
-﻿#include "ui_plot.h"
+#include "ui_plot.h"
 #include "plot.h"
 #include <QDateTime>
 #include <QString>
@@ -4971,7 +4971,11 @@ void Plot::update_transform_settings(Transform *transform)
     if (plot_type == FFT_PLOT || plot_type == FFT_SEEK_PLOT) {
 
         FFT_SETTINGS(transform)->fft_size = ui->cmb_fft_size->currentText().toInt ();
-        FFT_SETTINGS(transform)->fft_win = ui->cmb_fft_win->currentText().toLocal8Bit().data();
+        // Own a stable copy. toLocal8Bit().data() dies with the temporary and
+        // window_function_offset() later reads freed heap under ASan.
+        g_free(FFT_SETTINGS(transform)->fft_win);
+        const QByteArray fftWin = ui->cmb_fft_win->currentText().toLocal8Bit();
+        FFT_SETTINGS(transform)->fft_win = g_strdup(fftWin.constData());
         win=ui->cmb_fft_win->currentText();
         FFT_SETTINGS(transform)->fft_avg = ui->txt_fft_avg->value();
         FFT_SETTINGS(transform)->fft_pwr_off =ui->txt_pwr_offset->value();
@@ -6357,7 +6361,6 @@ gboolean Plot::check_valid_setup_of_device(const char *name)
  */
 gboolean Plot::check_valid_setup_of_all_devices()
 {
-    gchar *dev_name;
     gboolean valid=false;
 
     QTreeWidgetItemIterator it(ui->tree_channel_list);
@@ -6368,9 +6371,9 @@ gboolean Plot::check_valid_setup_of_all_devices()
         // If treeview item has parent
         if(!(*it)->parent())
         {
-            dev_name=(*it)->text(0).toLatin1().data();
-            valid = check_valid_setup_of_device(dev_name);
-            //            free(dev_name);
+            // toLatin1() is a temporary; keep it alive across the call.
+            const QByteArray devName = (*it)->text(0).toLatin1();
+            valid = check_valid_setup_of_device(devName.constData());
             if(valid)
                 return true;
         }

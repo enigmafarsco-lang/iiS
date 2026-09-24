@@ -241,38 +241,40 @@ void adrv9009::update_widgets(void) {
 void adrv9009::rx_freq_info_update(void) {
 
     double lo_freq;
-    osc *oscInstance;
+    // These helpers do not use instance state, but calling them through an
+    // uninitialized pointer is undefined and can crash on some builds.
+    osc oscInstance;
 
     if (cap) {
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE,
                                                     USE_INTERN_SAMPLING_FREQ);
         lo_freq = mhz_scale*((QDoubleSpinBox*)(subcomponents[0].glb_widgets[subcomponents[0].trx_lo].widget))->value();
 
         lo_freq=0;
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
     }
 
     if (cap_obs) {
-        gchar *source;
-
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE_2,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE_2,
                                                     USE_INTERN_SAMPLING_FREQ);
 
         guint i = 0;
         for (; i < phy_devs_count; i++) {
-            source = ((QComboBox*)(subcomponents[i].obs_port_select))->currentText().toLocal8Bit().data();
+            // currentText().toLocal8Bit().data() is a pointer into a temporary
+            // QByteArray destroyed at the semicolon. strstr() then read freed
+            // heap (ASan heap-use-after-free). Keep the QString alive instead.
+            const QString source = static_cast<QComboBox*>(subcomponents[i].obs_port_select)->currentText();
 
-            if (source && strstr(source, "TX")) {
+            if (source.contains(QLatin1String("TX"))) {
                 lo_freq = mhz_scale
                         * ((QDoubleSpinBox*)(subcomponents[i].glb_widgets[subcomponents[i].trx_lo].widget))->value();
             } else {
                 lo_freq = mhz_scale
                         * ((QDoubleSpinBox*)(subcomponents[i].obsrx_widgets[subcomponents[i].aux_lo].widget))->value();
             }
-            //            g_free(source);
         }
 
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
     }
 }
 

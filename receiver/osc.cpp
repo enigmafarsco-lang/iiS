@@ -2,6 +2,10 @@
 #include <receiver/plot.h>
 #include <receiver/oscmain.h>
 
+osc::osc()
+{
+}
+
 OSCMain *oscMain;
 #define DMA_DEVICES_COUNT (sizeof(dma_devices) / sizeof(dma_devices[0]))
 

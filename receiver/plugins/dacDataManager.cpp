@@ -1324,7 +1324,8 @@ int dacDataManager::process_dac_buffer_file (struct dac_data_manager *manager, c
  */
 void dacDataManager::waveform_load_button_clicked_cb (struct dac_buffer *dbuf)
 {
-    gchar *filename = (*dbuf->dac_buf_filename).toLocal8Bit().data();
+    const QByteArray filenameBytes = (*dbuf->dac_buf_filename).toLocal8Bit();
+    const gchar *filename = filenameBytes.constData();
     gchar *status_msg;
 
     if(strcmp(filename,"")==0)

@@ -206,12 +206,12 @@ iio_context *adrv::GetContext(QString ip)
 {
     // Manual Scan Mode
     if (ip != "") {
-        char *hostname=ip.toLocal8Bit().data();
+        const QByteArray hostname = ip.toLocal8Bit();
 
-        if (globals::ctx && !g_strcmp0(hostname, iio_context_get_attr_value(globals::ctx, "uri")))
+        if (globals::ctx && !g_strcmp0(hostname.constData(), iio_context_get_attr_value(globals::ctx, "uri")))
             return globals::ctx;
 
-        return iio_create_context_from_uri(hostname);
+        return iio_create_context_from_uri(hostname.constData());
 
     } else {
         return iio_create_local_context();
