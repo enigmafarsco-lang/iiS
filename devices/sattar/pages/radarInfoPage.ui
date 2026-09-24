@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadarInfoPage</class>
+ <widget class="QWidget" name="RadarInfoPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>444</width>
+    <height>426</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>426</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Select Radar Operation Mode</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QRadioButton" name="rad_PulseMode">
+          <property name="text">
+           <string>pulse Mode</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_ScanMode">
+          <property name="text">
+           <string>Scan Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_CWMode">
+          <property name="text">
+           <string>CW Mode</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Select Radar Frequency Band</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QRadioButton" name="rad_SBand">
+          <property name="text">
+           <string>S Band[1-4]GHz</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="rad_CBand">
+          <property name="text">
+           <string>C Band[4-8]GHz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="rad_XBand">
+          <property name="text">
+           <string>X Band[8-12]GHz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="rad_KBand">
+          <property name="text">
+           <string>Ku-K Band[12-18]GHz</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Select Radar Frequency</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QStackedWidget" name="stk_radarFrequency">
+        <property name="currentIndex">
+         <number>3</number>
+        </property>
+        <widget class="QWidget" name="SbandPage">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QRadioButton" name="rad_FRQ_1_15">
+              <property name="text">
+               <string>[1 - 1.5] GHz</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rad_FRQ_2_25">
+              <property name="text">
+               <string>[2 - 2.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rad_FRQ_25_3">
+              <property name="text">
+               <string>[2.5 - 3] GHz</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="XbandPage">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_9_95">
+              <property name="text">
+               <string>[9 - 9.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_8_85">
+              <property name="text">
+               <string>[8 - 8.5] GHz</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_85_9">
+              <property name="text">
+               <string>[8.5 - 9] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_95_10">
+              <property name="text">
+               <string>[9.5 - 10] GHz</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="KbandPage">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_125_13">
+              <property name="text">
+               <string>[12.5 - 13] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_155_16">
+              <property name="text">
+               <string>[15.5 - 16] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_165_17">
+              <property name="text">
+               <string>[16.5 - 17] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_175_18">
+              <property name="text">
+               <string>[17.5 - 18] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_12_125">
+              <property name="text">
+               <string>[12 - 12.5] GHz</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_15_155">
+              <property name="text">
+               <string>[15 - 15.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_16_165">
+              <property name="text">
+               <string>[16 - 16.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_17_175">
+              <property name="text">
+               <string>[17 - 17.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="CbandPage">
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_55_6">
+              <property name="text">
+               <string>[5.5 - 6] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="rad_FRQ_65_7">
+              <property name="text">
+               <string>[6.5 - 7] GHz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_5_55">
+              <property name="text">
+               <string>[5 - 5.5] GHz</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="rad_FRQ_6_65">
+              <property name="text">
+               <string>[6 - 6.5] GHz</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item alignment="Qt::AlignRight">
+      <widget class="QPushButton" name="btnOk">
+       <property name="text">
+        <string>ok</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

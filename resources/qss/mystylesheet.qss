@@ -1,0 +1,381 @@
+/*
+Colour scheme used:
+- White (text): #eff0f1
+- Dark black (main bg): #272a2d
+- Lighter dark black (menu bar): #373b3f
+- Dark blue: #18465d
+- Gray: #76797C
+- Red (accents): #db1c49
+
+Useful reference on QSS:
+ - http://doc.qt.io/qt-5/stylesheet-reference.html#alternate-background-color-prop
+
+Be sure to change all image urls to the appropriate folder on your system.
+*/
+
+/*================================================================
+QWidget
+================================================================*/
+QWidget {
+        color: #eff0f1;
+        background-color: #272a2d;
+        selection-background-color: #db1c49;
+        selection-color: #eff0f1;
+}
+
+QWidget::item:hover {
+        background-color: #18465d;
+        color: #eff0f1;
+}
+
+QWidget::item:selected {
+        background-color: #18465d;
+}
+
+/*================================================================
+QPushButton
+================================================================*/
+QPushButton {
+	color: #eff0f1;
+	background-color: #31363b;
+	border-width: 1px;
+	border-color: #76797C;
+	border-style: solid;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        border-radius: 2px;
+	outline: none;
+        font: 87 9pt "Segoe UI Black";
+        /*font: 75 10pt "Segoe UI";
+        font: 87 14pt "Segoe UI Black";
+        background-color: transparent;
+        padding: 1px;*/
+}
+
+QPushButton:disabled {
+	background-color: #31363b;
+	border-width: 1px;
+	border-color: #454545;
+	border-style: solid;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 2px;
+	color: #454545;
+}
+
+QPushButton:hover,
+QPushButton:focus {
+        background-color: #18465d;/*blue oil*/
+        color: #ffffff;
+}
+
+QPushButton:pressed {
+	background-color: #18465d;
+	padding-top: -15px;
+	padding-bottom: -17px;
+}
+
+QPushButton:checked {
+	background-color: #76797C;
+	border-color: #6A6969;
+}
+
+QPushButton#btnExciterConnectionStatus,
+#btnSolidConnectionStatus,
+#btnServoConnectionStatus,
+#btnGpsCompassConnectionStatus,
+#btnPowerControlBoardConnectionStatus,
+#btnOuterNodeConnectionStatus
+{
+    font: 87 11pt "Segoe UI Black";
+    /*background-color: Black; QPushButton:checked{background-color: green;} QPushButton:pressed {background-color: red;}*/
+    /*text-align: left;*/
+    /*icon-size: 20px;*/
+}
+
+/*/============================*/
+QPushButton#btnOuterNode,
+#btnPpiGisSetting,
+#btnSolidSetting,
+#btnServoSetting,
+#btnGpsSetting,
+#btnIpSetting,
+#btnLog,
+#btnPowerControl,
+#btnHelp
+{
+    font: 87 11pt "Segoe UI Black";
+    /*icon-size: 25px;
+    icon-align: left;*/
+}
+/*================================================================
+QLabel
+================================================================*/
+QLabel {
+    font: 87 9pt "Segoe UI Black";
+}
+
+/*================================================================
+QScrollBar - e.g. Scrollbar in internal PDFviewer, editor window etc.
+================================================================*/
+QScrollBar:horizontal {
+        height: 25px;
+        margin: 3px 27px 3px 27px;
+        border: 1px transparent #2A2929;
+        border-radius: 4px;
+        background-color: #000000;
+}
+
+QScrollBar::handle:horizontal {
+        background-color: #76797C;
+        min-width: 15px;
+        border-radius: 4px;
+}
+
+QScrollBar::add-line:horizontal {
+        margin: 0px 3px 0px 3px;
+        border-image: url(://rc/right_arrow_disabled.png);
+        width: 20px;
+        height: 20px;
+        subcontrol-position: right;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+        margin: 0px 3px 0px 3px;
+        border-image: url(://rc/left_arrow_disabled.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: left;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:horizontal:hover,
+QScrollBar::add-line:horizontal:on {
+        border-image: url(://rc/right_arrow.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: right;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal:hover,
+QScrollBar::sub-line:horizontal:on {
+        border-image: url(://rc/left_arrow.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: left;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:horizontal,
+QScrollBar::down-arrow:horizontal {
+        background: none;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+        background: none;
+}
+
+QScrollBar:vertical {
+        background-color: #000000;
+        width: 25px;
+        margin: 27px 3px 27px 3px;
+        border: 1px solid #2A2929;
+        border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+        background-color: #76797C;
+        min-height: 15px;
+        border-radius: 4px;
+}
+
+QScrollBar::sub-line:vertical {
+        margin: 3px 0px 3px 0px;
+        border-image: url(://rc/up_arrow_disabled.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: top;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical {
+        margin: 3px 0px 3px 0px;
+        border-image: url(://rc/down_arrow_disabled.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: bottom;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical:hover,
+QScrollBar::sub-line:vertical:on {
+        border-image: url(://rc/up_arrow.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: top;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical:hover,
+QScrollBar::add-line:vertical:on {
+        border-image: url(://rc/down_arrow.png);
+        height: 20px;
+        width: 20px;
+        subcontrol-position: bottom;
+        subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical,
+QScrollBar::down-arrow:vertical {
+        background: none;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+        background: none;
+}
+
+
+/*================================================================
+QTabBar - e.g. File tabs (top), Bottom panel tabs (top), Autocompleter window tabs (bottom)
+================================================================*/
+QTabBar {
+        qproperty-drawBase: 0; /* important */
+        background-color: transparent;
+}
+
+/* <FIX> Workaround for QTabBars created from docked QDockWidgets which don't draw the border if not set and reseted as follows: */
+QTabBar {
+        border-top: 1px transparent #76797C;  /* set color for all QTabBars */
+}
+QDialog QTabBar {
+        border-color: transparent; /* set color for QTabBars inside Preferences dialog */
+}
+/* </FIX> */
+
+QTabBar::close-button {
+        image: url(://rc/close.png);
+        background: transparent;
+        margin-top: 6px;
+        margin-bottom: 6px;
+}
+
+QTabBar::close-button:hover {
+        image: url(://rc/close-hover.png);
+        background: transparent;
+        margin-top: 6px;
+        margin-bottom: 6px;
+}
+
+QTabBar::close-button:pressed {
+        image: url(://rc/close-pressed.png);
+        background: transparent;
+        margin-top: 6px;
+        margin-bottom: 6px;
+}
+
+/* TOP TABS */
+
+QTabBar::tab:top {
+
+        border: 1px solid #76797C;
+        border-bottom: 1px transparent black;
+        background-color: #31363b;
+        padding: 5px;
+        min-width: 100px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        font: 87 12pt "Segoe UI Black";
+}
+
+QTabBar::tab:top:selected {
+
+        background-color: #54575B;
+        border: 2px solid #76797C;
+        border-bottom: 3px solid #3daee9;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+}
+
+QTabBar::tab:top:!selected:hover {
+        background-color: #18465d;
+}
+
+/* BOTTOM TABS */
+
+QTabBar::tab:left {
+        color: #eff0f1;
+        border: 1px solid #76797C;
+        border-top: 1px transparent black;
+        background-color: #31363b;
+        padding: 5px;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+        min-width: 30px;
+        font: 87 10pt "Segoe UI Black";
+}
+
+QTabBar::tab:left:selected {
+        color: #eff0f1;
+        background-color: #54575B;
+        border: 2px solid #76797C;
+        border-top: 3px solid #3daee9;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+}
+
+QTabBar::tab:left:!selected:hover {
+        background-color: #18465d;
+}
+/*================================================================
+QGroupBox================================================================*/
+QGroupBox
+{
+    /*border: 1px solid aqua;
+    margin-top: 27px;
+    font-size: 13px;
+    font:bold;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    background-color: #04101C;*/
+}
+QGroupBox
+{
+font: 87 10pt "Segoe UI Black";
+}
+QGroupBox#gp_ppiGis,
+#gb_exciter,
+#gb_Servo,
+#gb_gps,
+#gb_electronicBox,
+#gb_solid
+{
+font: 87 13pt "Segoe UI Black";
+}
+QGroupBox:title
+{
+    subcontrol-position: top center;
+}
+QGroupBox:title#gp_ppiGis,
+:title#gb_exciter,
+:title#gb_Servo,
+:title#gb_gps,
+:title#gb_electronicBox,
+:title#gb_solid
+{
+    subcontrol-position: top center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding: 3px 25px;
+    background-color:#eff0f1;
+    /*rgb(253,253,253);*/
+    /*#36EEE0;*/
+    color:#272a2d;
+}

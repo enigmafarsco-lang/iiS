@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>custom-icons/fullScreen.png</file>
+        <file>custom-icons/minus.png</file>
+        <file>custom-icons/next.png</file>
+        <file alias="start">custom-icons/play.png</file>
+        <file>custom-icons/plus.png</file>
+        <file>custom-icons/plusWindow.png</file>
+        <file>custom-icons/saveAs.png</file>
+        <file>custom-icons/select.png</file>
+        <file alias="stop">custom-icons/stop.png</file>
+        <file>custom-icons/openFile.ico</file>
+    </qresource>
+</RCC>

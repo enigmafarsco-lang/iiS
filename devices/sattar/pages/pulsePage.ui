@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PulsePage</class>
+ <widget class="QWidget" name="PulsePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>898</width>
+    <height>682</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0" alignment="Qt::AlignRight">
+    <widget class="QPushButton" name="btnOk">
+     <property name="text">
+      <string>Ok</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QGroupBox" name="groupBox_5">
+       <property name="title">
+        <string>Radar Paremeters</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="title">
+           <string>Radar Name:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLineEdit" name="edtRadarName"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_7">
+          <property name="title">
+           <string>Shift Time:</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QSpinBox" name="spnShiftTime">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cmbMeasUnit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>45</width>
+               <height>0</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>nS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>mS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>uS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>S</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>eg:100u,750ns</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QGroupBox" name="groupBox_8">
+            <property name="title">
+             <string>Priority:</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QSpinBox" name="spnPriority">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_9">
+            <property name="title">
+             <string>Spur(%)</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QSpinBox" name="spnSpur">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QGroupBox" name="groupBox_10">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="title">
+             <string>Relative Power(db)</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QComboBox" name="cmbRelativePower">
+               <item>
+                <property name="text">
+                 <string>-1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>6</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>9</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>11</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>12</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>13</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>14</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>15</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>16</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>17</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>18</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>19</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>20</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>21</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>22</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>23</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>24</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>25</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>26</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>27</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>28</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>29</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>30</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>31</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>32</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>33</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>34</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>35</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>36</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>37</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>38</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>39</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>40</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>41</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>42</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>43</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>44</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>45</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>46</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>47</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>48</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>49</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>50</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>51</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>52</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>53</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>54</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>55</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>56</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>57</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>58</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>59</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>60</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>61</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>62</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>63</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>64</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>65</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>66</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>67</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>68</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>69</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>70</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>71</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>72</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>73</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>74</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>75</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>76</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>77</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>78</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>79</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>80</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>81</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>82</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>83</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>84</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>85</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>86</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>87</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>88</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>89</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>90</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>91</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>92</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>93</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>94</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>95</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>96</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>97</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>98</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>99</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>100</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_11">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="title">
+             <string>Miss Pulse(%)</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <item>
+              <widget class="QSpinBox" name="spnMissPulse">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>PRI/PRF Type</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QGroupBox" name="groupBox_12">
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Constant_3">
+             <property name="text">
+              <string>Constant</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Jitter">
+             <property name="text">
+              <string>Jitter</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Stagger">
+             <property name="text">
+              <string>Stagger</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_DwellAndSwitch">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Dwell and Switch</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Sliding">
+             <property name="text">
+              <string>Sliding</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Periodic">
+             <property name="text">
+              <string>Periodic</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rad_PRIPRF_Triangular">
+             <property name="text">
+              <string>Triangular</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_13">
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QRadioButton" name="radPRI">
+             <property name="text">
+              <string>PRI</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radPRF">
+             <property name="text">
+              <string>PRF</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string>PW Type</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_11">
+        <item>
+         <widget class="QRadioButton" name="rad_PW_Constant">
+          <property name="text">
+           <string>Constant</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_PW_Random">
+          <property name="text">
+           <string>Random</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_PW_MultiLevel">
+          <property name="text">
+           <string>Multilevel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Frequency Type</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_12">
+        <item>
+         <widget class="QRadioButton" name="rad_frq_Constant">
+          <property name="text">
+           <string>Constant</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_frq_Agile">
+          <property name="text">
+           <string>Agile</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_frq_Diversity">
+          <property name="text">
+           <string>Diversity</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_frq_Hopping">
+          <property name="text">
+           <string>Hopping</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Modulation Type</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_13">
+        <item>
+         <widget class="QRadioButton" name="rad_mod_Simple">
+          <property name="text">
+           <string>Simple</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_mod_XFM">
+          <property name="text">
+           <string>xFM</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_mod_FSK">
+          <property name="text">
+           <string>FSK</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_mod_BPSK">
+          <property name="text">
+           <string>BPSK</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rad_mod_QPSK">
+          <property name="text">
+           <string>QPSK</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

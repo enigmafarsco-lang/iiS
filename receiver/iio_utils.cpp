@@ -1,0 +1,168 @@
+#include "iio_utils.h"
+#include <QAbstractButton>
+#include <QWidget>
+
+iio_utils::iio_utils()
+{
+
+}
+
+/*
+ * Compares strings naturally
+ *
+ * This function will compare strings naturally, this means when a number is
+ * encountered in both strings at the same offset it is compared as a number
+ * rather than comparing the individual digits.
+ * This functions works with strings that they must be NULL terminated. Also the
+ * stings must be valid (both s1 and s2 must not be NULL).
+ *
+ * This makes sure that e.g. in_voltage9 is placed before in_voltage10
+ */
+int str_natural_cmp(const char *s1, const char *s2)
+{
+    unsigned int n1, n2;
+    unsigned int i1 = 0, i2 = 0;
+
+    while (s1[i1] && s2[i2]) {
+        if (isdigit(s1[i1]) && isdigit(s2[i2])) {
+            n1 = 0;
+            do {
+                n1 = n1 * 10 + s1[i1] - '0';
+                i1++;
+            } while (isdigit(s1[i1]));
+
+            n2 = 0;
+            do {
+                n2 = n2 * 10 + s2[i2] - '0';
+                i2++;
+            } while (isdigit(s2[i2]));
+
+            if (n1 != n2)
+                return n1 - n2;
+        } else {
+            if (s1[i1] != s2[i2])
+                return s1[i1] - s2[i2];
+            i1++;
+            i2++;
+        }
+    }
+
+    return 0;
+}
+
+static gint iio_chn_cmp_by_name(gconstpointer ptr_a, gconstpointer ptr_b)
+{
+    struct iio_channel *ch_a = *(struct iio_channel **)ptr_a;
+    struct iio_channel *ch_b = *(struct iio_channel **)ptr_b;
+
+    g_return_val_if_fail(ch_a, 0);
+    g_return_val_if_fail(ch_b, 0);
+
+    const char *name_a = iio_channel_get_name(ch_a) ?: iio_channel_get_id(ch_a);
+    const char *name_b = iio_channel_get_name(ch_b) ?: iio_channel_get_id(ch_b);
+
+    g_return_val_if_fail(name_a, 0);
+    g_return_val_if_fail(name_b, 0);
+
+    return str_natural_cmp(name_a, name_b);
+}
+
+gint iio_utils::iio_dev_cmp_by_name(gconstpointer ptr_a, gconstpointer ptr_b)
+{
+    const struct iio_device *dev_a = *(struct iio_device **)ptr_a;
+    const struct iio_device *dev_b = *(struct iio_device **)ptr_b;
+
+    g_return_val_if_fail(dev_a, 0);
+    g_return_val_if_fail(dev_b, 0);
+
+    const char *name_a = iio_device_get_name(dev_a);
+    const char *name_b = iio_device_get_name(dev_b);
+
+    g_return_val_if_fail(name_a, 0);
+    g_return_val_if_fail(name_b, 0);
+
+    return -1 * strcmp(name_a, name_b);
+}
+
+/*
+ * Get the device label attribute if there's one.
+ *
+ * Returns a newly allocated NULL terminated string. The caller is responsible to
+ * free the allocated memory.
+ */
+char *iio_utils::iio_get_device_label(const struct iio_device *dev)
+{
+    char label[256];
+
+    if (!iio_device_find_attr(dev, "label"))
+        return NULL;
+
+    if (iio_device_attr_read(dev, "label", label, sizeof(label)) < 0)
+        return NULL;
+
+    return g_strndup(label, sizeof(label));
+}
+
+/*
+ * Gets all devices that have their name starting with the given sequence.
+ * Returns an array of 'struct iio_device *' elements.
+ */
+GArray * iio_utils::get_iio_devices_starting_with(struct iio_context *ctx, const char *sequence)
+{
+    GArray *devices = g_array_new(FALSE, FALSE, sizeof(struct iio_devices *));
+    size_t i = 0;
+
+    for (; i < iio_context_get_devices_count(ctx); i++) {
+        struct iio_device *dev = iio_context_get_device(ctx, i);
+        const char *dev_name = iio_device_get_name(dev);
+        char *label = iio_get_device_label(dev);
+
+        if ((label && !strncmp(sequence, label, strlen(sequence))) ||
+            (dev_name && !strncmp(sequence, dev_name, strlen(sequence)))) {
+            g_array_append_val(devices, dev);
+        }
+
+        g_free(label);
+    }
+
+    g_array_sort(devices, iio_dev_cmp_by_name);
+
+    return devices;
+}
+
+/*
+ * Gets all channels of the specified device sorted in a natural order.
+ * Returns an array of 'struct iio_channel *' elements.
+ */
+GArray *iio_utils::get_iio_channels_naturally_sorted(struct iio_device *dev)
+{
+    GArray *channels = g_array_new(FALSE, TRUE, sizeof(struct iio_channel *));
+    unsigned int i, nb_channels = iio_device_get_channels_count(dev);
+
+    for (i = 0; i < nb_channels; ++i) {
+        struct iio_channel *ch = iio_device_get_channel(dev, i);
+        g_array_append_val(channels, ch);
+    }
+
+    g_array_sort(channels,	iio_chn_cmp_by_name);
+
+    return channels;
+}
+
+void handle_toggle_section_cb(QAbstractButton *btn, QWidget *section)
+{
+    QWidget *toplevel;
+
+    if (btn->isChecked()) {
+        //g_object_set((QObject)(btn), "stock-id", "gtk-go-down", NULL);
+        section->show();
+    } else {
+        //g_object_set(GTK_OBJECT(btn), "stock-id", "gtk-go-up", NULL);
+        section->hide();
+//        toplevel = gtk_widget_get_toplevel(GTK_WIDGET(btn));
+
+//        if (gtk_widget_is_toplevel(toplevel))
+//            gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+
+    }
+}

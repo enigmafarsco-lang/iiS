@@ -1,0 +1,867 @@
+﻿#include "receivermain.h"
+#include "ui_receivermain.h"
+//178.22.122.100, 185.51.200.2
+#include <receiver/config.h>
+#include <receiver/backtrace.h>
+#include <receiver/connectdialog.h>
+
+#include "receiver/globals.h"
+
+
+ReceiverMain::ReceiverMain(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::ReceiverMain)
+{
+    ui->setupUi(this);
+    init();
+    initPlot();
+    //  timer = new QTimer(this);
+    connection();
+}
+
+void ReceiverMain::connection()
+{
+    connect(timeDomainPlot, &Plot::ValueSignal,  this, &ReceiverMain::ValueSlot);
+    // this connection is for awaring this class when frq value  is changed in adrv9009
+    connect(frqSpn,SIGNAL(valueChanged(QString)), this,SLOT(frqValueChenged(QString)));
+    connect(ui->btnCurrentFrq,&QPushButton::clicked, this, &ReceiverMain::settingMinMaxBand);
+    // connect(timer, &QTimer::timeout, [=](){emit isConnectSignal(isConnect);});
+    //   timer->start(100);
+}
+
+
+void ReceiverMain::ValueSlot( QString * val, int mode)
+{
+    if (ui->tabWidget->currentIndex() != 1 ) return;
+
+    double value {val->toDouble()};
+    switch (mode) {
+    case 1://FRQ
+    {
+        frqMax = maximumFinder(&value, &frqMax);
+        //        frqCnt = plottingValues(&value, ui->wigFRQ, &xFrq, &yFrq,(centerFrq - centerFrq * 0.8), (frqMax+ frqMax * 0.3) ,frqCnt);
+        frqCnt = plottingValues(&value, ui->wigFRQ, &xFrq, &yFrq,(frqMax- frqMax * 0.03), (frqMax+ frqMax * 0.003) ,frqCnt);
+        fillHistoramArray(mode, ui->wigFRQhisto, &value, frqCnt);
+        frqCnt++;
+    }
+        break;
+
+    case 2://PAPeak
+    {
+        PAPeakCnt++;
+        PAPeakMax = maximumFinder(&value, &PAPeakMax);
+        PAPeakCnt = plottingValues(&value, ui->wigPAPEAK, &xPAPEAK, &yPAPEAK,-1,(PAPeakMax + PAPeakMax* 0.3),PAPeakCnt);
+    }
+        break;
+
+
+    case 3://PASum
+    {
+        PASumMax = maximumFinder(&value, &PASumMax);
+        PASumCnt = plottingValues(&value, ui->wigPASUM , &xPASUM, &yPASUM,-1,(PASumMax + PASumMax* 0.2),PASumCnt);
+        fillHistoramArray(mode, ui->wigPASumhisto, &value, PASumCnt);
+        PASumCnt++;
+    }
+        break;
+
+
+    case 4://PRI
+    {
+        PRIMax = maximumFinder(&value, &PRIMax);
+        PRIMin = minimumFinder(&value, &PRIMin);
+        PRICnt = plottingValues(&value, ui->wigPRI, &xPRI, &yPRI,(PRIMin - PRIMin* 0.2),(PRIMax + PRIMax* 0.2),PRICnt);
+        fillHistoramArray(mode, ui->wigPRIhisto, &value, PRICnt);
+        PRICnt++;
+    }
+        break;
+
+
+    case 5://PW1
+    {
+        PW1Max = maximumFinder(&value, &PW1Max);
+        PW1Cnt = plottingValues(&value, ui->wigPW1,&xPW1,& yPW1,-1,(PW1Max + PW1Max* 0.2),PW1Cnt);
+        fillHistoramArray(mode, ui->wigPWhisto, &value, PW1Cnt);
+        PW1Cnt++;
+    }
+        break;
+
+
+    case 6://PW2
+    {
+        PW2Cnt++;
+        PW2Max =maximumFinder(&value, &PW2Max);
+        PW2Cnt = plottingValues(&value, ui->wigPW2, &xPW2, &yPW2,-1,(PW2Max + PW2Max* 0.2),PW2Cnt);
+
+    }
+        break;
+
+
+    case 7://TOA
+    {
+        TOACnt++;
+        TOAMax = maximumFinder(&value, &TOAMax);
+        TOACnt = plottingValues(&value, ui->wigTOA , &xTOA, &yTOA,-1,(TOAMax + TOAMax* 0.2),TOACnt);
+
+    }
+        break;
+
+
+    case 8://Channel
+    {
+        ChannelCnt++;
+        ChannelMax = maximumFinder(&value, &ChannelMax);
+        ChannelCnt = plottingValues(&value, ui->wigCHANNEL, &xCHANNEL, &yCHANNEL,-1,(ChannelMax  +ChannelMax* 0.2),ChannelCnt);
+
+    }
+        break;
+
+
+    default:
+        break;
+    }
+}
+
+
+
+int ReceiverMain::plottingValues( const double * val,QCustomPlot * plot,QVector<double> * x,QVector<double> * y, double min, double max,int count)
+{
+    if (count < 100)
+    {
+        x->append(count);
+        y->append(*val);
+        return count;
+    }
+
+    else
+    {
+        plot->graph(0)->setData(*x, *y);
+        plot->xAxis->setRange(0,x->size());
+        plot->yAxis->setRange(min, max);
+        plot->replot();
+
+        x->clear();
+        y->clear();
+        count = -1;
+        return count;
+    }
+}
+
+
+void ReceiverMain::plotHistogram(QCustomPlot * plot, std::unordered_map<double, double> * histogramData)
+{
+
+    QVector<double> data;
+    QVector<double> lineData;
+
+    for (auto it = histogramData->begin(); it != histogramData->end(); ++it)
+    {
+        if (it->second > 10){
+            data.append(it->first);
+            lineData.append(it->second);
+        }
+
+        if (xMax <= it->second)
+        {
+            yMax = it->first; // maximum data for y axios
+            xMax = it->second; // maximun data for x axios
+        }
+    }
+
+    auto minmax1 = std::minmax_element(data.begin(), data.end());
+    double min_YAxis = *minmax1.first;
+    double max_YAxis = *minmax1.second;
+
+    auto minmax2 = std::minmax_element(lineData.begin(), lineData.end());
+    double min_XAxis = *minmax2.first;
+    double max_XAxis = *minmax2.second;
+
+    plot->xAxis->setRange(min_XAxis- (min_XAxis * 0.5), max_XAxis + (max_XAxis * 0.8));
+    plot->yAxis->setRange(min_YAxis - (min_YAxis * 0.001) , max_YAxis + (max_YAxis * 0.001));
+
+    QCPBars *bars = new QCPBars(plot->yAxis,plot->xAxis);
+
+    // add the text label at the top:
+    QCPItemText *textLabel = new QCPItemText(plot);
+    textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignRight);
+    textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    textLabel->position->setCoords(1,0.05);
+    textLabel->setText("val: "+QString::number(yMax)+"\nnum: "+QString::number(xMax));
+    textLabel->setFont(QFont(font().family(), 15));
+    //    textLabel->setPen(QPen(QColor(1, 133, 17)));
+    textLabel->setColor(Qt::green);
+
+
+    bars->setData(data,lineData);
+    bars->setWidth(0.8);
+    bars->setPen(QPen(Qt::yellow, 2));
+    //    bars->setBrush(Qt:: '#d6fbff' );
+
+    plot->replot();
+    plot->clearItems();
+    plot->clearGraphs();
+    plot->removePlottable(bars);
+    //    plot->replot();
+    xMax =0;
+    xMin=9999999999;
+    yMax=0;
+    yMin=0;
+}
+
+void ReceiverMain::fillHistoramArray(int type, QCustomPlot * plot, double * val,int cnt)
+{
+    switch (type)
+    {
+
+    case 1://FRQ
+    {
+        if(cnt == -1)
+        {
+            plotHistogram(plot, &frqMap);
+            frqMap.clear();
+        }
+        else {
+
+            frqMap[*val]++;
+
+        }
+    }
+        break;
+        //    case 2://PAPeak
+        //    {
+        //    }
+        //        break;
+
+
+    case 3://PASum
+    {
+        if(cnt == -1)
+        {
+            plotHistogram(plot, &piSumMap);
+            piSumMap.clear();
+        }
+        else {
+            piSumMap[*val]++;
+        }
+
+    }
+        break;
+
+
+    case 4://PRI
+    {
+        if(cnt == -1)
+        {
+            plotHistogram(plot, &priMap);
+            priMap.clear();
+        }
+        else {
+            priMap[*val]++;
+        }
+    }
+        break;
+
+
+    case 5://PW1
+    {
+
+
+        if(cnt == -1)
+        {
+            plotHistogram(plot, &pwMap);
+            pwMap.clear();
+        }
+        else {
+            pwMap[*val]++;
+        }
+    }
+        break;
+
+
+        //    case 6://PW2
+        //    {
+
+        //    }
+        //        break;
+
+
+        //    case 7://TOA
+        //    {
+
+        //    }
+        //        break;
+
+
+        //    case 8://Channel
+        //    {
+
+        //    }
+        //        break;
+
+
+    default:
+        break;
+    }
+}
+
+
+void ReceiverMain::init()
+{
+
+    ui->groupBox_7->setVisible(false);
+
+    ui->tabWidgetSetting->setStyleSheet("QTabBar::tab:selected {background-color:  #186a3b;}");
+
+    init_signal_handlers();
+    opterr = 0;
+    globals::ctx=NULL;
+    oscMain=new OSCMain();
+
+    //saeid raziani
+    oscMain->show();
+
+    if (!oscMain->ctx_destroyed_by_do_quit) {
+
+        if (!globals::ctx)
+        {
+            connectDialog *connect_dialog=new connectDialog();
+            QObject::connect(connect_dialog,&connectDialog::connectSignal,[=](){
+                globals::status=true;
+                oscMain->do_init();
+                oscMain->create_default_plot();
+            });
+
+            if(!connect_dialog->Initialize())
+                connect_dialog->exec();
+            else
+            {
+                globals::status=true;
+                oscMain->do_init();
+                oscMain->create_default_plot();
+
+                //saeid raziani
+                //                time domain plot (first plot)
+                timeDomainPlot = oscMain->createMultiPlot(TIME_DOMAIN);
+                QVBoxLayout * vLaytimeDomainPlot = new QVBoxLayout    ;
+                vLaytimeDomainPlot->addWidget(timeDomainPlot)         ;
+                ui->wigTimeDomain->setLayout(vLaytimeDomainPlot)      ;
+
+                //              frq domain (second plot)
+                frqDomainPlot = oscMain->createMultiPlot(FRQ_DOMAIN);
+                QVBoxLayout * vLayfrqDomainPlot = new QVBoxLayout   ;
+                vLayfrqDomainPlot->addWidget(frqDomainPlot)         ;
+                ui->wigFrqDomain->setLayout(vLayfrqDomainPlot)      ;
+
+                //setting items
+                //--- Global ---------------------------------------------
+                ensmCmb = oscMain->_adrv9009->ensmCmb ;
+                frqSpn = oscMain->_adrv9009->frqSpn   ;
+                settingMinMaxBand();
+                ui->hrzGlobal_1->addWidget(ensmCmb)   ;
+                ui->hrzGlobal_2->addWidget(frqSpn)    ;
+                ensm_mode_available = oscMain->_adrv9009->ensm_mode_available;
+                QString status =ensm_mode_available->currentText();
+
+                if(status != "radio_on" )
+                {
+                    reboutWithSSN();
+                }
+
+                //--- Hopping --------------------------------------------
+                chk_trigger_mode   = oscMain->_adrv9009adv->chk_trigger_mode     ;
+                chk_exit_mode      = oscMain->_adrv9009adv->chk_exit_mode        ;
+                chk_msc_sync       = oscMain->_adrv9009adv->chk_msc_sync         ;
+                chk_enable         = oscMain->_adrv9009adv->chk_enable           ;
+                txt_init_frequency = oscMain->_adrv9009adv->txt_init_frequency   ;
+                txt_gpio_pin       = oscMain->_adrv9009adv->txt_gpio_pin         ;
+                txt_min_freq       = oscMain->_adrv9009adv->txt_min_freq         ;
+                txt_max_freq       = oscMain->_adrv9009adv->txt_max_freq         ;
+                save_settings      = oscMain->_adrv9009adv->save_settings        ;
+
+
+
+                //setting
+                ui->hrzHopp_34->addWidget(chk_trigger_mode     );
+                ui->hrzHopp_34->addWidget(chk_exit_mode        );
+                ui->hrzHopp_34->addWidget(chk_msc_sync         );
+                ui->hrzHopp_34->addWidget(chk_enable           );
+                ui->hrzHopp_34->addWidget(txt_init_frequency   );
+                ui->hrzHopp_34->addWidget(txt_gpio_pin         );
+                ui->hrzHopp_34->addWidget(txt_min_freq         );
+                ui->hrzHopp_34->addWidget(txt_max_freq         );
+                ui->hrzHopp_35->addWidget(save_settings        );
+                ui->hrzInitFrq->addWidget(txt_init_frequency, 1);
+
+                //config
+                QGroupBox *grbHopp = ui->grbHopp_1;
+                QGridLayout *gridHopp = grbHopp->findChild<QGridLayout *>()      ;
+                gridHopp->addWidget(txt_gpio_pin, 0, 1)                          ;
+                gridHopp->addWidget(txt_min_freq, 1, 1)                          ;
+                gridHopp->addWidget(txt_max_freq, 2, 1)                          ;
+
+
+
+                // below code is hidden in screen
+                nextFrqSpn        = oscMain->_adrv9009->nextFrqSpn       ;
+                minSpn            = oscMain->_adrv9009->minSpn           ;
+                maxSpn            = oscMain->_adrv9009->maxSpn           ;
+                stepSpn           = oscMain->_adrv9009->stepSpn          ;
+                delaySpn          = oscMain->_adrv9009->delaySpn         ;
+                startBtn          = oscMain->_adrv9009->startBtn         ;
+                modeChk           = oscMain->_adrv9009->modeChk          ;
+
+                ui->hrzHopp_1->addWidget(modeChk)                        ;
+                ui->hrzHopp_2->addWidget(nextFrqSpn)                     ;
+                ui->hrzHopp_3->addWidget(minSpn)                         ;
+                ui->hrzHopp_4->addWidget(maxSpn)                         ;
+                ui->hrzHopp_5->addWidget(stepSpn)                        ;
+                ui->hrzHopp_6->addWidget(delaySpn)                       ;
+                ui->verHopp->addWidget(startBtn)                         ;
+
+                //--- spectrum chart -------------------------------------
+                ui->hrz_fft_size->addWidget(frqDomainPlot->fftCmb)          ;
+                ui->hrz_window->addWidget(frqDomainPlot->windowCmb)       ;
+                ui->hrz_avg->addWidget(frqDomainPlot->avgSpn)          ;
+                ui->hrz_pwr->addWidget(frqDomainPlot->pwrSpn);         ;
+                ui->hrz_start_frq->addWidget(frqDomainPlot->txt_start_freq);
+                ui->hrz_frq_stop->addWidget(frqDomainPlot->txt_stop_freq );
+                ui->hrz_frq_step->addWidget(frqDomainPlot->txt_freq_step );
+                ui->hrz_delay->addWidget(frqDomainPlot->txt_freq_delay);
+                //                ui->hrzSpec_9->addWidget(frqDomainPlot->pwrSpn);         ;
+
+                //--- TH1 ------------------------------------------------
+                ui->hrz_1->addWidget(oscMain->_adrv9009controlUnit->TH1) ;
+                ui->hrz_2->addWidget(oscMain->_adrv9009controlUnit->TH2) ;
+                //oscMain->_adrv9009controlUnit->logouti->currentIndexChanged();
+                //                oscMain->_adrv9009controlUnit->WriteAll();
+                //--- TX1 ------------------------------------------------
+                pinn_TX1_Chk      = oscMain->_adrv9009->pinn_TX1_Chk     ;
+                track_TX1_Chk     = oscMain->_adrv9009->track_TX1_Chk    ;
+                power_TX1_DownChk = oscMain->_adrv9009->power_TX1_DownChk;
+                lo_TX1_Chk        = oscMain->_adrv9009->lo_TX1_Chk       ;
+                att_TX1_Spn       = oscMain->_adrv9009->att_TX1_Spn      ;
+                rfBandlbl         = oscMain->_adrv9009->rfBandlbl        ;
+                sampleRatelbl     = oscMain->_adrv9009->sampleRatelbl    ;
+
+                QGroupBox *grbTX1 = ui->grbTX_1;
+                QGridLayout *gridTX1 = grbTX1->findChild<QGridLayout *>();
+
+                gridTX1->addWidget(att_TX1_Spn        , 0 , 1)           ;
+                gridTX1->addWidget(pinn_TX1_Chk       , 1 , 1)           ;
+                gridTX1->addWidget(track_TX1_Chk      , 2 , 1)           ;
+                gridTX1->addWidget(lo_TX1_Chk         , 3 , 1)           ;
+                gridTX1->addWidget(power_TX1_DownChk  , 4 , 1)           ;
+                gridTX1->addWidget(rfBandlbl          , 5 , 1)           ;
+                gridTX1->addWidget(sampleRatelbl      , 6 , 1)           ;
+
+                //--- TX2 ------------------------------------------------
+                pinn_TX2_Chk      = oscMain->_adrv9009->pinn_TX2_Chk     ;
+                track_TX2_Chk     = oscMain->_adrv9009->track_TX2_Chk    ;
+                powerTX2DownChk   = oscMain->_adrv9009->powerTX2DownChk  ;
+                lo_TX2_Chk        = oscMain->_adrv9009->lo_TX2_Chk       ;
+                att_TX2_Spn       = oscMain->_adrv9009->att_TX2_Spn      ;
+
+                QGroupBox *grbTX2 = ui->grbTX_2;
+                //                grbTX2->setVisible(false);
+                QGridLayout *gridTX2 = grbTX2->findChild<QGridLayout *>();
+
+                gridTX2->addWidget(att_TX2_Spn        , 0 , 1)           ;
+                gridTX2->addWidget(pinn_TX2_Chk       , 1 , 1)           ;
+                gridTX2->addWidget(track_TX2_Chk      , 2 , 1)           ;
+                gridTX2->addWidget(lo_TX2_Chk         , 3 , 1)           ;
+                gridTX2->addWidget(powerTX2DownChk    , 4 , 1)           ;
+                //gridAttTX2->addWidget(rfBandlbl     , 5 , 1);
+                //gridAttTX2->addWidget(sampleRatelbl , 6 , 1);
+
+                //--- OBSRX ----------------------------------------------
+                power_OBSRX_Spn   = oscMain->_adrv9009->power_OBSRX_Spn  ;
+                track_OBSRX_Chk   = oscMain->_adrv9009->track_OBSRX_Chk  ;
+                hardwareGain      = oscMain->_adrv9009->hardwareGain     ;
+                rfBandOBSlbl      = oscMain->_adrv9009->rfBandOBSlbl;
+                sampleRateOBSlbl  = oscMain->_adrv9009->sampleRateOBSlbl ;
+
+                QGroupBox *grbRX1 = ui->grbRX1;
+                QGridLayout *gridRX2 = grbRX1->findChild<QGridLayout *>();
+
+                gridRX2->addWidget(hardwareGain     , 0 , 1)             ;
+                gridRX2->addWidget(track_OBSRX_Chk  , 1 , 1)             ;
+                gridRX2->addWidget(power_OBSRX_Spn  , 2 , 1)             ;
+                gridRX2->addWidget(rfBandOBSlbl     , 3 , 1)             ;
+                gridRX2->addWidget(sampleRateOBSlbl , 4 , 1)             ;
+
+                //--- THCW -----------------------------------------------
+                QGroupBox *grbTHCW = ui->grbTHCW;
+                QGridLayout *gridTHCW = grbTHCW->findChild<QGridLayout *>();
+
+                THCW1 = oscMain->_adrv9009controlUnit->THCW1               ;
+                THCW2 = oscMain->_adrv9009controlUnit->THCW2               ;
+                THCW3 = oscMain->_adrv9009controlUnit->THCW3               ;
+                //                btnWrite = oscMain->_adrv9009controlUnit->btnWrite         ;
+
+                gridTHCW->addWidget(THCW1  , 0 , 1)                        ;
+                gridTHCW->addWidget(THCW2  , 1 , 1)                        ;
+                gridTHCW->addWidget(THCW3  , 2 , 1)                        ;
+
+
+                //======================== Default Configuration ==================================================
+
+                defaultSettings();
+                isConnect = true;
+
+
+            }
+        }
+        else
+        {
+            // TODO: Show Plot window
+        }
+    }
+    else
+    {
+        qInfo()<<Q_FUNC_INFO<<"else";
+    }
+}
+
+ReceiverMain::~ReceiverMain()
+{
+    delete[] rangeXChart;
+    delete[] rangeYChart;
+    delete timeDomainPlot;
+    delete frqDomainPlot;
+    delete oscMain;
+    delete ui;
+}
+
+void ReceiverMain::on_btnSet_clicked()
+{
+    //    frqValueChenged("");
+    oscMain->_adrv9009->tx_sample_rate_changed(oscMain->_adrv9009->frqSpn->value());
+    settingMinMaxBand();
+}
+
+void ReceiverMain::emittingSignal()
+{
+    //    emit isConnect(true);
+}
+
+
+//this function is responsible for setting some configuration on the board in order to get correct value
+void ReceiverMain::defaultSettings()
+{
+    //
+    oscMain->_adrv9009->rx1Powerdown->setChecked(true);
+    oscMain->_adrv9009->rx2Powerdown->setChecked(true);
+    oscMain->_adrv9009->obs2Powerdown->setChecked(true);//OBS RX
+    oscMain->_adrv9009->obs1_powerdown->setChecked(false);//OBS RX
+
+    oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
+    oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);
+    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
+
+    //Control unit adrv
+    THCW1->setValue(10000000);
+    THCW2->setValue(150);
+    THCW3->setValue(100);
+    QTimer::singleShot(500,[&]{oscMain->_adrv9009controlUnit->btnThCw1->click();});
+    QTimer::singleShot(500,[&]{oscMain->_adrv9009controlUnit->btnThCw2->click();});
+    QTimer::singleShot(500,[&]{oscMain->_adrv9009controlUnit->btnThCw3->click();});
+    QTimer::singleShot(500,[&]{oscMain->_adrv9009controlUnit->btnWrite->click();});
+
+    //Hopping
+    //in order to run with these values
+    //                chk_enable->setChecked(true);
+    //                chk_trigger_mode->setChecked(true);
+    //                chk_exit_mode->setChecked(true);
+    txt_gpio_pin->setValue(0);
+    txt_min_freq->setValue(1700);
+    txt_max_freq->setValue(5700);
+    //                save_settings->click();
+
+    //                //                QTimer::singleShot(1000, std::move([&]{oscMain->_adrv9009controlUnit->btnThCw1->click();}));
+    //                //                QTimer::singleShot(1000, std::move([&]{oscMain->_adrv9009controlUnit->btnThCw2->click();}));
+    //                //                QTimer::singleShot(1000, std::move([&]{oscMain->_adrv9009controlUnit->btnThCw3->click();}));
+    //                //                QTimer::singleShot(1000, std::move([&]{btnWrite->click();}));
+
+    //                //these codes are for automate capture btn for time and fft domain
+    //                frqDomainPlot->on_btnfftcapture_clicked();
+    //                //                                frqDomainPlot->isCaptureOff = false;
+    //                timeDomainPlot->fillTable->clicked(true);
+    //                timeDomainPlot->on_btn_capture_clicked();
+
+
+}
+
+double ReceiverMain::maximumFinder(double * newVal,double * max)
+{
+
+    if(*newVal > *max)
+    {
+        max = newVal;
+    }
+    return *max;
+}
+
+
+double ReceiverMain::minimumFinder(double * newVal,double * min)
+{
+    if(*newVal < *min)
+    {
+        min = newVal;
+    }
+
+    return *min;
+}
+
+
+
+
+void ReceiverMain::centerFrqChangedSlot(double c)
+{
+    //    std::cout << "helloooooooooooo" << std::endl;
+}
+
+
+
+void ReceiverMain::on_btnSetBandSelect_clicked()
+{
+
+    double fs1 = ui->spnMin->value(); //?
+    double fs2 = ui->spnMax->value();//?
+
+    bool instop{};
+    double fc{centerFrq}; //frq
+    double fs1ch{};
+    double fs2ch{};
+    double inchn{};
+    int p{};
+    double tmp{};
+    //    fc TODO= receive frq value
+    //    if (ui->radBandSelect->setEnabled())
+    //    {
+    //        instop =true;
+    //    }
+    //    else {
+    //        instop =false;
+    //    }
+
+    double bw=122.88*2;
+    double chbw=bw/32;
+    double fs2n=(fs2-fc);
+    double fs1n=(fs1-fc);
+
+    if(fs1>fc)
+    {
+        fs1ch= floor(fs1n/chbw);
+    }
+
+    else
+    {
+        fs1ch= ceil(fs1n/chbw);
+    }
+
+
+    if(fs1ch<0)
+    {
+        fs1ch = fs1ch +32;
+    }
+
+    if(fs2>fc)
+    {
+        fs2ch= floor(fs2n/chbw);
+    }
+    else
+    {
+        fs2ch= ceil(fs2n/chbw);
+    }
+
+
+    if(fs2ch<0){
+        fs2ch = fs2ch +32;
+    }
+
+
+    if(((fs1ch <16) && (fs2ch >15)) || ((fs2ch <16) && (fs1ch >15)))
+    {
+        instop = !instop;
+    }
+
+    if(instop)
+    {
+        inchn=4294967295;
+        p=-1;
+    }
+    else
+    {
+        inchn=0;
+        p=1;
+    }
+
+    if(fs1ch>fs2ch && fs1ch!=0)
+    {
+        tmp=fs2ch;
+        fs2ch=fs1ch;
+        fs1ch=tmp;
+    }
+
+
+    if(fs2ch>15 && fs1ch==0)
+    {
+        tmp=fs2ch;
+        fs2ch=31;
+        fs1ch=tmp;
+        inchn=inchn+p* pow(2,0) ;
+    }
+
+    for (int i=int(fs1ch) ; i<= fs2ch ; i++)
+    {
+        inchn=inchn+p* pow(2,i) ;
+    }
+
+    emit inChannel(inchn); // pass it to the InChannel in adrv unit
+}
+
+
+void ReceiverMain::frqValueChenged(QString val)
+{
+
+    int frqVal= frqSpn->value();
+    if(frqVal > 2000 && frqVal <7000 )
+    {
+
+        if( !timeDomainPlot->isCaptureOn || !frqDomainPlot->isCaptureOn)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Please turn on capture buttons.");
+            msgBox.exec();
+            return;
+        }
+
+        frqSpn->clearFocus();
+        timeDomainPlot->btn_capt->click();
+        frqDomainPlot->btnfftcapt->click();
+
+        QTimer::singleShot(400, [&]{timeDomainPlot->btn_capt->click();});
+        QTimer::singleShot(800, [&]{frqDomainPlot->btnfftcapt->click();});
+    }
+}
+
+void ReceiverMain::settingMinMaxBand()
+{
+    centerFrq = frqSpn->value();
+    ui->spnMax->setValue(centerFrq+250);
+    ui->spnMin->setValue(centerFrq -250);
+}
+
+void ReceiverMain::reboutWithSSN()
+{
+
+}
+
+void ReceiverMain::initPlot()
+{
+
+    QCustomPlot * plotWidgets[] = {ui->wigFRQ,ui->wigPRI, ui->wigPW1, ui->wigPW2, ui->wigTOA, ui->wigPASUM, ui->wigPAPEAK, ui->wigCHANNEL,ui->wigPWhisto,ui->wigFRQhisto,ui->wigPRIhisto,ui->wigPASumhisto};
+
+    QStringList titleName = {"FRQ","PRI","PW1","PW2","TOA","PASum","PAPeak","Channel",};
+
+    for(size_t i{}; i < (sizeof (plotWidgets) / sizeof (*plotWidgets)); i ++)
+    {
+        plotWidgets[i]->xAxis->setBasePen(QPen(QColor(255,255,255)));
+        plotWidgets[i]->yAxis->setBasePen(QPen(QColor(255,255,255)));
+        plotWidgets[i]->setBackground(QBrush(Qt::black));
+        plotWidgets[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+        plotWidgets[i]->xAxis->setTickLabelColor(QColor(255,255,255));
+        plotWidgets[i]->yAxis->setTickLabelColor(QColor(255,255,255));
+        plotWidgets[i]->yAxis->setSelectedLabelColor(QColor(255,255,255));
+        plotWidgets[i]->yAxis->setSelectedTickLabelColor(QColor(255,255,255));
+        plotWidgets[i]->setSelectionRectMode(QCP::srmSelect);
+        plotWidgets[i]->setSelectionTolerance(100);
+        plotWidgets[i]->addGraph();
+        plotWidgets[i]->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20))); // first graph will be filled with translucent blue
+        plotWidgets[i]->addGraph();
+
+        QPen pen;
+        pen.setWidth(3);
+        pen.setColor(Qt::yellow);
+        plotWidgets[i]->graph(0)->setPen(pen);
+
+        QCPGrid *xGrid = plotWidgets[i]->xAxis->grid();
+        QPen xGridPen = xGrid->pen();
+        xGridPen.setStyle(Qt::SolidLine);
+        xGridPen.setColor(QColor( 0, 126, 78 ));
+        xGrid->setPen(xGridPen);
+
+        QCPGrid *yGrid = plotWidgets[i]->yAxis->grid();
+        QPen yGridPen = yGrid->pen();
+        yGridPen.setStyle(Qt::SolidLine);
+        yGridPen.setColor(QColor( 0, 126, 78 ));
+        yGrid->setPen(yGridPen);
+
+
+        //        plotWidgets[i]->graph(1)->setPen(QPen(Qt::red)); // line color red for second graph
+        //        connect(plotWidgets[i]->xAxis, SIGNAL(rangeChanged(QCPRange)), plotWidgets[i]->xAxis2, SLOT(setRange(QCPRange)));
+        //        connect(plotWidgets[i]->yAxis, SIGNAL(rangeChanged(QCPRange)), plotWidgets[i]->yAxis2, SLOT(setRange(QCPRange)));
+        //        plotWidgets[i]->xAxis->grid()->setVisible(true);
+        //        plotWidgets[i]->yAxis->grid()->setVisible(true);
+    }
+}
+
+
+void ReceiverMain::on_btnSetTH_clicked()
+{
+    oscMain->_adrv9009controlUnit->btnTh1->click();
+    sleep(1);
+    oscMain->_adrv9009controlUnit->btnTh2->click();
+}
+
+void ReceiverMain::on_btnSetTHCW_clicked()
+{
+    oscMain->_adrv9009controlUnit->btnThCw1->click();
+    sleep(1);
+    oscMain->_adrv9009controlUnit->btnThCw2->click();
+    sleep(1);
+    oscMain->_adrv9009controlUnit->btnThCw3->click();
+}
+
+//           for (const auto& [number, frequency] : frqMap) {
+
+
+//               std::cout << "Number " << number << " appeared " << frequency << " times.\n";
+//           }
+
+
+void ReceiverMain::on_tabWidget_currentChanged(int index)
+{
+    currentTabState = (index == 0) ? FIRST_TAB:SECOND_TAB;
+}
+
+
+
+void ReceiverMain::on_btnFrqSeek_clicked()
+{
+
+    //    if( !timeDomainPlot->isCaptureOn || !frqDomainPlot->isCaptureOn)
+    //    {
+    //        QMessageBox msgBox;
+    //        msgBox.setText("Please turn on capture buttons.");
+    //        msgBox.exec();
+    //        return;
+    //    }
+
+    //turn off time domain and frq btn
+    QTimer::singleShot(100, [&]{frqDomainPlot->btnfftcapt->click();});
+    QTimer::singleShot(100, [&]{timeDomainPlot->btn_capt->click();});
+
+    //changing current index of frq domain combobox and calling onItemClicked function in order to set chanel
+    QTimer::singleShot(100, [&]{frqDomainPlot->cmb_plot_type->setCurrentIndex(2);});
+    QTimer::singleShot(100, [&]{frqDomainPlot->cmb_plot_type->currentIndexChanged(2);});
+    QTimer::singleShot(100, [&]{frqDomainPlot->onItemClicked();});
+
+    //invoking btn capture again for plotting time and frq domain
+    QTimer::singleShot(100, [&]{frqDomainPlot->btnfftcapt->click();});
+    QTimer::singleShot(100, [&]{timeDomainPlot->btn_capt->click();});
+
+
+
+    //    QTimer::singleShot(400, [&]{frqDomainPlot->btnfftcapt->click();});
+    //    //    QTimer::singleShot(1000,[&]{frqDomainPlot;});
+}

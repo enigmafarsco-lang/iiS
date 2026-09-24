@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>alarm.png</file>
+        <file>normal.png</file>
+        <file>undef.png</file>
+        <file>NC.png</file>
+    </qresource>
+</RCC>

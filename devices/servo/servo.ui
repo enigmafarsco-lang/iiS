@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Servo</class>
+ <widget class="QWidget" name="Servo">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>674</width>
+    <height>545</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Target Detector</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="0" column="0" colspan="2">
+       <widget class="TargetDetector" name="targrtDetection" native="true"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="chbAutoSet">
+        <property name="text">
+         <string>Auto Set</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="btnAutoSet">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Report</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="1">
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="title">
+         <string>Tilt</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_11">
+         <item row="0" column="0">
+          <widget class="QLCDNumber" name="lcdTilt">
+           <property name="font">
+            <font>
+             <pointsize>65</pointsize>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="smallDecimalPoint">
+            <bool>false</bool>
+           </property>
+           <property name="digitCount">
+            <number>3</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+           <property name="intValue" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Pan</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_10">
+         <item row="0" column="0">
+          <widget class="QLCDNumber" name="lcdPan">
+           <property name="font">
+            <font>
+             <pointsize>65</pointsize>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="smallDecimalPoint">
+            <bool>false</bool>
+           </property>
+           <property name="digitCount">
+            <number>3</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+           <property name="intValue" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QWidget" name="widget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="0" column="1">
+       <widget class="QGroupBox" name="gbPan">
+        <property name="title">
+         <string>Pan Settings</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Pan Speed:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="dsbPanAngle">
+           <property name="maximum">
+            <double>360.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="btnSetPan">
+           <property name="text">
+            <string>Set Pan</string>
+           </property>
+           <property name="shortcut">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="sbPanSpeed">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>2</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Pan Angle:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="btnSetPanSpeed">
+           <property name="text">
+            <string>Set Speed</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QGroupBox" name="gbGeneral">
+     <property name="title">
+      <string>Tilt Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Tilt Angle:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="dsbTiltAngle">
+        <property name="minimum">
+         <double>-10.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>30.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btnSetTilt">
+        <property name="text">
+         <string>Set Tilt</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Tilt Speed:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="sbTiltSpeed">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="btnSetTiltSpeed">
+        <property name="text">
+         <string>Set Speed</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" rowspan="3">
+    <layout class="QGridLayout" name="gridLayout_9">
+     <item row="1" column="0">
+      <widget class="BTiltGauge" name="gageTilt" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="BPanGauge" name="gagePan" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="2">
+    <widget class="QGroupBox" name="gbTilt">
+     <property name="title">
+      <string>General Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="2" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="chbGun">
+          <property name="text">
+           <string>Gun Is InSide</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chbCheckoffset">
+          <property name="text">
+           <string>Check Offset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="btnStop">
+          <property name="text">
+           <string>Stop</string>
+          </property>
+          <property name="shortcut">
+           <string>Space</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnPark">
+          <property name="text">
+           <string>Park</string>
+          </property>
+          <property name="shortcut">
+           <string>Return</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Jog</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_8">
+      <item row="0" column="1">
+       <widget class="QPushButton" name="btnJogUp">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../application.qrc">
+          <normaloff>:/resources/Images/Icons/Arrow-Up-96.png</normaloff>:/resources/Images/Icons/Arrow-Up-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Up</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="btnJogDown">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../application.qrc">
+          <normaloff>:/resources/Images/Icons/Arrow-Down-96.png</normaloff>:/resources/Images/Icons/Arrow-Down-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Down</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="btnJogLeft">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../application.qrc">
+          <normaloff>:/resources/Images/Icons/Arrow-Left-96.png</normaloff>:/resources/Images/Icons/Arrow-Left-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Left</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="btnJogRight">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../application.qrc">
+          <normaloff>:/resources/Images/Icons/Arrow-Right-96.png</normaloff>:/resources/Images/Icons/Arrow-Right-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Right</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>BPanGauge</class>
+   <extends>QWidget</extends>
+   <header>components/Pan/pangauge.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BTiltGauge</class>
+   <extends>QWidget</extends>
+   <header>components/Tilt/tiltgauge.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TargetDetector</class>
+   <extends>QWidget</extends>
+   <header>devices/targetDetector/targetdetector.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../application.qrc"/>
+ </resources>
+ <connections/>
+</ui>
