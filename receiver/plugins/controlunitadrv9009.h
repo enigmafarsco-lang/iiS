@@ -65,13 +65,14 @@ private:
     bool writeRegisterLikeThreshold(quint32 offset, quint32 value,
                                     const QString &label, QString *details = nullptr);
     // Corrected write path for the DRFM tab controls ONLY (th0/amplify,
-    // dacsel, pdw/VGPO, inchannel, thcw).  Routes through DrfmRegisterIO:
-    // named IIO debug attributes of the led-count device (the iio-oscilloscope
-    // Debug tab registers th0/dacsel/...), matching IIO channel attributes
-    // (e.g. frequency on voltage0/1), then direct led-count register access -
-    // with mwipcore0:mmwr0 only as a fallback for old bitstreams.  The
-    // software never opens the UART; every write prints the echo/cat command
-    // to confirm the value in the board console (picocom).
+    // dacsel, pdw/VGPO, inchann, thcw).  Routes through DrfmRegisterIO:
+    // the IIO channel "raw" attributes of the led-count-iio device
+    // (out_count1_th0_raw, out_count15_dacseles_raw, ... - the raw-data
+    // entries of the iio-oscilloscope Debug tab), then named debug
+    // attributes and direct led-count register access - with mwipcore0:mmwr0
+    // only as a fallback for old bitstreams.  The software never opens the
+    // UART; every write prints the cat command to confirm the value in the
+    // board console (picocom).
     bool writeRegisterToHw(quint32 offset, quint32 value,
                            const QString &label, QString *details = nullptr);
     bool tryReadRegister(quint32 offset, quint32 *value);
@@ -107,9 +108,6 @@ public:
     // Compatibility overload: phase offset defaults to zero.
     bool setVgpoValue(qint32 phaseStep, bool enabled = true, QString *details = nullptr)
     { return setVgpoValue(0u, phaseStep, enabled, details); }
-    // Writes the IIO channel register "frequency" that is represented by the
-    // voltage0 / voltage1 channels (in_voltage0_frequency etc. in sysfs).
-    bool setIioFrequency(double frequency, QString *details = nullptr);
 
     // Scan report: every led-count IIO debug attribute (name = value) and the
     // register it represents (th0/dacsel/...).  Pure IIO - no UART.

@@ -95,6 +95,7 @@ SOURCES += \
     receiver/plugins/adrv9009_adv.cpp \
     receiver/plugins/controlunitadrv9009.cpp \
     receiver/plugins/dacDataManager.cpp \
+    receiver/plugins/drfmregisterio.cpp \
     receiver/settings.cpp \
     receiver/receivermain.cpp \
     receiver/utils/filedialog.cpp \

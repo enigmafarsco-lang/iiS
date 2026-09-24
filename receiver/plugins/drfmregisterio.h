@@ -9,34 +9,45 @@
 #include <iio.h>
 
 /**
- * One led_count_ip control register as exposed by the IIO led-count driver
- * (the device shown as "led-count" in iio-oscilloscope, whose Debug tab
- * accepts raw data for th0 / dacsel / ...).
+ * One led_count_ip control register as exposed by the "led-count-iio"
+ * driver (iio:device0 on the board).  The driver maps every register to an
+ * IIO channel with a "raw" attribute - the same entries you write raw data
+ * for in the iio-oscilloscope Debug tab:
+ *
+ *     out_count1_th0_raw       <- TH0 / amplify   (AXI 0x43C30100)
+ *     out_count5_pdw_raw       <- PDW             (AXI 0x43C30110)
+ *     out_count7_inchann_raw   <- phase offset    (AXI 0x43C30118)
+ *     out_count8_thcw_raw      <- phase step      (AXI 0x43C3011C)
+ *     out_count15_dacseles_raw <- dacsel          (AXI 0x43C30138)
+ *     ...
+ *
+ * Each channel also has a "label" attribute naming the register ("th0",
+ * "dacseles", ...), which is what this class matches against.
  */
 struct DrfmRegisterDef
 {
     quint32 offset;        // offset inside the led_count_ip AXI window (base 0x43C30000)
     QString label;         // human readable name used in logs / UI
-    QStringList attrNames; // IIO attribute name aliases (canonical name first)
+    QStringList attrNames; // register-name aliases (canonical name first)
     bool isSigned;         // value is a signed 32-bit quantity when rendered
 };
 
 /**
  * DrfmRegisterIO writes the led_count_ip registers the same way
- * iio-oscilloscope's Debug tab does:
+ * iio-oscilloscope's Debug tab writes raw data for th0 / dacsel / ...:
  *
- *   1. named IIO debug attributes of the led-count device ("th0", "dacsel",
- *      "amplify", ...) - the raw data entry you use in the Debug tab;
- *   2. matching IIO channel attributes (e.g. "frequency" on voltage0 /
- *      voltage1) when the driver exposes a register there;
- *   3. direct register access on the led-count IIO device at its AXI offset
- *      ("the device addresses that IIO writes into");
+ *   1. the IIO channel "raw" attribute whose channel/label represents the
+ *      register (out_countN_<name>_raw on led-count-iio) - this is the
+ *      correct write mechanism;
+ *   2. matching named IIO debug attributes, when a driver exposes any
+ *      (kept for other bitstreams);
+ *   3. direct register access on the led-count IIO device at its AXI offset;
  *   4. only as a last resort the historical MathWorks bridge
- *      mwipcore0:mmwr0 + reg_access (kept for old bitstreams).
+ *      mwipcore0:mmwr0 + reg_access (old bitstreams).
  *
- * Because the led_count_ip AXI read mux does not return the written control
- * registers, confirmation is done over the board UART console with
- * echo / cat on /sys/bus/iio/devices (see UartRegisterConsole).
+ * The software never opens the UART.  Because the AXI read mux cannot return
+ * the written control registers, each write prints the exact `cat` command
+ * for the board console (picocom) so the value can be confirmed by hand.
  */
 class DrfmRegisterIO
 {
@@ -53,32 +64,45 @@ public:
     bool writeRegister(quint32 offset, quint32 value,
                        const QString &label, QString *details = nullptr);
 
-    // Writes the IIO channel attribute "frequency" of voltage0 / voltage1
-    // (in and out) on the led-count device - the registers that appear as
-    // voltage0/1 "frequency" entries in IIO / iio-oscilloscope.
-    bool writeChannelFrequency(double frequency, QString *details = nullptr);
-
-    // Multi-line report: every debug attribute the led-count device exposes
-    // (name = value) with the register it represents (th0/dacsel/...) -
-    // the IIO equivalent of scanning the iio-oscilloscope Debug tab.
+    // Multi-line report: every IIO channel attribute of the led-count device
+    // (label + raw + sysfs file) with the register it represents - the IIO
+    // equivalent of reading the iio-oscilloscope Debug tab list.
     QString scanReport();
 
     // One-line description of the resolved hardware paths.
     QString backendInfo();
 
 private:
+    // A channel/attribute pair that carries a register's raw value, e.g.
+    // channel "count1_th0" with attribute "raw" (sysfs out_count1_th0_raw).
+    struct ChannelRawMatch
+    {
+        struct iio_channel *channel;
+        QString attrName;   // "raw", or "<name>_raw" for the alternate layout
+        QString sysfsName;  // e.g. "out_count1_th0_raw"
+        QString channelDesc;
+    };
+
     struct iio_device *ledCountDevice();
     struct iio_device *legacyBridgeDevice();
     void setLegacyBridgeEnabled(bool enable);
+
+    // Finds the channel raw attribute that represents one of the register
+    // names in `wanted` (matched against channel id/name with any leading
+    // "countN" stripped and against the channel's "label" attribute).
+    bool findChannelRaw(struct iio_device *dev, const QStringList &wanted,
+                        ChannelRawMatch *match) const;
+    bool writeChannelRaw(struct iio_device *dev, const QStringList &wanted,
+                         quint32 value, bool isSigned, QString *how,
+                         ChannelRawMatch *usedMatch = nullptr);
 
     QStringList debugAttrNames(struct iio_device *dev) const;
     QString matchAttrName(const QStringList &available,
                           const QStringList &wanted) const;
     bool writeDebugAttr(struct iio_device *dev, const QString &name,
                         quint32 value, bool isSigned, QString *how);
-    bool writeChannelAttrs(struct iio_device *dev, const QStringList &wanted,
-                           quint32 value, bool isSigned, QString *how);
     static QString valueText(quint32 value, bool isSigned);
+    static QStringList channelNameCandidates(struct iio_channel *ch);
 
     struct iio_device *m_ledDev;
     struct iio_device *m_legacyDev;

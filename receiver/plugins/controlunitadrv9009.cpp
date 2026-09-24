@@ -706,14 +706,14 @@ bool ControlUnitADRV9009::writeRegisterToHw(quint32 offset, quint32 value,
                                              QString *details)
 {
     // Hardware-write entry point for the DRFM tab controls ONLY (th0/amplify,
-    // dacsel, pdw/VGPO, inchannel, thcw).  Every other tab, menu and legacy
+    // dacsel, pdw/VGPO, inchann, thcw).  Every other tab, menu and legacy
     // button keeps its historical writeRegisterLikeThreshold/mwipcore
     // transaction untouched.  DrfmRegisterIO performs the corrected write
     // sequence:
-    //   1. named IIO debug attributes of the led-count device (th0, dacsel,
-    //      amplify, ...) - the raw-data mechanism of the iio-oscilloscope
-    //      Debug tab;
-    //   2. matching IIO channel attributes (e.g. "frequency" on voltage0/1);
+    //   1. the IIO channel "raw" attributes of the led-count-iio device
+    //      (out_count1_th0_raw, out_count15_dacseles_raw, ...) - the
+    //      raw-data mechanism of the iio-oscilloscope Debug tab;
+    //   2. named IIO debug attributes, when a driver exposes any;
     //   3. direct IIO register access on the led-count device (AXI base
     //      0x43C30000 + offset);
     //   4. legacy mwipcore0:mmwr0 + reg_access only as a fallback.
@@ -895,19 +895,6 @@ bool ControlUnitADRV9009::setVgpoValue(quint32 phaseOffset, qint32 phaseStep,
                 .arg(phaseStep)
                 .arg(paramDetails, enableDetails);
     return paramsOk && enableOk;
-}
-
-bool ControlUnitADRV9009::setIioFrequency(double frequency, QString *details)
-{
-    // Some led-count registers are represented as IIO channel attributes of
-    // voltage0 / voltage1 ("frequency" shows up as in_voltage0_frequency etc.
-    // in sysfs).  Write them through the same IIO context so the values land
-    // beside the raw th0/dacsel registers.
-    QString local;
-    const bool ok = registerIo.writeChannelFrequency(frequency, &local);
-    if (details)
-        *details = local;
-    return ok;
 }
 
 /**

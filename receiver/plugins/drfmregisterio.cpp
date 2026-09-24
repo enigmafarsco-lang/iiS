@@ -3,7 +3,7 @@
 #include <receiver/globals.h>
 
 #include <QDebug>
-#include <QPair>
+#include <QRegularExpression>
 
 #include <cstring>
 
@@ -25,8 +25,7 @@ QString hexText(quint32 value, int width)
 }
 
 // Same signature as globals::__connect_widget so it works with the libiio
-// callback typedef this project already compiles against.  Collects the
-// debug-attribute names the led-count driver exposes (th0, dacsel, ...).
+// callback typedef this project already compiles against.
 int collectDebugAttrNames(struct iio_device *dev, const char *attr,
                           const char *value, size_t len, void *d)
 {
@@ -40,33 +39,27 @@ int collectDebugAttrNames(struct iio_device *dev, const char *attr,
     return 0;
 }
 
-// Collects name = value pairs for the scan report.
-int collectDebugAttrPairs(struct iio_device *dev, const char *attr,
-                          const char *value, size_t len, void *d)
-{
-    Q_UNUSED(dev)
-
-    QList<QPair<QString, QString> > *pairs =
-            static_cast<QList<QPair<QString, QString> > *>(d);
-    if (!attr || !*attr)
-        return 0;
-
-    const int copyLen = value ? static_cast<int>(qMin<size_t>(len, 96)) : 0;
-    const QString valueText = value ? QString::fromLocal8Bit(value, copyLen).trimmed()
-                                    : QString();
-    pairs->append(qMakePair(QString::fromLocal8Bit(attr), valueText));
-    return 0;
-}
-
-// Paste-able board-console command that finds and reads one IIO register -
+// Paste-able board-console command that finds and reads one IIO sysfs file -
 // the user runs this in picocom; the software never opens the UART itself.
-QString consoleCheckCommand(const QString &attrName)
+QString consoleCheckCommand(const QString &sysfsName)
 {
     return QStringLiteral(
                 "for f in /sys/bus/iio/devices/iio:device*/%1 "
                 "/sys/bus/iio/devices/iio:device*/debug/%1; "
                 "do [ -f \"$f\" ] && { echo $f; cat $f; break; }; done")
-            .arg(attrName);
+            .arg(sysfsName);
+}
+
+// led-count-iio names its channels "count1_th0", "count15_dacseles", ... -
+// strip the "countN" index so the register name remains.
+QString stripCountPrefix(const QString &identifier)
+{
+    static const QRegularExpression countPrefix(
+                QStringLiteral("^count[0-9]+_?"),
+                QRegularExpression::CaseInsensitiveOption);
+    QString stripped = identifier;
+    stripped.remove(countPrefix);
+    return stripped.trimmed();
 }
 
 } // namespace
@@ -101,7 +94,7 @@ const QList<DrfmRegisterDef> &DrfmRegisterIO::registerMap()
           QStringList() << QStringLiteral("logouti") << QStringLiteral("logout"),
           false },
         { 0x118u, QStringLiteral("INchann / phase offset"),
-          QStringList() << QStringLiteral("inchannel") << QStringLiteral("inchann")
+          QStringList() << QStringLiteral("inchann") << QStringLiteral("inchannel")
                         << QStringLiteral("in_chann") << QStringLiteral("phase_offset"),
           false },
         { 0x11Cu, QStringLiteral("thcw / phase step"),
@@ -123,7 +116,7 @@ const QList<DrfmRegisterDef> &DrfmRegisterIO::registerMap()
         { 0x134u, QStringLiteral("pdiv"),
           QStringList() << QStringLiteral("pdiv"), false },
         { 0x138u, QStringLiteral("DACseles / dacsel"),
-          QStringList() << QStringLiteral("dacsel") << QStringLiteral("dacseles")
+          QStringList() << QStringLiteral("dacseles") << QStringLiteral("dacsel")
                         << QStringLiteral("dacselect") << QStringLiteral("dacsele")
                         << QStringLiteral("dac_sel"),
           false },
@@ -177,10 +170,11 @@ struct iio_device *DrfmRegisterIO::ledCountDevice()
     if (m_ledDev || !globals::ctx)
         return m_ledDev;
 
-    // The DTS binding is "led-count@43c30000" (compatible xlnx,led-count-ip).
+    // The DTS binding is "led-count@43c30000"; the board driver registers
+    // the IIO device as "led-count-iio".
     const char *exactNames[] = {
-        "led-count", "led_count", "led-count-ip", "led_count_ip",
-        "ledcount", "led-count-ip-1.0", nullptr
+        "led-count-iio", "led_count_iio", "led-count", "led_count",
+        "led-count-ip", "led_count_ip", "ledcount", nullptr
     };
     for (int i = 0; exactNames[i]; ++i)
     {
@@ -211,7 +205,7 @@ struct iio_device *DrfmRegisterIO::ledCountDevice()
         }
     }
 
-    // Last resort: the device that exposes the th0/dacsel debug attributes,
+    // Last resort: the device whose channels carry the th0/dacseles labels,
     // even when it was renamed.
     for (unsigned int i = 0; i < count; ++i)
     {
@@ -219,21 +213,15 @@ struct iio_device *DrfmRegisterIO::ledCountDevice()
         if (!dev)
             continue;
 
-        const QStringList names = debugAttrNames(dev);
-        bool hasTh0 = false, hasDacsel = false;
-        for (int n = 0; n < names.size(); ++n)
-        {
-            const QString key = normalizedAttrKey(names.at(n));
-            if (key == QLatin1String("th0"))
-                hasTh0 = true;
-            if (key == QLatin1String("dacsel") || key == QLatin1String("dacseles"))
-                hasDacsel = true;
-        }
+        ChannelRawMatch m;
+        const bool hasTh0 = findChannelRaw(dev, QStringList() << QStringLiteral("th0"), &m);
+        const bool hasDacsel = findChannelRaw(dev,
+                                              QStringList() << QStringLiteral("dacseles")
+                                                            << QStringLiteral("dacsel"),
+                                              &m);
         if (hasTh0 && hasDacsel)
         {
             m_ledDev = dev;
-            m_ledDebugAttrs = names;
-            m_ledDebugAttrsKnown = true;
             return m_ledDev;
         }
     }
@@ -316,6 +304,140 @@ QString DrfmRegisterIO::matchAttrName(const QStringList &available,
     return QString();
 }
 
+QStringList DrfmRegisterIO::channelNameCandidates(struct iio_channel *ch)
+{
+    QStringList candidates;
+    if (!ch)
+        return candidates;
+
+    // The driver labels each channel with its register name
+    // (out_count1_th0_label = "th0").
+    if (iio_channel_find_attr(ch, "label"))
+    {
+        char buf[128] = {};
+        const ssize_t n = iio_channel_attr_read(ch, "label", buf, sizeof(buf) - 1);
+        if (n > 0)
+            candidates << QString::fromLocal8Bit(buf).trimmed();
+    }
+
+    const QString id = iio_channel_get_id(ch)
+            ? QString::fromLocal8Bit(iio_channel_get_id(ch)) : QString();
+    const QString name = iio_channel_get_name(ch)
+            ? QString::fromLocal8Bit(iio_channel_get_name(ch)) : QString();
+
+    const QStringList bases = QStringList() << id << name;
+    for (int i = 0; i < bases.size(); ++i)
+    {
+        if (!bases.at(i).isEmpty())
+            candidates << bases.at(i);
+        const QString stripped = stripCountPrefix(bases.at(i));
+        if (!stripped.isEmpty())
+            candidates << stripped;
+    }
+    return candidates;
+}
+
+bool DrfmRegisterIO::findChannelRaw(struct iio_device *dev, const QStringList &wanted,
+                                    ChannelRawMatch *match) const
+{
+    if (!dev || !match || wanted.isEmpty())
+        return false;
+
+    const unsigned int channelCount = iio_device_get_channels_count(dev);
+    for (unsigned int c = 0; c < channelCount; ++c)
+    {
+        struct iio_channel *ch = iio_device_get_channel(dev, c);
+        if (!ch)
+            continue;
+
+        const QString channelDesc =
+                QStringLiteral("channel id '%1'%2")
+                .arg(iio_channel_get_id(ch) ? iio_channel_get_id(ch) : "?",
+                     iio_channel_is_output(ch) ? QStringLiteral(" (output)")
+                                               : QStringLiteral(" (input)"));
+
+        // 1) channel identified by its name / label as one of the registers
+        const QStringList candidates = channelNameCandidates(ch);
+        QString matchedAlias;
+        for (int w = 0; w < wanted.size() && matchedAlias.isEmpty(); ++w)
+        {
+            const QString wantKey = normalizedAttrKey(wanted.at(w));
+            for (int a = 0; a < candidates.size(); ++a)
+                if (normalizedAttrKey(candidates.at(a)) == wantKey)
+                {
+                    matchedAlias = wanted.at(w);
+                    break;
+                }
+        }
+
+        if (!matchedAlias.isEmpty())
+        {
+            if (iio_channel_find_attr(ch, "raw"))
+            {
+                match->channel = ch;
+                match->attrName = QStringLiteral("raw");
+                const char *fn = iio_channel_attr_get_filename(ch, "raw");
+                match->sysfsName = fn ? QString::fromLocal8Bit(fn) : QString();
+                match->channelDesc = channelDesc;
+                return true;
+            }
+        }
+
+        // 2) alternate layout: attribute named "<register>_raw" on any
+        //    channel (e.g. channel "count1" with attribute "th0_raw")
+        for (int w = 0; w < wanted.size(); ++w)
+        {
+            const QByteArray fname = (wanted.at(w) + QLatin1String("_raw")).toLatin1();
+            if (!iio_channel_find_attr(ch, fname.constData()))
+                continue;
+            match->channel = ch;
+            match->attrName = QString::fromLatin1(fname);
+            const char *fn = iio_channel_attr_get_filename(ch, fname.constData());
+            match->sysfsName = fn ? QString::fromLocal8Bit(fn) : QString();
+            match->channelDesc = channelDesc;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DrfmRegisterIO::writeChannelRaw(struct iio_device *dev, const QStringList &wanted,
+                                     quint32 value, bool isSigned, QString *how,
+                                     ChannelRawMatch *usedMatch)
+{
+    ChannelRawMatch match;
+    if (!findChannelRaw(dev, wanted, &match))
+        return false;
+
+    const long long llValue = isSigned ? static_cast<long long>(static_cast<qint32>(value))
+                                       : static_cast<long long>(value);
+
+    const QByteArray attrName = match.attrName.toLocal8Bit();
+    ssize_t ret = iio_channel_attr_write_longlong(match.channel, attrName.constData(),
+                                                  llValue);
+    if (ret < 0)
+    {
+        const QByteArray text = valueText(value, isSigned).toLatin1();
+        ret = iio_channel_attr_write(match.channel, attrName.constData(),
+                                     text.constData());
+    }
+    if (ret < 0)
+        return false;
+
+    if (usedMatch)
+        *usedMatch = match;
+
+    if (how)
+    {
+        const QString fileName = match.sysfsName.isEmpty() ? match.attrName
+                                                           : match.sysfsName;
+        *how = QStringLiteral(
+                    "IIO channel raw write: %1 [%2] <= %3 (iio-oscilloscope Debug tab entry)")
+                .arg(fileName, match.channelDesc, valueText(value, isSigned));
+    }
+    return true;
+}
+
 bool DrfmRegisterIO::writeDebugAttr(struct iio_device *dev, const QString &name,
                                     quint32 value, bool isSigned, QString *how)
 {
@@ -335,7 +457,6 @@ bool DrfmRegisterIO::writeDebugAttr(struct iio_device *dev, const QString &name,
         return true;
     }
 
-    // Retry with a hex rendering ("raw data" style) and the longlong helper.
     const QByteArray hex = hexText(value, 8).toLatin1();
     const ssize_t retHex = iio_device_debug_attr_write(dev, attrName.constData(),
                                                        hex.constData());
@@ -361,51 +482,6 @@ bool DrfmRegisterIO::writeDebugAttr(struct iio_device *dev, const QString &name,
     return false;
 }
 
-bool DrfmRegisterIO::writeChannelAttrs(struct iio_device *dev, const QStringList &wanted,
-                                       quint32 value, bool isSigned, QString *how)
-{
-    if (!dev)
-        return false;
-
-    bool any = false;
-    const unsigned int channelCount = iio_device_get_channels_count(dev);
-    for (unsigned int c = 0; c < channelCount; ++c)
-    {
-        struct iio_channel *ch = iio_device_get_channel(dev, c);
-        if (!ch)
-            continue;
-
-        const QString channelName = QString::fromLocal8Bit(iio_channel_get_id(ch)
-                                                           ? iio_channel_get_id(ch) : "?")
-                + (iio_channel_is_output(ch) ? QStringLiteral("_out") : QStringLiteral("_in"));
-
-        for (int w = 0; w < wanted.size(); ++w)
-        {
-            const QByteArray attr = wanted.at(w).toLocal8Bit();
-            if (!iio_channel_find_attr(ch, attr.constData()))
-                continue;
-
-            const long long llValue = isSigned
-                    ? static_cast<long long>(static_cast<qint32>(value))
-                    : static_cast<long long>(value);
-            const ssize_t ret = iio_channel_attr_write_longlong(ch, attr.constData(), llValue);
-            if (ret >= 0)
-            {
-                any = true;
-                if (how)
-                {
-                    if (!how->isEmpty())
-                        *how += QStringLiteral(" | ");
-                    *how += QStringLiteral("channel attr %1/%2 <= %3")
-                            .arg(channelName, wanted.at(w),
-                                 QString::number(llValue));
-                }
-            }
-        }
-    }
-    return any;
-}
-
 bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
                                    const QString &label, QString *details)
 {
@@ -418,83 +494,73 @@ bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
     const QString niceLabel = label.isEmpty() ? labelForOffset(offset) : label;
 
     bool written = false;
-    QString how;
-    QString debugAttrUsed;
+    QString checkFileName;
 
+    // Path 1: IIO channel "raw" attribute of the led-count device - the
+    // out_countN_<name>_raw entries you write raw data for in the
+    // iio-oscilloscope Debug tab (out_count1_th0_raw, out_count15_dacseles_raw, ...).
     if (ledDev && !wanted.isEmpty())
     {
-        // Path 1: named IIO debug attribute - identical to writing raw data
-        // for th0 / dacsel / ... in the iio-oscilloscope Debug tab.
-        const QString found = matchAttrName(debugAttrNames(ledDev), wanted);
-        if (!found.isEmpty())
+        QString how;
+        ChannelRawMatch usedMatch;
+        if (writeChannelRaw(ledDev, wanted, value, isSigned, &how, &usedMatch))
         {
-            QString sub;
-            if (writeDebugAttr(ledDev, found, value, isSigned, &sub))
-            {
-                written = true;
-                debugAttrUsed = found;
-                pathLog << QStringLiteral("IIO debug attribute: %1").arg(sub);
-            }
-            else
-            {
-                pathLog << QStringLiteral("IIO debug attribute '%1' rejected the write").arg(found);
-            }
+            written = true;
+            checkFileName = usedMatch.sysfsName.isEmpty() ? usedMatch.attrName
+                                                          : usedMatch.sysfsName;
+            pathLog << how;
         }
         else
         {
-            // Path 1b: attribute exists but is write-only (read_all skipped
-            // it).  Trying to write the alias doubles as the existence test.
-            QStringList variants = wanted;
-            for (int w = 0; w < wanted.size(); ++w)
-            {
-                variants << wanted.at(w).toUpper();
-                variants << wanted.at(w).toLower();
-            }
-            for (int v = 0; v < variants.size() && !written; ++v)
-            {
-                QString sub;
-                if (writeDebugAttr(ledDev, variants.at(v), value, isSigned, &sub))
-                {
-                    written = true;
-                    debugAttrUsed = variants.at(v);
-                    pathLog << QStringLiteral("IIO debug attribute (probed): %1").arg(sub);
-                }
-            }
-            if (!written)
-                pathLog << QStringLiteral("no matching debug attribute among (%1)")
-                           .arg(wanted.join(QLatin1String(", ")));
+            pathLog << QStringLiteral("no channel raw attribute matched (%1)")
+                       .arg(wanted.join(QLatin1String(", ")));
         }
 
-        // Path 2: matching IIO channel attributes (e.g. "frequency" entries
-        // that represent voltage0/1) - written "also", as requested.
-        QString channelHow;
-        if (writeChannelAttrs(ledDev, wanted, value, isSigned, &channelHow))
-            pathLog << QStringLiteral("IIO channel attribute: %1").arg(channelHow);
+        // Path 2: named IIO debug attribute (other drivers / bitstreams).
+        if (!written)
+        {
+            const QString found = matchAttrName(debugAttrNames(ledDev), wanted);
+            if (!found.isEmpty())
+            {
+                QString sub;
+                if (writeDebugAttr(ledDev, found, value, isSigned, &sub))
+                {
+                    written = true;
+                    checkFileName = found;
+                    pathLog << QStringLiteral("IIO debug attribute: %1").arg(sub);
+                }
+                else
+                {
+                    pathLog << QStringLiteral("IIO debug attribute '%1' rejected the write").arg(found);
+                }
+            }
+            else
+            {
+                pathLog << QStringLiteral("no matching debug attribute either");
+            }
+        }
+    }
+    else
+    {
+        pathLog << QStringLiteral("led-count IIO device not found");
     }
 
     // Path 3: direct register write to the IIO-visible led-count device at
     // its AXI offset (led_count_ip base 0x43C30000 + offset).
-    if (!written)
+    if (!written && ledDev)
     {
-        if (!ledDev)
+        const int ret = iio_device_reg_write(ledDev, offset, value);
+        if (ret == 0)
         {
-            pathLog << QStringLiteral("led-count IIO device not found");
+            written = true;
+            pathLog << QStringLiteral("IIO register write on '%1' offset %2 <= %3")
+                       .arg(QString::fromLocal8Bit(iio_device_get_id(ledDev)
+                                                   ? iio_device_get_id(ledDev) : "led-count"),
+                            hexText(offset, 3), hexText(value, 8));
         }
         else
         {
-            const int ret = iio_device_reg_write(ledDev, offset, value);
-            if (ret == 0)
-            {
-                written = true;
-                pathLog << QStringLiteral("IIO register write on '%1' offset %2 <= %3")
-                           .arg(QString::fromLocal8Bit(iio_device_get_id(ledDev)
-                                                       ? iio_device_get_id(ledDev) : "led-count"),
-                                hexText(offset, 3), hexText(value, 8));
-            }
-            else
-            {
-                pathLog << QStringLiteral("IIO register write failed (%1)").arg(ret);
-            }
+            pathLog << QStringLiteral("IIO register write failed (%1)").arg(ret);
         }
     }
 
@@ -536,8 +602,8 @@ bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
 
         // The confirmation command for the board console (picocom) - run it
         // by hand to cat the register and confirm the value really landed.
-        const QString checkName = !debugAttrUsed.isEmpty() ? debugAttrUsed
-                                                          : wanted.value(0);
+        const QString checkName = checkFileName.isEmpty() ? wanted.value(0)
+                                                          : checkFileName;
         if (!checkName.isEmpty())
             *details += QStringLiteral("\n       console check (picocom): %1")
                     .arg(consoleCheckCommand(checkName));
@@ -551,137 +617,85 @@ bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
     return written;
 }
 
-bool DrfmRegisterIO::writeChannelFrequency(double frequency, QString *details)
-{
-    QStringList pathLog;
-    bool any = false;
-
-    // Prefer the led-count device; fall back to any device exposing a
-    // "frequency" attribute on voltage0 / voltage1.
-    struct iio_device *order[2] = { ledCountDevice(), nullptr };
-    QList<struct iio_device *> devices;
-    if (order[0])
-        devices << order[0];
-
-    const unsigned int count = iio_context_get_devices_count(globals::ctx);
-    for (unsigned int i = 0; i < count; ++i)
-    {
-        struct iio_device *dev = iio_context_get_device(globals::ctx, i);
-        if (dev && !devices.contains(dev))
-            devices << dev;
-    }
-
-    const char *channelNames[] = { "voltage0", "voltage1", nullptr };
-    const char *attrNames[] = { "frequency", "freq", nullptr };
-
-    for (int d = 0; d < devices.size(); ++d)
-    {
-        struct iio_device *dev = devices.at(d);
-        const QString devName = QString::fromLocal8Bit(iio_device_get_id(dev)
-                                                       ? iio_device_get_id(dev) : "?");
-        for (int c = 0; channelNames[c]; ++c)
-        {
-            for (int out = 0; out < 2; ++out)
-            {
-                struct iio_channel *ch = iio_device_find_channel(dev, channelNames[c],
-                                                                 out != 0);
-                if (!ch)
-                    continue;
-                for (int a = 0; attrNames[a]; ++a)
-                {
-                    if (!iio_channel_find_attr(ch, attrNames[a]))
-                        continue;
-                    const ssize_t ret = iio_channel_attr_write_double(
-                                ch, attrNames[a], frequency);
-                    if (ret >= 0)
-                    {
-                        any = true;
-                        pathLog << QStringLiteral("%1/%2%3_%4 <= %5 Hz")
-                                   .arg(devName, QString::fromLatin1(channelNames[c]),
-                                        out ? QStringLiteral("_out") : QStringLiteral("_in"),
-                                        QString::fromLatin1(attrNames[a]),
-                                        QString::number(frequency));
-                    }
-                }
-            }
-        }
-        // voltage0/1 "frequency" only needs to be written once per found
-        // device family; keep scanning but do not duplicate on identical dev.
-    }
-
-    if (details)
-    {
-        *details = any
-                ? QStringLiteral("IIO frequency registers written: %1")
-                  .arg(pathLog.join(QStringLiteral(" ; ")))
-                : QStringLiteral("no 'frequency' channel attribute on voltage0/1 was found (%1)")
-                  .arg(pathLog.join(QStringLiteral(" ; ")));
-        *details += QStringLiteral("\n       console check (picocom): %1")
-                .arg(consoleCheckCommand(QStringLiteral("in_voltage0_frequency")));
-    }
-    return any;
-}
-
 QString DrfmRegisterIO::scanReport()
 {
     struct iio_device *ledDev = ledCountDevice();
     if (!ledDev)
         return QStringLiteral("led-count IIO device not found in the IIO context.");
 
-    QList<QPair<QString, QString> > pairs;
-    iio_device_debug_attr_read_all(ledDev, collectDebugAttrPairs, &pairs);
-
-    QStringList mappedNames;
     QStringList lines;
-    lines << QStringLiteral("led-count IIO debug attributes (= the th0/dacsel/... registers of");
-    lines << QStringLiteral("the iio-oscilloscope Debug tab):");
+    const QString devId = iio_device_get_id(ledDev)
+            ? QString::fromLocal8Bit(iio_device_get_id(ledDev)) : QStringLiteral("iio:device?");
+    lines << QStringLiteral("led-count IIO register map (device '%1', %2):")
+             .arg(QString::fromLocal8Bit(iio_device_get_name(ledDev)
+                                         ? iio_device_get_name(ledDev) : "?"), devId);
+    lines << QStringLiteral("(these are the raw-data entries of the iio-oscilloscope Debug tab)");
     lines << QString();
 
     const QList<DrfmRegisterDef> &map = registerMap();
     for (int i = 0; i < map.size(); ++i)
     {
         const DrfmRegisterDef &def = map.at(i);
-        const QString name = matchAttrName(debugAttrNames(ledDev), def.attrNames);
-        QString value = QStringLiteral("<not exposed>");
-        if (!name.isEmpty())
+        ChannelRawMatch match;
+        if (findChannelRaw(ledDev, def.attrNames, &match))
         {
-            mappedNames << name;
-            for (int p = 0; p < pairs.size(); ++p)
-                if (QString::compare(pairs.at(p).first, name, Qt::CaseInsensitive) == 0)
-                {
-                    value = pairs.at(p).second;
-                    break;
-                }
-            if (value == QStringLiteral("<not exposed>"))
-                value = QStringLiteral("<write-only>");
+            QString value = QStringLiteral("<unreadable>");
+            if (match.channel)
+            {
+                char buf[128] = {};
+                const QByteArray attr = match.attrName.toLocal8Bit();
+                const ssize_t n = iio_channel_attr_read(match.channel, attr.constData(),
+                                                        buf, sizeof(buf) - 1);
+                if (n > 0)
+                    value = QString::fromLocal8Bit(buf).trimmed();
+            }
+            lines << QStringLiteral("%1 (AXI 0x%2) = %3 = %4   [%5]")
+                     .arg(def.label,
+                          hexText(0x43C30000u + def.offset, 8),
+                          match.sysfsName.isEmpty() ? match.attrName : match.sysfsName,
+                          value,
+                          match.channelDesc);
         }
-        lines << QStringLiteral("%1 (AXI 0x%2) = attr '%3' = %4")
-                 .arg(def.label,
-                      hexText(0x43C30000u + def.offset, 8),
-                      name.isEmpty() ? QStringLiteral("-") : name,
-                      value);
+        else
+        {
+            lines << QStringLiteral("%1 (AXI 0x%2) = <no matching IIO channel attribute>")
+                     .arg(def.label, hexText(0x43C30000u + def.offset, 8));
+        }
     }
 
-    bool haveExtra = false;
-    for (int p = 0; p < pairs.size(); ++p)
+    // Raw channel inventory so any unmapped register is visible as well.
+    lines << QString();
+    lines << QStringLiteral("IIO channel inventory:");
+    const unsigned int channelCount = iio_device_get_channels_count(ledDev);
+    for (unsigned int c = 0; c < channelCount; ++c)
     {
-        bool known = false;
-        for (int m = 0; m < mappedNames.size(); ++m)
-            if (QString::compare(pairs.at(p).first, mappedNames.at(m),
-                                 Qt::CaseInsensitive) == 0)
-            {
-                known = true;
-                break;
-            }
-        if (known)
+        struct iio_channel *ch = iio_device_get_channel(ledDev, c);
+        if (!ch)
             continue;
-        if (!haveExtra)
+
+        QString label;
+        if (iio_channel_find_attr(ch, "label"))
         {
-            lines << QString();
-            lines << QStringLiteral("other debug attributes on the device:");
-            haveExtra = true;
+            char buf[128] = {};
+            if (iio_channel_attr_read(ch, "label", buf, sizeof(buf) - 1) > 0)
+                label = QString::fromLocal8Bit(buf).trimmed();
         }
-        lines << QStringLiteral("  %1 = %2").arg(pairs.at(p).first, pairs.at(p).second);
+
+        QStringList files;
+        const char *probeAttrs[] = { "raw", "label", nullptr };
+        for (int a = 0; probeAttrs[a]; ++a)
+            if (iio_channel_find_attr(ch, probeAttrs[a]))
+            {
+                const char *fn = iio_channel_attr_get_filename(ch, probeAttrs[a]);
+                if (fn)
+                    files << QString::fromLocal8Bit(fn);
+            }
+
+        lines << QStringLiteral("  %1 id='%2' label='%3' files: %4")
+                 .arg(iio_channel_is_output(ch) ? QStringLiteral("out") : QStringLiteral("in"),
+                      iio_channel_get_id(ch) ? iio_channel_get_id(ch) : "?",
+                      label,
+                      files.isEmpty() ? QStringLiteral("-") : files.join(QLatin1String(", ")));
     }
 
     return lines.join(QStringLiteral("\n"));
@@ -704,8 +718,8 @@ QString DrfmRegisterIO::backendInfo()
 
     return QStringLiteral(
                 "led_count_ip base 0x43C30000 | IIO led-count device: %1 | "
-                "write path: named debug attrs (iio-osc Debug tab) -> voltage0/1 "
-                "channel attrs -> led-count reg_write -> legacy %2")
+                "write path: IIO channel raw attrs (out_countN_<name>_raw, "
+                "iio-osc Debug tab) -> debug attrs -> led-count reg_write -> legacy %2")
             .arg(ledName,
                  legacy ? QStringLiteral("mwipcore0:mmwr0 (available)")
                         : QStringLiteral("mmwr bridge (not present)"));
