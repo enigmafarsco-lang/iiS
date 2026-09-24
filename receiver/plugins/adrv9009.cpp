@@ -197,9 +197,9 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
 
 adrv9009::~adrv9009()
 {
+    if (refreshTimer)
+        refreshTimer->stop();
     delete ui;
-
-    refreshThread->quit();
 }
 
 #pragma endregion }
@@ -288,11 +288,13 @@ static void rssi_update_label(QWidget *label, struct iio_channel *chn) {
     char buf[1024];
     int ret;
 
-    /* don't update if it is hidden (to quiet down SPI) */
-    if (!(label->isVisible()))
+    if (!label || !chn || !label->isVisible())
         return;
 
-    ret = iio_channel_attr_read(chn,"rssi", buf, sizeof(buf));
+    /* Leave one byte so a libiio that null-terminates past len cannot smash the stack. */
+    ret = iio_channel_attr_read(chn,"rssi", buf, sizeof(buf) - 1);
+    if (ret >= 0)
+        buf[ret < (int)sizeof(buf) ? ret : (int)sizeof(buf) - 1] = '\0';
     if (ret > 0)
         ((QLabel*)(label))->setText(buf);
     else
@@ -423,20 +425,25 @@ void adrv9009::glb_settings_update_labels()
 {
 
     char buf[1024];
-    char buf2[1024];
     ssize_t ret;
-    ssize_t ret2;
     struct iio_channel *ch;
     guint i = 0;
 
     IIO_Widget iio_w;
 
+    if (!ui)
+        return;
+
     /* Get ensm_mode from all devices. Notify user if any of devices has a different mode than the others. */
-    for (; i < phy_devs_count; i++) {
-        ret = iio_device_attr_read(subcomponents[i].iio_dev, "ensm_mode", buf, sizeof(buf));
+    for (; i < phy_devs_count && ui->ensm_mode; i++) {
+        if (!subcomponents[i].iio_dev)
+            continue;
+        ret = iio_device_attr_read(subcomponents[i].iio_dev, "ensm_mode", buf, sizeof(buf) - 1);
+        if (ret >= 0)
+            buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         if (ret > 0) {
             if (i > 0) {
-                if ((QString)buf!= ui->ensm_mode->text().data()) {
+                if (QString::fromUtf8(buf) != ui->ensm_mode->text()) {
                     ui->ensm_mode->setText("<not synced>");
                     break;
                 }
@@ -453,39 +460,55 @@ void adrv9009::glb_settings_update_labels()
     update_label_with_scale_from(ui->lblTempAd7291,
                                  ddm,"temp0", "raw","scale", false, " °C", 10);
     bool temp7291Ok = false;
-    const double temp7291Value = ui->lblTempAd7291->text().split(" ")[0].toDouble(&temp7291Ok);
-    if (temp7291Ok)
-        globals::temp7291 = temp7291Value;
+    if (ui->lblTempAd7291) {
+        const double temp7291Value = ui->lblTempAd7291->text().split(" ").value(0).toDouble(&temp7291Ok);
+        if (temp7291Ok)
+            globals::temp7291 = temp7291Value;
+    }
 
     for (i = 0; i < phy_devs_count; i++) {
+        if (!subcomponents[i].iio_dev)
+            continue;
+
         ch = iio_device_find_channel(subcomponents[i].iio_dev, "voltage0", false);
+        ret = 0;
         if (ch) {
-            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf));
-        } else {
-            ret = 0;
+            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf) - 1);
+            if (ret >= 0)
+                buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         }
 
-        if (ret > 0)
-            ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText(buf);
-        else
-            ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText("<error>");
+        if (subcomponents[i].rx_gain_control_rx1) {
+            if (ret > 0)
+                ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText(buf);
+            else
+                ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText("<error>");
+        }
 
         ch = iio_device_find_channel(subcomponents[i].iio_dev, "voltage1", false);
+        ret = 0;
         if (ch) {
-            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf));
-        } else {
-            ret = 0;
+            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf) - 1);
+            if (ret >= 0)
+                buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         }
 
-        if (ret > 0)
-            ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText(buf);
-        else
-            ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText("<error>");
+        if (subcomponents[i].rx_gain_control_rx2) {
+            if (ret > 0)
+                ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText(buf);
+            else
+                ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText("<error>");
+        }
 
-        // Temp Adrv9009
-        update_label_from((QLabel*)subcomponents[i].label_temp,
-                          subcomponents[i].iio_dev,"temp0", "input", false, " °C", 1000);
-        globals::temp9009=((QLabel*)subcomponents[i].label_temp)->text().split(" ")[0].toDouble();
+        // Temp Adrv9009. temp0 is optional on some images; do not touch a missing label.
+        if (subcomponents[i].label_temp) {
+            update_label_from((QLabel*)subcomponents[i].label_temp,
+                              subcomponents[i].iio_dev,"temp0", "input", false, " °C", 1000);
+            bool temp9009Ok = false;
+            const double temp9009Value = ((QLabel*)subcomponents[i].label_temp)->text().split(" ").value(0).toDouble(&temp9009Ok);
+            if (temp9009Ok)
+                globals::temp9009 = temp9009Value;
+        }
 
         update_label_from((QLabel*)subcomponents[i].label_rf_bandwidth_rx,
                           subcomponents[i].iio_dev,"voltage0", "rf_bandwidth", false, "MHz", 1000000);
@@ -798,6 +821,7 @@ QWidget *adrv9009::init()
     struct iio_channel *ch;
 
     can_update_widgets = false;
+    num_fpga = 0;
 
     if (!globals::ctx)
         return NULL;
@@ -928,9 +952,9 @@ QWidget *adrv9009::init()
 
     IIO_Widget iio_w;
 
-    if (cap) {
+    if (cap && num_fpga < 2) {
         ch = iio_device_find_channel(cap, "voltage0_i", false);
-        if (iio_channel_find_attr(ch, "sampling_frequency_available")) {
+        if (ch && iio_channel_find_attr(ch, "sampling_frequency_available")) {
             iio_w.iio_combo_box_init(&fpga_widgets[num_fpga++],
                     cap, ch, "sampling_frequency",
                     "sampling_frequency_available",
@@ -944,9 +968,9 @@ QWidget *adrv9009::init()
         //								  "receive_frame_dma_buf")));
     }
 
-    if (dds) {
+    if (dds && num_fpga < 2) {
         ch = iio_device_find_channel(dds, "voltage0", true);
-        if (iio_channel_find_attr(ch, "sampling_frequency_available")) {
+        if (ch && iio_channel_find_attr(ch, "sampling_frequency_available")) {
             iio_w.iio_combo_box_init(&fpga_widgets[num_fpga++],
                     dds, ch, "sampling_frequency",
                     "sampling_frequency_available",
@@ -1226,20 +1250,24 @@ QWidget *adrv9009::init()
 
     ConnectSignals();
 
-    refreshFuture=QtConcurrent::run([=]{
-
-        while(globals::status)
-        {
-            if(!hopping && !ui->tx_lo_freq->hasFocus())
-            {
-                update_widgets();
-                glb_settings_update_labels();
-                rssi_update_labels();
-                int_dec_update_cb();
-            }
-            QThread::msleep(20000);
-        }
-    });
+    // Must stay on the GUI thread. The old QtConcurrent loop called QWidget
+    // and libiio from a pool thread while init() was still running, which
+    // corrupts Qt and trips "stack smashing detected" on some PCs only.
+    if (!refreshTimer) {
+        refreshTimer = new QTimer(this);
+        refreshTimer->setInterval(20000);
+        connect(refreshTimer, &QTimer::timeout, this, [this]{
+            if (!globals::status || hopping)
+                return;
+            if (ui->tx_lo_freq && ui->tx_lo_freq->hasFocus())
+                return;
+            update_widgets();
+            glb_settings_update_labels();
+            rssi_update_labels();
+            int_dec_update_cb();
+        });
+    }
+    refreshTimer->start();
 
     //saeid raziani
     QObject::connect(ui->profile_config,&QPushButton::clicked,[=](){

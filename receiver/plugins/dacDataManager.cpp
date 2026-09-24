@@ -1633,7 +1633,7 @@ void dacDataManager::save_scale_widget_value(void *data)
     iio_channel_attr_read_double(scale_pair_w->chn, scale_pair_w->attr_name, &val2);
 
     if (val1 + val2 > 1)
-        ((QDoubleSpinBox)scale_w->widget).setValue(db_full_scale_convert(old_val, true));
+        static_cast<QDoubleSpinBox*>(scale_w->widget)->setValue(db_full_scale_convert(old_val, true));
 
     scale_w->save(scale_w);
 }

@@ -206,7 +206,8 @@ private:
     void rssi_update_labels();
     void make_widget_update_signal_based(iio_widget *widgets, unsigned int num_widgets);
 
-    QThread *refreshThread;
+    QThread *refreshThread = nullptr;
+    QTimer *refreshTimer = nullptr;
     int interval=1000;
     bool refreshMode=false;
 

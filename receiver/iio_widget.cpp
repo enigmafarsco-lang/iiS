@@ -28,10 +28,12 @@ void iio_combo_box_update_value(struct iio_widget *widget,
     if (widget->attr_name_avail) {
         if (widget->chn)
             ret = iio_channel_attr_read(widget->chn,
-                                        widget->attr_name_avail, text2, sizeof(text2));
+                                        widget->attr_name_avail, text2, sizeof(text2) - 1);
         else
             ret = iio_device_attr_read(widget->dev,
-                                       widget->attr_name_avail, text2, sizeof(text2));
+                                       widget->attr_name_avail, text2, sizeof(text2) - 1);
+        if (ret >= 0)
+            text2[ret < (ssize_t)sizeof(text2) ? ret : (ssize_t)sizeof(text2) - 1] = '\0';
         if (ret < 0)
             return;
 
@@ -77,10 +79,12 @@ void iio_combo_box_update(struct iio_widget *widget)
 
     if (widget->chn)
         len = iio_channel_attr_read(widget->chn,
-                                    widget->attr_name, text, sizeof(text));
+                                    widget->attr_name, text, sizeof(text) - 1);
     else
         len = iio_device_attr_read(widget->dev,
-                                   widget->attr_name, text, sizeof(text));
+                                   widget->attr_name, text, sizeof(text) - 1);
+    if (len >= 0)
+        text[len < (ssize_t)sizeof(text) ? len : (ssize_t)sizeof(text) - 1] = '\0';
     if (len > 0)
         iio_combo_box_update_value(widget, text, len);
 }
@@ -203,10 +207,12 @@ static void iio_toggle_button_update(struct iio_widget *widget)
 
     if (widget->chn)
         ret = iio_channel_attr_read(widget->chn,
-                                    widget->attr_name, buf, sizeof(buf));
+                                    widget->attr_name, buf, sizeof(buf) - 1);
     else
         ret = iio_device_attr_read(widget->dev,
-                                   widget->attr_name, buf, sizeof(buf));
+                                   widget->attr_name, buf, sizeof(buf) - 1);
+    if (ret >= 0)
+        buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
     if (ret > 0)
         iio_toggle_button_update_value(widget, buf, ret);
     else if (ret == -ENODEV)
