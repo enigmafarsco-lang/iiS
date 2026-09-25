@@ -421,6 +421,13 @@ void MainWindow::connections()
 
 
         //    connect(ui->exiter->spnWBPower,QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ receiverWindow->frqDomainPlot->txt_start_freq->setValue(val);});
+
+        // TX1 is OFF when the application starts (checkbox checked = TX off).
+        // Anything the operator sets later turns it on again.
+        if (receiverWindow && receiverWindow->power_TX1_DownChk)
+        {
+            receiverWindow->power_TX1_DownChk->setChecked(true);
+        }
     }
 }
 

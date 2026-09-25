@@ -174,6 +174,7 @@ public:
     struct iio_widget fpga_widgets[2];
     QString setFile(QString fileName,double scale );
     QString changingDac(QString);
+    QString changeDacToBuffer(); // CW tone -> DAC Buffer Output (DRFM tab)
 
 
 //    struct iio_device *dds;

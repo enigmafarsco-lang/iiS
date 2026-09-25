@@ -645,6 +645,26 @@ void ReceiverMain::setupDrfmControlTab()
                      .toUpper(), 8, QLatin1Char('0'));
     };
 
+    // ------------------ TX1 transmit control ------------------
+    // The DRFM tab carries its own TX1 on/off pair so the operator can stop
+    // and start TX1 from here too. It drives the global TX1 control both ways
+    // (power_TX1_DownChk checked = TX off).
+    QGroupBox *txGroup = new QGroupBox(tr("TX1"), page);
+    QGridLayout *txLayout = new QGridLayout(txGroup);
+    QLabel *txInfo = new QLabel(
+        tr("TX1 transmit control (same as the main TX1 switch). ON = transmit, "
+           "OFF = safe. Any Set on this tab turns TX1 on."), txGroup);
+    txInfo->setWordWrap(true);
+    QRadioButton *txOn = new QRadioButton(tr("TX ON"), txGroup);
+    QRadioButton *txOff = new QRadioButton(tr("TX OFF"), txGroup);
+    txOff->setChecked(true); // TX1 default at application start: off
+    txLayout->addWidget(txInfo, 0, 0, 1, 3);
+    txLayout->addWidget(new QLabel(tr("State"), txGroup), 1, 0);
+    txLayout->addWidget(txOn, 1, 1);
+    txLayout->addWidget(txOff, 1, 2);
+
+    pageLayout->addWidget(txGroup);
+
     // -------------------- DRFM / Noise source select --------------------
     QGroupBox *drfmGroup = new QGroupBox(tr("DRFM"), page);
     QGridLayout *drfmLayout = new QGridLayout(drfmGroup);
@@ -850,15 +870,34 @@ void ReceiverMain::setupDrfmControlTab()
         registerOutput->appendPlainText(QStringLiteral("\n[FAILED]\n") + msg);
     };
 
-    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard]() {
+    // Every Set on this tab means the operator is driving the transmitter:
+    // turn TX1 on (same rule as the exciter) and switch the DAC output from
+    // the CW tone to the DAC Buffer Output mode - exactly what the exciter
+    // does when pulse/spot/wideband is set. The exciter's own CW tone / DAC
+    // buffer switching is not touched here.
+    auto noteDrfmSetActivity = [this, registerOutput]() {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->stateChanged(0);   // force, even if already on
+            power_TX1_DownChk->setChecked(false); // TX1 ON
+        }
+        if (att_TX1_Spn)
+            att_TX1_Spn->setValue(0);
+        if (oscMain && oscMain->_adrv9009)
+            registerOutput->appendPlainText(
+                QStringLiteral("\n") + oscMain->_adrv9009->changeDacToBuffer());
+    };
+
+    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setDrfmEnabled(drfmOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
-    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard]() {
+    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
         bool valueOk = false;
         const uint value = ampEdit->text().toUInt(&valueOk);
         if (!valueOk || value > 65535u) {
@@ -867,21 +906,23 @@ void ReceiverMain::setupDrfmControlTab()
         }
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setAmplifyValue(static_cast<quint16>(value), ampOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
-    auto applyVgpoEnable = [controlUnit, vgpoOn, showResult, noBoard]() {
+    auto applyVgpoEnable = [controlUnit, vgpoOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setVgpoEnabled(vgpoOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
     auto applyVgpoSet = [controlUnit, vgpoOffsetEdit, vgpoStepEdit, vgpoOn,
-                         statusLabel, showResult, noBoard]() {
+                         statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
         bool offsetOk = false;
         const qulonglong offset64 = vgpoOffsetEdit->text().toULongLong(&offsetOk);
         if (!offsetOk || offset64 > std::numeric_limits<quint32>::max()) {
@@ -899,6 +940,7 @@ void ReceiverMain::setupDrfmControlTab()
 
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setVgpoValue(static_cast<quint32>(offset64),
                                            static_cast<qint32>(step64),
@@ -920,6 +962,26 @@ void ReceiverMain::setupDrfmControlTab()
     connect(vgpoOn,  &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoOff, &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoSet, &QPushButton::clicked, this, applyVgpoSet);
+
+    // The DRFM tab TX1 pair drives the global TX1 control and follows it when
+    // TX1 is changed elsewhere (checkbox checked = TX off). Radio setChecked()
+    // does not emit clicked(), so these connections cannot loop.
+    connect(txOn, &QRadioButton::clicked, this, [this](bool) {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->setChecked(false); // TX1 ON
+        }
+    });
+    connect(txOff, &QRadioButton::clicked, this, [this](bool) {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->setChecked(true); // TX1 OFF
+        }
+    });
+    connect(power_TX1_DownChk, &QCheckBox::toggled, this, [txOn, txOff](bool checked) {
+        txOff->setChecked(checked);
+        txOn->setChecked(!checked);
+    });
 
     // IIO-side scan: which debug attributes represent th0/dacsel/...
     // (identical list to the iio-oscilloscope Debug tab - no UART involved).

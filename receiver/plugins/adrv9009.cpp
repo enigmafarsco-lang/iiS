@@ -2083,3 +2083,23 @@ QString adrv9009::changingDac(QString mode)
     }
         return mode +" is turned off.";
 }
+
+// Switch the DAC from the CW tone DDS to the "DAC Buffer Output" mode.
+// This is the same dds_mode change setFile() performs when the exciter sets
+// pulse/spot/wideband (index 4), but without loading a waveform file: every
+// noise/DRFM set on the DRFM tab takes over the DAC buffer path the same way.
+// The exciter's own CW tone / DAC buffer switching is not changed by this.
+QString adrv9009::changeDacToBuffer()
+{
+        if(!dac_tx_manager)
+                return "DAC switch failed: DAC manager is not ready.";
+
+        changingDac(""); // disable the CW tone DDS first, same as setFile does
+
+        for (guint i = 0; i < dac_tx_manager->dac1.tx_count; i++)
+            dac_tx_manager->dac1.txs[i].dds_mode_widget->setCurrentIndex(4);
+        for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
+            dac_tx_manager->dac2.txs[i].dds_mode_widget->setCurrentIndex(4);
+
+        return "DAC output changed from CW tone to DAC Buffer Output.";
+}
