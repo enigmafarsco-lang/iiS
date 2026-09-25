@@ -648,6 +648,14 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
     char signal_name[25];
     unsigned int i;
 
+    // Persistent per-widget text storage. iio_widget::value is a const char*;
+    // it used to receive pointers into temporaries (std::to_string().c_str(),
+    // QString::toLocal8Bit().data()) that died at the semicolon - ASan
+    // heap-use-after-free as soon as a bound spinbox changed. The shared
+    // buffer lives as long as the signal connections do.
+    QSharedPointer<QVector<QByteArray> > valueStore(
+                new QVector<QByteArray>(num_widgets ? num_widgets : 1));
+
     QString className="";
 
     for (i = 0; i < num_widgets; i++) {
@@ -666,7 +674,8 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
                 QObject::connect((QSpinBox*)widgets[i].widget,
                                  static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
                                  [=](int value){
-                    widgets[i].value=std::to_string(value).c_str ();
+                    (*valueStore)[i] = std::to_string(value).c_str();
+                    widgets[i].value = (*valueStore)[i].constData();
                     save_widget_value(&widgets[i]);
                 });
 
@@ -676,7 +685,8 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
                                  static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
                                  [=](double value){
 
-                    widgets[i].value=QString::number(value).toLocal8Bit().data();
+                    (*valueStore)[i] = QString::number(value).toLocal8Bit();
+                    widgets[i].value = (*valueStore)[i].constData();
 
                     save_widget_value(&widgets[i]);
                 });
