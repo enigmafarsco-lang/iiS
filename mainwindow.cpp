@@ -387,8 +387,10 @@ void MainWindow::connections()
         connect(ui->exiter, &Exciter::modeActivitySignal, this, [&](bool anyOn)
         {
             if (receiverWindow && receiverWindow->power_TX1_DownChk)
+            {
                 receiverWindow->power_TX1_DownChk->stateChanged(anyOn ? 0 : 1);
                 receiverWindow->power_TX1_DownChk->setChecked(!anyOn);
+            }
         });
         connect(receiverWindow,&ReceiverMain::smartNoiseIsActiveSignal,ui->exiter,&Exciter::smartNoiseIsActiveSlot);
 
