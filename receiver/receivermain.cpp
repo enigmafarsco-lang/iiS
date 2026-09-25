@@ -6,6 +6,7 @@
 #include <receiver/connectdialog.h>
 #include "receiver/globals.h"
 #include <QFileInfo>
+#include <QProcess>
 #include <limits>
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -467,7 +468,7 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     //spin box limitation
     if(DC_6_UPTO_8_12 == 0)
     {
-        ui->spnFrq->setRange         (1000,6000);
+        ui->spnFrq->setRange         (200,6000);
     }
 
     else
@@ -1947,6 +1948,7 @@ void ReceiverMain::init()
 
                 settingMinMaxBand();
                 ui->hrzGlobal_1->addWidget(ensmCmb)   ;
+                updateSerialNumber(); // board SN on the Global tab
                 //                ui->hrzGlobal_2->addWidget(frqSpn)    ;
 
                 ensm_mode_available = oscMain->_adrv9009->ensm_mode_available;
@@ -2056,7 +2058,22 @@ void ReceiverMain::init()
                 gridTX2->addWidget(lo_TX2_Chk         , 3 , 1)           ;
                 gridTX2->addWidget(powerTX2DownChk    , 4 , 1)           ;
 
-                //--- OBSRX ----------------------------------------------
+                                //--- ADRV9009 calibration (Calibration tab) ----------------
+                QGridLayout *gridAdrvCalib = ui->grbAdrvCalib->findChild<QGridLayout *>();
+                oscMain->_adrv9009->cal_rx_qec_chk->setText("cal-rx-qec");
+                oscMain->_adrv9009->cal_tx_qec_chk->setText("cal-tx-qec");
+                oscMain->_adrv9009->cal_tx_lol_chk->setText("cal-tx-lol");
+                oscMain->_adrv9009->cal_tx_lol_ext_chk->setText("cal-tx-ext");
+                oscMain->_adrv9009->cal_rx_phase_chk->setText("cal-rx-phase");
+                oscMain->_adrv9009->cal_fhm_chk->setText("fhm");
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_rx_qec_chk    , 0 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_qec_chk    , 0 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_lol_chk    , 1 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_lol_ext_chk, 1 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_rx_phase_chk  , 2 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_fhm_chk       , 2 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->calibrateBtn      , 3 , 0);
+//--- OBSRX ----------------------------------------------
                 power_OBSRX_Spn   = oscMain->_adrv9009->power_OBSRX_Spn  ;
                 track_OBSRX_Chk   = oscMain->_adrv9009->track_OBSRX_Chk  ;
                 hardwareGain      = oscMain->_adrv9009->hardwareGain     ;
@@ -2193,6 +2210,52 @@ void ReceiverMain::defaultSettings()
 
 
 
+// Read the board serial number over LAN and show it on the Global tab.
+// Preferred source: iiod context attribute "hw_serial". Otherwise read the
+// production EEPROM (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated
+// ssh exec (BatchMode: never prompts for a password).
+void ReceiverMain::updateSerialNumber()
+{
+    QString sn;
+
+    if (globals::ctx) {
+        const char *v = iio_context_get_attr_value(globals::ctx, "hw_serial");
+        if (v && *v)
+            sn = QString::fromUtf8(v).trimmed();
+    }
+
+    if (sn.isEmpty() && globals::ctx) {
+        QString host;
+        const char *uri = iio_context_get_attr_value(globals::ctx, "uri");
+        if (uri)
+            host = QString::fromUtf8(uri);
+        host.remove(QLatin1String("ip:"));
+        host = host.section(QLatin1Char(':'), 0, 0);
+
+        if (!host.isEmpty()) {
+            QProcess proc;
+            proc.start(QStringLiteral("ssh"),
+                       QStringList() << QStringLiteral("-o") << QStringLiteral("BatchMode=yes")
+                       << QStringLiteral("-o") << QStringLiteral("ConnectTimeout=2")
+                       << (QStringLiteral("root@") + host)
+                       << QStringLiteral("head -c 16 /sys/bus/i2c/devices/0-0050/eeprom"));
+            if (proc.waitForFinished(3500) && proc.exitCode() == 0) {
+                const QByteArray raw = proc.readAllStandardOutput();
+                for (unsigned char c : raw) {
+                    if (c < 0x20 || c > 0x7e)
+                        break;
+                    sn.append(QChar(c));
+                }
+                sn = sn.trimmed();
+            }
+        }
+    }
+
+    if (ui->lblSN)
+        ui->lblSN->setText(sn.isEmpty() ? QStringLiteral("-") : sn);
+    qInfo() << "Board serial number:" << (sn.isEmpty() ? "(not found)" : sn);
+}
+
 void ReceiverMain::defaultParameters()
 {
 
@@ -2204,6 +2267,13 @@ void ReceiverMain::defaultParameters()
 
     oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
     oscMain->_adrv9009->power_TX1_DownChk->setChecked(false); // default: TX1 on, TX2 off
+    // ADRV9009 calibration defaults: all checked except cal-tx-ext and fhm
+    oscMain->_adrv9009->cal_rx_qec_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_qec_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_lol_chk->setChecked(true);
+    oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
+    oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 

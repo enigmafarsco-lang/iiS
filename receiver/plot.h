@@ -437,6 +437,7 @@ public:
     QCPItemText * textOnPlot;
     QColor originalColor ;
     QCPItemText *txtLbl;
+    QCPItemLine *selectedFreqLine = nullptr;
 
     QVector<double> *cwFrqValue;
     QVector<double> *cwPowerValue;

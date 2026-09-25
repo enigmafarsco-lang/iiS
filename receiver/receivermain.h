@@ -197,6 +197,7 @@ public:
     Plot * frqDomainPlot;
     void frqModeIsSelected();
     void defaultParameters();
+    void updateSerialNumber();
     void changingPlotMode(int);
     QTimer dataTimer;
 

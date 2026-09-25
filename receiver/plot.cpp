@@ -389,6 +389,11 @@ Plot::Plot(QApplication *app,QString name,QWidget *parent) :
 
     // Get Current frequency
     GetBaseFreq();
+    // Track the board base (LO) frequency so the spectrum diagram follows
+    // retuning (it used to freeze at the construction-time value).
+    QTimer *baseFreqTimer = new QTimer(this);
+    connect(baseFreqTimer, &QTimer::timeout, this, [=](){ GetBaseFreq(); });
+    baseFreqTimer->start(500);
 
     //===========================================================================
     //saeid raziani ==> Mode variable stores the value of the mode and specifies which mode the plot should be run in
@@ -1656,6 +1661,14 @@ void Plot::DrawFFTPlot()
 
 
             QVector<double> vector;
+
+            // Keep the frequency axis tied to the *current* base frequency.
+            // It was filled once at transform init, so the spectrum diagram
+            // never updated when the frequency changed.
+            for(int i{}; i < transform->x_axis->size() ;i++)
+            {
+                (*transform->x_axis)[i]= baseFreq - 245.759999 + i*0.029999 ;
+            }
 
             for(int i{}; i < transform->x_axis->size() ;i++)
             {
@@ -3459,6 +3472,10 @@ bool Plot::GetBaseFreq()
         ui->lblFreqValue->setText(QString::number(abs(DC_6_UPTO_8_12-baseFreq)));
 
         frqValueStr =  ui->lblFreqValue->text();
+        // Move the spectrum window with the base frequency
+        double frqWin = abs(DC_6_UPTO_8_12 - baseFreq);
+        ui->fftChart->xAxis->setRange(frqWin - 250, frqWin + 250);
+        ui->fftChart->replot();
 
         //        waterfallChart->axes(Qt::AlignBottom).at(0)->setRange((baseFreq - 250),(baseFreq + 250));
 
@@ -6883,16 +6900,16 @@ void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 
 void Plot::on_txtSelectedFreq_valueChanged(double value)
 {
-    //    for(int i=0;i<fftxItemList[0].size();i++)
-    //    {
-    //        if(qCeil(fftxItemList[0][i])*.01==qCeil(value)*.01)
-    //        {
-    ////            ui->lblSelectedFreqValue->setText(QString::number((*tr->x_axis)[i]));
-    //            break;
-    //        }
-    //    }
-
-
+    // Mark the entered frequency on the spectrum diagram so the display
+    // updates with the frequency selection.
+    if (!selectedFreqLine) {
+        selectedFreqLine = new QCPItemLine(ui->fftChart);
+        selectedFreqLine->setPen(QPen(QColor(255, 255, 0), 1, Qt::DashLine));
+    }
+    selectedFreqLine->start->setCoords(value, ui->fftChart->yAxis->range().lower);
+    selectedFreqLine->end->setCoords(value, ui->fftChart->yAxis->range().upper);
+    selectedFreqLine->setVisible(true);
+    ui->fftChart->replot();
 }
 
 void Plot::ShowControls(int index){

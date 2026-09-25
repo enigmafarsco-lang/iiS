@@ -144,6 +144,14 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
     startBtn          = findChild<QPushButton    *>("btnStartHopping");
     nextFrqSpn        = findChild<QDoubleSpinBox *>("tx_lo_freq_hop");
     modeChk           = findChild<QCheckBox      *>("fhm_enable");
+    //--- Calibration ---------------------------------------------------------
+    cal_rx_qec_chk      = findChild<QCheckBox  *>("calibrate_rx_qec_en");
+    cal_tx_qec_chk      = findChild<QCheckBox  *>("calibrate_tx_qec_en");
+    cal_tx_lol_chk      = findChild<QCheckBox  *>("calibrate_tx_lol_en");
+    cal_tx_lol_ext_chk  = findChild<QCheckBox  *>("calibrate_tx_lol_ext_en");
+    cal_rx_phase_chk    = findChild<QCheckBox  *>("calibrate_rx_phase_correction_en");
+    cal_fhm_chk         = findChild<QCheckBox  *>("calibrate_fhm_en");
+    calibrateBtn        = findChild<QPushButton *>("calibrate");
     //--- TX1 ------------------------------------------------------------------
     pinn_TX1_Chk      = findChild<QCheckBox      *>("tx1_atten_control_pin_mode_en");
     track_TX1_Chk     = findChild<QCheckBox      *>("tx1_quadrature_tracking_en");
@@ -1022,7 +1030,8 @@ QWidget *adrv9009::init()
                 ui->calibrate_rx_phase_correction_en, 0);
 
         iio_w.iio_toggle_button_init(&subcomponents[i].glb_widgets[subcomponents[i].num_glb++],
-                subcomponents[i].iio_dev, NULL, "calibrate_fhm_en",
+                subcomponents[i].iio_dev, NULL, (iio_device_find_attr(subcomponents[i].iio_dev, "calibrate_fhm_en")
+                ? "calibrate_fhm_en" : "calibrate_frm_en"),
                 ui->calibrate_fhm_en, 0);
 
         iio_w.iio_button_init(&subcomponents[i].glb_widgets[subcomponents[i].num_glb++],

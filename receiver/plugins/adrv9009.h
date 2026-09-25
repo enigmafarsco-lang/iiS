@@ -146,6 +146,14 @@ public:
 //    QCheckBox * obs1_powerdown;
 
     QDoubleSpinBox * tx_lo_freq;
+    //--- ADRV9009 calibration widgets (shown on ReceiverMain Calibration tab)
+    QCheckBox  * cal_rx_qec_chk;
+    QCheckBox  * cal_tx_qec_chk;
+    QCheckBox  * cal_tx_lol_chk;
+    QCheckBox  * cal_tx_lol_ext_chk;
+    QCheckBox  * cal_rx_phase_chk;
+    QCheckBox  * cal_fhm_chk;
+    QPushButton * calibrateBtn;
 
     //saeid raziani
      dacDataManager *dac_data_manager;
