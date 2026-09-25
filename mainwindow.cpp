@@ -362,6 +362,16 @@ void MainWindow::connections()
 
         connect(ui->exiter,&Exciter::changeDacSignal,this,[&](QString mode)
         {
+            // Every exciter SET turns TX1 on (the disable buttons don't).
+            if (mode.startsWith("set"))
+            {
+                if (receiverWindow && receiverWindow->power_TX1_DownChk)
+                {
+                    receiverWindow->att_TX1_Spn->setValue(0);
+                    receiverWindow->power_TX1_DownChk->stateChanged(0);
+                    receiverWindow->power_TX1_DownChk->setChecked(false);
+                }
+            }
             QString msg = receiverWindow->oscMain->_adrv9009->changingDac(mode);
             emit dacMsgSignal(msg,"");
             receiverWindow->stopExciterSlot();
@@ -371,6 +381,17 @@ void MainWindow::connections()
 
         //smart noise and exciter
         connect(ui->exiter,&Exciter::turnOffSmartNoiseSignal,receiverWindow,&ReceiverMain::stopSmartNoiseSlot);
+
+        // TX1 follows the exciter modes: all modes off -> TX1 off,
+        // any mode on -> TX1 on
+        connect(ui->exiter, &Exciter::modeActivitySignal, this, [&](bool anyOn)
+        {
+            if (receiverWindow && receiverWindow->power_TX1_DownChk)
+            {
+                receiverWindow->power_TX1_DownChk->stateChanged(anyOn ? 0 : 1);
+                receiverWindow->power_TX1_DownChk->setChecked(!anyOn);
+            }
+        });
         connect(receiverWindow,&ReceiverMain::smartNoiseIsActiveSignal,ui->exiter,&Exciter::smartNoiseIsActiveSlot);
 
         //for sending sattar file on processing cart
@@ -413,6 +434,9 @@ void MainWindow::connections()
 
 
         //    connect(ui->exiter->spnWBPower,QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ receiverWindow->frqDomainPlot->txt_start_freq->setValue(val);});
+
+        // (TX1 is forced OFF at startup in ReceiverMain, where the real
+        // tx1_powerdown_en widget is known.)
     }
 }
 

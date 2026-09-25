@@ -232,27 +232,27 @@ static void update_widgets(void) {
 void AD9371::rx_freq_info_update(void) {
     double lo_freq;
 
-    osc *oscInstance;
+    osc oscInstance;
     if (cap) {
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE,
                                                     USE_INTERN_SAMPLING_FREQ);
         lo_freq = mhz_scale
                   * ((QDoubleSpinBox*)(rx_widgets[rx_lo].widget))->value();
 
         lo_freq=0;
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
 
     }
 
     if (cap_obs) {
-        gchar *source;
-
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE_2,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE_2,
                                                     USE_INTERN_SAMPLING_FREQ);
 
-        source = ((QComboBox*)(ui->rf_port_select_obs))->currentText().toLocal8Bit().data();
+        // Keep the QString alive. toLocal8Bit().data() dangles after the
+        // statement and strstr() is a heap-use-after-free under ASan.
+        const QString source = static_cast<QComboBox*>(ui->rf_port_select_obs)->currentText();
 
-        if (source && strstr(source, "TX")) {
+        if (source.contains(QLatin1String("TX"))) {
             lo_freq = mhz_scale
                       * ((QDoubleSpinBox*)(tx_widgets[tx_lo].widget))->value();
         } else {
@@ -261,7 +261,7 @@ void AD9371::rx_freq_info_update(void) {
         }
 
         lo_freq=0;
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
         //g_free(source);
     }
 }

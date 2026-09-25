@@ -168,28 +168,29 @@ void Cooling3::on_BtnTurnOnCooling_clicked()
 
 bool Cooling3::creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t dataLen,FC_t fc)
 {
+    // QByteArray::operator[] past the current size only warns (QByteRef) and
+    // discards the byte, so the old dOut[index++] form sent EMPTY packets and
+    // spammed "Using QByteRef with an index pointing outside the valid range".
     QByteArray dOut;
-    uint8_t index=0;
 
+    dOut.append((char)(uint8_t)(_HEADER_>>8));
+    dOut.append((char)(uint8_t)(_HEADER_));
 
-    dOut[index++]=(uint8_t)(_HEADER_>>8);
-    dOut[index++]=(uint8_t)(_HEADER_);
+    dOut.append((char)(uint8_t)(slaveNumber>>8));
+    dOut.append((char)(uint8_t)(slaveNumber));
 
-    dOut[index++]=(uint8_t)(slaveNumber>>8);
-    dOut[index++]=(uint8_t)(slaveNumber);
+    dOut.append((char)(uint8_t)((dataLen+10)>>8)); // 10 = FixByte
+    dOut.append((char)(uint8_t)(dataLen+10));
 
-    dOut[index++]=(dataLen+10)>>8; // 10 = FixByte
-    dOut[index++]=(dataLen+10);
-
-    dOut[index++]=fc;
-    dOut[index++]=dataLen;
+    dOut.append((char)fc);
+    dOut.append((char)dataLen);
 
     for (int i = 0; i < dataLen; ++i)
     {
-        dOut[index++]=data[i];
+        dOut.append((char)data[i]);
     }
-    dOut[index++]=(uint8_t)(_FOOTER_>>8);
-    dOut[index++]=(uint8_t)(_FOOTER_);
+    dOut.append((char)(uint8_t)(_FOOTER_>>8));
+    dOut.append((char)(uint8_t)(_FOOTER_));
 
     emit sendCommandToDeviceSignal(dOut);
     return true;

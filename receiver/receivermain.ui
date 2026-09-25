@@ -107,7 +107,7 @@
                      <item>
                       <widget class="QDoubleSpinBox" name="spnFrq">
                        <property name="minimum">
-                        <double>1000.000000000000000</double>
+                        <double>200.000000000000000</double>
                        </property>
                        <property name="maximum">
                         <double>12000.000000000000000</double>
@@ -125,7 +125,25 @@
                   </layout>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btnSet">
+                 <layout class="QHBoxLayout" name="hrzGlobal_sn">
+                  <item>
+                   <widget class="QLabel" name="lblSerialTitle">
+                    <property name="text">
+                     <string>Serial Number</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="lblSN">
+                    <property name="text">
+                     <string>-</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnSet">
                    <property name="text">
                     <string>Set</string>
                    </property>
@@ -1788,6 +1806,14 @@
               <string>Calibration</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_33">
+              <item row="10" column="0">
+               <widget class="QGroupBox" name="grbAdrvCalib">
+                <property name="title">
+                 <string>ADRV9009 Calibration</string>
+                </property>
+                <layout class="QGridLayout" name="gridAdrvCalib"/>
+               </widget>
+              </item>
               <item row="5" column="0">
                <widget class="QLabel" name="label_90">
                 <property name="text">

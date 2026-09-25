@@ -73,11 +73,11 @@ Exciter::Exciter(QWidget *parent) :
     //spin box limitation
     if(DC_6_UPTO_8_12 == 0)
     {
-        ui->spnCWFrq->setRange         (1000,6000);
-        ui->spnSpotFrq->setRange       (1000,6000);
-        ui->spnImpulseFrq->setRange    (1000,6000);
-        ui->spnSweepStopFrq->setRange  (1000,6000);
-        ui->spnSweepStartFrq->setRange (1000,6000);
+        ui->spnCWFrq->setRange         (200,6000);
+        ui->spnSpotFrq->setRange       (200,6000);
+        ui->spnImpulseFrq->setRange    (200,6000);
+        ui->spnSweepStopFrq->setRange  (200,6000);
+        ui->spnSweepStartFrq->setRange (200,6000);
     }
 
     else
@@ -432,6 +432,16 @@ bool Exciter::existsFile (const std::string& name)
 }
 
 
+void Exciter::setModeActive(const QString &mode, bool on)
+{
+    if (on)
+        activeModes.insert(mode);
+    else
+        activeModes.remove(mode);
+
+    emit modeActivitySignal(!activeModes.isEmpty());
+}
+
 void Exciter::setDataSlot()
 {
 
@@ -462,6 +472,7 @@ void Exciter::setDataSlot()
 
         emit turnOffSmartNoiseSignal();
         currentTabState = CW;
+        setModeActive("cw", true);
         changeDacSignal("set-cw");
         QTimer::singleShot(500,  [&]{emit sendFrqDataSignal(QString::number(ui->spnCWFrq->value()));});
         QTimer::singleShot(500,  [&]{emit sendPowerToCart(ui->spnCWPower->value());});
@@ -476,6 +487,7 @@ void Exciter::setDataSlot()
         if ( ui->spnSpotFrq->value() >= minFrqLimit and  ui->spnSpotFrq->value() < maxFrqLimit ) return;
         emit turnOffSmartNoiseSignal();
         currentTabState = Spot;
+        setModeActive("spot", true);
 
         //            adrvObj->SetPower(ui->spnSpotPower->value());
         //            adrvObj->SetFrequency(ui->spnSpotFrq->value());
@@ -521,6 +533,7 @@ void Exciter::setDataSlot()
 
         emit turnOffSmartNoiseSignal();
         currentTabState = Sweep;
+        setModeActive("sweep", true);
         changeDacSignal("set-sweep");
         QTimer::singleShot(100, [&]{emit sendStartFrqToCart(ui->spnSweepStartFrq->value());});
         QTimer::singleShot(100, [&]{emit sendStoptFrqToCart(ui->spnSweepStopFrq->value());});
@@ -542,6 +555,7 @@ void Exciter::setDataSlot()
         emit turnOffSmartNoiseSignal();
         //            changeDacSignal("impulse");
         currentTabState = Impulse;
+        setModeActive("impulse", true);
         //            adrvObj->SetPower(ui->spnImpulsePower->value());
         //            adrvObj->SetFrequency(ui->spnImpulseFrq->value());
         //            getDataSlot();
@@ -593,6 +607,7 @@ void Exciter::setDataSlot()
         emit turnOffSmartNoiseSignal();
         //            changeDacSignal("we");
         currentTabState = WB;
+        setModeActive("wb", true);
         //            adrvObj->SetPower(ui->spnWBPower->value());
         //            getDataSlot();
         QString fileName = ("spot/widebandnoise.txt");
@@ -662,6 +677,7 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName)
 void Exciter::on_btnStopSweep_clicked()
 {
     QTimer::singleShot(1000, [&]{emit stoptHopp();});
+    setModeActive("sweep", false);
     //    ui->btnStartSweep->setStyleSheet("background-color:black");
     //    ui->btnStopSweep->setStyleSheet("background-color:black");
 }
@@ -672,6 +688,7 @@ void Exciter::on_btnDisableSpot_clicked()
 
     //    adrvObj->DisableDac();
     if (isExciterOn) emit changeDacSignal("Spot");
+    setModeActive("spot", false);
     //    ui->lblSpotStatus->setText("Status: disable");
     //    ui->btnDisableSpot->setStyleSheet("background-color:#186a3b");
     //    ui->btnLoadSpot->setStyleSheet("background-color:#d30000");
@@ -680,6 +697,7 @@ void Exciter::on_btnDisableSpot_clicked()
 
 void Exciter::on_btnDisImpulse_clicked()
 {    if (isExciterOn) emit changeDacSignal("Impulse");
+    setModeActive("impulse", false);
     //     ui->lblImpulseStatus->setText("Status: disable");
     //     ui->btnDisImpulse->setStyleSheet("background-color:#186a3b");
     //     ui->btnLoadImpulse->setStyleSheet("background-color:red");
@@ -689,9 +707,11 @@ void Exciter::on_btnDisImpulse_clicked()
 void Exciter::on_btnDisableCW_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("CW");
+    setModeActive("cw", false);
 }
 
 void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");
+    setModeActive("wb", false);
 }

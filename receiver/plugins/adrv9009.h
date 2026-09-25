@@ -146,6 +146,14 @@ public:
 //    QCheckBox * obs1_powerdown;
 
     QDoubleSpinBox * tx_lo_freq;
+    //--- ADRV9009 calibration widgets (shown on ReceiverMain Calibration tab)
+    QCheckBox  * cal_rx_qec_chk;
+    QCheckBox  * cal_tx_qec_chk;
+    QCheckBox  * cal_tx_lol_chk;
+    QCheckBox  * cal_tx_lol_ext_chk;
+    QCheckBox  * cal_rx_phase_chk;
+    QCheckBox  * cal_fhm_chk;
+    QPushButton * calibrateBtn;
 
     //saeid raziani
      dacDataManager *dac_data_manager;
@@ -166,6 +174,7 @@ public:
     struct iio_widget fpga_widgets[2];
     QString setFile(QString fileName,double scale );
     QString changingDac(QString);
+    QString changeDacToBuffer(); // CW tone -> DAC Buffer Output (DRFM tab)
 
 
 //    struct iio_device *dds;
@@ -206,7 +215,8 @@ private:
     void rssi_update_labels();
     void make_widget_update_signal_based(iio_widget *widgets, unsigned int num_widgets);
 
-    QThread *refreshThread;
+    QThread *refreshThread = nullptr;
+    QTimer *refreshTimer = nullptr;
     int interval=1000;
     bool refreshMode=false;
 

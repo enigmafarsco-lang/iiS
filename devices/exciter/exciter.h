@@ -1,6 +1,7 @@
 #ifndef EXCITER_H
 #define EXCITER_H
 
+#include <QSet>
 #include <QWidget>
 #include <unistd.h>
 #include <iio.h>
@@ -76,6 +77,8 @@ private:
     QString fileName;
 
     bool isExciterOn{false};
+    QSet<QString> activeModes;
+    void setModeActive(const QString &mode, bool on);
 
     enum tabState{
         CW,Spot,Sweep,Impulse,WB
@@ -129,6 +132,7 @@ signals:
     void stoptHopp();
     void sendFileToCardSignal(QString, double,QString);
     void changeDacSignal(QString);
+    void modeActivitySignal(bool anyModeActive);
     void turnOffSmartNoiseSignal();
 };
 

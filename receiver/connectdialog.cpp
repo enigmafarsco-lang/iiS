@@ -461,12 +461,12 @@ iio_context *connectDialog::GetContext()
         return ctx;
     } else if (ui->rad_serial_context->isChecked()) {
         iio_context *ctx;
-        gchar *port = ui->cmb_port->currentText().toLocal8Bit().data();
-        gchar *baud_rate = ui->cmb_baud_rate->currentText().toLocal8Bit().data();
-        const gchar *bits8n1 =ui->txt_serial_bit->toPlainText().toLocal8Bit().data();
+        const QByteArray port = ui->cmb_port->currentText().toLocal8Bit();
+        const QByteArray baud_rate = ui->cmb_baud_rate->currentText().toLocal8Bit();
+        const QByteArray bits8n1 = ui->txt_serial_bit->toPlainText().toLocal8Bit();
 
         /* Size is +3: for ':', ',' and '\0' */
-        gchar *result = g_strdup_printf("serial:%s,%s,%s", port, baud_rate, bits8n1);
+        gchar *result = g_strdup_printf("serial:%s,%s,%s", port.constData(), baud_rate.constData(), bits8n1.constData());
 //        g_free(port);
 //        g_free(baud_rate);
 

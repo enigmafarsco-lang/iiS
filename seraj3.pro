@@ -95,6 +95,7 @@ SOURCES += \
     receiver/plugins/adrv9009_adv.cpp \
     receiver/plugins/controlunitadrv9009.cpp \
     receiver/plugins/dacDataManager.cpp \
+    receiver/plugins/drfmregisterio.cpp \
     receiver/settings.cpp \
     receiver/receivermain.cpp \
     receiver/utils/filedialog.cpp \
@@ -184,6 +185,7 @@ HEADERS += \
     receiver/plugins/adrv9009_adv.h \
     receiver/plugins/controlunitadrv9009.h \
     receiver/plugins/dacDataManager.h \
+    receiver/plugins/drfmregisterio.h \
     receiver/settings.h \
     receiver/receivermain.h \
     receiver/utils/filedialog.h \

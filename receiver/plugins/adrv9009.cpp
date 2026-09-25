@@ -144,6 +144,14 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
     startBtn          = findChild<QPushButton    *>("btnStartHopping");
     nextFrqSpn        = findChild<QDoubleSpinBox *>("tx_lo_freq_hop");
     modeChk           = findChild<QCheckBox      *>("fhm_enable");
+    //--- Calibration ---------------------------------------------------------
+    cal_rx_qec_chk      = findChild<QCheckBox  *>("calibrate_rx_qec_en");
+    cal_tx_qec_chk      = findChild<QCheckBox  *>("calibrate_tx_qec_en");
+    cal_tx_lol_chk      = findChild<QCheckBox  *>("calibrate_tx_lol_en");
+    cal_tx_lol_ext_chk  = findChild<QCheckBox  *>("calibrate_tx_lol_ext_en");
+    cal_rx_phase_chk    = findChild<QCheckBox  *>("calibrate_rx_phase_correction_en");
+    cal_fhm_chk         = findChild<QCheckBox  *>("calibrate_fhm_en");
+    calibrateBtn        = findChild<QPushButton *>("calibrate");
     //--- TX1 ------------------------------------------------------------------
     pinn_TX1_Chk      = findChild<QCheckBox      *>("tx1_atten_control_pin_mode_en");
     track_TX1_Chk     = findChild<QCheckBox      *>("tx1_quadrature_tracking_en");
@@ -197,9 +205,9 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
 
 adrv9009::~adrv9009()
 {
+    if (refreshTimer)
+        refreshTimer->stop();
     delete ui;
-
-    refreshThread->quit();
 }
 
 #pragma endregion }
@@ -241,38 +249,40 @@ void adrv9009::update_widgets(void) {
 void adrv9009::rx_freq_info_update(void) {
 
     double lo_freq;
-    osc *oscInstance;
+    // These helpers do not use instance state, but calling them through an
+    // uninitialized pointer is undefined and can crash on some builds.
+    osc oscInstance;
 
     if (cap) {
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE,
                                                     USE_INTERN_SAMPLING_FREQ);
         lo_freq = mhz_scale*((QDoubleSpinBox*)(subcomponents[0].glb_widgets[subcomponents[0].trx_lo].widget))->value();
 
         lo_freq=0;
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE, "all", lo_freq);
     }
 
     if (cap_obs) {
-        gchar *source;
-
-        oscInstance->rx_update_device_sampling_freq(CAP_DEVICE_2,
+        oscInstance.rx_update_device_sampling_freq(CAP_DEVICE_2,
                                                     USE_INTERN_SAMPLING_FREQ);
 
         guint i = 0;
         for (; i < phy_devs_count; i++) {
-            source = ((QComboBox*)(subcomponents[i].obs_port_select))->currentText().toLocal8Bit().data();
+            // currentText().toLocal8Bit().data() is a pointer into a temporary
+            // QByteArray destroyed at the semicolon. strstr() then read freed
+            // heap (ASan heap-use-after-free). Keep the QString alive instead.
+            const QString source = static_cast<QComboBox*>(subcomponents[i].obs_port_select)->currentText();
 
-            if (source && strstr(source, "TX")) {
+            if (source.contains(QLatin1String("TX"))) {
                 lo_freq = mhz_scale
                         * ((QDoubleSpinBox*)(subcomponents[i].glb_widgets[subcomponents[i].trx_lo].widget))->value();
             } else {
                 lo_freq = mhz_scale
                         * ((QDoubleSpinBox*)(subcomponents[i].obsrx_widgets[subcomponents[i].aux_lo].widget))->value();
             }
-            //            g_free(source);
         }
 
-        oscInstance->rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
+        oscInstance.rx_update_channel_lo_freq(CAP_DEVICE_2, "all", lo_freq);
     }
 }
 
@@ -286,11 +296,13 @@ static void rssi_update_label(QWidget *label, struct iio_channel *chn) {
     char buf[1024];
     int ret;
 
-    /* don't update if it is hidden (to quiet down SPI) */
-    if (!(label->isVisible()))
+    if (!label || !chn || !label->isVisible())
         return;
 
-    ret = iio_channel_attr_read(chn,"rssi", buf, sizeof(buf));
+    /* Leave one byte so a libiio that null-terminates past len cannot smash the stack. */
+    ret = iio_channel_attr_read(chn,"rssi", buf, sizeof(buf) - 1);
+    if (ret >= 0)
+        buf[ret < (int)sizeof(buf) ? ret : (int)sizeof(buf) - 1] = '\0';
     if (ret > 0)
         ((QLabel*)(label))->setText(buf);
     else
@@ -421,20 +433,25 @@ void adrv9009::glb_settings_update_labels()
 {
 
     char buf[1024];
-    char buf2[1024];
     ssize_t ret;
-    ssize_t ret2;
     struct iio_channel *ch;
     guint i = 0;
 
     IIO_Widget iio_w;
 
+    if (!ui)
+        return;
+
     /* Get ensm_mode from all devices. Notify user if any of devices has a different mode than the others. */
-    for (; i < phy_devs_count; i++) {
-        ret = iio_device_attr_read(subcomponents[i].iio_dev, "ensm_mode", buf, sizeof(buf));
+    for (; i < phy_devs_count && ui->ensm_mode; i++) {
+        if (!subcomponents[i].iio_dev)
+            continue;
+        ret = iio_device_attr_read(subcomponents[i].iio_dev, "ensm_mode", buf, sizeof(buf) - 1);
+        if (ret >= 0)
+            buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         if (ret > 0) {
             if (i > 0) {
-                if ((QString)buf!= ui->ensm_mode->text().data()) {
+                if (QString::fromUtf8(buf) != ui->ensm_mode->text()) {
                     ui->ensm_mode->setText("<not synced>");
                     break;
                 }
@@ -451,39 +468,55 @@ void adrv9009::glb_settings_update_labels()
     update_label_with_scale_from(ui->lblTempAd7291,
                                  ddm,"temp0", "raw","scale", false, " °C", 10);
     bool temp7291Ok = false;
-    const double temp7291Value = ui->lblTempAd7291->text().split(" ")[0].toDouble(&temp7291Ok);
-    if (temp7291Ok)
-        globals::temp7291 = temp7291Value;
+    if (ui->lblTempAd7291) {
+        const double temp7291Value = ui->lblTempAd7291->text().split(" ").value(0).toDouble(&temp7291Ok);
+        if (temp7291Ok)
+            globals::temp7291 = temp7291Value;
+    }
 
     for (i = 0; i < phy_devs_count; i++) {
+        if (!subcomponents[i].iio_dev)
+            continue;
+
         ch = iio_device_find_channel(subcomponents[i].iio_dev, "voltage0", false);
+        ret = 0;
         if (ch) {
-            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf));
-        } else {
-            ret = 0;
+            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf) - 1);
+            if (ret >= 0)
+                buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         }
 
-        if (ret > 0)
-            ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText(buf);
-        else
-            ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText("<error>");
+        if (subcomponents[i].rx_gain_control_rx1) {
+            if (ret > 0)
+                ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText(buf);
+            else
+                ((QLabel*)subcomponents[i].rx_gain_control_rx1)->setText("<error>");
+        }
 
         ch = iio_device_find_channel(subcomponents[i].iio_dev, "voltage1", false);
+        ret = 0;
         if (ch) {
-            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf));
-        } else {
-            ret = 0;
+            ret = iio_channel_attr_read(ch, "gain_control_mode", buf, sizeof(buf) - 1);
+            if (ret >= 0)
+                buf[ret < (ssize_t)sizeof(buf) ? ret : (ssize_t)sizeof(buf) - 1] = '\0';
         }
 
-        if (ret > 0)
-            ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText(buf);
-        else
-            ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText("<error>");
+        if (subcomponents[i].rx_gain_control_rx2) {
+            if (ret > 0)
+                ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText(buf);
+            else
+                ((QLabel*)subcomponents[i].rx_gain_control_rx2)->setText("<error>");
+        }
 
-        // Temp Adrv9009
-        update_label_from((QLabel*)subcomponents[i].label_temp,
-                          subcomponents[i].iio_dev,"temp0", "input", false, " °C", 1000);
-        globals::temp9009=((QLabel*)subcomponents[i].label_temp)->text().split(" ")[0].toDouble();
+        // Temp Adrv9009. temp0 is optional on some images; do not touch a missing label.
+        if (subcomponents[i].label_temp) {
+            update_label_from((QLabel*)subcomponents[i].label_temp,
+                              subcomponents[i].iio_dev,"temp0", "input", false, " °C", 1000);
+            bool temp9009Ok = false;
+            const double temp9009Value = ((QLabel*)subcomponents[i].label_temp)->text().split(" ").value(0).toDouble(&temp9009Ok);
+            if (temp9009Ok)
+                globals::temp9009 = temp9009Value;
+        }
 
         update_label_from((QLabel*)subcomponents[i].label_rf_bandwidth_rx,
                           subcomponents[i].iio_dev,"voltage0", "rf_bandwidth", false, "MHz", 1000000);
@@ -615,6 +648,14 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
     char signal_name[25];
     unsigned int i;
 
+    // Persistent per-widget text storage. iio_widget::value is a const char*;
+    // it used to receive pointers into temporaries (std::to_string().c_str(),
+    // QString::toLocal8Bit().data()) that died at the semicolon - ASan
+    // heap-use-after-free as soon as a bound spinbox changed. The shared
+    // buffer lives as long as the signal connections do.
+    QSharedPointer<QVector<QByteArray> > valueStore(
+                new QVector<QByteArray>(num_widgets ? num_widgets : 1));
+
     QString className="";
 
     for (i = 0; i < num_widgets; i++) {
@@ -633,7 +674,8 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
                 QObject::connect((QSpinBox*)widgets[i].widget,
                                  static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
                                  [=](int value){
-                    widgets[i].value=std::to_string(value).c_str ();
+                    (*valueStore)[i] = std::to_string(value).c_str();
+                    widgets[i].value = (*valueStore)[i].constData();
                     save_widget_value(&widgets[i]);
                 });
 
@@ -643,7 +685,8 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
                                  static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
                                  [=](double value){
 
-                    widgets[i].value=QString::number(value).toLocal8Bit().data();
+                    (*valueStore)[i] = QString::number(value).toLocal8Bit();
+                    widgets[i].value = (*valueStore)[i].constData();
 
                     save_widget_value(&widgets[i]);
                 });
@@ -796,6 +839,7 @@ QWidget *adrv9009::init()
     struct iio_channel *ch;
 
     can_update_widgets = false;
+    num_fpga = 0;
 
     if (!globals::ctx)
         return NULL;
@@ -926,9 +970,9 @@ QWidget *adrv9009::init()
 
     IIO_Widget iio_w;
 
-    if (cap) {
+    if (cap && num_fpga < 2) {
         ch = iio_device_find_channel(cap, "voltage0_i", false);
-        if (iio_channel_find_attr(ch, "sampling_frequency_available")) {
+        if (ch && iio_channel_find_attr(ch, "sampling_frequency_available")) {
             iio_w.iio_combo_box_init(&fpga_widgets[num_fpga++],
                     cap, ch, "sampling_frequency",
                     "sampling_frequency_available",
@@ -942,9 +986,9 @@ QWidget *adrv9009::init()
         //								  "receive_frame_dma_buf")));
     }
 
-    if (dds) {
+    if (dds && num_fpga < 2) {
         ch = iio_device_find_channel(dds, "voltage0", true);
-        if (iio_channel_find_attr(ch, "sampling_frequency_available")) {
+        if (ch && iio_channel_find_attr(ch, "sampling_frequency_available")) {
             iio_w.iio_combo_box_init(&fpga_widgets[num_fpga++],
                     dds, ch, "sampling_frequency",
                     "sampling_frequency_available",
@@ -996,7 +1040,8 @@ QWidget *adrv9009::init()
                 ui->calibrate_rx_phase_correction_en, 0);
 
         iio_w.iio_toggle_button_init(&subcomponents[i].glb_widgets[subcomponents[i].num_glb++],
-                subcomponents[i].iio_dev, NULL, "calibrate_fhm_en",
+                subcomponents[i].iio_dev, NULL, (iio_device_find_attr(subcomponents[i].iio_dev, "calibrate_fhm_en")
+                ? "calibrate_fhm_en" : "calibrate_frm_en"),
                 ui->calibrate_fhm_en, 0);
 
         iio_w.iio_button_init(&subcomponents[i].glb_widgets[subcomponents[i].num_glb++],
@@ -1210,6 +1255,10 @@ QWidget *adrv9009::init()
     /* Update all widgets with current values */
     printf("Updating widgets...\n");
     update_widgets();
+
+    // TX1 default at start of operation: OFF (checked = powerdown = TX off).
+    if (ui->tx1_powerdown_en)
+        ui->tx1_powerdown_en->setChecked(true);
     rx_freq_info_update();
     printf("Updating FIR filter...\n");
     profile_update();
@@ -1224,20 +1273,24 @@ QWidget *adrv9009::init()
 
     ConnectSignals();
 
-    refreshFuture=QtConcurrent::run([=]{
-
-        while(globals::status)
-        {
-            if(!hopping && !ui->tx_lo_freq->hasFocus())
-            {
-                update_widgets();
-                glb_settings_update_labels();
-                rssi_update_labels();
-                int_dec_update_cb();
-            }
-            QThread::msleep(20000);
-        }
-    });
+    // Must stay on the GUI thread. The old QtConcurrent loop called QWidget
+    // and libiio from a pool thread while init() was still running, which
+    // corrupts Qt and trips "stack smashing detected" on some PCs only.
+    if (!refreshTimer) {
+        refreshTimer = new QTimer(this);
+        refreshTimer->setInterval(20000);
+        connect(refreshTimer, &QTimer::timeout, this, [this]{
+            if (!globals::status || hopping)
+                return;
+            if (ui->tx_lo_freq && ui->tx_lo_freq->hasFocus())
+                return;
+            update_widgets();
+            glb_settings_update_labels();
+            rssi_update_labels();
+            int_dec_update_cb();
+        });
+    }
+    refreshTimer->start();
 
     //saeid raziani
     QObject::connect(ui->profile_config,&QPushButton::clicked,[=](){
@@ -2001,7 +2054,12 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 QString adrv9009::setFile(QString fileName,double scale)
 {
         changingDac("");
-        dac_tx_manager->dac1.txs[0].dds_mode_widget->setCurrentIndex(4);
+        // Put every TX pair into "DAC Buffer Output" mode, not just TX1,
+// so the loaded waveform drives all four channels voltage0..3.
+for (guint i = 0; i < dac_tx_manager->dac1.tx_count; i++)
+    dac_tx_manager->dac1.txs[i].dds_mode_widget->setCurrentIndex(4);
+for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
+    dac_tx_manager->dac2.txs[i].dds_mode_widget->setCurrentIndex(4);
         dac_tx_manager->dac_buffer_module.scale->setValue(scale);
         QTreeWidget *treeview =dac_tx_manager->dac_buffer_module.tx_channels_view;
         for(int i=0;i<treeview->topLevelItemCount();i++)
@@ -2038,4 +2096,24 @@ QString adrv9009::changingDac(QString mode)
         dac_tx_manager->dac1.txs[1].dds_mode_widget->setCurrentIndex(0);
     }
         return mode +" is turned off.";
+}
+
+// Switch the DAC from the CW tone DDS to the "DAC Buffer Output" mode.
+// This is the same dds_mode change setFile() performs when the exciter sets
+// pulse/spot/wideband (index 4), but without loading a waveform file: every
+// noise/DRFM set on the DRFM tab takes over the DAC buffer path the same way.
+// The exciter's own CW tone / DAC buffer switching is not changed by this.
+QString adrv9009::changeDacToBuffer()
+{
+        if(!dac_tx_manager)
+                return "DAC switch failed: DAC manager is not ready.";
+
+        changingDac(""); // disable the CW tone DDS first, same as setFile does
+
+        for (guint i = 0; i < dac_tx_manager->dac1.tx_count; i++)
+            dac_tx_manager->dac1.txs[i].dds_mode_widget->setCurrentIndex(4);
+        for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
+            dac_tx_manager->dac2.txs[i].dds_mode_widget->setCurrentIndex(4);
+
+        return "DAC output changed from CW tone to DAC Buffer Output.";
 }

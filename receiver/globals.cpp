@@ -127,12 +127,19 @@ void globals::connect_widget(QWidget *widget, struct w_info *item, long long val
 int globals::__connect_widget(struct iio_device *dev, const char *attr,
                               const char *value, size_t len, void *d)
 {
-    unsigned int i, nb_items = attrs->size();
+    unsigned int i, nb_items = attrs ? attrs->size() : 0;
     char str[80];
     int bit, ret;
 
     for (i = 0; i < nb_items; i++) {
-        ret = sscanf(attrs->at(i)->name, "%[^'#']#%d", str, &bit);
+        if (!attrs->at(i) || !attrs->at(i)->name || !attr)
+            continue;
+        // Width limit: an unbounded scanset writes past str[80] and aborts
+        // with "stack smashing detected" when an attribute name is long.
+        str[0] = '\0';
+        ret = sscanf(attrs->at(i)->name, "%79[^'#']#%d", str, &bit);
+        if (ret < 1)
+            continue;
         if (!strcmp(str, attr)) {
             connect_widget(attrs->at(i)->widget, attrs->at(i), atoll(value));
 

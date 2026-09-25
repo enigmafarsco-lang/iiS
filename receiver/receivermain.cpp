@@ -6,18 +6,26 @@
 #include <receiver/connectdialog.h>
 #include "receiver/globals.h"
 #include <QFileInfo>
+#include <QProcess>
 #include <limits>
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleValidator>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QIntValidator>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QScrollBar>
 #include <QVBoxLayout>
+
+#include <receiver/plugins/drfmregisterio.h>
 
 
 ReceiverMain::ReceiverMain(QWidget *parent) :
@@ -460,7 +468,7 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     //spin box limitation
     if(DC_6_UPTO_8_12 == 0)
     {
-        ui->spnFrq->setRange         (1000,6000);
+        ui->spnFrq->setRange         (200,6000);
     }
 
     else
@@ -614,8 +622,15 @@ void ReceiverMain::setupDrfmControlTab()
     //   MUXDACS_ip.v:
     //       DacSel=1 -> DRFM/processed path, DacSel=0 -> DMA/noise path.
     //
-    // The new controls intentionally use the same IIO/mwipcore register-write
-    // transaction as the original TH1/TH2 Write buttons.
+    // Register writes go through DrfmRegisterIO: the IIO channel "raw"
+    // attributes of the led-count-iio device (out_count1_th0_raw,
+    // out_count15_dacseles_raw, ... - the raw-data entries of the
+    // iio-oscilloscope Debug tab), then named debug attributes and direct
+    // led-count register access; the old mwipcore0:mmwr0 bridge is only a
+    // fallback.  Because the AXI read mux cannot return these control
+    // registers, every Set prints the cat command to confirm the value
+    // manually in the board console (picocom) - the software never opens
+    // the UART itself.
 
     QWidget *page = new QWidget(ui->tabWidgetSetting);
     page->setObjectName(QStringLiteral("tabDrfmControl"));
@@ -629,6 +644,28 @@ void ReceiverMain::setupDrfmControlTab()
                 .arg(QString::number(ControlUnitADRV9009::LED_COUNT_AXI_BASE + offset, 16)
                      .toUpper(), 8, QLatin1Char('0'));
     };
+
+    // ------------------ TX1 transmit control ------------------
+    // The DRFM tab carries its own TX1 on/off pair so the operator can stop
+    // and start TX1 from here too. It drives the global TX1 control both ways
+    // (power_TX1_DownChk checked = TX off).
+    QGroupBox *txGroup = new QGroupBox(tr("TX1"), page);
+    QGridLayout *txLayout = new QGridLayout(txGroup);
+    QLabel *txInfo = new QLabel(
+        tr("TX1 transmit control (same as the main TX1 switch). ON = transmit, "
+           "OFF = safe. Any Set on this tab turns TX1 on."), txGroup);
+    txInfo->setWordWrap(true);
+    QRadioButton *txOn = new QRadioButton(tr("TX ON"), txGroup);
+    QRadioButton *txOff = new QRadioButton(tr("TX OFF"), txGroup);
+    txOn->setObjectName("drfmTxOn");
+    txOff->setObjectName("drfmTxOff");
+    txOff->setChecked(true); // TX1 default at application start: off
+    txLayout->addWidget(txInfo, 0, 0, 1, 3);
+    txLayout->addWidget(new QLabel(tr("State"), txGroup), 1, 0);
+    txLayout->addWidget(txOn, 1, 1);
+    txLayout->addWidget(txOff, 1, 2);
+
+    pageLayout->addWidget(txGroup);
 
     // -------------------- DRFM / Noise source select --------------------
     QGroupBox *drfmGroup = new QGroupBox(tr("DRFM"), page);
@@ -729,6 +766,60 @@ void ReceiverMain::setupDrfmControlTab()
     vgpoLayout->addWidget(vgpoSet, 3, 4);
     pageLayout->addWidget(vgpoGroup);
 
+
+    // -------------------- Board console check commands (manual) --------------------
+    // The software never opens the UART/USB.  The user verifies the registers
+    // separately in a terminal, e.g.
+    //     sudo picocom -b 115200 -l -r /dev/ttyUSB0
+    // and runs these echo/cat commands on the board shell.  Every Set above
+    // prints the exact command for the written register as well.
+    QGroupBox *consoleGroup = new QGroupBox(
+                tr("Board console check (picocom: echo / cat /sys/bus/iio/devices/...)"),
+                page);
+    QGridLayout *consoleLayout = new QGridLayout(consoleGroup);
+
+    QPushButton *btnScanIio = new QPushButton(tr("Scan led-count IIO registers (via IIO)"),
+                                              consoleGroup);
+    btnScanIio->setObjectName(QStringLiteral("btnScanDrfmIioRegisters"));
+    btnScanIio->setToolTip(tr("Lists the IIO debug attributes of the led-count device and\n"
+                              "which one represents th0/dacseles (out_countN_<name>_raw) - no UART involved."));
+
+    QPlainTextEdit *txtConsoleHelp = new QPlainTextEdit(consoleGroup);
+    txtConsoleHelp->setObjectName(QStringLiteral("txtDrfmConsoleHelp"));
+    txtConsoleHelp->setReadOnly(true);
+    txtConsoleHelp->setMaximumBlockCount(200);
+    txtConsoleHelp->setMinimumHeight(150);
+    QFont consoleFont(QStringLiteral("Monospace"));
+    consoleFont.setStyleHint(QFont::TypeWriter);
+    txtConsoleHelp->setFont(consoleFont);
+    txtConsoleHelp->setPlainText(
+                tr("The software does NOT open the UART.  Connect separately with:\n"
+                   "  sudo picocom -b 115200 -l -r /dev/ttyUSB0\n"
+                   "\n"
+                   "led-count-iio (iio:device0) registers used by the DRFM tab:\n"
+                   "  TH0 / amplify .......... out_count1_th0_raw\n"
+                   "  dacsel (1=DRFM) ........ out_count15_dacseles_raw\n"
+                   "  PDW enable ............. out_count5_pdw_raw\n"
+                   "  phase offset (inchann) . out_count7_inchann_raw\n"
+                   "  phase step (thcw) ...... out_count8_thcw_raw\n"
+                   "\n"
+                   "-- read a register value (confirm a Set from the DRFM tab) --\n"
+                   "cat /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
+                   "\n"
+                   "-- read all DRFM registers in one go --\n"
+                   "for f in out_count1_th0_raw out_count15_dacseles_raw out_count5_pdw_raw out_count7_inchann_raw out_count8_thcw_raw; do echo -n \"$f = \"; cat /sys/bus/iio/devices/iio:device0/$f; done\n"
+                   "\n"
+                   "-- write + confirm by hand (same raw data as the iio-osc Debug tab) --\n"
+                   "echo 200 > /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
+                   "cat /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
+                   "echo 1 > /sys/bus/iio/devices/iio:device0/out_count15_dacseles_raw\n"
+                   "\n"
+                   "(the same entries appear in the iio-oscilloscope Debug tab of led-count-iio)"));
+
+    consoleLayout->addWidget(btnScanIio, 0, 0);
+    consoleLayout->addWidget(txtConsoleHelp, 1, 0);
+    pageLayout->addWidget(consoleGroup);
+
     // -------------------- Hardware transaction output --------------------
     QLabel *backendLabel = new QLabel(tr("Register backend: waiting for board connection."), page);
     backendLabel->setObjectName(QStringLiteral("lblDrfmRegisterBackend"));
@@ -747,8 +838,12 @@ void ReceiverMain::setupDrfmControlTab()
     registerOutput->setMinimumHeight(150);
     registerOutput->setPlainText(
                 tr("Vivado map: led_count_ip_0 @ 0x43C30000.\n"
-                   "The controls below use the same mwipcore/IIO register-write path as TH1 and TH2.\n"
-                   "Every successful Set/On/Off operation prints the exact AXI address and raw value here."));
+                   "Writes use the led-count-iio channel raw attributes (the th0/dacseles\n"
+                   "out_countN_<name>_raw entries of the iio-oscilloscope Debug tab), then\n"
+                   "named debug attributes and direct IIO register access; mwipcore0:mmwr0\n"
+                   "is only a fallback.  Every successful Set/On/Off operation prints the\n"
+                   "exact AXI address, raw value and the cat command to confirm it in the\n"
+                   "board console (picocom)."));
     pageLayout->addWidget(registerOutput);
     pageLayout->addStretch(1);
 
@@ -777,15 +872,34 @@ void ReceiverMain::setupDrfmControlTab()
         registerOutput->appendPlainText(QStringLiteral("\n[FAILED]\n") + msg);
     };
 
-    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard]() {
+    // Every Set on this tab means the operator is driving the transmitter:
+    // turn TX1 on (same rule as the exciter) and switch the DAC output from
+    // the CW tone to the DAC Buffer Output mode - exactly what the exciter
+    // does when pulse/spot/wideband is set. The exciter's own CW tone / DAC
+    // buffer switching is not touched here.
+    auto noteDrfmSetActivity = [this, registerOutput]() {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->stateChanged(0);   // force, even if already on
+            power_TX1_DownChk->setChecked(false); // TX1 ON
+        }
+        if (att_TX1_Spn)
+            att_TX1_Spn->setValue(0);
+        // (Every noise/DRFM set switches the DAC from CW tone to DAC buffer
+        // through ControlUnitADRV9009::sendFileToDacSignal -> setFile, exactly
+        // like the exciter tab does.)
+    };
+
+    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setDrfmEnabled(drfmOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
-    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard]() {
+    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
         bool valueOk = false;
         const uint value = ampEdit->text().toUInt(&valueOk);
         if (!valueOk || value > 65535u) {
@@ -794,21 +908,23 @@ void ReceiverMain::setupDrfmControlTab()
         }
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setAmplifyValue(static_cast<quint16>(value), ampOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
-    auto applyVgpoEnable = [controlUnit, vgpoOn, showResult, noBoard]() {
+    auto applyVgpoEnable = [controlUnit, vgpoOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setVgpoEnabled(vgpoOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
     auto applyVgpoSet = [controlUnit, vgpoOffsetEdit, vgpoStepEdit, vgpoOn,
-                         statusLabel, showResult, noBoard]() {
+                         statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
         bool offsetOk = false;
         const qulonglong offset64 = vgpoOffsetEdit->text().toULongLong(&offsetOk);
         if (!offsetOk || offset64 > std::numeric_limits<quint32>::max()) {
@@ -826,6 +942,7 @@ void ReceiverMain::setupDrfmControlTab()
 
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setVgpoValue(static_cast<quint32>(offset64),
                                            static_cast<qint32>(step64),
@@ -847,6 +964,37 @@ void ReceiverMain::setupDrfmControlTab()
     connect(vgpoOn,  &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoOff, &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
     connect(vgpoSet, &QPushButton::clicked, this, applyVgpoSet);
+
+    // The DRFM tab TX1 pair drives the global TX1 control and follows it when
+    // TX1 is changed elsewhere (checkbox checked = TX off). Radio setChecked()
+    // does not emit clicked(), so these connections cannot loop.
+    connect(txOn, &QRadioButton::clicked, this, [this](bool) {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->stateChanged(0);   // force a hardware write
+            power_TX1_DownChk->setChecked(false); // TX1 ON
+        }
+    });
+    connect(txOff, &QRadioButton::clicked, this, [this](bool) {
+        if (power_TX1_DownChk)
+        {
+            power_TX1_DownChk->stateChanged(1);   // force a hardware write
+            power_TX1_DownChk->setChecked(true);  // TX1 OFF
+        }
+    });
+
+    // IIO-side scan: which debug attributes represent th0/dacsel/...
+    // (identical list to the iio-oscilloscope Debug tab - no UART involved).
+    connect(btnScanIio, &QPushButton::clicked, this,
+            [controlUnit, registerOutput, statusLabel]() {
+        ControlUnitADRV9009 *unit = controlUnit();
+        if (!unit) {
+            statusLabel->setText(QObject::tr("Board control is not connected yet."));
+            return;
+        }
+        registerOutput->appendPlainText(unit->scanIioRegisters());
+        statusLabel->setText(QObject::tr("IIO register scan finished (see output above)."));
+    });
 }
 
 void ReceiverMain::showNoiseStatus(QString activeMode= "",QString msg="")
@@ -1862,6 +2010,7 @@ void ReceiverMain::init()
 
                 settingMinMaxBand();
                 ui->hrzGlobal_1->addWidget(ensmCmb)   ;
+                updateSerialNumber(); // board SN on the Global tab
                 //                ui->hrzGlobal_2->addWidget(frqSpn)    ;
 
                 ensm_mode_available = oscMain->_adrv9009->ensm_mode_available;
@@ -1952,6 +2101,32 @@ void ReceiverMain::init()
                 gridTX1->addWidget(track_TX1_Chk      , 2 , 1)         ;
                 gridTX1->addWidget(lo_TX1_Chk         , 3 , 1)         ;
                 gridTX1->addWidget(power_TX1_DownChk  , 4 , 1)         ;
+
+                // TX1 default at start: OFF (checked = powerdown = TX off).
+                // Forced here where the real tx1_powerdown_en widget is known.
+                if (power_TX1_DownChk)
+                {
+                    power_TX1_DownChk->setChecked(true);
+                    // The DRFM tab TX1 pair follows the real TX1 control.
+                    connect(power_TX1_DownChk, &QCheckBox::toggled, this, [this](bool checked) {
+                        QRadioButton *txOn  = findChild<QRadioButton *>("drfmTxOn");
+                        QRadioButton *txOff = findChild<QRadioButton *>("drfmTxOff");
+                        if (txOff) txOff->setChecked(checked);
+                        if (txOn)  txOn->setChecked(!checked);
+                    });
+                }
+                // Every noise/DRFM set changes the DAC from CW tone to DAC
+                // buffer "like the exciter tab": the control unit emits
+                // sendFileToDacSignal and we load the DAC buffer file the same
+                // way the exciter sets pulse/spot/wideband (setFile).
+                if (oscMain && oscMain->_adrv9009controlUnit)
+                {
+                    connect(oscMain->_adrv9009controlUnit, &ControlUnitADRV9009::sendFileToDacSignal,
+                            this, [this]() {
+                        if (oscMain && oscMain->_adrv9009)
+                            oscMain->_adrv9009->setFile(spotPath, 0);
+                    });
+                }
                 gridTX1->addWidget(rfBandlbl          , 5 , 1)         ;
                 gridTX1->addWidget(sampleRatelbl      , 6 , 1)         ;
 
@@ -1971,7 +2146,22 @@ void ReceiverMain::init()
                 gridTX2->addWidget(lo_TX2_Chk         , 3 , 1)           ;
                 gridTX2->addWidget(powerTX2DownChk    , 4 , 1)           ;
 
-                //--- OBSRX ----------------------------------------------
+                                //--- ADRV9009 calibration (Calibration tab) ----------------
+                QGridLayout *gridAdrvCalib = ui->grbAdrvCalib->findChild<QGridLayout *>();
+                oscMain->_adrv9009->cal_rx_qec_chk->setText("cal-rx-qec");
+                oscMain->_adrv9009->cal_tx_qec_chk->setText("cal-tx-qec");
+                oscMain->_adrv9009->cal_tx_lol_chk->setText("cal-tx-lol");
+                oscMain->_adrv9009->cal_tx_lol_ext_chk->setText("cal-tx-ext");
+                oscMain->_adrv9009->cal_rx_phase_chk->setText("cal-rx-phase");
+                oscMain->_adrv9009->cal_fhm_chk->setText("fhm");
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_rx_qec_chk    , 0 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_qec_chk    , 0 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_lol_chk    , 1 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_tx_lol_ext_chk, 1 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_rx_phase_chk  , 2 , 0);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->cal_fhm_chk       , 2 , 1);
+                gridAdrvCalib->addWidget(oscMain->_adrv9009->calibrateBtn      , 3 , 0);
+//--- OBSRX ----------------------------------------------
                 power_OBSRX_Spn   = oscMain->_adrv9009->power_OBSRX_Spn  ;
                 track_OBSRX_Chk   = oscMain->_adrv9009->track_OBSRX_Chk  ;
                 hardwareGain      = oscMain->_adrv9009->hardwareGain     ;
@@ -2104,9 +2294,61 @@ void ReceiverMain::defaultSettings()
     {
         defaultParameters();
     }
+    // TX1 is OFF whenever defaults are applied at start (safe default).
+    if (power_TX1_DownChk)
+    {
+        power_TX1_DownChk->stateChanged(1);  // force a hardware write
+        power_TX1_DownChk->setChecked(true); // TX off
+    }
 }
 
 
+
+// Read the board serial number over LAN and show it on the Global tab.
+// Preferred source: iiod context attribute "hw_serial". Otherwise read the
+// production EEPROM (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated
+// ssh exec (BatchMode: never prompts for a password).
+void ReceiverMain::updateSerialNumber()
+{
+    QString sn;
+
+    if (globals::ctx) {
+        const char *v = iio_context_get_attr_value(globals::ctx, "hw_serial");
+        if (v && *v)
+            sn = QString::fromUtf8(v).trimmed();
+    }
+
+    if (sn.isEmpty() && globals::ctx) {
+        QString host;
+        const char *uri = iio_context_get_attr_value(globals::ctx, "uri");
+        if (uri)
+            host = QString::fromUtf8(uri);
+        host.remove(QLatin1String("ip:"));
+        host = host.section(QLatin1Char(':'), 0, 0);
+
+        if (!host.isEmpty()) {
+            QProcess proc;
+            proc.start(QStringLiteral("ssh"),
+                       QStringList() << QStringLiteral("-o") << QStringLiteral("BatchMode=yes")
+                       << QStringLiteral("-o") << QStringLiteral("ConnectTimeout=2")
+                       << (QStringLiteral("root@") + host)
+                       << QStringLiteral("head -c 16 /sys/bus/i2c/devices/0-0050/eeprom"));
+            if (proc.waitForFinished(3500) && proc.exitCode() == 0) {
+                const QByteArray raw = proc.readAllStandardOutput();
+                for (unsigned char c : raw) {
+                    if (c < 0x20 || c > 0x7e)
+                        break;
+                    sn.append(QChar(c));
+                }
+                sn = sn.trimmed();
+            }
+        }
+    }
+
+    if (ui->lblSN)
+        ui->lblSN->setText(sn.isEmpty() ? QStringLiteral("-") : sn);
+    qInfo() << "Board serial number:" << (sn.isEmpty() ? "(not found)" : sn);
+}
 
 void ReceiverMain::defaultParameters()
 {
@@ -2118,7 +2360,14 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);//OBS RX
 
     oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
-    oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);
+    oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);  // default: TX1 off (safe), TX2 off
+    // ADRV9009 calibration defaults: all checked except cal-tx-ext and fhm
+    oscMain->_adrv9009->cal_rx_qec_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_qec_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_lol_chk->setChecked(true);
+    oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
+    oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
+    oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 
