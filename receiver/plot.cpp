@@ -3459,36 +3459,27 @@ bool Plot::GetBaseFreq()
     RFBandwidthOBS/=1000000.0;
     //    qInfo() <<  " third if";
 
-    // Update Ui if base frequecny has changed
-    if(ui->lblFreqValue->text().toDouble()==baseFreq)
-    {
-        //        qInfo() << "for" ;
-        freqChanged=false;
-    }
+    // Update Ui if base frequecny has changed.
+    // GetBaseFreq() also runs on the capture thread (capture_process) and any
+    // QWidget access from there crashes with SIGSEGV, so the UI update is
+    // marshalled onto the GUI thread.
+    QTimer::singleShot(0, this, [this](){
+        if (!ui || !ui->lblFreqValue)
+            return;
 
-    else
-    {
-        //        qInfo() << "-----------------------------------------------else" ;
+        if (ui->lblFreqValue->text().toDouble() == baseFreq)
+        {
+            freqChanged = false;
+            return;
+        }
+
         ui->lblFreqValue->setText(QString::number(abs(DC_6_UPTO_8_12-baseFreq)));
-
-        frqValueStr =  ui->lblFreqValue->text();
+        frqValueStr = ui->lblFreqValue->text();
         // Move the spectrum window with the base frequency
         double frqWin = abs(DC_6_UPTO_8_12 - baseFreq);
         ui->fftChart->xAxis->setRange(frqWin - 250, frqWin + 250);
         ui->fftChart->replot();
-
-        //        waterfallChart->axes(Qt::AlignBottom).at(0)->setRange((baseFreq - 250),(baseFreq + 250));
-
-        //    panoramaUpdateData->start();
-        //    detectedAmpUpdateData->start();
-        //    waterfallUpdateData->start();
-
-
-
-
-
-        //        freqChanged=true;
-    }
+    });
 
     //    qInfo() << "====================== END =========================="<<"\n";
     return freqChanged;

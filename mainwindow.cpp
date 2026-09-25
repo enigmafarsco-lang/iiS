@@ -371,6 +371,14 @@ void MainWindow::connections()
 
         //smart noise and exciter
         connect(ui->exiter,&Exciter::turnOffSmartNoiseSignal,receiverWindow,&ReceiverMain::stopSmartNoiseSlot);
+
+        // TX1 follows the exciter modes: all modes off -> TX1 off,
+        // any mode on -> TX1 on
+        connect(ui->exiter, &Exciter::modeActivitySignal, this, [&](bool anyOn)
+        {
+            if (receiverWindow && receiverWindow->power_TX1_DownChk)
+                receiverWindow->power_TX1_DownChk->setChecked(!anyOn);
+        });
         connect(receiverWindow,&ReceiverMain::smartNoiseIsActiveSignal,ui->exiter,&Exciter::smartNoiseIsActiveSlot);
 
         //for sending sattar file on processing cart
