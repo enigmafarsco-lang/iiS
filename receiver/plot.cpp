@@ -1774,6 +1774,15 @@ void Plot::DrawFFTPlot()
         txtLbl->setFont(QFont(font().family(), 12));
         txtLbl->setColor(Qt::yellow);
         txtLbl->setText("");
+        // Selected-frequency marker; recreated here because clearItems()
+        // destroys every chart item on each frame.
+        if (selectedFreqValid)
+        {
+            QCPItemLine *selectedLine = new QCPItemLine(ui->fftChart);
+            selectedLine->setPen(QPen(QColor(255, 255, 0), 1, Qt::DashLine));
+            selectedLine->start->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().lower);
+            selectedLine->end->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().upper);
+        }
 
 
         // saeid raziani ===========================
@@ -2053,6 +2062,15 @@ void Plot::DrawFFTPlot()
         txtLbl->setFont(QFont(font().family(), 12));
         txtLbl->setColor(Qt::yellow);
         txtLbl->setText("");
+        // Selected-frequency marker; recreated here because clearItems()
+        // destroys every chart item on each frame.
+        if (selectedFreqValid)
+        {
+            QCPItemLine *selectedLine = new QCPItemLine(ui->fftChart);
+            selectedLine->setPen(QPen(QColor(255, 255, 0), 1, Qt::DashLine));
+            selectedLine->start->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().lower);
+            selectedLine->end->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().upper);
+        }
 
 
 
@@ -3464,7 +3482,7 @@ bool Plot::GetBaseFreq()
     // QWidget access from there crashes with SIGSEGV, so the UI update is
     // marshalled onto the GUI thread.
     QTimer::singleShot(0, this, [this](){
-        if (!ui || !ui->lblFreqValue)
+        if (!ui || !ui->lblFreqValue || !ui->fftChart)
             return;
 
         if (ui->lblFreqValue->text().toDouble() == baseFreq)
@@ -6050,6 +6068,15 @@ void Plot::reScale_plot(int type){
         txtLbl->setFont(QFont(font().family(), 12));
         txtLbl->setColor(Qt::red);
         txtLbl->setText("");
+        // Selected-frequency marker; recreated here because clearItems()
+        // destroys every chart item on each frame.
+        if (selectedFreqValid)
+        {
+            QCPItemLine *selectedLine = new QCPItemLine(ui->fftChart);
+            selectedLine->setPen(QPen(QColor(255, 255, 0), 1, Qt::DashLine));
+            selectedLine->start->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().lower);
+            selectedLine->end->setCoords(selectedFreqValue, ui->fftChart->yAxis->range().upper);
+        }
 
         int minIndexNum{};
         int maxIndexNum{};
@@ -6891,15 +6918,11 @@ void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 
 void Plot::on_txtSelectedFreq_valueChanged(double value)
 {
-    // Mark the entered frequency on the spectrum diagram so the display
-    // updates with the frequency selection.
-    if (!selectedFreqLine) {
-        selectedFreqLine = new QCPItemLine(ui->fftChart);
-        selectedFreqLine->setPen(QPen(QColor(255, 255, 0), 1, Qt::DashLine));
-    }
-    selectedFreqLine->start->setCoords(value, ui->fftChart->yAxis->range().lower);
-    selectedFreqLine->end->setCoords(value, ui->fftChart->yAxis->range().upper);
-    selectedFreqLine->setVisible(true);
+    // Remember the entered frequency; the marker itself is drawn in
+    // DrawFFTPlot() AFTER clearItems(). A cached QCPItem would dangle:
+    // clearItems() destroys every chart item on each frame.
+    selectedFreqValue = value;
+    selectedFreqValid = true;
     ui->fftChart->replot();
 }
 
