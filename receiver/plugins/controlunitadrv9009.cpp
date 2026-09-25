@@ -272,7 +272,7 @@ ControlUnitADRV9009::ControlUnitADRV9009(QWidget *parent) :
     QObject::connect(this, &ControlUnitADRV9009::sendTransmitSignal, [=](int index)
     {
         Write((uint32_t)writeItemAddress.value("dacselect"),index);
-//        emit sendFileToDacSignal();
+        emit sendFileToDacSignal(); // noise/DRFM set: CW tone -> DAC buffer
     });
 
     //setting auto amp value
@@ -291,6 +291,7 @@ ControlUnitADRV9009::ControlUnitADRV9009(QWidget *parent) :
     QObject::connect(this, &ControlUnitADRV9009::setNoiseSignal, [=](int val)
     {
         Write((uint32_t)writeItemAddress.value("chselect"),1);
+        emit sendFileToDacSignal(); // noise set: CW tone -> DAC buffer
     });
 
 
@@ -793,10 +794,13 @@ bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
     // DacSel=0 => DMA path used by the noise waveform.
     const quint32 value = enabled ? 1u : 0u;
     writeItemValues["dacselect"] = value;
-    return writeRegisterToHw(REG_DRFM_SELECT, value,
+    const bool ok = writeRegisterToHw(REG_DRFM_SELECT, value,
                                       enabled ? QStringLiteral("DRFM ON / DACSEL=1")
                                               : QStringLiteral("NOISE / DACSEL=0"),
                                       details);
+    if (ok)
+        emit sendFileToDacSignal(); // noise/DRFM set: CW tone -> DAC buffer
+    return ok;
 }
 
 bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *details)

@@ -885,9 +885,9 @@ void ReceiverMain::setupDrfmControlTab()
         }
         if (att_TX1_Spn)
             att_TX1_Spn->setValue(0);
-        if (oscMain && oscMain->_adrv9009)
-            registerOutput->appendPlainText(
-                QStringLiteral("\n") + oscMain->_adrv9009->changeDacToBuffer());
+        // (Every noise/DRFM set switches the DAC from CW tone to DAC buffer
+        // through ControlUnitADRV9009::sendFileToDacSignal -> setFile, exactly
+        // like the exciter tab does.)
     };
 
     auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
@@ -2115,6 +2115,18 @@ void ReceiverMain::init()
                         if (txOn)  txOn->setChecked(!checked);
                     });
                 }
+                // Every noise/DRFM set changes the DAC from CW tone to DAC
+                // buffer "like the exciter tab": the control unit emits
+                // sendFileToDacSignal and we load the DAC buffer file the same
+                // way the exciter sets pulse/spot/wideband (setFile).
+                if (oscMain && oscMain->_adrv9009controlUnit)
+                {
+                    connect(oscMain->_adrv9009controlUnit, &ControlUnitADRV9009::sendFileToDacSignal,
+                            this, [this]() {
+                        if (oscMain && oscMain->_adrv9009)
+                            oscMain->_adrv9009->setFile(spotPath, 0);
+                    });
+                }
                 gridTX1->addWidget(rfBandlbl          , 5 , 1)         ;
                 gridTX1->addWidget(sampleRatelbl      , 6 , 1)         ;
 
@@ -2348,7 +2360,7 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);//OBS RX
 
     oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
-    oscMain->_adrv9009->power_TX1_DownChk->setChecked(false); // default: TX1 on, TX2 off
+    oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);  // default: TX1 off (safe), TX2 off
     // ADRV9009 calibration defaults: all checked except cal-tx-ext and fhm
     oscMain->_adrv9009->cal_rx_qec_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_qec_chk->setChecked(true);
