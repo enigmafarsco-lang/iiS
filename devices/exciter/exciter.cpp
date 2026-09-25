@@ -73,11 +73,11 @@ Exciter::Exciter(QWidget *parent) :
     //spin box limitation
     if(DC_6_UPTO_8_12 == 0)
     {
-        ui->spnCWFrq->setRange         (1000,6000);
-        ui->spnSpotFrq->setRange       (1000,6000);
-        ui->spnImpulseFrq->setRange    (1000,6000);
-        ui->spnSweepStopFrq->setRange  (1000,6000);
-        ui->spnSweepStartFrq->setRange (1000,6000);
+        ui->spnCWFrq->setRange         (200,6000);
+        ui->spnSpotFrq->setRange       (200,6000);
+        ui->spnImpulseFrq->setRange    (200,6000);
+        ui->spnSweepStopFrq->setRange  (200,6000);
+        ui->spnSweepStartFrq->setRange (200,6000);
     }
 
     else

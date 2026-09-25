@@ -2203,7 +2203,7 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);//OBS RX
 
     oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
-    oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);
+    oscMain->_adrv9009->power_TX1_DownChk->setChecked(false); // default: TX1 on, TX2 off
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 

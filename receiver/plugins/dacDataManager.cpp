@@ -492,22 +492,16 @@ QScrollArea *dacDataManager::gui_dac_channels_tree_create(struct dac_buffer *d_b
         item->setText (0,iio_channel_get_id(ch));
         item->setFlags (item->flags ()|Qt::ItemIsUserCheckable|Qt::ItemIsSelectable);
 
-        if(iio_channel_is_enabled(ch))
-            item->setCheckState (0,Qt::Checked);
-        else
-            item->setCheckState (0,Qt::Unchecked);
+        // voltage0..3 all selected by default so a loaded waveform
+        // drives every channel, like in iio-oscilloscope.
+        item->setCheckState (0,Qt::Checked);
 
         treeview->addTopLevelItem(item);
     }
 
-    QObject::connect(treeview,&QTreeWidget::itemClicked,[=](QTreeWidgetItem *item, int column){
-
-        if(item->checkState(0))
-            item->setCheckState(0,Qt::Unchecked);
-        else
-            item->setCheckState(0,Qt::Checked);
-
-    });
+    // Note: do not toggle the check state on itemClicked.
+    // QTreeWidget already toggles it on checkbox clicks, and a
+    // second flip here cancelled the user click.
 
     d_buffer->tx_channels_view=treeview;
 
@@ -1128,19 +1122,26 @@ double dacDataManager::db_full_scale_convert(double value, bool inverse)
 void dacDataManager::enable_dds_channels(struct dac_buffer *db)
 {
     QTreeWidget *treeview = db->tx_channels_view;
-    gboolean enabled;
-    gint ch_index = 0;
+    struct iio_device *dac = db->dac_with_scanelems;
 
-    for(int i=0;i<treeview->topLevelItemCount();i++)
-    {
-        enabled=treeview->topLevelItem(i)->checkState(0);
+    // The tree holds one item per scan-element channel (same walk as
+    // gui_dac_channels_tree_create). Indexing iio_device_get_channel() with
+    // the raw row number was wrong: rows landed on DDS tone channels
+    // (altvoltage*) so voltage2/3 kept their old enable state and the
+    // waveform only reached voltage0/1.
+    int item = 0;
+    int count = iio_device_get_channels_count(dac);
+    for (int i = 0; i < count && item < treeview->topLevelItemCount(); i++) {
+        struct iio_channel *channel = iio_device_get_channel(dac, i);
+        if (!iio_channel_is_scan_element(channel))
+            continue;
 
-        struct iio_channel *channel = iio_device_get_channel(db->dac_with_scanelems, ch_index++);
-
+        bool enabled = treeview->topLevelItem(item)->checkState(0) == Qt::Checked;
         if (enabled)
             iio_channel_enable(channel);
         else
             iio_channel_disable(channel);
+        item++;
     }
 }
 

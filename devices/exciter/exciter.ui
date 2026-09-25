@@ -183,7 +183,7 @@
              </sizepolicy>
             </property>
             <property name="minimum">
-             <double>1000.000000000000000</double>
+             <double>200.000000000000000</double>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -299,7 +299,7 @@
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spnSpotFrq">
             <property name="minimum">
-             <double>1000.000000000000000</double>
+             <double>200.000000000000000</double>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -416,7 +416,7 @@
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spnSweepStartFrq">
             <property name="minimum">
-             <double>1000.000000000000000</double>
+             <double>200.000000000000000</double>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -433,7 +433,7 @@
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spnSweepStopFrq">
             <property name="minimum">
-             <double>1000.000000000000000</double>
+             <double>200.000000000000000</double>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -590,7 +590,7 @@
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spnImpulseFrq">
             <property name="minimum">
-             <double>1000.000000000000000</double>
+             <double>200.000000000000000</double>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>

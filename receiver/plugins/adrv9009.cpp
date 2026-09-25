@@ -2031,7 +2031,12 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 QString adrv9009::setFile(QString fileName,double scale)
 {
         changingDac("");
-        dac_tx_manager->dac1.txs[0].dds_mode_widget->setCurrentIndex(4);
+        // Put every TX pair into "DAC Buffer Output" mode, not just TX1,
+// so the loaded waveform drives all four channels voltage0..3.
+for (guint i = 0; i < dac_tx_manager->dac1.tx_count; i++)
+    dac_tx_manager->dac1.txs[i].dds_mode_widget->setCurrentIndex(4);
+for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
+    dac_tx_manager->dac2.txs[i].dds_mode_widget->setCurrentIndex(4);
         dac_tx_manager->dac_buffer_module.scale->setValue(scale);
         QTreeWidget *treeview =dac_tx_manager->dac_buffer_module.tx_channels_view;
         for(int i=0;i<treeview->topLevelItemCount();i++)
