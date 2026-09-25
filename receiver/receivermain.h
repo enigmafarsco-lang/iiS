@@ -156,9 +156,9 @@ public:
     //--- TX1 -----------------------------------------------------------
     QCheckBox      * pinn_TX1_Chk;
     QCheckBox      * track_TX1_Chk;
-    QCheckBox      * power_TX1_DownChk;
+    QCheckBox      * power_TX1_DownChk = nullptr;
     QCheckBox      * lo_TX1_Chk;
-    QDoubleSpinBox * att_TX1_Spn;
+    QDoubleSpinBox * att_TX1_Spn = nullptr;
     QLabel         * rfBandlbl;
     QLabel         * sampleRatelbl;
     //--- TX1 -----------------------------------------------------------

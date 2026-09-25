@@ -657,6 +657,8 @@ void ReceiverMain::setupDrfmControlTab()
     txInfo->setWordWrap(true);
     QRadioButton *txOn = new QRadioButton(tr("TX ON"), txGroup);
     QRadioButton *txOff = new QRadioButton(tr("TX OFF"), txGroup);
+    txOn->setObjectName("drfmTxOn");
+    txOff->setObjectName("drfmTxOff");
     txOff->setChecked(true); // TX1 default at application start: off
     txLayout->addWidget(txInfo, 0, 0, 1, 3);
     txLayout->addWidget(new QLabel(tr("State"), txGroup), 1, 0);
@@ -969,18 +971,16 @@ void ReceiverMain::setupDrfmControlTab()
     connect(txOn, &QRadioButton::clicked, this, [this](bool) {
         if (power_TX1_DownChk)
         {
+            power_TX1_DownChk->stateChanged(0);   // force a hardware write
             power_TX1_DownChk->setChecked(false); // TX1 ON
         }
     });
     connect(txOff, &QRadioButton::clicked, this, [this](bool) {
         if (power_TX1_DownChk)
         {
-            power_TX1_DownChk->setChecked(true); // TX1 OFF
+            power_TX1_DownChk->stateChanged(1);   // force a hardware write
+            power_TX1_DownChk->setChecked(true);  // TX1 OFF
         }
-    });
-    connect(power_TX1_DownChk, &QCheckBox::toggled, this, [txOn, txOff](bool checked) {
-        txOff->setChecked(checked);
-        txOn->setChecked(!checked);
     });
 
     // IIO-side scan: which debug attributes represent th0/dacsel/...
@@ -2101,6 +2101,20 @@ void ReceiverMain::init()
                 gridTX1->addWidget(track_TX1_Chk      , 2 , 1)         ;
                 gridTX1->addWidget(lo_TX1_Chk         , 3 , 1)         ;
                 gridTX1->addWidget(power_TX1_DownChk  , 4 , 1)         ;
+
+                // TX1 default at start: OFF (checked = powerdown = TX off).
+                // Forced here where the real tx1_powerdown_en widget is known.
+                if (power_TX1_DownChk)
+                {
+                    power_TX1_DownChk->setChecked(true);
+                    // The DRFM tab TX1 pair follows the real TX1 control.
+                    connect(power_TX1_DownChk, &QCheckBox::toggled, this, [this](bool checked) {
+                        QRadioButton *txOn  = findChild<QRadioButton *>("drfmTxOn");
+                        QRadioButton *txOff = findChild<QRadioButton *>("drfmTxOff");
+                        if (txOff) txOff->setChecked(checked);
+                        if (txOn)  txOn->setChecked(!checked);
+                    });
+                }
                 gridTX1->addWidget(rfBandlbl          , 5 , 1)         ;
                 gridTX1->addWidget(sampleRatelbl      , 6 , 1)         ;
 
@@ -2267,6 +2281,12 @@ void ReceiverMain::defaultSettings()
     else
     {
         defaultParameters();
+    }
+    // TX1 is OFF whenever defaults are applied at start (safe default).
+    if (power_TX1_DownChk)
+    {
+        power_TX1_DownChk->stateChanged(1);  // force a hardware write
+        power_TX1_DownChk->setChecked(true); // TX off
     }
 }
 

@@ -1245,6 +1245,10 @@ QWidget *adrv9009::init()
     /* Update all widgets with current values */
     printf("Updating widgets...\n");
     update_widgets();
+
+    // TX1 default at start of operation: OFF (checked = powerdown = TX off).
+    if (ui->tx1_powerdown_en)
+        ui->tx1_powerdown_en->setChecked(true);
     rx_freq_info_update();
     printf("Updating FIR filter...\n");
     profile_update();
