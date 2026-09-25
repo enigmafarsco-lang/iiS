@@ -125,7 +125,6 @@
                   </layout>
                  </item>
                  <item>
-                  <item>
                  <layout class="QHBoxLayout" name="hrzGlobal_sn">
                   <item>
                    <widget class="QLabel" name="lblSerialTitle">
