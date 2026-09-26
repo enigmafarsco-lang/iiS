@@ -1294,6 +1294,15 @@ void ReceiverMain::smartSelectedNoise()
 
     connect(frqDomainPlot, &Plot::selectedSmartNoiseStatusSignal,this, [&](bool val)
     {
+        // Phase 5 fix: the spectrum "select" button emits this on every
+        // click (it only re-scales the chart). Only a real transition from
+        // an ACTIVE smart noise may power down TX1 / reset the noise
+        // status; a plain select click must not change TX1 or other params.
+        if (val)
+            return;
+        if (!frqDomainPlot || !frqDomainPlot->isSmartNoisetOn)
+            return;
+        frqDomainPlot->isSmartNoisetOn = false;
         power_TX1_DownChk->setChecked(true);
         showNoiseStatus("","There is no active smart noise.");
     });
@@ -2363,12 +2372,18 @@ void ReceiverMain::on_btnProfileSet_clicked()
         frqDomainPlot->setEnabled(false);
     }
 
+    // Phase 5 fix: the profile loader ends by changing the working
+    // directory to the profile folder (existing behavior). The exciter
+    // resolves spot files relative to the working directory, so restore
+    // it afterwards or "spot/spot{N}mhz_{P}.txt" would not be found.
+    const QString workDir = QDir::currentPath();
     if (oscMain && oscMain->_adrv9009) {
         oscMain->_adrv9009->on_profile_config_clicked(profilePath);
     } else {
         qWarning() << "Receiver: ADRV9009 plugin not ready; profile not loaded:"
                    << profilePath;
     }
+    QDir::setCurrent(workDir);
 
     QTimer::singleShot(10000, this, [this, bw]{
         if (!frqDomainPlot)

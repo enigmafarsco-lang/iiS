@@ -3493,9 +3493,15 @@ bool Plot::GetBaseFreq()
 
         ui->lblFreqValue->setText(QString::number(abs(DC_6_UPTO_8_12-baseFreq)));
         frqValueStr = ui->lblFreqValue->text();
-        // Move the spectrum window with the base frequency
+        // Move the spectrum window with the base frequency.
+        // Phase 5: with an active profile bandwidth, and no explicit
+        // frequency entered, keep the freq +/- bw/2 window width.
         double frqWin = abs(DC_6_UPTO_8_12 - baseFreq);
-        ui->fftChart->xAxis->setRange(frqWin - 250, frqWin + 250);
+        if (activeBandwidthMHz > 0.0 && ui->txtSelectedFreq->value() <= 0.0)
+            ui->fftChart->xAxis->setRange(frqWin - activeBandwidthMHz / 2.0,
+                                           frqWin + activeBandwidthMHz / 2.0);
+        else
+            ui->fftChart->xAxis->setRange(frqWin - 250, frqWin + 250);
         ui->fftChart->replot();
     });
 
@@ -6932,7 +6938,16 @@ void Plot::applyBandwidthWindow()
         !ui->txtSelectedFreq)
         return;
 
-    const double freq = ui->txtSelectedFreq->value();
+    // The "Frequency (MHz)" field (txtSelectedFreq) defaults to 0. When the
+    // user has not entered an explicit frequency, center the window on the
+    // current base frequency so the spectrum stays visible (Phase 5 fix:
+    // the window used to snap to 0 MHz and the plot went blank).
+    double freq = ui->txtSelectedFreq->value();
+    if (freq <= 0.0)
+        freq = abs(DC_6_UPTO_8_12 - baseFreq);
+    if (freq <= 0.0)
+        return; // center not known yet; keep the current axis
+
     const double half = activeBandwidthMHz / 2.0;
 
     // Keep the start/stop fields in sync with the forced window...
