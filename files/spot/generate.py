@@ -27,15 +27,8 @@ the iio-oscilloscope DAC loader already accepts):
 
 Spectral convention
 -------------------
-Each file is complex (I/Q) Gaussian noise whose power is confined to a
-flat band of N MHz centred at DC (baseband).  The band edge is a
-brick-wall DFT cutoff: every DFT bin inside +/-N/2 MHz is kept and every
-bin outside is zeroed, so the transition is at most one DFT bin wide
-(P/262144 MHz = 0.38 / 0.76 / 1.53 kHz for P = 100/200/400).  There is
-no filter ramp; out-of-band energy sits at the 6-decimal text
-quantisation floor (~ -120 dB), not at -60 dB.  (The legacy
-spot5/10/500mhz.txt files in the files repo have a soft ramp edge, so
-prefer these generated profile files.)
+Each file is complex (I/Q) Gaussian noise confined to a flat band of
+N MHz centred at DC (baseband):
 
     -P/2 MHz ... -N/2 MHz ... 0 ... N/2 MHz ... +P/2 MHz
                 |_____________|
@@ -44,7 +37,33 @@ prefer these generated profile files.)
 The file's assumed sample rate is Fs = P MHz (P = the ADRV9009 profile
 the file belongs to), so every N <= P fits inside the Nyquist band
 [-P/2, +P/2] MHz.  The largest file of a set (spot{P}mhz_{P}.txt) is
-therefore full-band white noise for that profile.
+full-band white noise for that profile.
+
+The band edge is shaped like a high-order low-pass filter, not a soft
+ramp:
+
+  * N >= 12 MHz: flat passband (ripple well under 1 dB) up to the
+    nominal edge, exactly -3 dB at +/-N/2 MHz, then a smooth rolloff
+    that reaches the noise floor by +/-(N/2 + 10) MHz (more than
+    60 dB rejection there).  E.g. a 100 MHz spot: flat to ~44 MHz,
+    -3 dB at 50 MHz, > 60 dB down by 60 MHz.
+  * N <= 11 MHz: brick-wall DFT cutoff at +/-N/2 MHz (the 10 MHz
+    rolloff plus its ~5.7 MHz pre-edge knee cannot fit inside such a
+    narrow band without distorting the passband centre).
+
+Out-of-band energy sits at the 6-decimal text quantisation floor
+(~ -120 dB), not at -60 dB.  The in-band level is flat because the
+spectrum is synthesised with a fixed, averaged amplitude (random
+phases) - the PSD trace shows no per-bin statistical ripples while
+the time-domain samples remain Gaussian noise.
+
+(The legacy spot5/10/500mhz.txt files in the files repo have a soft
+ramp edge - only ~ -60 dB rejection ~10 MHz outside the band - so
+prefer these generated profile files.)
+
+All MHz values above are in the file's sample-rate units (Fs = P MHz).
+If the DAC plays the file at a different clock, scale the displayed
+band by clock/P.
 
 The DAC loader auto-scales each file's peak to full scale, so the
 absolute amplitude written here (normalized to a peak of 1.0) only
@@ -63,10 +82,10 @@ Usage
     skipped with a warning.  Re-running is idempotent (default seed is
     deterministic per file).
 
-Speed: with numpy installed (pip install numpy) all 700 files take a
-few minutes.  Without numpy the pure-stdlib FFT path needs roughly
-1-10 s per file.  Total on-disk size is about 4.5 GB, so make sure the
-target folder has enough room.
+Speed: with numpy installed (pip install numpy) all 700 files take
+roughly 5-10 minutes.  Without numpy the pure-stdlib FFT path needs
+roughly 4-5 s per file (~40-60 min for all 700).  Total on-disk size
+is about 3.5 GB, so make sure the target folder has enough room.
 
 NEVER commit the generated .txt files (files/spot/.gitignore blocks them).
 """
@@ -139,23 +158,119 @@ def _fft_pure(re, im, inverse=False):
             im[i] *= inv
 
 
-def _bandlimit_pure(re, im, bins_each_side):
-    """Brick-wall band limit around DC via FFT, zeroing out-of-band bins."""
-    n = len(re)
-    x_re = re[:]
-    x_im = im[:]
-    _fft_pure(x_re, x_im)
-    c = bins_each_side
-    if c:
-        lo = c
-        hi = n - c
-        if hi > lo:
-            for k in range(lo, hi):
-                x_re[k] = 0.0
-                x_im[k] = 0.0
-    _fft_pure(x_re, x_im, inverse=True)
-    re[:] = x_re
-    im[:] = x_im
+# ---------------------------------------------------------------------------
+# Band-edge filter design
+# ---------------------------------------------------------------------------
+#
+# Requirement: a high-order-filter look, not a soft ramp.  For a
+# 100 MHz spot the spectrum must be flat up to f0+/-50 MHz (passband,
+# -3 dB at the nominal edge) and at least 40-60 dB down by f0+/-60
+# MHz.  Implemented as a raised-cosine rolloff: flat top, exactly
+# -3 dB at +/-N/2 MHz, zero (noise floor) at +/-(N/2 + 10) MHz.  For
+# N <= 11 MHz the 10 MHz rolloff plus its ~5.7 MHz pre-edge knee
+# cannot fit without distorting the passband centre, so those files
+# use a brick-wall DFT cutoff at +/-N/2 MHz.
+#
+# The PSD is synthesised: the (smoothed, multi-sequence averaged)
+# amplitude spectrum is fixed and the phases are random, so the
+# in-band trace is flat (no per-bin statistical ripples) while the
+# time-domain samples remain Gaussian noise.
+
+N_SEQUENCES = 4          # independent noise sequences averaged into the PSD
+BIN_SMOOTH = 16          # circular moving-average width for the PSD (bins)
+ROLLOFF_MHZ = 10.0       # stopband starts at N/2 + ROLLOFF_MHZ
+KNEE_MHZ = 5.706         # pre-edge knee (raised cosine -> -3 dB at N/2)
+BRICKWALL_MAX_BW = 11.0  # N <= this uses the brick-wall edge
+
+
+def _band_edge_response(bw_mhz, profile_bw, n):
+    """Per-DFT-bin amplitude response H[k] (list of n floats).
+
+    Bin k (0..n-1) is the signed frequency
+    (k if k <= n/2 else k-n) * P/n MHz, file sample rate P MHz.
+    """
+    p = float(profile_bw)
+    e = bw_mhz / 2.0                       # nominal edge, MHz
+    half = n // 2
+    if bw_mhz >= profile_bw:               # full band: white
+        return [1.0] * n
+    if e >= KNEE_MHZ:                      # high-order rolloff template
+        b = min(e + ROLLOFF_MHZ, p / 2.0)  # stopband start, MHz
+        t = KNEE_MHZ * (b - e) / ROLLOFF_MHZ
+        a = e - t                          # rolloff start, MHz
+        span = 1.0 / (b - a)
+        pi = math.pi
+        H = []
+        append = H.append
+        for k in range(n):
+            af = (k if k <= half else k - n) * (p / n)
+            if af < 0.0:
+                af = -af
+            if af <= a:
+                append(1.0)
+            elif af < b:
+                append(0.5 * (1.0 + math.cos(pi * (af - a) * span)))
+            else:
+                append(0.0)
+        return H
+    c = int(bw_mhz * n // (2 * profile_bw))  # brick-wall bin count
+    return [1.0 if (k if k <= half else n - k) < c else 0.0
+            for k in range(n)]
+
+
+def _synthesize_numpy(n, seed, H):
+    """Fixed-amplitude / random-phase re-synthesis (numpy path)."""
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    S = None
+    for _ in range(N_SEQUENCES):
+        x = rng.standard_normal(n) + 1j * rng.standard_normal(n)
+        X = np.fft.fft(x)
+        pw = X.real * X.real + X.imag * X.imag
+        S = pw if S is None else S + pw
+    S /= N_SEQUENCES
+    acc = np.zeros(n)
+    for r in range(BIN_SMOOTH):
+        acc += np.roll(S, r)
+    Ss = acc / BIN_SMOOTH
+    amp = np.asarray(H, dtype=np.float64) * np.sqrt(Ss)
+    amp[0] = 0.0                      # no DC component
+    ph = rng.uniform(0.0, 2.0 * math.pi, n)
+    y = np.fft.ifft(amp * np.cos(ph) + 1j * (amp * np.sin(ph)))
+    return y.real, y.imag
+
+
+def _synthesize_pure(n, seed, H):
+    """Fixed-amplitude / random-phase re-synthesis (stdlib path)."""
+    rnd = random.Random(seed)
+    S = [0.0] * n
+    for _ in range(N_SEQUENCES):
+        re = [rnd.gauss(0.0, 1.0) for _ in range(n)]
+        im = [rnd.gauss(0.0, 1.0) for _ in range(n)]
+        _fft_pure(re, im)
+        for k in range(n):
+            S[k] += re[k] * re[k] + im[k] * im[k]
+    w = BIN_SMOOTH
+    tail = w - 1
+    T = S[:tail] + S                  # circular windowing
+    pref = [0.0] * (len(T) + 1)
+    ssum = 0.0
+    for i, v in enumerate(T):
+        ssum += v
+        pref[i + 1] = ssum
+    Ss = [0.0] * n
+    for k in range(n):
+        Ss[k] = (pref[k + w] - pref[k]) / w
+    y_re = [0.0] * n
+    y_im = [0.0] * n
+    for k in range(n):
+        a = H[k] * math.sqrt(Ss[k])
+        if k:
+            p = rnd.uniform(0.0, 2.0 * math.pi)
+            y_re[k] = a * math.cos(p)
+            y_im[k] = a * math.sin(p)
+    _fft_pure(y_re, y_im, inverse=True)
+    return y_re, y_im
 
 
 # ---------------------------------------------------------------------------
@@ -178,33 +293,20 @@ def generate_file(path, bw_mhz, profile_bw, samples, seed, use_numpy):
     """Generate one band-limited noise file.  Returns (seconds, bytes)."""
     t0 = time.time()
     n = samples
-    # File sample rate = profile bandwidth (MHz).  Keep the baseband band
-    # [-bw/2, +bw/2] MHz -> bw*n/(2*P) DFT bins on each side of DC.
-    bins_each_side = int(bw_mhz * n // (2 * profile_bw))
+    H = _band_edge_response(bw_mhz, profile_bw, n)
 
     if use_numpy:
+        re, im = _synthesize_numpy(n, seed, H)
         import numpy as np
-        rng = np.random.default_rng(seed)
-        x = rng.standard_normal(n) + 1j * rng.standard_normal(n)
-        spectrum = np.fft.fft(x)
-        mask = np.zeros(n, dtype=bool)
-        c = bins_each_side
-        if c:
-            mask[:c] = True
-            mask[n - c:] = True
-        x = np.fft.ifft(spectrum * mask)
-        re = np.ascontiguousarray(x.real, dtype=np.float64)
-        im = np.ascontiguousarray(x.imag, dtype=np.float64)
+        re = np.ascontiguousarray(re, dtype=np.float64)
+        im = np.ascontiguousarray(im, dtype=np.float64)
         peak = max(float(np.max(np.abs(re))), float(np.max(np.abs(im))))
         if peak > 0.0:
             re /= peak
             im /= peak
-        n_bytes = _write_wavefile(path, re.tolist(), im.tolist())
+        _write_wavefile(path, re.tolist(), im.tolist())
     else:
-        rnd = random.Random(seed)
-        re = [rnd.gauss(0.0, 1.0) for _ in range(n)]
-        im = [rnd.gauss(0.0, 1.0) for _ in range(n)]
-        _bandlimit_pure(re, im, bins_each_side)
+        re, im = _synthesize_pure(n, seed, H)
         peak = 0.0
         for i in range(n):
             a = abs(re[i])
@@ -218,7 +320,7 @@ def generate_file(path, bw_mhz, profile_bw, samples, seed, use_numpy):
             for i in range(n):
                 re[i] *= s
                 im[i] *= s
-        n_bytes = _write_wavefile(path, re, im)
+        _write_wavefile(path, re, im)
 
     return time.time() - t0, os.path.getsize(path)
 
