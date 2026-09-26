@@ -87,7 +87,7 @@ private:
         CW,Spot,Sweep,Impulse,WB
     };
 
-    void createImpulseFile(double, double, QString&);
+    void createImpulseFile(double, double, QString&, double);
     bool existsFile (const std::string& name);
     bool returnfilePath(QString&);
 

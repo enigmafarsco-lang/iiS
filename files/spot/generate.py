@@ -34,18 +34,38 @@ N MHz centred at DC (baseband):
                 |_____________|
                  band = N MHz
 
-The file's assumed sample rate is Fs = P MHz (P = the ADRV9009 profile
-the file belongs to), so every N <= P fits inside the Nyquist band
-[-P/2, +P/2] MHz.  The largest file of a set (spot{P}mhz_{P}.txt) is
-full-band white noise for that profile.
+Sample rate (IMPORTANT - hardware anchored)
+-------------------------------------------
+The file's assumed sample rate is
+
+    Fs = 0.5 x P MHz        (P100: 50,  P200: 100,  P400: 200 MS/s)
+
+i.e. half the ADRV9009 profile bandwidth.  This is the I/Q playback
+rate measured on the target rig (calibrated with the scope: files
+generated at the old P MHz assumption displayed at exactly half
+width, e.g. a 100 MHz spot read 50 MHz).  With this rate, a spot of
+N MHz occupies exactly N MHz on the spectrum: type 100, see 100.
+
+Consequences:
+  * the widest spot a profile can produce is P/2 MHz (Nyquist):
+    P100 -> 50 MHz, P200 -> 100 MHz, P400 -> 200 MHz;
+  * N > P/2 produces the profile's maximum (full-band) waveform;
+  * files are still named spot{N}mhz_{P}.txt for N = 1..P.
+
+(For reference the Talise profiles list the TX baseband input rate
+as 1.2288 x P MHz - 122.88/245.76/491.52 MS/s - with 16/8/4x
+interpolation to the 1966.08 MS/s DAC; the board's actual file
+playback clock is the 0.5 x P value above.  To re-anchor the rate,
+change SAMPLE_RATE_SCALE below and regenerate.)
 
 The band edge is shaped like a high-order low-pass filter, not a soft
 ramp:
 
   * N >= 12 MHz: flat passband (ripple well under 1 dB) up to the
-    nominal edge, exactly -3 dB at +/-N/2 MHz, then a smooth rolloff
-    that reaches the noise floor by +/-(N/2 + 10) MHz (more than
-    60 dB rejection there).  E.g. a 100 MHz spot: flat to ~44 MHz,
+    nominal edge, exactly -3 dB at +/-N/2 MHz, then a steep
+    2nd-order (zero-slope) raised-cosine rolloff that reaches the
+    noise floor by +/-(N/2 + 10) MHz (more than 60 dB rejection
+    there).  E.g. a 100 MHz spot on profile 400: flat to ~46 MHz,
     -3 dB at 50 MHz, > 60 dB down by 60 MHz.
   * N <= 11 MHz: brick-wall DFT cutoff at +/-N/2 MHz (the 10 MHz
     rolloff plus its ~5.7 MHz pre-edge knee cannot fit inside such a
@@ -61,9 +81,9 @@ the time-domain samples remain Gaussian noise.
 ramp edge - only ~ -60 dB rejection ~10 MHz outside the band - so
 prefer these generated profile files.)
 
-All MHz values above are in the file's sample-rate units (Fs = P MHz).
-If the DAC plays the file at a different clock, scale the displayed
-band by clock/P.
+All MHz values above are in the file's sample-rate units
+(Fs = 0.5 x P MHz, see "Sample rate" above).  If the DAC plays the
+file at a different clock, scale the displayed band by clock/Fs.
 
 The DAC loader auto-scales each file's peak to full scale, so the
 absolute amplitude written here (normalized to a peak of 1.0) only
@@ -178,8 +198,21 @@ def _fft_pure(re, im, inverse=False):
 
 N_SEQUENCES = 4          # independent noise sequences averaged into the PSD
 BIN_SMOOTH = 16          # circular moving-average width for the PSD (bins)
+SAMPLE_RATE_SCALE = 0.5  # file sample rate = 0.5 x profile BW (MS/s)
 ROLLOFF_MHZ = 10.0       # stopband starts at N/2 + ROLLOFF_MHZ
-KNEE_MHZ = 5.706         # pre-edge knee (raised cosine -> -3 dB at N/2)
+ROLLOFF_ORDER = 2        # squared raised cosine: sharper edge than 1st order
+
+
+def _knee_mhz(rolloff_mhz, order):
+    """Pre-edge knee width that puts a raised-cosine template of the
+    given order exactly at -3 dB at the nominal edge N/2.
+    Solve (0.5*(1+cos(pi*u)))**order = 1/sqrt(2) for u, then
+    K = rolloff * u / (1-u)."""
+    u0 = math.acos(2.0 * (1.0 / math.sqrt(2.0)) ** (1.0 / order) - 1.0) / math.pi
+    return rolloff_mhz * u0 / (1.0 - u0)
+
+
+KNEE_MHZ = _knee_mhz(ROLLOFF_MHZ, ROLLOFF_ORDER)   # 3.534 for order 2
 BRICKWALL_MAX_BW = 11.0  # N <= this uses the brick-wall edge
 
 
@@ -187,12 +220,13 @@ def _band_edge_response(bw_mhz, profile_bw, n):
     """Per-DFT-bin amplitude response H[k] (list of n floats).
 
     Bin k (0..n-1) is the signed frequency
-    (k if k <= n/2 else k-n) * P/n MHz, file sample rate P MHz.
+    (k if k <= n/2 else k-n) * fs/n MHz, where
+    fs = SAMPLE_RATE_SCALE * P (P = profile bandwidth, MHz).
     """
-    p = float(profile_bw)
+    p = float(profile_bw) * SAMPLE_RATE_SCALE   # file sample rate, MHz
     e = bw_mhz / 2.0                       # nominal edge, MHz
     half = n // 2
-    if bw_mhz >= profile_bw:               # full band: white
+    if e >= p / 2.0:                       # band reaches Nyquist: full band
         return [1.0] * n
     if e >= KNEE_MHZ:                      # high-order rolloff template
         b = min(e + ROLLOFF_MHZ, p / 2.0)  # stopband start, MHz
@@ -200,6 +234,7 @@ def _band_edge_response(bw_mhz, profile_bw, n):
         a = e - t                          # rolloff start, MHz
         span = 1.0 / (b - a)
         pi = math.pi
+        order = ROLLOFF_ORDER
         H = []
         append = H.append
         for k in range(n):
@@ -209,11 +244,11 @@ def _band_edge_response(bw_mhz, profile_bw, n):
             if af <= a:
                 append(1.0)
             elif af < b:
-                append(0.5 * (1.0 + math.cos(pi * (af - a) * span)))
+                append((0.5 * (1.0 + math.cos(pi * (af - a) * span))) ** order)
             else:
                 append(0.0)
         return H
-    c = int(bw_mhz * n // (2 * profile_bw))  # brick-wall bin count
+    c = int(bw_mhz * n / p)                # brick-wall bin count
     return [1.0 if (k if k <= half else n - k) < c else 0.0
             for k in range(n)]
 
@@ -383,8 +418,9 @@ def main(argv=None):
                     continue
                 if n_bw > p:
                     print(f"warning: bw {n_bw} MHz > profile {p} MHz, skipping "
-                          f"(max spot bandwidth for this profile is {p} MHz)",
-                          file=sys.stderr)
+                          f"(max accepted spot bandwidth for this profile is "
+                          f"{p} MHz; note the widest *displayable* spot is "
+                          f"{p * SAMPLE_RATE_SCALE:g} MHz)", file=sys.stderr)
                     continue
                 work.append((p, n_bw))
         else:
@@ -402,6 +438,8 @@ def main(argv=None):
         path_desc = "pure stdlib" + ("" if not have_numpy else " (no numpy detected or --no-numpy)")
     print(f"Generating {total} file(s) into {os.path.abspath(args.out)}")
     print(f"  samples/file: {args.samples}   path: {path_desc}")
+    print(f"  file sample rate: {SAMPLE_RATE_SCALE:g} x profile BW -> " +
+          ", ".join(f"{p}: {p * SAMPLE_RATE_SCALE:g} MS/s" for p in profiles))
     est_total_gb = total * args.samples * 17 / 1e9
     print(f"  expected total size: ~{est_total_gb:.1f} GB")
 
@@ -439,7 +477,9 @@ def main(argv=None):
           f"{elapsed/60.0:.1f} min")
     for p in sorted(per_profile):
         m, t = per_profile[p]
-        print(f"  profile {p:>3d} MHz: {m}/{t} file(s)")
+        print(f"  profile {p:>3d} MHz: {m}/{t} file(s)  "
+              f"[rate {p * SAMPLE_RATE_SCALE:g} MS/s, max spot "
+              f"{p * SAMPLE_RATE_SCALE:g} MHz]")
     return 0 if made == total else 1
 
 

@@ -53,19 +53,43 @@ TEXT
 * 262144 samples per file.
 
 Each file is complex Gaussian noise confined to a flat band of
-`N` MHz centred at DC, assumed sample rate `P` MHz (so `N <= P` always
-fits the Nyquist band; `spot{P}mhz_{P}.txt` is full-band white noise).
+`N` MHz centred at DC.
+
+**Assumed sample rate: `Fs = 0.5 x P MHz`** (P100: 50, P200: 100,
+P400: 200 MS/s) — half the profile bandwidth.  This is the I/Q
+playback rate of the board, calibrated with the scope (files
+generated at the old `P` MHz assumption displayed at exactly half
+width, e.g. a 100 MHz spot reading 50 MHz on the spectrum).  With
+this rate **a spot of `N` MHz occupies exactly `N` MHz**: type 100,
+see 100.
+
+Consequences:
+
+* the widest spot a profile can produce is `P/2 MHz` (Nyquist):
+  **P100 -> 50 MHz, P200 -> 100 MHz, P400 -> 200 MHz**;
+* `N > P/2` produces the profile's maximum (full-band) waveform
+  (`spot{P}mhz_{P}.txt` and wider are all full-band white noise);
+* to re-anchor the rate (different board/clock), change
+  `SAMPLE_RATE_SCALE` in `generate.py` and regenerate.
+
+(The Talise profile files list the TX baseband input rate as
+`1.2288 x P` MHz — 122.88/245.76/491.52 MS/s — with 16/8/4x
+interpolation to the 1966.08 MS/s DAC; the board's actual file
+playback clock is the `0.5 x P` value above.)
+
 The DAC loader auto-scales each file's peak to full scale.
 
 ### Spectral edge (high-order filter shape, not a soft ramp)
 
 * `N >= 12 MHz`: flat passband (ripple well under 1 dB), **exactly
-  -3 dB at the nominal edge** (+/-N/2 MHz), then a smooth rolloff
-  reaching the noise floor by **+/(N/2 + 10) MHz** — more than 60 dB
-  rejection there (measured: > 100 dB; the floor is the ~-120 dB
-  6-decimal text quantisation limit).  Example, 100 MHz spot:
-  flat to ~44 MHz, -3 dB at 50 MHz, -12.7 dB at 55 MHz, > 100 dB
-  down by 60 MHz.
+  -3 dB at the nominal edge** (+/-N/2 MHz), then a steep 2nd-order
+  (zero-slope) raised-cosine rolloff reaching the noise floor by
+  **+/(N/2 + 10) MHz** — more than 60 dB rejection there (measured:
+  > 100 dB; the floor is the ~-120 dB 6-decimal text quantisation
+  limit).  Example, 100 MHz spot on profile 400: flat to ~46 MHz,
+  -3.7 dB at 50 MHz, -21 dB at 55 MHz, > 120 dB down by 60 MHz.
+  When the edge is within 10 MHz of Nyquist the rolloff is
+  compressed to end exactly at Nyquist (-3 dB still at the edge).
 * `N <= 11 MHz`: brick-wall cutoff at +/-N/2 MHz (the 10 MHz rolloff
   cannot fit inside such a narrow band without distorting the
   passband centre); out-of-band energy at the same ~-120 dB floor.
@@ -73,9 +97,19 @@ The DAC loader auto-scales each file's peak to full scale.
   fixed, averaged amplitude (random phases), so the PSD trace has no
   per-bin statistical ripples.
 
-All MHz figures are in the file's sample-rate units (Fs = P MHz, the
-profile bandwidth).  If the DAC plays the file at a different clock,
-scale the displayed band by clock/P.
+All MHz figures are in the file's sample-rate units
+(Fs = 0.5 x P MHz, see above).  If the DAC plays the file at a
+different clock, scale the displayed band by clock/Fs.
+
+## Impulse (pulse) tab
+
+`Impulse.txt` is generated live by the app from the PRI / pulse-width
+spins.  Samples are created at the same profile playback rate
+(`0.5 x P` MS/s, `profileBw` from the Profile tab): `samples =
+microseconds x rate`, so a 10 us pulse at profile 200 is 1000
+samples (at profile 100 it would be 500).  Older app versions wrote
+1 sample/us (1 MS/s) regardless of profile — pulses came out 50-200x
+too wide.
 
 ## What must NOT be committed
 

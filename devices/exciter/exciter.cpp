@@ -622,7 +622,7 @@ void Exciter::setDataSlot()
         double pw = (ui->spnImpulsePulseWidth->value() * 2000) / 4.1;
 
         QString impulseFileName = "Impulse.txt";
-        createImpulseFile(pri,pw,impulseFileName);
+        createImpulseFile(pri, pw, impulseFileName, profileBw / 2.0);
 
         if (!returnfilePath(impulseFileName)) return;
         fileName = "Impulse.txt";
@@ -686,7 +686,7 @@ void Exciter::setDataSlot()
 }
 
 
-void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName)
+void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName, double fs_msps)
 {
     uint iValue{}, qValue{};
 
@@ -702,9 +702,14 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName)
         QTextStream out(&file);
         out<< "TEXT\n";
 
-        for(uint i{}; i < uint(pri); i++)
+        // The board plays file samples at fs_msps = 0.5 x profile BW
+        // (the I/Q playback rate, see files/spot/generate.py).  PRI and
+        // pulse width arrive in microseconds, so:
+        const uint priSamp = uint(pri * fs_msps);
+        const uint pwSamp  = uint(pw  * fs_msps);
+        for(uint i{}; i < priSamp; i++)
         {
-            if(i < pw)
+            if(i < pwSamp)
             {
                 iValue = 1;
                 qValue = 1;
