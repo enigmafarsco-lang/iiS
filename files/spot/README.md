@@ -21,9 +21,16 @@ in — the app looks in `./spot/` relative to the startup directory):
 ```bash
 python3 generate.py            # all 700 files: 100 + 200 + 400
 python3 generate.py --profiles 100        # only the 100 MHz set
+python3 generate.py --profiles 200        # only the 200 MHz set
 python3 generate.py --profiles 400 --bw 1 2 3 40 400
 python3 generate.py --out /path/to/spot   # write elsewhere
 ```
+
+A plain `python3 generate.py` always produces **all three profile
+sets** — `spot1mhz_100.txt .. spot100mhz_100.txt` (100 files),
+`spot1mhz_200.txt .. spot200mhz_200.txt` (200 files) and
+`spot1mhz_400.txt .. spot400mhz_400.txt` (400 files) — and prints a
+per-profile count at the end so a missing set cannot go unnoticed.
 
 * `pip install numpy` makes generation a few minutes total; without
   numpy the stdlib path takes roughly 1-10 s per file (~20-60 min for

@@ -1,6 +1,7 @@
 
 #include "exciter.h"
 #include "ui_exciter.h"
+#include <QLineEdit>
 #include <QRegularExpression>
 
 Exciter::Exciter(QWidget *parent) :
@@ -14,7 +15,7 @@ Exciter::Exciter(QWidget *parent) :
     ui->cmbBW->setEditable(true);
     ui->cmbBW->clear();
     if (ui->cmbBW->lineEdit())
-        ui->cmbBW->lineEdit()->setPlaceholderText("1 - 100/200/400 MHz");
+        ui->cmbBW->lineEdit()->setPlaceholderText("1 - 100 MHz");
     //    QPushButton * getBtn[] = {ui->btnGetCW,ui->btnGetWB,ui->btnDisableSpot,ui->btnStopSweep,ui->btnDisImpulse};
     QPushButton * setBtn[] = {ui->btnSetCW,ui->btnSetWB, ui->btnLoadSpot, ui->btnStartSweep, ui->btnLoadImpulse};
 
@@ -442,8 +443,15 @@ bool Exciter::existsFile (const std::string& name)
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.
+    // The spot BW box is free-typed 1 .. profileBw (100/200/400 MHz),
+    // so keep the placeholder in sync with the active profile.
     if (bwMHz > 0)
+    {
         profileBw = bwMHz;
+        if (ui->cmbBW->lineEdit())
+            ui->cmbBW->lineEdit()->setPlaceholderText(
+                QStringLiteral("1 - %1 MHz").arg(profileBw));
+    }
 }
 
 
@@ -517,7 +525,12 @@ void Exciter::setDataSlot()
         // Only the file name selection changes here; the DAC load path
         // (returnfilePath / sendFileToCardSignal) below is untouched.
         double spotBwMhz = 0.0;
-        const QRegularExpression spotBwRx("^\\s*([0-9]+(?:\\.[0-9]+)?)");
+        // Integer MHz only, optionally suffixed with "MHz" (the remote
+        // control injects "N MHz"). Anything non-numeric keeps the
+        // legacy plain file-name behaviour below.
+        const QRegularExpression spotBwRx(
+            "^\\s*([0-9]+)\\s*(?:MHz)?\\s*$",
+            QRegularExpression::CaseInsensitiveOption);
         const QRegularExpressionMatch spotBwM = spotBwRx.match(ui->cmbBW->currentText());
         if (spotBwM.hasMatch())
             spotBwMhz = spotBwM.captured(1).toDouble();

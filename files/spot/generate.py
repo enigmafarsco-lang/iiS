@@ -28,7 +28,14 @@ the iio-oscilloscope DAC loader already accepts):
 Spectral convention
 -------------------
 Each file is complex (I/Q) Gaussian noise whose power is confined to a
-flat band of N MHz centred at DC (baseband):
+flat band of N MHz centred at DC (baseband).  The band edge is a
+brick-wall DFT cutoff: every DFT bin inside +/-N/2 MHz is kept and every
+bin outside is zeroed, so the transition is at most one DFT bin wide
+(P/262144 MHz = 0.38 / 0.76 / 1.53 kHz for P = 100/200/400).  There is
+no filter ramp; out-of-band energy sits at the 6-decimal text
+quantisation floor (~ -120 dB), not at -60 dB.  (The legacy
+spot5/10/500mhz.txt files in the files repo have a soft ramp edge, so
+prefer these generated profile files.)
 
     -P/2 MHz ... -N/2 MHz ... 0 ... N/2 MHz ... +P/2 MHz
                 |_____________|
@@ -45,8 +52,9 @@ keeps the file compact.
 
 Usage
 -----
-    python3 generate.py                  # all 700 files, in this folder
+    python3 generate.py                  # all 700 files (100+200+400)
     python3 generate.py --profiles 100   # only the 100 MHz profile set
+    python3 generate.py --profiles 200 --bw 12   # a few 200 MHz files
     python3 generate.py --profiles 400 --bw 1 2 3 40 400
     python3 generate.py --out /path/to/spot
     python3 generate.py --no-numpy       # force the stdlib (slower) path
@@ -298,9 +306,11 @@ def main(argv=None):
     t_start = time.time()
     made = 0
     total_bytes = 0
+    per_profile = {}  # profile bw -> [made, total]
     for idx, (p, n_bw) in enumerate(work, 1):
         name = f"spot{n_bw}mhz_{p}.txt"
         path = os.path.join(args.out, name)
+        per_profile.setdefault(p, [0, 0])[1] += 1
         if args.seed == "random":
             seed = random.randrange(1 << 31)
         elif args.seed is not None:
@@ -315,6 +325,7 @@ def main(argv=None):
             continue
         made += 1
         total_bytes += nbytes
+        per_profile[p][0] += 1
         if not args.quiet:
             elapsed = time.time() - t_start
             eta = elapsed / idx * (total - idx)
@@ -324,6 +335,9 @@ def main(argv=None):
     elapsed = time.time() - t_start
     print(f"Done: {made}/{total} file(s), {total_bytes/1e9:.2f} GB in "
           f"{elapsed/60.0:.1f} min")
+    for p in sorted(per_profile):
+        m, t = per_profile[p]
+        print(f"  profile {p:>3d} MHz: {m}/{t} file(s)")
     return 0 if made == total else 1
 
 
