@@ -6950,13 +6950,9 @@ void Plot::applyBandwidthWindow()
 
     const double half = activeBandwidthMHz / 2.0;
 
-    // Keep the start/stop fields in sync with the forced window...
-    if (ui->txt_start_freq)
-        ui->txt_start_freq->setValue(freq - half);
-    if (ui->txt_stop_freq)
-        ui->txt_stop_freq->setValue(freq + half);
-
-    // ...and snap the FFT chart x-axis to the same window.
+    // Phase 5 fix: only the FFT chart x-axis is forced - the start/stop
+    // (seek) fields keep their default values, changing the profile
+    // bandwidth must not reset the other parameters.
     ui->fftChart->xAxis->setRange(freq - half, freq + half);
     ui->fftChart->replot();
 }

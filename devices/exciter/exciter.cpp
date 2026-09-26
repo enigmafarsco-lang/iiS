@@ -8,9 +8,13 @@ Exciter::Exciter(QWidget *parent) :
     ui(new Ui::exciter)
 {
     ui->setupUi(this);
-    // Phase 5: let the user type arbitrary spot bandwidths (e.g. "40"),
-    // not just the pre-filled combo entries.
+    // Phase 5: free-typed spot bandwidth (e.g. "40"), NOT a pull-down menu:
+    // the user writes 1 .. profile BW and spot{N}mhz_{P}.txt is loaded
+    // (P = active profile: 100 -> spotN mhz_100.txt, 400 -> spotN mhz_400.txt).
     ui->cmbBW->setEditable(true);
+    ui->cmbBW->clear();
+    if (ui->cmbBW->lineEdit())
+        ui->cmbBW->lineEdit()->setPlaceholderText("1 - 100/200/400 MHz");
     //    QPushButton * getBtn[] = {ui->btnGetCW,ui->btnGetWB,ui->btnDisableSpot,ui->btnStopSweep,ui->btnDisImpulse};
     QPushButton * setBtn[] = {ui->btnSetCW,ui->btnSetWB, ui->btnLoadSpot, ui->btnStartSweep, ui->btnLoadImpulse};
 

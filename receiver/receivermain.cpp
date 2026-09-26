@@ -2389,7 +2389,17 @@ void ReceiverMain::on_btnProfileSet_clicked()
         if (!frqDomainPlot)
             return;
         frqDomainPlot->setEnabled(true);
-        frqDomainPlot->setActiveBandwidth(bw); // re-apply the freq +/- bw/2 window
+
+        // The profile write reconfigures the board, so re-apply the startup
+        // default settings (same path as at application start in
+        // defaultSettings()): RX1/2 off, TX1/2 off, OBS RX1 on, OBS RX2
+        // off, TX gain 10 dB, seek/hopping defaults, control-unit writes
+        // and plot restart. Without this the spectrum stays blank and the
+        // TX1/2 checkboxes are left in an undefined state.
+        if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
+            defaultParameters();
+
+        frqDomainPlot->setActiveBandwidth(bw); // re-apply the freq +/- bw/2 axis window
     });
 }
 
@@ -2452,6 +2462,11 @@ void ReceiverMain::defaultParameters()
 
     oscMain->_adrv9009->powerTX2DownChk->setChecked(true);
     oscMain->_adrv9009->power_TX1_DownChk->setChecked(true);  // default: TX1 off (safe), TX2 off
+    // Default TX output gain: 10 dB (effective when TX is enabled)
+    if (att_TX1_Spn)
+        att_TX1_Spn->setValue(10);
+    if (att_TX2_Spn)
+        att_TX2_Spn->setValue(10);
     // ADRV9009 calibration defaults: all checked except cal-tx-ext and fhm
     oscMain->_adrv9009->cal_rx_qec_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_qec_chk->setChecked(true);
