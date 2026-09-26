@@ -1,0 +1,5 @@
+# Generated band-limited spot noise files (run generate.py locally).
+# These are ~4.5 GB of data and must never be committed.
+spot[0-9]*mhz_*.txt
+# legacy-name outputs, if ever generated locally
+spot[0-9]*mhz.txt

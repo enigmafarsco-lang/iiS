@@ -170,6 +170,76 @@
               </item>
              </layout>
             </widget>
+            <widget class="QWidget" name="tabProfile">
+             <attribute name="title">
+              <string>Profile</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayoutProfile">
+              <item>
+               <widget class="QGroupBox" name="grpProfileBw">
+                <property name="title">
+                 <string>ADR-V9009 TX Profile</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayoutProfileBw">
+                 <item>
+                  <widget class="QRadioButton" name="rdoProfile100">
+                   <property name="text">
+                    <string>100 MHz BW</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rdoProfile200">
+                   <property name="text">
+                    <string>200 MHz BW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rdoProfile400">
+                   <property name="text">
+                    <string>400 MHz BW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnProfileSet">
+                   <property name="text">
+                    <string>Set</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblProfileHint">
+                <property name="text">
+                 <string>Loads files/filters/adrv9009/Tx_BW100/200/400_*.txt and snaps the spectrum x-axis to freq +/- BW/2.</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacerProfile">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
             <widget class="QWidget" name="tabHopping">
              <property name="font">
               <font>

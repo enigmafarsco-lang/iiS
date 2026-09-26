@@ -114,6 +114,9 @@ private slots:
     void on_btnSetBandSelect_clicked();
     void realtimeDataSlot();
 
+    // Phase 5: Profile tab "Set" button (auto-connected by name).
+    void on_btnProfileSet_clicked();
+
     //    QTimer * frqTimer;
 
 public:
@@ -411,6 +414,10 @@ signals:
     void frqDomainIsOn();
     void startExciterSignal();
     void frqPltSignal();
+
+    // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
+    // Routed to the exciter so spot noise files match the active profile.
+    void profileBandwidthChanged(int bwMHz);
 
 
     void frqValues      (QCustomSeries a);

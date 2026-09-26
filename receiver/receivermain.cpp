@@ -7,6 +7,9 @@
 #include "receiver/globals.h"
 #include <QFileInfo>
 #include <QProcess>
+#include <QDir>
+#include <QCoreApplication>
+#include <QMessageBox>
 #include <limits>
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -2300,6 +2303,79 @@ void ReceiverMain::defaultSettings()
         power_TX1_DownChk->stateChanged(1);  // force a hardware write
         power_TX1_DownChk->setChecked(true); // TX off
     }
+}
+
+
+// Phase 5: Profile tab "Set" button.
+// Loads the selected ADRV9009 TX profile (100/200/400 MHz) from the
+// files/filters/adrv9009 folder shipped with the project (with fallbacks
+// for the build dir and the user's local checkout), then snaps the
+// spectrum x-axis window to freq +/- bw/2 around the selected frequency.
+void ReceiverMain::on_btnProfileSet_clicked()
+{
+    static const char *profileFiles[] = {
+        "Tx_BW100_IR122p88_Rx_BW100_OR122p88_ORx_BW100_OR122p88_DC245p76.txt",
+        "Tx_BW200_IR245p76_Rx_BW100_OR122p88_ORx_BW200_OR245p76_DC245p76.txt",
+        "Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt",
+    };
+
+    int bw = 100;
+    int idx = 0;
+    if (ui->rdoProfile400->isChecked()) {
+        bw = 400;
+        idx = 2;
+    } else if (ui->rdoProfile200->isChecked()) {
+        bw = 200;
+        idx = 1;
+    }
+
+    // Search order: project tree from the working dir, project tree from the
+    // executable dir, then the user's local checkout.
+    const QStringList dirs = {
+        QDir::currentPath() + "/files/filters/adrv9009",
+        QCoreApplication::applicationDirPath() + "/files/filters/adrv9009",
+        "/home/joshua/Documents/NIMA_USB/iiS-arena-01a0d367-iis/files/filters/adrv9009",
+    };
+
+    QString profilePath;
+    for (const QString &dir : dirs) {
+        if (QFileInfo::exists(dir + "/" + profileFiles[idx])) {
+            profilePath = dir + "/" + profileFiles[idx];
+            break;
+        }
+    }
+
+    if (profilePath.isEmpty()) {
+        QMessageBox::warning(this, tr("Profile"),
+            tr("ADR-V9009 profile file not found:\n%1\n\nLooked in:\n%2")
+                .arg(profileFiles[idx], dirs.join("\n")));
+        return;
+    }
+
+    // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
+    emit profileBandwidthChanged(bw);
+
+    // Snap the spectrum window to freq +/- bw/2 now, and disable the plot
+    // while the profile write to the board runs (same pattern as
+    // defaultSettings() above).
+    if (frqDomainPlot) {
+        frqDomainPlot->setActiveBandwidth(bw);
+        frqDomainPlot->setEnabled(false);
+    }
+
+    if (oscMain && oscMain->_adrv9009) {
+        oscMain->_adrv9009->on_profile_config_clicked(profilePath);
+    } else {
+        qWarning() << "Receiver: ADRV9009 plugin not ready; profile not loaded:"
+                   << profilePath;
+    }
+
+    QTimer::singleShot(10000, this, [this, bw]{
+        if (!frqDomainPlot)
+            return;
+        frqDomainPlot->setEnabled(true);
+        frqDomainPlot->setActiveBandwidth(bw); // re-apply the freq +/- bw/2 window
+    });
 }
 
 

@@ -1,12 +1,16 @@
 
 #include "exciter.h"
 #include "ui_exciter.h"
+#include <QRegularExpression>
 
 Exciter::Exciter(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::exciter)
 {
     ui->setupUi(this);
+    // Phase 5: let the user type arbitrary spot bandwidths (e.g. "40"),
+    // not just the pre-filled combo entries.
+    ui->cmbBW->setEditable(true);
     //    QPushButton * getBtn[] = {ui->btnGetCW,ui->btnGetWB,ui->btnDisableSpot,ui->btnStopSweep,ui->btnDisImpulse};
     QPushButton * setBtn[] = {ui->btnSetCW,ui->btnSetWB, ui->btnLoadSpot, ui->btnStartSweep, ui->btnLoadImpulse};
 
@@ -431,6 +435,13 @@ bool Exciter::existsFile (const std::string& name)
     return (stat (name.c_str(), &buffer) == 0);
 }
 
+void Exciter::setProfileBw(int bwMHz)
+{
+    // Phase 5: active ADRV9009 profile from the receiver Profile tab.
+    if (bwMHz > 0)
+        profileBw = bwMHz;
+}
+
 
 void Exciter::setModeActive(const QString &mode, bool on)
 {
@@ -494,7 +505,36 @@ void Exciter::setDataSlot()
         //            getDataSlot();
         emit sendFrqDataSignal(QString::number(ui->spnSpotFrq->value()));
 
-        fileName = ("spot/spot" + ui->cmbBW->currentText().toLower().replace(" ", "")+ ".txt");
+        // Phase 5: prefer the profile-specific band-limited noise file
+        // spot{N}mhz_{P}.txt (P = active ADRV9009 profile bandwidth, set
+        // from the receiver Profile tab via setProfileBw()). N is the
+        // numeric MHz value typed/selected in cmbBW. Falls back to the
+        // legacy spot{N}mhz.txt when the profile file is not present.
+        // Only the file name selection changes here; the DAC load path
+        // (returnfilePath / sendFileToCardSignal) below is untouched.
+        double spotBwMhz = 0.0;
+        const QRegularExpression spotBwRx("^\\s*([0-9]+(?:\\.[0-9]+)?)");
+        const QRegularExpressionMatch spotBwM = spotBwRx.match(ui->cmbBW->currentText());
+        if (spotBwM.hasMatch())
+            spotBwMhz = spotBwM.captured(1).toDouble();
+
+        if (spotBwMhz > 0.0)
+        {
+            const QString profileFile =
+                QString("spot/spot%1mhz_%2.txt")
+                    .arg(spotBwMhz, 0, 'f', 0).arg(profileBw);
+            const QString legacyFile =
+                QString("spot/spot%1mhz.txt")
+                    .arg(spotBwMhz, 0, 'f', 0);
+            if (existsFile((QDir::currentPath() + "/" + profileFile).toStdString()))
+                fileName = profileFile;
+            else
+                fileName = legacyFile;
+        }
+        else
+        {
+            fileName = ("spot/spot" + ui->cmbBW->currentText().toLower().replace(" ", "")+ ".txt");
+        }
         //            QString fileName = ("spot/iio/msk_20M.txt");
 
         if (!returnfilePath(fileName)) return;

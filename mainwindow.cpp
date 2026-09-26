@@ -230,6 +230,9 @@ void MainWindow::connections()
         ui->exiter->maxFrqLimit = receiverWindow->maxFrqLimit;
         connect(receiverWindow, &ReceiverMain::userLoggedInSignal, ui->exiter, &Exciter::isUserLoggedInSlot);
 
+        // Phase 5: Profile tab (100/200/400 MHz) -> exciter spot file selection
+        connect(receiverWindow, &ReceiverMain::profileBandwidthChanged, ui->exiter, &Exciter::setProfileBw);
+
 
 
         //these connections are for connecting exciter panel in receiver to exciter panel in transmmiter

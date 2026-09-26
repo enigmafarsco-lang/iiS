@@ -80,6 +80,9 @@ private:
     QSet<QString> activeModes;
     void setModeActive(const QString &mode, bool on);
 
+    // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz)
+    int profileBw{100};
+
     enum tabState{
         CW,Spot,Sweep,Impulse,WB
     };
@@ -107,6 +110,10 @@ private slots:
 public slots:
     void joshanFuncDataSlot();
     void joshanStatusDataSlot();
+
+    // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz), set from
+    // the receiver Profile tab. Selects spot{N}mhz_{P}.txt in the Spot tab.
+    void setProfileBw(int bwMHz);
     //    void receiveIpAddressSlot(bool);
     void connectToDevice();
     void initConnection(bool);

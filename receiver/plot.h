@@ -440,6 +440,10 @@ public:
     double selectedFreqValue{0};
     bool   selectedFreqValid{false};
 
+    // Phase 5: spectrum x-axis window forced to the active ADRV9009
+    // profile bandwidth (0 = not forced).
+    double activeBandwidthMHz{0.0};
+
     QVector<double> *cwFrqValue;
     QVector<double> *cwPowerValue;
     QVector<QString> *cwModeValue;
@@ -472,6 +476,11 @@ public:
     double maxPower{-600};
     bool isCalibAllowed{false};
     int cntCalib{};
+
+    // Phase 5: spectrum x-axis window = selected freq +/- active bandwidth/2
+    // (called from the receiver Profile tab "Set" handler).
+    void setActiveBandwidth(double bwMHz);
+    void applyBandwidthWindow();
 
 public slots:
     void onItemClicked();

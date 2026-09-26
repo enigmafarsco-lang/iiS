@@ -6916,6 +6916,36 @@ void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 
 }
 
+// Phase 5: set the active ADRV9009 profile bandwidth (MHz). The spectrum
+// x-axis window then follows the selected frequency:
+// [freq - bw/2, freq + freq + bw/2] centered on the "Frequency (MHz)"
+// field (txtSelectedFreq) above the FFT.
+void Plot::setActiveBandwidth(double bwMHz)
+{
+    activeBandwidthMHz = bwMHz;
+    applyBandwidthWindow();
+}
+
+void Plot::applyBandwidthWindow()
+{
+    if (activeBandwidthMHz <= 0.0 || !ui || !ui->fftChart ||
+        !ui->txtSelectedFreq)
+        return;
+
+    const double freq = ui->txtSelectedFreq->value();
+    const double half = activeBandwidthMHz / 2.0;
+
+    // Keep the start/stop fields in sync with the forced window...
+    if (ui->txt_start_freq)
+        ui->txt_start_freq->setValue(freq - half);
+    if (ui->txt_stop_freq)
+        ui->txt_stop_freq->setValue(freq + half);
+
+    // ...and snap the FFT chart x-axis to the same window.
+    ui->fftChart->xAxis->setRange(freq - half, freq + half);
+    ui->fftChart->replot();
+}
+
 void Plot::on_txtSelectedFreq_valueChanged(double value)
 {
     // Remember the entered frequency; the marker itself is drawn in
@@ -6924,6 +6954,10 @@ void Plot::on_txtSelectedFreq_valueChanged(double value)
     selectedFreqValue = value;
     selectedFreqValid = true;
     ui->fftChart->replot();
+
+    // Phase 5: with an active profile bandwidth the x-axis window tracks
+    // the frequency edit as well (freq +/- bw/2).
+    applyBandwidthWindow();
 }
 
 void Plot::ShowControls(int index){
