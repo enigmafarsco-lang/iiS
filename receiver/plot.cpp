@@ -1628,8 +1628,11 @@ void Plot::getFFTMin(Transform *tr,bool is_seek){
 void Plot::DrawFFTPlot()
 {
 
-    //        double d= abs(DC_6_UPTO_8_12 -baseFreq )- 250;
-    waterfallChart->axes(Qt::AlignBottom).at(0)->setRange((abs(DC_6_UPTO_8_12 -baseFreq ) -250),(abs(DC_6_UPTO_8_12- baseFreq) + 250));
+    // Phase 5: with an active profile the waterfall follows the same
+    // freq +/- bw/2 window as the spectrum (instead of a fixed +/-250).
+    const double waterfallHalf = (activeBandwidthMHz > 0.0)
+        ? activeBandwidthMHz / 2.0 : 250.0;
+    waterfallChart->axes(Qt::AlignBottom).at(0)->setRange((abs(DC_6_UPTO_8_12 -baseFreq ) - waterfallHalf),(abs(DC_6_UPTO_8_12- baseFreq) + waterfallHalf));
 
     int sizeData ;
 
@@ -1665,9 +1668,19 @@ void Plot::DrawFFTPlot()
             // Keep the frequency axis tied to the *current* base frequency.
             // It was filled once at transform init, so the spectrum diagram
             // never updated when the frequency changed.
-            for(int i{}; i < transform->x_axis->size() ;i++)
+            // Phase 5: the axis span follows the channel's actual sampling
+            // rate (per profile: 122.88/245.76/491.52 MHz) - the old
+            // hardcoded 491.52 MHz span (step 0.03) showed the same ~495 MHz
+            // axis for every profile and misplaced the spectrum on the
+            // 100/200 MHz profiles.  1 tick = 1 real MHz again.
+            const int nAxisPts = transform->x_axis->size();
+            const double axisSpanMhz =
+                (transform->fs_mhz > 0.0) ? transform->fs_mhz : 491.52;
+            const double axisStepMhz = (nAxisPts > 0)
+                ? axisSpanMhz / nAxisPts : 0.0;
+            for(int i{}; i < nAxisPts; i++)
             {
-                (*transform->x_axis)[i]= baseFreq - 245.759999 + i*0.029999 ;
+                (*transform->x_axis)[i]= baseFreq - axisSpanMhz/2.0 + i*axisStepMhz ;
             }
 
             for(int i{}; i < transform->x_axis->size() ;i++)
@@ -1745,7 +1758,12 @@ void Plot::DrawFFTPlot()
 
             sizeData = transform->x_axis->size();
             transform->fftgraph->setSelectable(QCP::SelectionType::stDataRange);
-            transform->fftgraph->rescaleAxes();
+            // Phase 5: with an active profile the x-axis window is
+            // freq +/- bw/2 (setActiveBandwidth).  rescaleAxes() auto-fits
+            // the axis to the full data span on every frame and clobbered
+            // that window (the axis stayed at the full ~495 MHz scale).
+            if (activeBandwidthMHz <= 0.0)
+                transform->fftgraph->rescaleAxes();
         }
 
 
@@ -4776,6 +4794,12 @@ bool Plot::freq_spectrum_transform_function(Transform *tr, gboolean init_transfo
         if (ret < 0)
             return false;
         sampling_freq /= 1000000; /* Hz to MHz*/
+
+        /* Phase 5: remember the per-profile sampling rate (OBS RX:
+         * 122.88/245.76/491.52 MHz for the 100/200/400 profiles) so the
+         * draw loop can scale the frequency axis with the active profile
+         * instead of a hardcoded 491.52 MHz span. */
+        tr->fs_mhz = sampling_freq;
 
         bits_used = iio_channel_get_data_format(chn)->bits;
 

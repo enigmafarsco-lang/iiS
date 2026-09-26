@@ -129,6 +129,7 @@ struct _transform {
     QCPGraph *graph;
     QCPGraph *fftgraph;
     int type_id;
+    double fs_mhz{0.0};   /* channel sampling rate in MHz (Phase 5) */
     GSList *plot_channels;
     QString ChannelName;
     int plot_channels_type;    
