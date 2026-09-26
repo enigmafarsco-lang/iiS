@@ -618,8 +618,15 @@ void Exciter::setDataSlot()
         //            getDataSlot();
 
         emit sendFrqDataSignal(QString::number(ui->spnImpulseFrq->value()));
-        double pri = (ui->spnImpulsePRI->value() * 2000) / 4.1;
-        double pw = (ui->spnImpulsePulseWidth->value() * 2000) / 4.1;
+        // PRI and pulse width spinboxes are in microseconds ("us" labels,
+        // see exciter.ui).  createImpulseFile converts us -> samples at the
+        // profile's I/Q playback rate (0.5 x profile BW, see
+        // files/spot/generate.py), so the pulse on air is exactly the typed
+        // width at exactly the typed PRI.  (The old formula
+        // value*2000/4.1 multiplied the typed us by 487.8, so pulses came
+        // out 2.4-9.8x too wide on air.)
+        double pri = ui->spnImpulsePRI->value();
+        double pw = ui->spnImpulsePulseWidth->value();
 
         QString impulseFileName = "Impulse.txt";
         createImpulseFile(pri, pw, impulseFileName, profileBw / 2.0);
@@ -706,7 +713,11 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
         // (the I/Q playback rate, see files/spot/generate.py).  PRI and
         // pulse width arrive in microseconds, so:
         const uint priSamp = uint(pri * fs_msps);
-        const uint pwSamp  = uint(pw  * fs_msps);
+        uint pwSamp  = uint(pw  * fs_msps);
+        // A pulse wider than its own PRI would be a continuous tone; keep
+        // at least one sample off so the waveform stays a pulse train.
+        if (priSamp > 1 && pwSamp >= priSamp)
+            pwSamp = priSamp - 1;
         for(uint i{}; i < priSamp; i++)
         {
             if(i < pwSamp)
