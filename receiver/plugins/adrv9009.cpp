@@ -2113,8 +2113,7 @@ QString adrv9009::changingDac(QString mode)
         // "DDS Mode: One CW Tone" in iio-oscilloscope - on BOTH TX1 (dac1)
         // and TX2 (dac2), not the DAC buffer path the other exciter tabs
         // use.  The DDS parameters are set before switching the mode so
-        // the mode handler (manage_dds_mode) applies them to the IIO
-        // attributes:
+        // the mode handler applies them to the IIO attributes:
         //   Frequency - from the CW tab "DDS Freq" field (default 10 MHz;
         //                      the RF carrier itself is the exciter
         //                      frequency, set through the normal
@@ -2142,12 +2141,13 @@ QString adrv9009::changingDac(QString mode)
                 ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_ONE_TONE);
                 /* FORCE (re)apply. A programmatic setCurrentIndex() does
                  * not emit currentIndexChanged when the combo is already
-                 * at the target index, so manage_dds_mode() would never
-                 * run: the DDS engine (the altvoltage0 "raw" attribute)
-                 * could stay disabled and the DAC buffer would keep
-                 * playing the last file (noise/pulses) instead of the CW
-                 * tone.  manage_dds_mode() is idempotent - it re-enables
-                 * the DDS engine and force-syncs the tone values. */
+                 * at the target index, so the DDS mode handler would
+                 * never run: the DDS engine (the altvoltage0 "raw"
+                 * attribute) could stay disabled and the DAC buffer
+                 * would keep playing the last file (noise/pulses)
+                 * instead of the CW tone.  The handler is idempotent -
+                 * it re-enables the DDS engine and force-syncs the tone
+                 * values. */
                 if (dac_data_manager)
                     dac_data_manager->manage_dds_mode(
                         ddac->txs[i].dds_mode_widget, &ddac->txs[i]);

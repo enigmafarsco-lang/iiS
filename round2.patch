@@ -1,0 +1,108 @@
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..68cbf63
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,31 @@
++# Convenience top-level Makefile for this qmake project (seraj3.pro), so
++# a plain `make` at the repository root works. It runs qmake in a shadow
++# build directory (the same one Qt Creator uses) and delegates to the
++# generated Makefile there; qmake output never overwrites this file.
++
++BUILD_DIR ?= build/Desktop-Debug
++PRO       := $(CURDIR)/seraj3.pro
++
++QMAKE ?= $(shell command -v qmake6 2>/dev/null || command -v qmake 2>/dev/null || \
++	ls /usr/lib/qt6/bin/qmake /usr/lib/qt5/bin/qmake \
++	   /usr/lib/x86_64-linux-gnu/qt5/bin/qmake 2>/dev/null | head -n1)
++
++.PHONY: all clean distclean
++
++all: $(BUILD_DIR)/Makefile
++	$(MAKE) -C $(BUILD_DIR)
++
++$(BUILD_DIR)/Makefile: $(PRO)
++	@if [ -z "$(QMAKE)" ]; then \
++		echo "error: qmake not found - install Qt (qt5-qmake / qt6-base-dev)" >&2; \
++		echo "       or build the project with Qt Creator" >&2; \
++		exit 1; \
++	fi
++	@mkdir -p $(BUILD_DIR)
++	cd $(BUILD_DIR) && $(QMAKE) $(PRO)
++
++clean:
++	@if [ -f $(BUILD_DIR)/Makefile ]; then $(MAKE) -C $(BUILD_DIR) clean; fi
++
++distclean:
++	rm -rf $(BUILD_DIR)
+diff --git a/devices/exciter/exciter.cpp b/devices/exciter/exciter.cpp
+index 4dc7797..9f63aa5 100644
+--- a/devices/exciter/exciter.cpp
++++ b/devices/exciter/exciter.cpp
+@@ -589,10 +589,19 @@ bool Exciter::returnfilePath(QString &fileName)
+ 
+     if(!existsFile(fullPath.toStdString()))
+     {
+-        QMessageBox msgBox;
+-        msgBox.setText("File doesn't exist.");
+-        msgBox.exec();
+-        return false;
++        // Fall back to the application folder (and its parents) - the
++        // same search the bridge noise files use - so the app can be
++        // started from somewhere else too.
++        const QString alt = resolveFileInAppFolders(fileName);
++        if (alt.isEmpty())
++        {
++            QMessageBox msgBox;
++            msgBox.setText("File doesn't exist.");
++            msgBox.exec();
++            return false;
++        }
++        fullPath = alt;
++        fileName = alt;
+     }
+ 
+     return  true;
+@@ -848,7 +857,7 @@ void Exciter::setDataSlot()
+         createImpulseFile(pri, pw, impulseFileName, impulseFs);
+ 
+         if (!returnfilePath(impulseFileName)) return;
+-        fileName = "Impulse.txt";
++        fileName = impulseFileName;
+         emit sendFileToCardSignal(fileName, 0,"impulse");
+         isExciterOn = true;
+         //            fileName = "pls.txt";
+diff --git a/receiver/plugins/adrv9009.cpp b/receiver/plugins/adrv9009.cpp
+index 52a3dc6..d4b5dee 100644
+--- a/receiver/plugins/adrv9009.cpp
++++ b/receiver/plugins/adrv9009.cpp
+@@ -2113,8 +2113,7 @@ QString adrv9009::changingDac(QString mode)
+         // "DDS Mode: One CW Tone" in iio-oscilloscope - on BOTH TX1 (dac1)
+         // and TX2 (dac2), not the DAC buffer path the other exciter tabs
+         // use.  The DDS parameters are set before switching the mode so
+-        // the mode handler (manage_dds_mode) applies them to the IIO
+-        // attributes:
++        // the mode handler applies them to the IIO attributes:
+         //   Frequency - from the CW tab "DDS Freq" field (default 10 MHz;
+         //                      the RF carrier itself is the exciter
+         //                      frequency, set through the normal
+@@ -2142,12 +2141,13 @@ QString adrv9009::changingDac(QString mode)
+                 ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_ONE_TONE);
+                 /* FORCE (re)apply. A programmatic setCurrentIndex() does
+                  * not emit currentIndexChanged when the combo is already
+-                 * at the target index, so manage_dds_mode() would never
+-                 * run: the DDS engine (the altvoltage0 "raw" attribute)
+-                 * could stay disabled and the DAC buffer would keep
+-                 * playing the last file (noise/pulses) instead of the CW
+-                 * tone.  manage_dds_mode() is idempotent - it re-enables
+-                 * the DDS engine and force-syncs the tone values. */
++                 * at the target index, so the DDS mode handler would
++                 * never run: the DDS engine (the altvoltage0 "raw"
++                 * attribute) could stay disabled and the DAC buffer
++                 * would keep playing the last file (noise/pulses)
++                 * instead of the CW tone.  The handler is idempotent -
++                 * it re-enables the DDS engine and force-syncs the tone
++                 * values. */
+                 if (dac_data_manager)
+                     dac_data_manager->manage_dds_mode(
+                         ddac->txs[i].dds_mode_widget, &ddac->txs[i]);

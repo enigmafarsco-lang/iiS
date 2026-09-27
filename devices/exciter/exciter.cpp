@@ -589,10 +589,19 @@ bool Exciter::returnfilePath(QString &fileName)
 
     if(!existsFile(fullPath.toStdString()))
     {
-        QMessageBox msgBox;
-        msgBox.setText("File doesn't exist.");
-        msgBox.exec();
-        return false;
+        // Fall back to the application folder (and its parents) - the
+        // same search the bridge noise files use - so the app can be
+        // started from somewhere else too.
+        const QString alt = resolveFileInAppFolders(fileName);
+        if (alt.isEmpty())
+        {
+            QMessageBox msgBox;
+            msgBox.setText("File doesn't exist.");
+            msgBox.exec();
+            return false;
+        }
+        fullPath = alt;
+        fileName = alt;
     }
 
     return  true;
@@ -848,7 +857,7 @@ void Exciter::setDataSlot()
         createImpulseFile(pri, pw, impulseFileName, impulseFs);
 
         if (!returnfilePath(impulseFileName)) return;
-        fileName = "Impulse.txt";
+        fileName = impulseFileName;
         emit sendFileToCardSignal(fileName, 0,"impulse");
         isExciterOn = true;
         //            fileName = "pls.txt";
