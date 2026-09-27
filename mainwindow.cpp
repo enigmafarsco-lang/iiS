@@ -381,6 +381,13 @@ void MainWindow::connections()
 
         });
 
+        // Phase 6: CW-tab DDS tone parameters -> applied when the CW tab
+        // switches TX1/TX2 into the DDS "One CW Tone" mode.
+        connect(ui->exiter, &Exciter::cwDdsParamsSignal,
+                [](double f, double s, double p) {
+                    adrv9009::setCwDdsParams(f, s, p);
+                });
+
 
         //smart noise and exciter
         connect(ui->exiter,&Exciter::turnOffSmartNoiseSignal,receiverWindow,&ReceiverMain::stopSmartNoiseSlot);

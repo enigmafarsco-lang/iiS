@@ -114,6 +114,13 @@ private:
     void updateMultiTargetRow(int row);
     bool buildMultiTargetWaveform();
 
+    // Phase 6: CW tab DDS tone parameters (shown on the CW tab like the
+    // iio-oscilloscope DDS panel): the CW tab drives the on-chip DDS tone
+    // engine on TX1+TX2 ("One CW Tone" mode), not the DAC buffer.
+    QDoubleSpinBox *cwDdsFrqSpn{nullptr};
+    QDoubleSpinBox *cwDdsScaleSpn{nullptr};
+    QDoubleSpinBox *cwDdsPhaseSpn{nullptr};
+
     tabState currentTabState;
     QTimer exciterConnection;
     bool isUserLoggedIn{};
@@ -161,6 +168,7 @@ signals:
     void startHopp();
     void stoptHopp();
     void sendFileToCardSignal(QString, double,QString);
+    void cwDdsParamsSignal(double freqMhz, double scaleDbfs, double phaseDeg);
     void changeDacSignal(QString);
     void modeActivitySignal(bool anyModeActive);
     void turnOffSmartNoiseSignal();

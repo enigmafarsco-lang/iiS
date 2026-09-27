@@ -33,6 +33,37 @@ Exciter::Exciter(QWidget *parent) :
         connect(setBtn[i], SIGNAL(clicked()),this,SLOT(setDataSlot()));
     }
 
+    //=================== Phase 6: DDS parameters on the CW tab =============
+    // The CW tab drives the on-chip DDS tone engine (iio-oscilloscope
+    // "DDS Mode: One CW Tone") on TX1 and TX2 instead of the DAC buffer,
+    // so its DDS parameters (frequency / scale / phase - same ranges as
+    // the DDS device panel) are shown right on the CW tab and applied to
+    // both TXs when "On" is pressed.
+    {
+        QGridLayout *cwGrid = qobject_cast<QGridLayout *>(ui->cw->layout());
+        if (cwGrid)
+        {
+            cwGrid->addWidget(new QLabel(QStringLiteral("DDS Freq (MHz):")), 2, 0);
+            cwDdsFrqSpn = new QDoubleSpinBox;
+            cwDdsFrqSpn->setRange(-122.878, 122.878);
+            cwDdsFrqSpn->setDecimals(3);
+            cwDdsFrqSpn->setValue(0.0);
+            cwGrid->addWidget(cwDdsFrqSpn, 2, 1);
+            cwGrid->addWidget(new QLabel(QStringLiteral("DDS Scale (dBFS):")), 3, 0);
+            cwDdsScaleSpn = new QDoubleSpinBox;
+            cwDdsScaleSpn->setRange(-91.0, 0.0);
+            cwDdsScaleSpn->setDecimals(1);
+            cwDdsScaleSpn->setValue(0.0);
+            cwGrid->addWidget(cwDdsScaleSpn, 3, 1);
+            cwGrid->addWidget(new QLabel(QStringLiteral("DDS Phase (deg):")), 4, 0);
+            cwDdsPhaseSpn = new QDoubleSpinBox;
+            cwDdsPhaseSpn->setRange(0.0, 360.0);
+            cwDdsPhaseSpn->setDecimals(1);
+            cwDdsPhaseSpn->setValue(0.0);
+            cwGrid->addWidget(cwDdsPhaseSpn, 4, 1);
+        }
+    }
+
     //=================== Phase 6: Bridge Noise tab ===================
     // Band-limited noise files bridge/bridge{N}mhz_{P}.txt created by
     // files/bridge/generate_bridge.py (same sharp band-limited noise
@@ -587,6 +618,13 @@ void Exciter::setDataSlot()
         emit turnOffSmartNoiseSignal();
         currentTabState = CW;
         setModeActive("cw", true);
+        // Phase 6: the CW tab drives the on-chip DDS (not the DAC buffer):
+        // hand over this tab's DDS tone parameters, then switch TX1+TX2
+        // into the DDS "One CW Tone" mode.
+        if (cwDdsFrqSpn && cwDdsScaleSpn && cwDdsPhaseSpn)
+            emit cwDdsParamsSignal(cwDdsFrqSpn->value(),
+                                   cwDdsScaleSpn->value(),
+                                   cwDdsPhaseSpn->value());
         changeDacSignal("set-cw");
         QTimer::singleShot(500,  [&]{emit sendFrqDataSignal(QString::number(ui->spnCWFrq->value()));});
         QTimer::singleShot(500,  [&]{emit sendPowerToCart(ui->spnCWPower->value());});

@@ -2076,6 +2076,20 @@ for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
 /**
  * @brief dacDataManager::changingDac
  */
+// Phase 6: CW-tab DDS tone parameters (setCwDdsParams from the exciter
+// before changingDac("set-cw") switches TX1/TX2 into the DDS tone mode).
+// Defaults = 0 MHz on-carrier / 0 dBFS / 0 deg.
+static double g_cwDdsFrq = 0.0;
+static double g_cwDdsScale = 0.0;
+static double g_cwDdsPhase = 0.0;
+
+void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
+{
+    g_cwDdsFrq = freqMhz;
+    g_cwDdsScale = scaleDbfs;
+    g_cwDdsPhase = phaseDeg;
+}
+
 QString adrv9009::changingDac(QString mode)
 {
     if(mode == "set-cw" || mode == "set-sweep" )
@@ -2086,12 +2100,14 @@ QString adrv9009::changingDac(QString mode)
         // use.  The DDS parameters are set before switching the mode so
         // the mode handler (manage_dds_mode) applies them to the IIO
         // attributes:
-        //   Frequency 0 MHz  - tone on the carrier; the RF carrier itself
+        //   Frequency - from the CW tab "DDS Freq" field (default 0 MHz =
+        //                      tone on the carrier; the RF carrier itself
         //                      is the exciter frequency, set through the
-        //                      normal frqSpn/RF path (spnCWFrq).
-        //   Scale     0 dBFS - full-scale tone; the output level is set by
-        //                      the existing TX gain (dBm) path.
-        //   Phase     0 deg.
+        //                      normal frqSpn/RF path (spnCWFrq)).
+        //   Scale     - from the CW tab "DDS Scale" field (default 0 dBFS,
+        //                      full-scale tone; output level is set by the
+        //                      existing TX gain (dBm) path).
+        //   Phase     - from the CW tab "DDS Phase" field (default 0 deg).
         for (guint d = 0; d < 2; d++)
         {
             struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
@@ -2103,10 +2119,10 @@ QString adrv9009::changingDac(QString mode)
                     struct dds_tone *tone = ddac->txs[i].dds_tones[t];
                     if (!tone)
                         continue;
-                    tone->freq->setValue(0.0);
+                    tone->freq->setValue(g_cwDdsFrq);
                     if (tone->scale)
-                        tone->scale->setValue(0.0);
-                    tone->phase->setValue(0.0);
+                        tone->scale->setValue(g_cwDdsScale);
+                    tone->phase->setValue(g_cwDdsPhase);
                 }
                 ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_ONE_TONE);
             }

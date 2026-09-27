@@ -174,6 +174,9 @@ public:
     struct iio_widget fpga_widgets[2];
     QString setFile(QString fileName,double scale );
     QString changingDac(QString);
+    // Phase 6: CW-tab DDS tone parameters, set from the exciter before
+    // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
+    static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);
     QString changeDacToBuffer(); // CW tone -> DAC Buffer Output (DRFM tab)
 
 
