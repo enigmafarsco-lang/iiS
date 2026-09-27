@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QRegExp>
 #include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
 #include <cmath>
 
 Exciter::Exciter(QWidget *parent) :
@@ -645,18 +647,53 @@ QString Exciter::resolveFileInAppFolders(const QString &relPath)
         QDir(QCoreApplication::applicationDirPath()).filePath(".."),
         QDir(QDir::currentPath()).filePath(".."),
     };
+
+    // Search <base>/<relPath> in every base.  The waveform generators
+    // live in the main project folder's files/ folder (files/bridge,
+    // files/spot), so the generated bridge/spot files are usually found
+    // as files/<relPath> under that folder.
+    QStringList bases = roots;
+    for (const QString &root : roots)
+        bases << QDir(root).absoluteFilePath("files");
+
+#ifdef PROJECT_FILES_DIR
+    // Source tree's files/ folder compiled in by seraj3.pro: the app is
+    // often started from a Qt Creator shadow build directory (e.g.
+    // build-seraj3-Desktop_Qt_.../Debug) that is NOT inside the project
+    // folder where the waveforms live.
+    bases << QStringLiteral(PROJECT_FILES_DIR)
+          << QDir(QStringLiteral(PROJECT_FILES_DIR)).absoluteFilePath("..");
+#endif
+
+    // Dynamic fallback: walk a few parent levels of every root and also
+    // look into each sibling's files/ folder - finds
+    // <workspace>/iiS-.../files/bridge/... when running from
+    // <workspace>/iio_projects/build-seraj3-.../.
     for (const QString &root : roots)
     {
-        const QString full = QDir(root).absoluteFilePath(relPath);
+        QDir level(root);
+        for (int up = 0; up < 4; ++up)
+        {
+            bases << level.absoluteFilePath("files");
+            const QFileInfoList subs = level.entryInfoList(
+                QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable);
+            int scanned = 0;
+            for (const QFileInfo &fi : subs)
+            {
+                if (++scanned > 32)
+                    break;
+                bases << QDir(fi.absoluteFilePath()).absoluteFilePath("files");
+            }
+            if (!level.cdUp())
+                break;
+        }
+    }
+
+    for (const QString &base : bases)
+    {
+        const QString full = QDir(base).absoluteFilePath(relPath);
         if (existsFile(full.toStdString()))
             return full;
-        // The waveform generators live in the project's files/ folder
-        // (files/bridge, files/spot), so the generated bridge/spot files
-        // are usually found as files/<relPath> under the project root -
-        // try that too.
-        const QString inFiles = QDir(root).absoluteFilePath("files/" + relPath);
-        if (existsFile(inFiles.toStdString()))
-            return inFiles;
     }
     return QString();
 }
@@ -926,10 +963,11 @@ void Exciter::setDataSlot()
         {
             QMessageBox msgBox;
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
-                              "(also searched the application folder). "
+                              "(also searched the application folder and "
+                              "the project files/ folder). "
                               "Run files/bridge/generate_bridge.py with "
-                              "'--out bridge' from the directory where "
-                              "the app is started (next to the spot/ "
+                              "'--out bridge' in the files/ folder of the "
+                              "main project folder (next to the spot/ "
                               "folder), then press Set again.")
                                .arg(QDir::currentPath() + "/" + fileName));
             msgBox.exec();

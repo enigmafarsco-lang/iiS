@@ -3512,12 +3512,19 @@ bool Plot::GetBaseFreq()
         ui->lblFreqValue->setText(QString::number(abs(DC_6_UPTO_8_12-baseFreq)));
         frqValueStr = ui->lblFreqValue->text();
         // Move the spectrum window with the base frequency.
-        // Phase 5: with an active profile bandwidth, and no explicit
-        // frequency entered, keep the freq +/- bw/2 window width.
+        // Phase 5: with an active profile bandwidth the window width is
+        // always freq +/- bw/2.  The old rule only kept that width while
+        // the "Frequency (MHz)" field was 0 and fell back to a fixed
+        // +/-250 (500 MHz) as soon as a center frequency was entered or
+        // the base frequency changed (Global Set / frequency set) - so
+        // the x-axis scale jumped to 500 MHz on every frequency set.
+        // Only the width rule was wrong; the window always follows the
+        // base frequency here (an entered frequency tunes the board, so
+        // the two are the same value in practice).
         double frqWin = abs(DC_6_UPTO_8_12 - baseFreq);
-        if (activeBandwidthMHz > 0.0 && ui->txtSelectedFreq->value() <= 0.0)
+        if (activeBandwidthMHz > 0.0)
             ui->fftChart->xAxis->setRange(frqWin - activeBandwidthMHz / 2.0,
-                                           frqWin + activeBandwidthMHz / 2.0);
+                                          frqWin + activeBandwidthMHz / 2.0);
         else
             ui->fftChart->xAxis->setRange(frqWin - 250, frqWin + 250);
         ui->fftChart->replot();

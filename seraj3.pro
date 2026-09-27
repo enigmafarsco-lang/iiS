@@ -8,6 +8,11 @@ CONFIG += c++11
 QMAKE_CXXFLAGS += -liio
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# Source tree's files/ folder (bridge/spot waveforms) compiled in, so the
+# app finds files/bridge/... even when it runs from a Qt Creator shadow
+# build directory outside the project folder.
+DEFINES += PROJECT_FILES_DIR=\\\"$$PWD/files\\\"
+
 INCLUDEPATH += /usr/include/freetype2
 
 LIBS += -liio -ldl -lfftw3 -lmatio -lfreetype
