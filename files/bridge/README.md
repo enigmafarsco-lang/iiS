@@ -37,8 +37,8 @@ The bridge files use the **same generator engine as the spot files**
 passband, exactly -3 dB at +/-N/2, 2nd-order rolloff to the noise
 floor by +/-N/2+10 MHz, brick wall for N <= 11), identical file format
 (`TEXT` header, two I/Q columns, 6 decimals, 262144 samples) and the
-same per-profile sample rate `1.2288 x P MS/s` (122.88/245.76/491.52
-for the 100/200/400 profiles).  The seed stream is offset (+777001) so each
+same per-profile playback rate `0.6144 x P MS/s` (61.44/122.88/245.76
+for the 100/200/400 profiles - half the profile's sample rate).  The seed stream is offset (+777001) so each
 bridge file is a different noise realization than the corresponding
 spot file.
 

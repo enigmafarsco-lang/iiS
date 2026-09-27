@@ -899,10 +899,11 @@ void Exciter::setDataSlot()
 
         QString impulseFileName = "Impulse.txt";
         // Same per-profile I/Q playback rate as the spot files
-        // (files/spot/generate.py): the profile's sample rate
-        // 122.88 x P/100 = 122.88/245.76/491.52 MS/s for the
-        // 100/200/400 profiles.
-        const double impulseFs = profileBw * 122.88 / 100.0;
+        // (files/spot/generate.py): the board plays the DAC buffer at
+        // half the profile's sample rate - 61.44/122.88/245.76 MS/s for
+        // the 100/200/400 profiles (measured: a spot/shift is exactly
+        // half as wide when this rate is doubled).
+        const double impulseFs = profileBw * 61.44 / 100.0;
         createImpulseFile(pri, pw, impulseFileName, impulseFs);
 
         if (!returnfilePath(impulseFileName)) return;
@@ -1197,10 +1198,9 @@ bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files
-    // (files/spot/generate.py): the profile's sample rate
-    // 122.88 x P/100 = 122.88/245.76/491.52 MS/s for the
-    // 100/200/400 profiles.
-    const double fsMhz = profileBw * 122.88 / 100.0;
+    // (files/spot/generate.py): half the profile's sample rate -
+    // 61.44/122.88/245.76 MS/s for the 100/200/400 profiles.
+    const double fsMhz = profileBw * 61.44 / 100.0;
     const double twoPi = 2.0 * M_PI;
 
     QVector<double> sumI(N, 0.0);
@@ -1252,11 +1252,32 @@ bool Exciter::buildMultiTargetWaveform()
                 n2++;
             }
             in.close();
+            if (n2 == 0)
+            {
+                // Never transmit a silent file: an empty/unparsable spot
+                // file used to produce an all-zero waveform and the user
+                // just saw "nothing" on the spectrum.
+                QMessageBox msgBox;
+                msgBox.setText(tr("Spot file for target %1 contains no samples:\n%2\n\n"
+                                  "Regenerate it with files/spot/generate.py.")
+                                   .arg(t + 1).arg(path));
+                msgBox.exec();
+                return false;
+            }
         }
         else if (type == 1)
         {
             // CW: complex tone at baseband frequency f (MHz)
             const double f = mtSpec[t][0]->value();
+            if (std::abs(f) > fsMhz / 2.0)
+            {
+                QMessageBox msgBox;
+                msgBox.setText(tr("Target %1 tone %2 MHz exceeds the playback "
+                                  "band (+/- %3 MHz on this profile).")
+                                   .arg(t + 1).arg(f).arg(fsMhz / 2.0));
+                msgBox.exec();
+                return false;
+            }
             const double w = twoPi * f / fsMhz;
             for (int i = 0; i < N; i++)
             {
@@ -1289,6 +1310,18 @@ bool Exciter::buildMultiTargetWaveform()
             const double f0 = mtSpec[t][0]->value();
             const double B = mtSpec[t][1]->value();
             const double T = mtSpec[t][2]->value();
+            // The sweep must fit inside the playback band or it folds.
+            const double lo = qMin(f0, f0 + B);
+            const double hi = qMax(f0, f0 + B);
+            if (lo < -fsMhz / 2.0 || hi > fsMhz / 2.0)
+            {
+                QMessageBox msgBox;
+                msgBox.setText(tr("Target %1 sweep %2 .. %3 MHz exceeds the "
+                                  "playback band (+/- %4 MHz on this profile).")
+                                   .arg(t + 1).arg(lo).arg(hi).arg(fsMhz / 2.0));
+                msgBox.exec();
+                return false;
+            }
             const int Tsamp = qMax(2, int(T * fsMhz));
             const double Tm = (double)Tsamp / fsMhz; // seconds
             for (int i = 0; i < N; i++)
@@ -1310,6 +1343,15 @@ bool Exciter::buildMultiTargetWaveform()
         // Frequency shift = complex exponential multiplier ("DDS sine"):
         //   s'(n) = s(n) * e^{j 2 pi f_shift n / fs}
         const double fsh = mtShift[t]->value();
+        if (std::abs(fsh) > fsMhz / 2.0)
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Target %1 shift %2 MHz exceeds the playback "
+                              "band (+/- %3 MHz on this profile).")
+                               .arg(t + 1).arg(fsh).arg(fsMhz / 2.0));
+            msgBox.exec();
+            return false;
+        }
         if (fsh != 0.0)
         {
             const double wsh = twoPi * fsh / fsMhz;
@@ -1377,10 +1419,26 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files:
-    // the profile's sample rate 122.88 x P/100 = 122.88/245.76/491.52
-    // MS/s for the 100/200/400 profiles.
-    const double fsMhz = profileBw * 122.88 / 100.0;
+    // half the profile's sample rate - 61.44/122.88/245.76 MS/s for the
+    // 100/200/400 profiles.
+    const double fsMhz = profileBw * 61.44 / 100.0;
     const double twoPi = 2.0 * M_PI;
+    // The whole sweep must fit inside the file's Nyquist band
+    // (-fs/2 .. +fs/2) or it folds and does not look like an LFM.
+    {
+        const double lo = qMin(f0Mhz, f0Mhz + bwMhz);
+        const double hi = qMax(f0Mhz, f0Mhz + bwMhz);
+        if (lo < -fsMhz / 2.0 || hi > fsMhz / 2.0)
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("LFM sweep %1 .. %2 MHz exceeds the playback "
+                              "band (+/- %3 MHz on this profile). "
+                              "Reduce the start frequency or bandwidth.")
+                               .arg(lo).arg(hi).arg(fsMhz / 2.0));
+            msgBox.exec();
+            return false;
+        }
+    }
     const int Tsamp = qMax(2, int(tUs * fsMhz));
     const double Tm = (double)Tsamp / fsMhz; // seconds
 

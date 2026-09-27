@@ -55,15 +55,15 @@ TEXT
 Each file is complex Gaussian noise confined to a flat band of
 `N` MHz centred at DC.
 
-**Assumed sample rate: `Fs = 1.2288 x P MHz`** — the per-profile I/Q
-sample rate of the board (Talise TX baseband input / ORx output rate,
-Tx_BW200_IR245p76 etc.):
+**Assumed sample rate: `Fs = 0.6144 x P MHz`** — the board consumes
+the DAC buffer at half the profile's sample rate (the Talise TX
+input / ORx output rate of Tx_BW200_IR245p76 etc. is 1.2288 x P):
 
 | profile | file rate | widest spot |
 |---|---|---|
-| 100 | 122.88 MS/s | 122.88 MHz |
-| 200 | 245.76 MS/s | 245.76 MHz |
-| 400 | 491.52 MS/s | 491.52 MHz |
+| 100 | 61.44 MS/s | 61.44 MHz |
+| 200 | 122.88 MS/s | 122.88 MHz |
+| 400 | 245.76 MS/s | 245.76 MHz |
 
 The earlier `P^2/800` and `0.5 x P` assumptions made the on-air band
 wrong and different per profile.  With the rate above **a spot of `N` MHz
@@ -80,7 +80,7 @@ Consequences:
 
 (The Talise profile files run the TX datapath at `1.2288 x P` MHz —
 122.88/245.76/491.52 MS/s — with 16/8/4x interpolation to the
-1966.08 MS/s DAC.)
+1966.08 MS/s DAC; the DAC buffer is consumed at half of that.)
 
 The DAC loader auto-scales each file's peak to full scale.
 
@@ -103,7 +103,7 @@ The DAC loader auto-scales each file's peak to full scale.
   per-bin statistical ripples.
 
 All MHz figures are in the file's sample-rate units
-(Fs = 1.2288 x P MHz, see above).  If the DAC plays the file at a
+(Fs = 0.6144 x P MHz, see above).  If the DAC plays the file at a
 different clock, scale the displayed band by clock/Fs.
 
 ## Impulse (pulse) tab
