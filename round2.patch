@@ -36,7 +36,7 @@ index 0000000..68cbf63
 +distclean:
 +	rm -rf $(BUILD_DIR)
 diff --git a/devices/exciter/exciter.cpp b/devices/exciter/exciter.cpp
-index 4dc7797..9f63aa5 100644
+index 4942232..9f63aa5 100644
 --- a/devices/exciter/exciter.cpp
 +++ b/devices/exciter/exciter.cpp
 @@ -589,10 +589,19 @@ bool Exciter::returnfilePath(QString &fileName)
@@ -72,6 +72,15 @@ index 4dc7797..9f63aa5 100644
          emit sendFileToCardSignal(fileName, 0,"impulse");
          isExciterOn = true;
          //            fileName = "pls.txt";
+@@ -912,7 +921,7 @@ void Exciter::setDataSlot()
+             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
+                               "(also searched the application folder). "
+                               "Run files/bridge/generate_bridge.py with "
+-                              ""--out bridge" from the directory where "
++                              "'--out bridge' from the directory where "
+                               "the app is started (next to the spot/ "
+                               "folder), then press Set again.")
+                                .arg(QDir::currentPath() + "/" + fileName));
 diff --git a/receiver/plugins/adrv9009.cpp b/receiver/plugins/adrv9009.cpp
 index 52a3dc6..d4b5dee 100644
 --- a/receiver/plugins/adrv9009.cpp
