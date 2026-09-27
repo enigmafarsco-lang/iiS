@@ -95,6 +95,11 @@ private:
     bool existsFile (const std::string& name);
     bool returnfilePath(QString&);
 
+    // Phase 6: search the plausible folders (app start dir, application
+    // binary dir and their parents) for a relative file name and return
+    // the first full path that exists (empty if not found anywhere).
+    QString resolveFileInAppFolders(const QString &relPath);
+
     // Phase 6: Bridge Noise tab - band-limited noise files
     // bridge/bridge{N}mhz_{P}.txt (created by
     // files/bridge/generate_bridge.py, same engine as the spot files).

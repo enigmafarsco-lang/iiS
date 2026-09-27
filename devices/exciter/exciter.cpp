@@ -8,6 +8,7 @@
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QRegExp>
+#include <QCoreApplication>
 #include <cmath>
 
 Exciter::Exciter(QWidget *parent) :
@@ -623,6 +624,27 @@ bool Exciter::existsFile (const std::string& name)
     return (stat (name.c_str(), &buffer) == 0);
 }
 
+QString Exciter::resolveFileInAppFolders(const QString &relPath)
+{
+    // The spot files are found via QDir::currentPath() (the directory
+    // the app is started from), so that stays first; the application
+    // binary's folder (and both parents) are extra candidates for the
+    // case the app is started from somewhere else.
+    const QStringList roots = {
+        QDir::currentPath(),
+        QCoreApplication::applicationDirPath(),
+        QDir(QCoreApplication::applicationDirPath()).filePath(".."),
+        QDir(QDir::currentPath()).filePath(".."),
+    };
+    for (const QString &root : roots)
+    {
+        const QString full = QDir(root).absoluteFilePath(relPath);
+        if (existsFile(full.toStdString()))
+            return full;
+    }
+    return QString();
+}
+
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.
@@ -883,10 +905,12 @@ void Exciter::setDataSlot()
         const int bridgeN = int(bridgeSpn->value());
         fileName = QString("bridge/bridge%1mhz_%2.txt")
                        .arg(bridgeN).arg(profileBw);
-        if (!existsFile((QDir::currentPath() + "/" + fileName).toStdString()))
+        const QString bridgeFull = resolveFileInAppFolders(fileName);
+        if (bridgeFull.isEmpty())
         {
             QMessageBox msgBox;
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
+                              "(also searched the application folder). "
                               "Run files/bridge/generate_bridge.py with "
                               ""--out bridge" from the directory where "
                               "the app is started (next to the spot/ "
@@ -895,8 +919,7 @@ void Exciter::setDataSlot()
             msgBox.exec();
             return;
         }
-        if (!returnfilePath(fileName)) return;
-        emit sendFileToCardSignal(fileName, 0, "bridge");
+        emit sendFileToCardSignal(bridgeFull, 0, "bridge");
         isExciterOn = true;
         break;
     }
@@ -1137,13 +1160,13 @@ bool Exciter::buildMultiTargetWaveform()
             // Spot: load the generated spot{N}mhz_{P}.txt (262144 samples)
             const int n = int(mtSpec[t][0]->value());
             const QString f = QString("spot/spot%1mhz_%2.txt").arg(n).arg(profileBw);
-            const QString path = QDir::currentPath() + "/" + f;
-            if (!existsFile(path.toStdString()))
+            const QString path = resolveFileInAppFolders(f);
+            if (path.isEmpty())
             {
                 QMessageBox msgBox;
                 msgBox.setText(tr("Spot file for target %1 not found:\n%2\n\n"
                                   "Run files/spot/generate.py first.")
-                                   .arg(t + 1).arg(f));
+                                   .arg(t + 1).arg(QDir::currentPath() + "/" + f));
                 msgBox.exec();
                 return false;
             }
