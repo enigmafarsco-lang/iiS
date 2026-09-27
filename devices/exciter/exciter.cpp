@@ -1237,18 +1237,22 @@ bool Exciter::buildMultiTargetWaveform()
                 return false;
             }
             QTextStream r(&in);
-            r.readLine(); // TEXT header
+            QString header;
+            r >> header; // "TEXT" header token
             int n2 = 0;
+            // Whitespace-agnostic I/Q extraction (spaces, tabs, CR/LF all
+            // work).  The old line splitting used a C string literal whose
+            // "\\s+" escape was broken (the regex was really "s+"), so it
+            // never matched a data line and every spot row read zero
+            // samples.
             while (n2 < N && !r.atEnd())
             {
-                const QString line = r.readLine().trimmed();
-                if (line.isEmpty())
-                    continue;
-                const QStringList c = line.split(QRegExp("\s+"), Qt::SkipEmptyParts);
-                if (c.size() < 2)
+                double a, b;
+                r >> a >> b;
+                if (r.status() != QTextStream::Ok)
                     break;
-                ti[n2] = c[0].toDouble();
-                tq[n2] = c[1].toDouble();
+                ti[n2] = a;
+                tq[n2] = b;
                 n2++;
             }
             in.close();
