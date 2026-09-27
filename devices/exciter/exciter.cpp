@@ -24,7 +24,8 @@ Exciter::Exciter(QWidget *parent) :
     ui->cmbBW->setEditable(true);
     ui->cmbBW->clear();
     if (ui->cmbBW->lineEdit())
-        ui->cmbBW->lineEdit()->setPlaceholderText("1 - 100 MHz");
+        ui->cmbBW->lineEdit()->setPlaceholderText(
+            QStringLiteral("1 - %1 MHz").arg(profileBw));
     //    QPushButton * getBtn[] = {ui->btnGetCW,ui->btnGetWB,ui->btnDisableSpot,ui->btnStopSweep,ui->btnDisImpulse};
     QPushButton * setBtn[] = {ui->btnSetCW,ui->btnSetWB, ui->btnLoadSpot, ui->btnStartSweep, ui->btnLoadImpulse};
 
@@ -790,15 +791,16 @@ void Exciter::setDataSlot()
         // Only the file name selection changes here; the DAC load path
         // (returnfilePath / sendFileToCardSignal) below is untouched.
         double spotBwMhz = 0.0;
-        // Integer MHz only, optionally suffixed with "MHz" (the remote
-        // control injects "N MHz"). Anything non-numeric keeps the
+        // Integer or decimal MHz, optionally suffixed with "MHz" (the
+        // remote control injects "N MHz"); decimals round to the nearest
+        // generated integer file.  Anything non-numeric keeps the
         // legacy plain file-name behaviour below.
         const QRegularExpression spotBwRx(
-            "^\\s*([0-9]+)\\s*(?:MHz)?\\s*$",
+            "^\\s*([0-9]+(?:\\.[0-9]+)?)\\s*(?:MHz)?\\s*$",
             QRegularExpression::CaseInsensitiveOption);
         const QRegularExpressionMatch spotBwM = spotBwRx.match(ui->cmbBW->currentText());
         if (spotBwM.hasMatch())
-            spotBwMhz = spotBwM.captured(1).toDouble();
+            spotBwMhz = qRound(spotBwM.captured(1).toDouble());
 
         if (spotBwMhz > 0.0)
         {
@@ -808,10 +810,12 @@ void Exciter::setDataSlot()
             const QString legacyFile =
                 QString("spot/spot%1mhz.txt")
                     .arg(spotBwMhz, 0, 'f', 0);
-            if (existsFile((QDir::currentPath() + "/" + profileFile).toStdString()))
+            if (!resolveFileInAppFolders(profileFile).isEmpty())
                 fileName = profileFile;
-            else
+            else if (!resolveFileInAppFolders(legacyFile).isEmpty())
                 fileName = legacyFile;
+            else
+                fileName = profileFile;
         }
         else
         {
@@ -895,9 +899,10 @@ void Exciter::setDataSlot()
 
         QString impulseFileName = "Impulse.txt";
         // Same per-profile I/Q playback rate as the spot files
-        // (files/spot/generate.py): P^2/800 MS/s = 12.5/50/200 for
-        // the 100/200/400 profiles, scope-calibrated on this board.
-        const double impulseFs = profileBw * profileBw / 800.0;
+        // (files/spot/generate.py): the profile's sample rate
+        // 122.88 x P/100 = 122.88/245.76/491.52 MS/s for the
+        // 100/200/400 profiles.
+        const double impulseFs = profileBw * 122.88 / 100.0;
         createImpulseFile(pri, pw, impulseFileName, impulseFs);
 
         if (!returnfilePath(impulseFileName)) return;
@@ -1192,9 +1197,10 @@ bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files
-    // (files/spot/generate.py): P^2/800 MS/s = 12.5/50/200 for the
+    // (files/spot/generate.py): the profile's sample rate
+    // 122.88 x P/100 = 122.88/245.76/491.52 MS/s for the
     // 100/200/400 profiles.
-    const double fsMhz = profileBw * profileBw / 800.0;
+    const double fsMhz = profileBw * 122.88 / 100.0;
     const double twoPi = 2.0 * M_PI;
 
     QVector<double> sumI(N, 0.0);
@@ -1371,8 +1377,9 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files:
-    // P^2/800 MS/s = 12.5/50/200 for the 100/200/400 profiles.
-    const double fsMhz = profileBw * profileBw / 800.0;
+    // the profile's sample rate 122.88 x P/100 = 122.88/245.76/491.52
+    // MS/s for the 100/200/400 profiles.
+    const double fsMhz = profileBw * 122.88 / 100.0;
     const double twoPi = 2.0 * M_PI;
     const int Tsamp = qMax(2, int(tUs * fsMhz));
     const double Tm = (double)Tsamp / fsMhz; // seconds

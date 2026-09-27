@@ -6959,6 +6959,10 @@ void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 // field (txtSelectedFreq) above the FFT.
 void Plot::setActiveBandwidth(double bwMHz)
 {
+    // Width of the spectrum/waterfall window around the frequency.
+    // ReceiverMain passes the active profile's SAMPLE RATE here
+    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
+    // profiles), so the window always shows the full sampled span.
     activeBandwidthMHz = bwMHz;
     applyBandwidthWindow();
 }

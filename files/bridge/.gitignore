@@ -3,3 +3,4 @@
 bridge[0-9]*mhz_*.txt
 # legacy-name outputs, if ever generated locally
 bridge[0-9]*mhz.txt
+__pycache__/

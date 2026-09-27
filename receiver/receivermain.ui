@@ -186,15 +186,15 @@
                    <property name="text">
                     <string>100 MHz BW</string>
                    </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QRadioButton" name="rdoProfile200">
                    <property name="text">
                     <string>200 MHz BW</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -1238,7 +1238,7 @@
                         <item row="1" column="0">
                          <widget class="QLabel" name="label_64">
                           <property name="text">
-                           <string>Power:</string>
+                           <string>P (attenuation):</string>
                           </property>
                          </widget>
                         </item>
@@ -1339,7 +1339,7 @@
                         <item row="1" column="0">
                          <widget class="QLabel" name="label_67">
                           <property name="text">
-                           <string>Power:</string>
+                           <string>P (attenuation):</string>
                           </property>
                          </widget>
                         </item>
@@ -1412,7 +1412,7 @@
                         <item row="4" column="0">
                          <widget class="QLabel" name="label_71">
                           <property name="text">
-                           <string>Power:</string>
+                           <string>P (attenuation):</string>
                           </property>
                          </widget>
                         </item>
@@ -1487,7 +1487,7 @@
                         <item row="1" column="0">
                          <widget class="QLabel" name="label_74">
                           <property name="text">
-                           <string>Power:</string>
+                           <string>P (attenuation):</string>
                           </property>
                          </widget>
                         </item>
@@ -1515,7 +1515,7 @@
                         <item row="0" column="0">
                          <widget class="QLabel" name="label_77">
                           <property name="text">
-                           <string>Power:</string>
+                           <string>P (attenuation):</string>
                           </property>
                          </widget>
                         </item>

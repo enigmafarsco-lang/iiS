@@ -136,7 +136,7 @@ public:
     // saeid raziani ==> here we define some ui pointer in order to using and showing them in receiver main.
     //--- Global --------------------------------------------------------
     QComboBox* ensmCmb;
-    QDoubleSpinBox * frqSpn;
+    QDoubleSpinBox * frqSpn{};
     QComboBox * ensm_mode_available;
     //--- Hopping -------------------------------------------------------
     QCheckBox      * chk_trigger_mode;

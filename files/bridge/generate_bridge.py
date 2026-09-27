@@ -43,28 +43,24 @@ Sample rate (IMPORTANT - hardware anchored, per profile)
 --------------------------------------------------------
 The file's assumed sample rate is
 
-    Fs = P^2 / 800 MHz      (P100: 12.5,  P200: 50,  P400: 200 MS/s)
+    Fs = 1.2288 x P MHz     (P100: 122.88,  P200: 245.76,  P400: 491.52 MS/s)
 
-i.e. the I/Q playback rate measured on the target board for each
-profile.  Calibration (scope, files generated at the earlier 0.5 x P
-assumption): on the 400 MHz profile "set N" displayed exactly N, on
-the 200 MHz profile it displayed N/2, on the 100 MHz profile N/4 -
-so the board plays the files at 200 / 50 / 12.5 MS/s for the 400 /
-200 / 100 profiles (P^2/800).  With the per-profile rate below, a
-spot of N MHz occupies exactly N MHz on the spectrum: type 100,
-see 100.
+i.e. the profile's sample rate: the Talise TX baseband input / ORx
+output rate of each profile (Tx_BW200_IR245p76 etc.).  The earlier
+P^2/800 and 0.5 x P assumptions made the on-air band differ per
+profile; with this rate a band of N MHz occupies exactly N MHz on
+the spectrum analyser for every profile: type 100, see 100.
 
 Consequences:
-  * the widest spot a profile can produce is its playback rate
-    (Nyquist): P100 -> 12.5 MHz, P200 -> 50 MHz, P400 -> 200 MHz;
+  * the widest band a profile can produce is its sample rate
+    (the full I/Q span): P100 -> 122.88 MHz, P200 -> 245.76 MHz,
+    P400 -> 491.52 MHz;
   * N above that produces the profile's maximum (full-band)
     waveform;
   * files are named bridge{N}mhz_{P}.txt for N = 1..P.
 
-(For reference the Talise profiles list the TX baseband input rate
-as 1.2288 x P MHz - 122.88/245.76/491.52 MS/s - with 16/8/4x
-interpolation to the 1966.08 MS/s DAC; the board's actual file
-playback clock is the per-profile value above.  To re-anchor a rate,
+(The Talise profiles run the TX datapath at 1.2288 x P MS/s with
+16/8/4x interpolation to the 1966.08 MS/s DAC.  To re-anchor a rate,
 edit profile_rate_mhz() below and regenerate.)
 
 The band edge is shaped like a high-order low-pass filter, not a soft
@@ -91,7 +87,7 @@ ramp edge - only ~ -60 dB rejection ~10 MHz outside the band - so
 prefer these generated profile files.)
 
 All MHz values above are in the file's sample-rate units
-(Fs = 0.5 x P MHz, see "Sample rate" above).  If the DAC plays the
+(Fs = 1.2288 x P MHz, see "Sample rate" above).  If the DAC plays the
 file at a different clock, scale the displayed band by clock/Fs.
 
 The DAC loader auto-scales each file's peak to full scale, so the
@@ -211,11 +207,15 @@ def profile_rate_mhz(profile_bw):
     """File sample rate (MS/s) for a profile bandwidth P.
 
     Calibrated on the target board: the board plays these files at
-    P^2/800 MS/s (P100: 12.5, P200: 50, P400: 200) - measured as the
-    display factor 1 / 1/2 / 1/4 of the typed bandwidth on the
-    400/200/100 profiles with the earlier 0.5 x P files.
+    the profile's sample rate
+    1.2288 x P MS/s (P100: 122.88, P200: 245.76, P400: 491.52) - the
+    Talise TX baseband input / ORx output rate of each profile
+    (Tx_BW200_IR245p76 etc.).  The earlier P^2/800 and 0.5 x P
+    assumptions made the on-air bandwidth wrong and different per
+    profile; with this rate a band of N MHz occupies exactly N MHz on
+    the spectrum analyser.
     """
-    return float(profile_bw) ** 2 / 800.0
+    return float(profile_bw) * 1.2288
 ROLLOFF_MHZ = 10.0       # stopband starts at N/2 + ROLLOFF_MHZ
 ROLLOFF_ORDER = 2        # squared raised cosine: sharper edge than 1st order
 

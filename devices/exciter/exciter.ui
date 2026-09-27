@@ -32,7 +32,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Current Power: </string>
+        <string>Current P (attenuation): </string>
        </property>
       </widget>
      </item>
@@ -157,7 +157,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Power :</string>
+             <string>P (attenuation) :</string>
             </property>
            </widget>
           </item>
@@ -265,7 +265,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Power :</string>
+             <string>P (attenuation) :</string>
             </property>
            </widget>
           </item>
@@ -409,7 +409,7 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>Power :</string>
+             <string>P (attenuation) :</string>
             </property>
            </widget>
           </item>
@@ -548,7 +548,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>Power :</string>
+             <string>P (attenuation) :</string>
             </property>
            </widget>
           </item>
@@ -645,7 +645,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_44">
             <property name="text">
-             <string>Power :</string>
+             <string>P (attenuation) :</string>
             </property>
            </widget>
           </item>

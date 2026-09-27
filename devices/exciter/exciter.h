@@ -85,7 +85,7 @@ private:
     void setModeActive(const QString &mode, bool on);
 
     // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz)
-    int profileBw{100};
+    int profileBw{200};   // default profile: 200 MHz BW (matches ReceiverMain)
 
     enum tabState{
         CW,Spot,Sweep,Impulse,WB

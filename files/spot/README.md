@@ -55,19 +55,18 @@ TEXT
 Each file is complex Gaussian noise confined to a flat band of
 `N` MHz centred at DC.
 
-**Assumed sample rate: `Fs = P^2/800 MHz`** — the per-profile I/Q
-playback rate of the board, calibrated with the scope:
+**Assumed sample rate: `Fs = 1.2288 x P MHz`** — the per-profile I/Q
+sample rate of the board (Talise TX baseband input / ORx output rate,
+Tx_BW200_IR245p76 etc.):
 
 | profile | file rate | widest spot |
 |---|---|---|
-| 100 | 12.5 MS/s | 12.5 MHz |
-| 200 | 50 MS/s  | 50 MHz  |
-| 400 | 200 MS/s | 200 MHz |
+| 100 | 122.88 MS/s | 122.88 MHz |
+| 200 | 245.76 MS/s | 245.76 MHz |
+| 400 | 491.52 MS/s | 491.52 MHz |
 
-Calibration: with the earlier `0.5 x P` files, "set N" displayed
-exactly N on the 400 profile, N/2 on the 200 profile and N/4 on the
-100 profile — i.e. the board plays the files at 200/50/12.5 MS/s
-(`P^2/800`).  With the per-profile rate above **a spot of `N` MHz
+The earlier `P^2/800` and `0.5 x P` assumptions made the on-air band
+wrong and different per profile.  With the rate above **a spot of `N` MHz
 occupies exactly `N` MHz**: type 100, see 100.
 
 Consequences:
@@ -79,10 +78,9 @@ Consequences:
 * to re-anchor a rate (different board/clock), edit
   `profile_rate_mhz()` in `generate.py` and regenerate.
 
-(The Talise profile files list the TX baseband input rate as
-`1.2288 x P` MHz — 122.88/245.76/491.52 MS/s — with 16/8/4x
-interpolation to the 1966.08 MS/s DAC; the board's actual file
-playback clock is the per-profile `P^2/800` value above.)
+(The Talise profile files run the TX datapath at `1.2288 x P` MHz —
+122.88/245.76/491.52 MS/s — with 16/8/4x interpolation to the
+1966.08 MS/s DAC.)
 
 The DAC loader auto-scales each file's peak to full scale.
 
@@ -105,7 +103,7 @@ The DAC loader auto-scales each file's peak to full scale.
   per-bin statistical ripples.
 
 All MHz figures are in the file's sample-rate units
-(Fs = P^2/800 MHz, see above).  If the DAC plays the file at a
+(Fs = 1.2288 x P MHz, see above).  If the DAC plays the file at a
 different clock, scale the displayed band by clock/Fs.
 
 ## Impulse (pulse) tab

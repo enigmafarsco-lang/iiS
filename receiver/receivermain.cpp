@@ -1893,6 +1893,12 @@ void ReceiverMain::init()
                 vLayfrqDomainPlot->addWidget(frqDomainPlot)          ;
                 ui->wigFrqDomain->setLayout(vLayfrqDomainPlot)       ;
 
+                // Default profile is 200 MHz BW, so the spectrum window
+                // spans its sample rate 122.88 x 2 = 245.76 MHz from the
+                // start.  Only the axis window is set here - the startup
+                // must NOT change the frequency.
+                frqDomainPlot->setActiveBandwidth(245.76);
+
 
                 //time domain plot (first plot)
                 timeDomainPlot = oscMain->createMultiPlot(TIME_DOMAIN) ;
@@ -2234,6 +2240,19 @@ void ReceiverMain::defaultSettings()
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
 void ReceiverMain::on_btnProfileSet_clicked()
 {
+    // Before a profile change the frequency must be 1800 MHz: check it
+    // first and only then apply the user's profile (a profile write
+    // reconfigures the whole RF chain, so the LO is parked at 1800 first).
+    if (frqSpn)
+    {
+        const double freqNow = abs(DC_6_UPTO_8_12 - frqSpn->value());
+        if (freqNow != 1800.0)
+        {
+            frqSpn->setValue(1800.0);
+            ui->spnFrq->setValue(abs(DC_6_UPTO_8_12 - 1800.0));
+        }
+    }
+
     static const char *profileFiles[] = {
         "Tx_BW100_IR122p88_Rx_BW100_OR122p88_ORx_BW100_OR122p88_DC245p76.txt",
         "Tx_BW200_IR245p76_Rx_BW100_OR122p88_ORx_BW200_OR245p76_DC245p76.txt",
@@ -2276,11 +2295,14 @@ void ReceiverMain::on_btnProfileSet_clicked()
     // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
     emit profileBandwidthChanged(bw);
 
-    // Snap the spectrum window to freq +/- bw/2 now, and disable the plot
-    // while the profile write to the board runs (same pattern as
+    // Snap the spectrum window to the profile's sample rate
+    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
+    // profiles) around the frequency, and disable the plot while the
+    // profile write to the board runs (same pattern as
     // defaultSettings() above).
+    const double profileFsMhz = bw * 122.88 / 100.0;
     if (frqDomainPlot) {
-        frqDomainPlot->setActiveBandwidth(bw);
+        frqDomainPlot->setActiveBandwidth(profileFsMhz);
         frqDomainPlot->setEnabled(false);
     }
 
@@ -2297,7 +2319,7 @@ void ReceiverMain::on_btnProfileSet_clicked()
     }
     QDir::setCurrent(workDir);
 
-    QTimer::singleShot(10000, this, [this, bw]{
+    QTimer::singleShot(10000, this, [this, bw, profileFsMhz]{
         if (!frqDomainPlot)
             return;
         frqDomainPlot->setEnabled(true);
@@ -2311,7 +2333,7 @@ void ReceiverMain::on_btnProfileSet_clicked()
         if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
             defaultParameters();
 
-        frqDomainPlot->setActiveBandwidth(bw); // re-apply the freq +/- bw/2 axis window
+        frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
     });
 }
 

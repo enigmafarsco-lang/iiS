@@ -3,3 +3,4 @@
 spot[0-9]*mhz_*.txt
 # legacy-name outputs, if ever generated locally
 spot[0-9]*mhz.txt
+__pycache__/
