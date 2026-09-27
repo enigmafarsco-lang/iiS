@@ -630,10 +630,7 @@ void ReceiverMain::setupDrfmControlTab()
     // out_count15_dacseles_raw, ... - the raw-data entries of the
     // iio-oscilloscope Debug tab), then named debug attributes and direct
     // led-count register access; the old mwipcore0:mmwr0 bridge is only a
-    // fallback.  Because the AXI read mux cannot return these control
-    // registers, every Set prints the cat command to confirm the value
-    // manually in the board console (picocom) - the software never opens
-    // the UART itself.
+    // fallback.
 
     QWidget *page = new QWidget(ui->tabWidgetSetting);
     page->setObjectName(QStringLiteral("tabDrfmControl"));
@@ -770,59 +767,6 @@ void ReceiverMain::setupDrfmControlTab()
     pageLayout->addWidget(vgpoGroup);
 
 
-    // -------------------- Board console check commands (manual) --------------------
-    // The software never opens the UART/USB.  The user verifies the registers
-    // separately in a terminal, e.g.
-    //     sudo picocom -b 115200 -l -r /dev/ttyUSB0
-    // and runs these echo/cat commands on the board shell.  Every Set above
-    // prints the exact command for the written register as well.
-    QGroupBox *consoleGroup = new QGroupBox(
-                tr("Board console check (picocom: echo / cat /sys/bus/iio/devices/...)"),
-                page);
-    QGridLayout *consoleLayout = new QGridLayout(consoleGroup);
-
-    QPushButton *btnScanIio = new QPushButton(tr("Scan led-count IIO registers (via IIO)"),
-                                              consoleGroup);
-    btnScanIio->setObjectName(QStringLiteral("btnScanDrfmIioRegisters"));
-    btnScanIio->setToolTip(tr("Lists the IIO debug attributes of the led-count device and\n"
-                              "which one represents th0/dacseles (out_countN_<name>_raw) - no UART involved."));
-
-    QPlainTextEdit *txtConsoleHelp = new QPlainTextEdit(consoleGroup);
-    txtConsoleHelp->setObjectName(QStringLiteral("txtDrfmConsoleHelp"));
-    txtConsoleHelp->setReadOnly(true);
-    txtConsoleHelp->setMaximumBlockCount(200);
-    txtConsoleHelp->setMinimumHeight(150);
-    QFont consoleFont(QStringLiteral("Monospace"));
-    consoleFont.setStyleHint(QFont::TypeWriter);
-    txtConsoleHelp->setFont(consoleFont);
-    txtConsoleHelp->setPlainText(
-                tr("The software does NOT open the UART.  Connect separately with:\n"
-                   "  sudo picocom -b 115200 -l -r /dev/ttyUSB0\n"
-                   "\n"
-                   "led-count-iio (iio:device0) registers used by the DRFM tab:\n"
-                   "  TH0 / amplify .......... out_count1_th0_raw\n"
-                   "  dacsel (1=DRFM) ........ out_count15_dacseles_raw\n"
-                   "  PDW enable ............. out_count5_pdw_raw\n"
-                   "  phase offset (inchann) . out_count7_inchann_raw\n"
-                   "  phase step (thcw) ...... out_count8_thcw_raw\n"
-                   "\n"
-                   "-- read a register value (confirm a Set from the DRFM tab) --\n"
-                   "cat /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
-                   "\n"
-                   "-- read all DRFM registers in one go --\n"
-                   "for f in out_count1_th0_raw out_count15_dacseles_raw out_count5_pdw_raw out_count7_inchann_raw out_count8_thcw_raw; do echo -n \"$f = \"; cat /sys/bus/iio/devices/iio:device0/$f; done\n"
-                   "\n"
-                   "-- write + confirm by hand (same raw data as the iio-osc Debug tab) --\n"
-                   "echo 200 > /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
-                   "cat /sys/bus/iio/devices/iio:device0/out_count1_th0_raw\n"
-                   "echo 1 > /sys/bus/iio/devices/iio:device0/out_count15_dacseles_raw\n"
-                   "\n"
-                   "(the same entries appear in the iio-oscilloscope Debug tab of led-count-iio)"));
-
-    consoleLayout->addWidget(btnScanIio, 0, 0);
-    consoleLayout->addWidget(txtConsoleHelp, 1, 0);
-    pageLayout->addWidget(consoleGroup);
-
     // -------------------- Hardware transaction output --------------------
     QLabel *backendLabel = new QLabel(tr("Register backend: waiting for board connection."), page);
     backendLabel->setObjectName(QStringLiteral("lblDrfmRegisterBackend"));
@@ -833,21 +777,6 @@ void ReceiverMain::setupDrfmControlTab()
     statusLabel->setObjectName(QStringLiteral("lblDrfmControlStatus"));
     statusLabel->setWordWrap(true);
     pageLayout->addWidget(statusLabel);
-
-    QPlainTextEdit *registerOutput = new QPlainTextEdit(page);
-    registerOutput->setObjectName(QStringLiteral("txtDrfmRegisterOutput"));
-    registerOutput->setReadOnly(true);
-    registerOutput->setMaximumBlockCount(200);
-    registerOutput->setMinimumHeight(150);
-    registerOutput->setPlainText(
-                tr("Vivado map: led_count_ip_0 @ 0x43C30000.\n"
-                   "Writes use the led-count-iio channel raw attributes (the th0/dacseles\n"
-                   "out_countN_<name>_raw entries of the iio-oscilloscope Debug tab), then\n"
-                   "named debug attributes and direct IIO register access; mwipcore0:mmwr0\n"
-                   "is only a fallback.  Every successful Set/On/Off operation prints the\n"
-                   "exact AXI address, raw value and the cat command to confirm it in the\n"
-                   "board console (picocom)."));
-    pageLayout->addWidget(registerOutput);
     pageLayout->addStretch(1);
 
     ui->tabWidgetSetting->addTab(page, tr("DRFM"));
@@ -857,22 +786,18 @@ void ReceiverMain::setupDrfmControlTab()
                 ? oscMain->_adrv9009controlUnit : nullptr;
     };
 
-    auto showResult = [backendLabel, statusLabel, registerOutput](
+    auto showResult = [backendLabel, statusLabel](
             ControlUnitADRV9009 *unit, bool ok, const QString &details) {
         if (unit)
             backendLabel->setText(unit->registerBackendInfo());
-        statusLabel->setText(ok ? QObject::tr("Applied to board.")
-                                : QObject::tr("Register operation failed."));
-        registerOutput->appendPlainText(QStringLiteral("\n%1\n%2")
-                                        .arg(ok ? QStringLiteral("[OK]")
-                                                : QStringLiteral("[FAILED]"), details));
-        registerOutput->verticalScrollBar()->setValue(registerOutput->verticalScrollBar()->maximum());
+        statusLabel->setText(QStringLiteral("%1\n%2")
+                             .arg(ok ? QObject::tr("Applied to board.")
+                                     : QObject::tr("Register operation failed."),
+                                  details));
     };
 
-    auto noBoard = [statusLabel, registerOutput]() {
-        const QString msg = QObject::tr("Board control is not connected yet.");
-        statusLabel->setText(msg);
-        registerOutput->appendPlainText(QStringLiteral("\n[FAILED]\n") + msg);
+    auto noBoard = [statusLabel]() {
+        statusLabel->setText(QObject::tr("Board control is not connected yet."));
     };
 
     // Every Set on this tab means the operator is driving the transmitter:
@@ -880,7 +805,7 @@ void ReceiverMain::setupDrfmControlTab()
     // the CW tone to the DAC Buffer Output mode - exactly what the exciter
     // does when pulse/spot/wideband is set. The exciter's own CW tone / DAC
     // buffer switching is not touched here.
-    auto noteDrfmSetActivity = [this, registerOutput]() {
+    auto noteDrfmSetActivity = [this]() {
         if (power_TX1_DownChk)
         {
             power_TX1_DownChk->stateChanged(0);   // force, even if already on
@@ -984,19 +909,6 @@ void ReceiverMain::setupDrfmControlTab()
             power_TX1_DownChk->stateChanged(1);   // force a hardware write
             power_TX1_DownChk->setChecked(true);  // TX1 OFF
         }
-    });
-
-    // IIO-side scan: which debug attributes represent th0/dacsel/...
-    // (identical list to the iio-oscilloscope Debug tab - no UART involved).
-    connect(btnScanIio, &QPushButton::clicked, this,
-            [controlUnit, registerOutput, statusLabel]() {
-        ControlUnitADRV9009 *unit = controlUnit();
-        if (!unit) {
-            statusLabel->setText(QObject::tr("Board control is not connected yet."));
-            return;
-        }
-        registerOutput->appendPlainText(unit->scanIioRegisters());
-        statusLabel->setText(QObject::tr("IIO register scan finished (see output above)."));
     });
 }
 
@@ -2474,6 +2386,9 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
     oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
+    // TX1 LO-leakage + quadrature tracking: enabled and checked in ALL
+    // settings (also re-applied here, after every profile load / save).
+    oscMain->_adrv9009->enforceTx1TrackingCalibrations();
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 

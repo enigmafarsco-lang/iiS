@@ -650,6 +650,13 @@ QString Exciter::resolveFileInAppFolders(const QString &relPath)
         const QString full = QDir(root).absoluteFilePath(relPath);
         if (existsFile(full.toStdString()))
             return full;
+        // The waveform generators live in the project's files/ folder
+        // (files/bridge, files/spot), so the generated bridge/spot files
+        // are usually found as files/<relPath> under the project root -
+        // try that too.
+        const QString inFiles = QDir(root).absoluteFilePath("files/" + relPath);
+        if (existsFile(inFiles.toStdString()))
+            return inFiles;
     }
     return QString();
 }

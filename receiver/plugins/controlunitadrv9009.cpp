@@ -272,7 +272,14 @@ ControlUnitADRV9009::ControlUnitADRV9009(QWidget *parent) :
     QObject::connect(this, &ControlUnitADRV9009::sendTransmitSignal, [=](int index)
     {
         Write((uint32_t)writeItemAddress.value("dacselect"),index);
-        emit sendFileToDacSignal(); // noise/DRFM set: CW tone -> DAC buffer
+        // Only the DSP noise sources (Smart Noise / Scan) take the DAC
+        // over from the exciter's CW tone and switch it to DAC Buffer
+        // Output.  "Direct" (index 0) must NOT: the exciter set the
+        // DDS tone / its own waveform on purpose - stealing the DAC here
+        // is what made CW mode output the noise/pulse buffer instead of
+        // the CW tone at the TX output.
+        if (index != 0)
+            emit sendFileToDacSignal(); // noise set: CW tone -> DAC buffer
     });
 
     //setting auto amp value

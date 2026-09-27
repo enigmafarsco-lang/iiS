@@ -174,6 +174,10 @@ public:
     struct iio_widget fpga_widgets[2];
     QString setFile(QString fileName,double scale );
     QString changingDac(QString);
+    // TX1 LO-leakage + quadrature tracking: forced enabled + checked
+    // (and locked) - must hold in ALL settings, re-applied after every
+    // profile load / widget sync.
+    void enforceTx1TrackingCalibrations();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);

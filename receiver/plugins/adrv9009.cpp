@@ -241,6 +241,11 @@ void adrv9009::update_widgets(void) {
                 subcomponents[0].num_rx + subcomponents[0].num_obsrx, dds);
 
 //    dacManager.dac_data_manager_update_iio_widgets(dac_tx_manager);
+
+    // Every widget sync (profile load, 20s refresh) re-reads the IIO
+    // attributes into the checkboxes and can silently turn the TX1
+    // tracking corrections off - re-assert them after every sync.
+    enforceTx1TrackingCalibrations();
 }
 
 /**
@@ -558,6 +563,33 @@ void adrv9009::glb_settings_update_labels()
  */
 void adrv9009::save_widget_value(struct iio_widget *iio_w) {
     iio_w->save(iio_w);
+}
+
+/**
+ * @brief adrv9009::enforceTx1TrackingCalibrations
+ *
+ * TX1 LO-leakage and quadrature tracking must stay ENABLED and checked
+ * in ALL settings.  The boxes are locked so they can never be turned
+ * off from the UI, and the forced stateChanged() emit runs the bound
+ * IIO write (out_voltage0 lo_leakage_tracking_en /
+ * quadrature_tracking_en) even when the box is already checked -
+ * after a profile load the attributes can be reset while the UI still
+ * shows the old state.
+ */
+void adrv9009::enforceTx1TrackingCalibrations()
+{
+    if (track_TX1_Chk)
+    {
+        track_TX1_Chk->setChecked(true);
+        track_TX1_Chk->stateChanged(1); // force the IIO attribute write
+        track_TX1_Chk->setEnabled(false);
+    }
+    if (lo_TX1_Chk)
+    {
+        lo_TX1_Chk->setChecked(true);
+        lo_TX1_Chk->stateChanged(1); // force the IIO attribute write
+        lo_TX1_Chk->setEnabled(false);
+    }
 }
 
 #pragma endregion }
@@ -1261,19 +1293,12 @@ QWidget *adrv9009::init()
         ui->tx1_powerdown_en->setChecked(true);
 
     // Phase 6: TX1 LO-leakage and quadrature tracking must be ENABLED in
-    // all settings - force them on now that the IIO widgets are bound
-    // (the checkbox state change writes the out_voltage0 IIO attributes)
-    // and lock the checkboxes so they can never be turned off again.
-    if (track_TX1_Chk)
-    {
-        track_TX1_Chk->setChecked(true);
-        track_TX1_Chk->setEnabled(false);
-    }
-    if (lo_TX1_Chk)
-    {
-        lo_TX1_Chk->setChecked(true);
-        lo_TX1_Chk->setEnabled(false);
-    }
+    // all settings.  The enforcement runs again after ConnectSignals()
+    // below (and after every update_widgets() sync) because the
+    // checkbox -> IIO attribute write connections only exist from
+    // ConnectSignals() on: forcing the checkboxes earlier only changed
+    // the UI, never the hardware attributes.
+    enforceTx1TrackingCalibrations();
     rx_freq_info_update();
     printf("Updating FIR filter...\n");
     profile_update();
@@ -1287,6 +1312,11 @@ QWidget *adrv9009::init()
     }
 
     ConnectSignals();
+
+    // The checkbox -> IIO write connections only exist from here on, so
+    // re-assert TX1 LO-leakage + quadrature now to actually write the
+    // out_voltage0 attributes (enforceTx1TrackingCalibrations()).
+    enforceTx1TrackingCalibrations();
 
     // Must stay on the GUI thread. The old QtConcurrent loop called QWidget
     // and libiio from a pool thread while init() was still running, which
