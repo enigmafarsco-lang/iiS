@@ -1259,6 +1259,21 @@ QWidget *adrv9009::init()
     // TX1 default at start of operation: OFF (checked = powerdown = TX off).
     if (ui->tx1_powerdown_en)
         ui->tx1_powerdown_en->setChecked(true);
+
+    // Phase 6: TX1 LO-leakage and quadrature tracking must be ENABLED in
+    // all settings - force them on now that the IIO widgets are bound
+    // (the checkbox state change writes the out_voltage0 IIO attributes)
+    // and lock the checkboxes so they can never be turned off again.
+    if (track_TX1_Chk)
+    {
+        track_TX1_Chk->setChecked(true);
+        track_TX1_Chk->setEnabled(false);
+    }
+    if (lo_TX1_Chk)
+    {
+        lo_TX1_Chk->setChecked(true);
+        lo_TX1_Chk->setEnabled(false);
+    }
     rx_freq_info_update();
     printf("Updating FIR filter...\n");
     profile_update();
@@ -2078,9 +2093,9 @@ for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
  */
 // Phase 6: CW-tab DDS tone parameters (setCwDdsParams from the exciter
 // before changingDac("set-cw") switches TX1/TX2 into the DDS tone mode).
-// Defaults = 0 MHz on-carrier / 0 dBFS / 0 deg.
-static double g_cwDdsFrq = 0.0;
-static double g_cwDdsScale = 0.0;
+// Defaults = 10 MHz / -10 dBFS / 0 deg (user-requested defaults).
+static double g_cwDdsFrq = 10.0;
+static double g_cwDdsScale = -10.0;
 static double g_cwDdsPhase = 0.0;
 
 void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
@@ -2100,12 +2115,12 @@ QString adrv9009::changingDac(QString mode)
         // use.  The DDS parameters are set before switching the mode so
         // the mode handler (manage_dds_mode) applies them to the IIO
         // attributes:
-        //   Frequency - from the CW tab "DDS Freq" field (default 0 MHz =
-        //                      tone on the carrier; the RF carrier itself
-        //                      is the exciter frequency, set through the
-        //                      normal frqSpn/RF path (spnCWFrq)).
-        //   Scale     - from the CW tab "DDS Scale" field (default 0 dBFS,
-        //                      full-scale tone; output level is set by the
+        //   Frequency - from the CW tab "DDS Freq" field (default 10 MHz;
+        //                      the RF carrier itself is the exciter
+        //                      frequency, set through the normal
+        //                      frqSpn/RF path (spnCWFrq)).
+        //   Scale     - from the CW tab "DDS Scale" field (default
+        //                      -10 dBFS; output level is set by the
         //                      existing TX gain (dBm) path).
         //   Phase     - from the CW tab "DDS Phase" field (default 0 deg).
         for (guint d = 0; d < 2; d++)
@@ -2125,6 +2140,17 @@ QString adrv9009::changingDac(QString mode)
                     tone->phase->setValue(g_cwDdsPhase);
                 }
                 ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_ONE_TONE);
+                /* FORCE (re)apply. A programmatic setCurrentIndex() does
+                 * not emit currentIndexChanged when the combo is already
+                 * at the target index, so manage_dds_mode() would never
+                 * run: the DDS engine (the altvoltage0 "raw" attribute)
+                 * could stay disabled and the DAC buffer would keep
+                 * playing the last file (noise/pulses) instead of the CW
+                 * tone.  manage_dds_mode() is idempotent - it re-enables
+                 * the DDS engine and force-syncs the tone values. */
+                if (dac_data_manager)
+                    dac_data_manager->manage_dds_mode(
+                        ddac->txs[i].dds_mode_widget, &ddac->txs[i]);
             }
         }
 
@@ -2132,13 +2158,20 @@ QString adrv9009::changingDac(QString mode)
     }
     else
     {
-        // Phase 6: disable the DDS tone on both TX1 and TX2.
+        // Phase 6: disable the DDS tone on both TX1 and TX2 (same
+        // forced re-apply as the enable path, so a stale DDS state
+        // cannot survive).
         for (guint d = 0; d < 2; d++)
         {
             struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
                                             : &dac_tx_manager->dac2;
             for (guint i = 0; i < ddac->tx_count; i++)
+            {
                 ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_DISABLED);
+                if (dac_data_manager)
+                    dac_data_manager->manage_dds_mode(
+                        ddac->txs[i].dds_mode_widget, &ddac->txs[i]);
+            }
         }
         return mode +" is turned off.";
     }

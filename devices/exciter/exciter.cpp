@@ -47,13 +47,13 @@ Exciter::Exciter(QWidget *parent) :
             cwDdsFrqSpn = new QDoubleSpinBox;
             cwDdsFrqSpn->setRange(-122.878, 122.878);
             cwDdsFrqSpn->setDecimals(3);
-            cwDdsFrqSpn->setValue(0.0);
+            cwDdsFrqSpn->setValue(10.0);
             cwGrid->addWidget(cwDdsFrqSpn, 2, 1);
             cwGrid->addWidget(new QLabel(QStringLiteral("DDS Scale (dBFS):")), 3, 0);
             cwDdsScaleSpn = new QDoubleSpinBox;
             cwDdsScaleSpn->setRange(-91.0, 0.0);
             cwDdsScaleSpn->setDecimals(1);
-            cwDdsScaleSpn->setValue(0.0);
+            cwDdsScaleSpn->setValue(-10.0);
             cwGrid->addWidget(cwDdsScaleSpn, 3, 1);
             cwGrid->addWidget(new QLabel(QStringLiteral("DDS Phase (deg):")), 4, 0);
             cwDdsPhaseSpn = new QDoubleSpinBox;
@@ -147,6 +147,67 @@ Exciter::Exciter(QWidget *parent) :
         });
         for (int t = 0; t < 5; t++)
             updateMultiTargetRow(t);
+    }
+
+    //=================== Phase 6: LFM / NLFM tabs ====================
+    // Same flow as the spot tab: type the specification (start frequency,
+    // bandwidth, pulse duration), press Set and the chirp is synthesized
+    // at the profile playback rate (P^2/800 MS/s) into Lfm.txt /
+    // Nlfm.txt and sent to the DAC buffer.  No pre-made files needed -
+    // the waveform is built in-app (phase 2*pi*(f0*t + B*t^2/2T), period
+    // T).  NLFM = LFM with a raised-cosine amplitude coding.
+    {
+        auto buildChirpTab = [this](const QString &title, const QString &btnText,
+                                    QDoubleSpinBox **startSpn,
+                                    QDoubleSpinBox **bwSpn,
+                                    QDoubleSpinBox **tSpn)
+        {
+            QWidget *tab = new QWidget;
+            QVBoxLayout *vbox = new QVBoxLayout(tab);
+            QHBoxLayout *row = new QHBoxLayout;
+            *startSpn = new QDoubleSpinBox;
+            (*startSpn)->setRange(-122.878, 122.878);
+            (*startSpn)->setDecimals(2);
+            (*startSpn)->setValue(0.0);
+            *bwSpn = new QDoubleSpinBox;
+            (*bwSpn)->setRange(0.1, 200.0);
+            (*bwSpn)->setDecimals(2);
+            (*bwSpn)->setValue(10.0);
+            *tSpn = new QDoubleSpinBox;
+            (*tSpn)->setRange(0.1, 10000.0);
+            (*tSpn)->setDecimals(2);
+            (*tSpn)->setValue(10.0);
+            row->addWidget(new QLabel(QStringLiteral("Start (MHz):")));
+            row->addWidget(*startSpn);
+            row->addWidget(new QLabel(QStringLiteral("BW (MHz):")));
+            row->addWidget(*bwSpn);
+            row->addWidget(new QLabel(QStringLiteral("T (us):")));
+            row->addWidget(*tSpn);
+            row->addStretch(1);
+            vbox->addLayout(row);
+            QPushButton *btnSet = new QPushButton(btnText);
+            vbox->addWidget(btnSet);
+            QPushButton *btnDisable = new QPushButton(QStringLiteral("Disable"));
+            vbox->addWidget(btnDisable);
+            vbox->addStretch(1);
+            ui->tabWidget->addTab(tab, title);
+            connect(btnSet, SIGNAL(clicked()), this, SLOT(setDataSlot()));
+            return btnDisable;
+        };
+        QPushButton *btnDisableLfm =
+            buildChirpTab(QStringLiteral("LFM"), QStringLiteral("Set LFM"),
+                          &lfmStartSpn, &lfmBwSpn, &lfmTSpn);
+        connect(btnDisableLfm, &QPushButton::clicked, this, [this]() {
+            if (isExciterOn) emit changeDacSignal("Lfm");
+            setModeActive("lfm", false);
+        });
+        QPushButton *btnDisableNlfm =
+            buildChirpTab(QStringLiteral("NLFM"), QStringLiteral("Set NLFM"),
+                          &nlfmStartSpn, &nlfmBwSpn, &nlfmTSpn);
+        connect(btnDisableNlfm, &QPushButton::clicked, this, [this]() {
+            if (isExciterOn) emit changeDacSignal("Nlfm");
+            setModeActive("nlfm", false);
+        });
     }
 
     //    ui->tabWidget->setStyleSheet("QTabBar::tab:selected {background-color:" +QString(DARK_OLIVE_GREEN)+ ";}");
@@ -826,9 +887,11 @@ void Exciter::setDataSlot()
         {
             QMessageBox msgBox;
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
-                              "Run files/bridge/generate_bridge.py to create "
-                              "the bridge noise files.")
-                               .arg(fileName));
+                              "Run files/bridge/generate_bridge.py with "
+                              ""--out bridge" from the directory where "
+                              "the app is started (next to the spot/ "
+                              "folder), then press Set again.")
+                               .arg(QDir::currentPath() + "/" + fileName));
             msgBox.exec();
             return;
         }
@@ -859,6 +922,38 @@ void Exciter::setDataSlot()
         fileName = "MultiTarget.txt";
         if (!returnfilePath(fileName)) return;
         emit sendFileToCardSignal(fileName, 0, "multitarget");
+        isExciterOn = true;
+        break;
+    }
+
+    //===========================LFM=====================================
+    case 7:
+    {
+        emit turnOffSmartNoiseSignal();
+        setModeActive("lfm", true);
+        if (!buildChirpFile("Lfm.txt", false,
+                            lfmStartSpn->value(), lfmBwSpn->value(),
+                            lfmTSpn->value()))
+            return;
+        fileName = "Lfm.txt";
+        if (!returnfilePath(fileName)) return;
+        emit sendFileToCardSignal(fileName, 0, "lfm");
+        isExciterOn = true;
+        break;
+    }
+
+    //===========================NLFM====================================
+    case 8:
+    {
+        emit turnOffSmartNoiseSignal();
+        setModeActive("nlfm", true);
+        if (!buildChirpFile("Nlfm.txt", true,
+                            nlfmStartSpn->value(), nlfmBwSpn->value(),
+                            nlfmTSpn->value()))
+            return;
+        fileName = "Nlfm.txt";
+        if (!returnfilePath(fileName)) return;
+        emit sendFileToCardSignal(fileName, 0, "nlfm");
         isExciterOn = true;
         break;
     }
@@ -1186,6 +1281,53 @@ bool Exciter::buildMultiTargetWaveform()
     const double g = (peak > 0.0) ? 1.0 / peak : 1.0;
     for (int i = 0; i < N; i++)
         w << (sumI[i] * g) << " " << (sumQ[i] * g) << "\n";
+    out.close();
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: LFM / NLFM tabs
+// ---------------------------------------------------------------------------
+
+bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
+                             double f0Mhz, double bwMhz, double tUs)
+{
+    const int N = 262144;
+    // Board playback rate, same calibration as the spot/impulse files:
+    // P^2/800 MS/s = 12.5/50/200 for the 100/200/400 profiles.
+    const double fsMhz = profileBw * profileBw / 800.0;
+    const double twoPi = 2.0 * M_PI;
+    const int Tsamp = qMax(2, int(tUs * fsMhz));
+    const double Tm = (double)Tsamp / fsMhz; // seconds
+
+    QVector<double> ti(N, 0.0);
+    QVector<double> tq(N, 0.0);
+    for (int i = 0; i < N; i++)
+    {
+        const int m = i % Tsamp;
+        const double tau = (double)m / fsMhz;
+        // phase(t) = 2*pi*(f0*t + B*t^2/(2*T))  (repeating pulse, period T)
+        const double ph = twoPi * (f0Mhz * tau + bwMhz * tau * tau / (2.0 * Tm));
+        double amp = 1.0;
+        if (nlfm)
+        {
+            // NLFM: raised-cosine amplitude coding over the pulse
+            amp = 0.5 * (1.0 - std::cos(twoPi * m / Tsamp));
+        }
+        ti[i] = amp * std::cos(ph);
+        tq[i] = amp * std::sin(ph);
+    }
+
+    QFile out(fileName);
+    if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() << "Chirp: cannot write" << fileName;
+        return false;
+    }
+    QTextStream w(&out);
+    w << "TEXT\n";
+    for (int i = 0; i < N; i++)
+        w << ti[i] << " " << tq[i] << "\n";
     out.close();
     return true;
 }

@@ -121,6 +121,18 @@ private:
     QDoubleSpinBox *cwDdsScaleSpn{nullptr};
     QDoubleSpinBox *cwDdsPhaseSpn{nullptr};
 
+    // Phase 6: LFM / NLFM tabs (same flow as the spot tab): start
+    // frequency / bandwidth / pulse duration; Set synthesizes the chirp
+    // at the profile playback rate and sends it to the DAC buffer.
+    QDoubleSpinBox *lfmStartSpn{nullptr};
+    QDoubleSpinBox *lfmBwSpn{nullptr};
+    QDoubleSpinBox *lfmTSpn{nullptr};
+    QDoubleSpinBox *nlfmStartSpn{nullptr};
+    QDoubleSpinBox *nlfmBwSpn{nullptr};
+    QDoubleSpinBox *nlfmTSpn{nullptr};
+    bool buildChirpFile(const QString &fileName, bool nlfm,
+                        double f0Mhz, double bwMhz, double tUs);
+
     tabState currentTabState;
     QTimer exciterConnection;
     bool isUserLoggedIn{};
