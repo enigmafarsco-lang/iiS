@@ -78,7 +78,6 @@ Exciter::Exciter(QWidget *parent) :
         bridgeSpn->setMaximum(400.0);
         bridgeSpn->setDecimals(0);
         bridgeSpn->setValue(10.0);
-        bridgeSpn->setPlaceholderText(QStringLiteral("1 - %1 MHz").arg(profileBw));
         bridgeRow->addWidget(bridgeSpn);
         QPushButton *btnSetBridge = new QPushButton(QStringLiteral("Set Bridge Noise"));
         bridgeRow->addWidget(btnSetBridge);
@@ -131,8 +130,9 @@ Exciter::Exciter(QWidget *parent) :
             row->addWidget(mtShift[t]);
             mtVbox->addLayout(row);
             const int rowT = t;
-            connect(mtType[t], SIGNAL(currentIndexChanged(int)), this,
-                [this, rowT]() { updateMultiTargetRow(rowT); });
+            connect(mtType[t],
+                    QOverload<int>::of(&QComboBox::currentIndexChanged),
+                    this, [this, rowT]() { updateMultiTargetRow(rowT); });
         }
         QPushButton *btnSetMulti = new QPushButton(QStringLiteral("Generate & Send Multi Target"));
         mtVbox->addWidget(btnSetMulti);
