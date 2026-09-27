@@ -912,7 +912,7 @@ void Exciter::setDataSlot()
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
                               "(also searched the application folder). "
                               "Run files/bridge/generate_bridge.py with "
-                              ""--out bridge" from the directory where "
+                              "'--out bridge' from the directory where "
                               "the app is started (next to the spot/ "
                               "folder), then press Set again.")
                                .arg(QDir::currentPath() + "/" + fileName));
