@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-generate.py -- band-limited "spot" noise generator for iiS (Phase 5).
+generate_bridge.py -- band-limited "bridge" noise generator for iiS (Phase 6).
 
-Generates the ADRV9009 spot-noise waveform files that the Exciter's Spot
-tab loads and plays into the DAC buffer:
+Bridge noise is generated with the exact same engine as the spot files
+(same sharp band-limited spectral shape, same board-calibrated sample
+rate) but with its own seed stream, so each bridge file is a different
+noise realization than the corresponding spot file.
 
-    spot{N}mhz_{P}.txt      P in {100, 200, 400},   N = 1..P
+Generates the ADRV9009 bridge-noise waveform files that the Exciter's
+Bridge Noise tab loads and plays into the DAC buffer:
+
+    bridge{N}mhz_{P}.txt   P in {100, 200, 400},   N = 1..P
 
 i.e. 100 + 200 + 400 = 700 files:
 
-    spot1mhz_100.txt ... spot100mhz_100.txt     (100 MHz ADRV9009 profile)
-    spot1mhz_200.txt ... spot200mhz_200.txt     (200 MHz ADRV9009 profile)
-    spot1mhz_400.txt ... spot400mhz_400.txt     (400 MHz ADRV9009 profile)
+    bridge1mhz_100.txt ... bridge100mhz_100.txt (100 MHz ADRV9009 profile)
+    bridge1mhz_200.txt ... bridge200mhz_200.txt (200 MHz ADRV9009 profile)
+    bridge1mhz_400.txt ... bridge400mhz_400.txt (400 MHz ADRV9009 profile)
 
 File format (same family as the legacy spot5mhz.txt waveform file that
 the iio-oscilloscope DAC loader already accepts):
@@ -54,7 +59,7 @@ Consequences:
     (Nyquist): P100 -> 12.5 MHz, P200 -> 50 MHz, P400 -> 200 MHz;
   * N above that produces the profile's maximum (full-band)
     waveform;
-  * files are still named spot{N}mhz_{P}.txt for N = 1..P.
+  * files are named bridge{N}mhz_{P}.txt for N = 1..P.
 
 (For reference the Talise profiles list the TX baseband input rate
 as 1.2288 x P MHz - 122.88/245.76/491.52 MS/s - with 16/8/4x
@@ -95,12 +100,12 @@ keeps the file compact.
 
 Usage
 -----
-    python3 generate.py                  # all 700 files (100+200+400)
-    python3 generate.py --profiles 100   # only the 100 MHz profile set
-    python3 generate.py --profiles 200 --bw 12   # a few 200 MHz files
-    python3 generate.py --profiles 400 --bw 1 2 3 40 400
-    python3 generate.py --out /path/to/spot
-    python3 generate.py --no-numpy       # force the stdlib (slower) path
+    python3 generate_bridge.py                  # all 700 files (100+200+400)
+    python3 generate_bridge.py --profiles 100   # only the 100 MHz set
+    python3 generate_bridge.py --profiles 200 --bw 12   # a few 200 files
+    python3 generate_bridge.py --profiles 400 --bw 1 2 3 40 400
+    python3 generate_bridge.py --out /path/to/bridge
+    python3 generate_bridge.py --no-numpy       # force stdlib (slower)
 
     --bw values must be <= the profile bandwidth; invalid ones are
     skipped with a warning.  Re-running is idempotent (default seed is
@@ -111,7 +116,7 @@ roughly 5-10 minutes.  Without numpy the pure-stdlib FFT path needs
 roughly 4-5 s per file (~40-60 min for all 700).  Total on-disk size
 is about 3.5 GB, so make sure the target folder has enough room.
 
-NEVER commit the generated .txt files (files/spot/.gitignore blocks them).
+NEVER commit the generated .txt files (files/bridge/.gitignore blocks them).
 """
 
 import argparse
@@ -205,7 +210,7 @@ BIN_SMOOTH = 16          # circular moving-average width for the PSD (bins)
 def profile_rate_mhz(profile_bw):
     """File sample rate (MS/s) for a profile bandwidth P.
 
-    Calibrated on the target board: the board plays the spot files at
+    Calibrated on the target board: the board plays these files at
     P^2/800 MS/s (P100: 12.5, P200: 50, P400: 200) - measured as the
     display factor 1 / 1/2 / 1/4 of the typed bandwidth on the
     400/200/100 profiles with the earlier 0.5 x P files.
@@ -382,13 +387,14 @@ def _is_pow2(x):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Generate spot{N}mhz_{P}.txt band-limited noise files "
-                    "for the iiS ADRV9009 spot exciter (see module docstring).")
+        description="Generate bridge{N}mhz_{P}.txt band-limited noise "
+                    "files for the iiS ADRV9009 bridge noise tab "
+                    "(see module docstring).")
     ap.add_argument("--profiles", type=int, nargs="*", default=list(PROFILES),
                     choices=PROFILES,
                     help="profile bandwidths P to generate (default: all)")
     ap.add_argument("--bw", type=int, nargs="*", default=None, metavar="N",
-                    help="spot bandwidths N to generate (default: 1..P per profile)")
+                    help="bridge bandwidths N to generate (default: 1..P per profile)")
     ap.add_argument("--out", default=".",
                     help="output directory (default: current directory)")
     ap.add_argument("--samples", type=int, default=DEFAULT_SAMPLES,
@@ -460,7 +466,7 @@ def main(argv=None):
     total_bytes = 0
     per_profile = {}  # profile bw -> [made, total]
     for idx, (p, n_bw) in enumerate(work, 1):
-        name = f"spot{n_bw}mhz_{p}.txt"
+        name = f"bridge{n_bw}mhz_{p}.txt"
         path = os.path.join(args.out, name)
         per_profile.setdefault(p, [0, 0])[1] += 1
         if args.seed == "random":
@@ -468,7 +474,7 @@ def main(argv=None):
         elif args.seed is not None:
             seed = args.seed
         else:
-            seed = n_bw * 1000003 + p  # deterministic per (N, P)
+            seed = n_bw * 1000003 + p + 777001  # bridge seed stream
         try:
             secs, nbytes = generate_file(path, n_bw, p, args.samples,
                                          seed, use_numpy)

@@ -3,6 +3,12 @@
 #include "ui_exciter.h"
 #include <QLineEdit>
 #include <QRegularExpression>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QLabel>
+#include <QRegExp>
+#include <cmath>
 
 Exciter::Exciter(QWidget *parent) :
     QWidget(parent),
@@ -25,6 +31,91 @@ Exciter::Exciter(QWidget *parent) :
     {
 //        setBtn[i]->setEnabled(false);
         connect(setBtn[i], SIGNAL(clicked()),this,SLOT(setDataSlot()));
+    }
+
+    //=================== Phase 6: Bridge Noise tab ===================
+    // Band-limited noise files bridge/bridge{N}mhz_{P}.txt created by
+    // files/bridge/generate_bridge.py (same sharp band-limited noise
+    // engine as the spot files, board-calibrated sample rate).
+    {
+        QWidget *bridgeTab = new QWidget;
+        QVBoxLayout *bridgeVbox = new QVBoxLayout(bridgeTab);
+        QHBoxLayout *bridgeRow = new QHBoxLayout;
+        bridgeRow->addWidget(new QLabel(QStringLiteral("Bandwidth (MHz):")));
+        bridgeSpn = new QDoubleSpinBox;
+        bridgeSpn->setMinimum(1.0);
+        bridgeSpn->setMaximum(400.0);
+        bridgeSpn->setDecimals(0);
+        bridgeSpn->setValue(10.0);
+        bridgeSpn->setPlaceholderText(QStringLiteral("1 - %1 MHz").arg(profileBw));
+        bridgeRow->addWidget(bridgeSpn);
+        QPushButton *btnSetBridge = new QPushButton(QStringLiteral("Set Bridge Noise"));
+        bridgeRow->addWidget(btnSetBridge);
+        QPushButton *btnDisableBridge = new QPushButton(QStringLiteral("Disable"));
+        bridgeRow->addWidget(btnDisableBridge);
+        bridgeRow->addStretch(1);
+        bridgeVbox->addLayout(bridgeRow);
+        bridgeVbox->addStretch(1);
+        ui->tabWidget->addTab(bridgeTab, QStringLiteral("Bridge Noise"));
+        connect(btnSetBridge, SIGNAL(clicked()), this, SLOT(setDataSlot()));
+        connect(btnDisableBridge, &QPushButton::clicked, this, [this]() {
+            if (isExciterOn) emit changeDacSignal("Bridge");
+            setModeActive("bridge", false);
+        });
+    }
+
+    //=================== Phase 6: Multi Target tab ====================
+    // Up to 5 selectable targets.  Each target: enable checkbox +
+    // modulation type (Spot/CW/Impulse/LFM/NLFM) + its own specification
+    // (fields relabel per type) + its own frequency shift.  On "Generate &
+    // Send" every selected target is written to its own txt file, shifted
+    // by its own complex exponential (e^{j 2 pi f t}) and summed into one
+    // I/Q stream (MultiTarget.txt) that is sent to the DAC buffer.
+    {
+        QWidget *mtTab = new QWidget;
+        QVBoxLayout *mtVbox = new QVBoxLayout(mtTab);
+        for (int t = 0; t < 5; t++)
+        {
+            QHBoxLayout *row = new QHBoxLayout;
+            mtEnable[t] = new QCheckBox(QStringLiteral("Target %1").arg(t + 1));
+            row->addWidget(mtEnable[t]);
+            mtType[t] = new QComboBox;
+            mtType[t]->addItems({QStringLiteral("Spot"), QStringLiteral("CW"),
+                                 QStringLiteral("Impulse"), QStringLiteral("LFM"),
+                                 QStringLiteral("NLFM")});
+            row->addWidget(mtType[t]);
+            for (int s = 0; s < 3; s++)
+            {
+                mtSpecLbl[t][s] = new QLabel(QStringLiteral("--"));
+                row->addWidget(mtSpecLbl[t][s]);
+                mtSpec[t][s] = new QDoubleSpinBox;
+                mtSpec[t][s]->setDecimals(2);
+                row->addWidget(mtSpec[t][s]);
+            }
+            row->addWidget(new QLabel(QStringLiteral("Shift (MHz):")));
+            mtShift[t] = new QDoubleSpinBox;
+            mtShift[t]->setMinimum(-200.0);
+            mtShift[t]->setMaximum(200.0);
+            mtShift[t]->setDecimals(2);
+            row->addWidget(mtShift[t]);
+            mtVbox->addLayout(row);
+            const int rowT = t;
+            connect(mtType[t], SIGNAL(currentIndexChanged(int)), this,
+                [this, rowT]() { updateMultiTargetRow(rowT); });
+        }
+        QPushButton *btnSetMulti = new QPushButton(QStringLiteral("Generate & Send Multi Target"));
+        mtVbox->addWidget(btnSetMulti);
+        QPushButton *btnDisableMulti = new QPushButton(QStringLiteral("Disable"));
+        mtVbox->addWidget(btnDisableMulti);
+        mtVbox->addStretch(1);
+        ui->tabWidget->addTab(mtTab, QStringLiteral("Multi Target"));
+        connect(btnSetMulti, SIGNAL(clicked()), this, SLOT(setDataSlot()));
+        connect(btnDisableMulti, &QPushButton::clicked, this, [this]() {
+            if (isExciterOn) emit changeDacSignal("MultiTarget");
+            setModeActive("multitarget", false);
+        });
+        for (int t = 0; t < 5; t++)
+            updateMultiTargetRow(t);
     }
 
     //    ui->tabWidget->setStyleSheet("QTabBar::tab:selected {background-color:" +QString(DARK_OLIVE_GREEN)+ ";}");
@@ -629,7 +720,11 @@ void Exciter::setDataSlot()
         double pw = ui->spnImpulsePulseWidth->value();
 
         QString impulseFileName = "Impulse.txt";
-        createImpulseFile(pri, pw, impulseFileName, profileBw / 2.0);
+        // Same per-profile I/Q playback rate as the spot files
+        // (files/spot/generate.py): P^2/800 MS/s = 12.5/50/200 for
+        // the 100/200/400 profiles, scope-calibrated on this board.
+        const double impulseFs = profileBw * profileBw / 800.0;
+        createImpulseFile(pri, pw, impulseFileName, impulseFs);
 
         if (!returnfilePath(impulseFileName)) return;
         fileName = "Impulse.txt";
@@ -678,6 +773,55 @@ void Exciter::setDataSlot()
 
         if (!returnfilePath(fileName)) return;
         emit sendFileToCardSignal(fileName, 0,"wb");
+        break;
+    }
+
+    //===========================Bridge Noise===============================
+    case 5:
+    {
+        emit turnOffSmartNoiseSignal();
+        setModeActive("bridge", true);
+        const int bridgeN = int(bridgeSpn->value());
+        fileName = QString("bridge/bridge%1mhz_%2.txt")
+                       .arg(bridgeN).arg(profileBw);
+        if (!existsFile((QDir::currentPath() + "/" + fileName).toStdString()))
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
+                              "Run files/bridge/generate_bridge.py to create "
+                              "the bridge noise files.")
+                               .arg(fileName));
+            msgBox.exec();
+            return;
+        }
+        if (!returnfilePath(fileName)) return;
+        emit sendFileToCardSignal(fileName, 0, "bridge");
+        isExciterOn = true;
+        break;
+    }
+
+    //===========================Multi Target===============================
+    case 6:
+    {
+        bool any = false;
+        for (int t = 0; t < 5; t++)
+            if (mtEnable[t]->isChecked())
+                any = true;
+        if (!any)
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Select at least one target."));
+            msgBox.exec();
+            return;
+        }
+        emit turnOffSmartNoiseSignal();
+        setModeActive("multitarget", true);
+        if (!buildMultiTargetWaveform())
+            return;
+        fileName = "MultiTarget.txt";
+        if (!returnfilePath(fileName)) return;
+        emit sendFileToCardSignal(fileName, 0, "multitarget");
+        isExciterOn = true;
         break;
     }
 
@@ -787,4 +931,223 @@ void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");
     setModeActive("wb", false);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: Multi Target tab
+// ---------------------------------------------------------------------------
+
+void Exciter::updateMultiTargetRow(int row)
+{
+    // Per-type specification fields: label / min / max / decimals.
+    struct SpecDef {
+        const char *lbl[3];
+        double min[3];
+        double max[3];
+        int dec[3];
+    };
+    static const SpecDef defs[5] = {
+        // Spot: bandwidth of the pre-generated spot{N}mhz_{P}.txt file
+        {{"BW (MHz)", "--", "--"}, {1.0, -1.0, -1.0}, {400.0, 1.0, 1.0}, {0, 0, 0}},
+        // CW: baseband tone frequency (MHz)
+        {{"Frq (MHz)", "--", "--"}, {-120.0, -1.0, -1.0}, {120.0, 1.0, 1.0}, {2, 0, 0}},
+        // Impulse: PRI and pulse width (us)
+        {{"PRI (us)", "PW (us)", "--"}, {1.0, 0.05, -1.0}, {50000.0, 10000.0, 1.0}, {1, 2, 0}},
+        // LFM: start frequency (MHz), bandwidth (MHz), pulse duration (us)
+        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}},
+        // NLFM: same fields as LFM (raised-cosine amplitude coding)
+        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}},
+    };
+    if (row < 0 || row > 4 || !mtType[row])
+        return;
+    const SpecDef &d = defs[mtType[row]->currentIndex()];
+    for (int s2 = 0; s2 < 3; s2++)
+    {
+        const bool used = (mtType[row]->currentIndex() == 0) ? (s2 == 0)
+                     : (mtType[row]->currentIndex() == 1) ? (s2 == 0)
+                     : (mtType[row]->currentIndex() == 2) ? (s2 < 2)
+                     : true;
+        mtSpecLbl[row][s2]->setText(used ? d.lbl[s2] : QStringLiteral("--"));
+        mtSpec[row][s2]->setEnabled(used);
+        if (used)
+        {
+            mtSpec[row][s2]->setMinimum(d.min[s2]);
+            mtSpec[row][s2]->setMaximum(d.max[s2]);
+            mtSpec[row][s2]->setDecimals(d.dec[s2]);
+        }
+    }
+}
+
+bool Exciter::buildMultiTargetWaveform()
+{
+    const int N = 262144;
+    // Board playback rate, same calibration as the spot/impulse files
+    // (files/spot/generate.py): P^2/800 MS/s = 12.5/50/200 for the
+    // 100/200/400 profiles.
+    const double fsMhz = profileBw * profileBw / 800.0;
+    const double twoPi = 2.0 * M_PI;
+
+    QVector<double> sumI(N, 0.0);
+    QVector<double> sumQ(N, 0.0);
+    int written = 0;
+
+    for (int t = 0; t < 5; t++)
+    {
+        if (!mtEnable[t]->isChecked())
+            continue;
+        const int type = mtType[t]->currentIndex();
+        QVector<double> ti(N, 0.0);
+        QVector<double> tq(N, 0.0);
+
+        if (type == 0)
+        {
+            // Spot: load the generated spot{N}mhz_{P}.txt (262144 samples)
+            const int n = int(mtSpec[t][0]->value());
+            const QString f = QString("spot/spot%1mhz_%2.txt").arg(n).arg(profileBw);
+            const QString path = QDir::currentPath() + "/" + f;
+            if (!existsFile(path.toStdString()))
+            {
+                QMessageBox msgBox;
+                msgBox.setText(tr("Spot file for target %1 not found:\n%2\n\n"
+                                  "Run files/spot/generate.py first.")
+                                   .arg(t + 1).arg(f));
+                msgBox.exec();
+                return false;
+            }
+            QFile in(path);
+            if (!in.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                qWarning() << "MultiTarget: cannot open" << path;
+                return false;
+            }
+            QTextStream r(&in);
+            r.readLine(); // TEXT header
+            int n2 = 0;
+            while (n2 < N && !r.atEnd())
+            {
+                const QString line = r.readLine().trimmed();
+                if (line.isEmpty())
+                    continue;
+                const QStringList c = line.split(QRegExp("\s+"), Qt::SkipEmptyParts);
+                if (c.size() < 2)
+                    break;
+                ti[n2] = c[0].toDouble();
+                tq[n2] = c[1].toDouble();
+                n2++;
+            }
+            in.close();
+        }
+        else if (type == 1)
+        {
+            // CW: complex tone at baseband frequency f (MHz)
+            const double f = mtSpec[t][0]->value();
+            const double w = twoPi * f / fsMhz;
+            for (int i = 0; i < N; i++)
+            {
+                ti[i] = std::cos(w * i);
+                tq[i] = std::sin(w * i);
+            }
+        }
+        else if (type == 2)
+        {
+            // Impulse: rectangular PRF pulse train (1/0 on I and Q)
+            const double priUs = mtSpec[t][0]->value();
+            const double pwUs = mtSpec[t][1]->value();
+            const int priSamp = qMax(2, int(priUs * fsMhz));
+            int pwSamp = int(pwUs * fsMhz);
+            if (pwSamp <= 0)
+                pwSamp = 1;
+            if (pwSamp >= priSamp)
+                pwSamp = priSamp - 1;
+            for (int i = 0; i < N; i++)
+            {
+                const double v = ((i % priSamp) < pwSamp) ? 1.0 : 0.0;
+                ti[i] = v;
+                tq[i] = v;
+            }
+        }
+        else
+        {
+            // LFM / NLFM: (chirp) pulse train, period T, start f0, BW B.
+            // phase(t) = 2 pi (f0 t + B t^2 / (2 T))
+            const double f0 = mtSpec[t][0]->value();
+            const double B = mtSpec[t][1]->value();
+            const double T = mtSpec[t][2]->value();
+            const int Tsamp = qMax(2, int(T * fsMhz));
+            const double Tm = (double)Tsamp / fsMhz; // seconds
+            for (int i = 0; i < N; i++)
+            {
+                const int m = i % Tsamp;
+                const double tau = (double)m / fsMhz;
+                const double ph = twoPi * (f0 * tau + B * tau * tau / (2.0 * Tm));
+                double amp = 1.0;
+                if (type == 4)
+                {
+                    // NLFM: raised-cosine amplitude coding over the pulse
+                    amp = 0.5 * (1.0 - std::cos(twoPi * m / Tsamp));
+                }
+                ti[i] = amp * std::cos(ph);
+                tq[i] = amp * std::sin(ph);
+            }
+        }
+
+        // Frequency shift = complex exponential multiplier ("DDS sine"):
+        //   s'(n) = s(n) * e^{j 2 pi f_shift n / fs}
+        const double fsh = mtShift[t]->value();
+        if (fsh != 0.0)
+        {
+            const double wsh = twoPi * fsh / fsMhz;
+            for (int i = 0; i < N; i++)
+            {
+                const double c = std::cos(wsh * i);
+                const double sn = std::sin(wsh * i);
+                const double a = ti[i];
+                const double b = tq[i];
+                ti[i] = a * c - b * sn;
+                tq[i] = a * sn + b * c;
+            }
+        }
+
+        // One txt file per selected object (inspectable individually)
+        const QString tf = QString("MultiTarget_t%1.txt").arg(t + 1);
+        QFile out(tf);
+        if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            qWarning() << "MultiTarget: cannot write" << tf;
+            return false;
+        }
+        QTextStream w(&out);
+        w << "TEXT\n";
+        for (int i = 0; i < N; i++)
+            w << ti[i] << " " << tq[i] << "\n";
+        out.close();
+        written++;
+
+        for (int i = 0; i < N; i++)
+        {
+            sumI[i] += ti[i];
+            sumQ[i] += tq[i];
+        }
+    }
+
+    if (written == 0)
+        return false;
+
+    // Sum of all shifted targets -> one I/Q stream, peak-normalized.
+    double peak = 0.0;
+    for (int i = 0; i < N; i++)
+        peak = qMax(peak, qMax(qAbs(sumI[i]), qAbs(sumQ[i])));
+    QFile out("MultiTarget.txt");
+    if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() << "MultiTarget: cannot write MultiTarget.txt";
+        return false;
+    }
+    QTextStream w(&out);
+    w << "TEXT\n";
+    const double g = (peak > 0.0) ? 1.0 / peak : 1.0;
+    for (int i = 0; i < N; i++)
+        w << (sumI[i] * g) << " " << (sumQ[i] * g) << "\n";
+    out.close();
+    return true;
 }

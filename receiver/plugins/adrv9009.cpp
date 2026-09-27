@@ -2080,22 +2080,52 @@ QString adrv9009::changingDac(QString mode)
 {
     if(mode == "set-cw" || mode == "set-sweep" )
     {
-        dac_tx_manager->dac1.txs[0].dds_mode_widget->setCurrentIndex(1);
-        dac_tx_manager->dac1.txs[1].dds_mode_widget->setCurrentIndex(1);
+        // Phase 6: CW (and sweep) must use the on-chip DDS tone engine -
+        // "DDS Mode: One CW Tone" in iio-oscilloscope - on BOTH TX1 (dac1)
+        // and TX2 (dac2), not the DAC buffer path the other exciter tabs
+        // use.  The DDS parameters are set before switching the mode so
+        // the mode handler (manage_dds_mode) applies them to the IIO
+        // attributes:
+        //   Frequency 0 MHz  - tone on the carrier; the RF carrier itself
+        //                      is the exciter frequency, set through the
+        //                      normal frqSpn/RF path (spnCWFrq).
+        //   Scale     0 dBFS - full-scale tone; the output level is set by
+        //                      the existing TX gain (dBm) path.
+        //   Phase     0 deg.
+        for (guint d = 0; d < 2; d++)
+        {
+            struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
+                                            : &dac_tx_manager->dac2;
+            for (guint i = 0; i < ddac->tx_count; i++)
+            {
+                for (unsigned t = 0; t < 4; t++)
+                {
+                    struct dds_tone *tone = ddac->txs[i].dds_tones[t];
+                    if (!tone)
+                        continue;
+                    tone->freq->setValue(0.0);
+                    if (tone->scale)
+                        tone->scale->setValue(0.0);
+                    tone->phase->setValue(0.0);
+                }
+                ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_ONE_TONE);
+            }
+        }
 
         return mode == "set-cw" ? "CW is set successfully": "...";
     }
-//    if(mode == "disable-cw")
-//    {
-//        dac_tx_manager->dac1.txs[0].dds_mode_widget->setCurrentIndex(0);
-//        dac_tx_manager->dac1.txs[1].dds_mode_widget->setCurrentIndex(0);
-//    }
     else
     {
-        dac_tx_manager->dac1.txs[0].dds_mode_widget->setCurrentIndex(0);
-        dac_tx_manager->dac1.txs[1].dds_mode_widget->setCurrentIndex(0);
-    }
+        // Phase 6: disable the DDS tone on both TX1 and TX2.
+        for (guint d = 0; d < 2; d++)
+        {
+            struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
+                                            : &dac_tx_manager->dac2;
+            for (guint i = 0; i < ddac->tx_count; i++)
+                ddac->txs[i].dds_mode_widget->setCurrentIndex(DDS_DISABLED);
+        }
         return mode +" is turned off.";
+    }
 }
 
 // Switch the DAC from the CW tone DDS to the "DAC Buffer Output" mode.

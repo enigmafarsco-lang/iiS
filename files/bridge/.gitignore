@@ -1,0 +1,5 @@
+# Generated band-limited bridge noise files (run generate_bridge.py locally).
+# These are ~4.5 GB of data and must never be committed.
+bridge[0-9]*mhz_*.txt
+# legacy-name outputs, if ever generated locally
+bridge[0-9]*mhz.txt

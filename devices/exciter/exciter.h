@@ -3,6 +3,10 @@
 
 #include <QSet>
 #include <QWidget>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QLabel>
 #include <unistd.h>
 #include <iio.h>
 
@@ -90,6 +94,25 @@ private:
     void createImpulseFile(double, double, QString&, double);
     bool existsFile (const std::string& name);
     bool returnfilePath(QString&);
+
+    // Phase 6: Bridge Noise tab - band-limited noise files
+    // bridge/bridge{N}mhz_{P}.txt (created by
+    // files/bridge/generate_bridge.py, same engine as the spot files).
+    QDoubleSpinBox *bridgeSpn{nullptr};
+
+    // Phase 6: Multi Target tab - up to 5 selectable targets, each with its
+    // own modulation (Spot/CW/Impulse/LFM/NLFM), its own specification and
+    // its own frequency shift (a complex exponential multiplier).  Every
+    // selected target is rendered to its own txt file, the shifted targets
+    // are summed into one I/Q stream (MultiTarget.txt) which is sent to the
+    // DAC buffer.
+    QCheckBox *mtEnable[5]{};
+    QComboBox *mtType[5]{};
+    QLabel *mtSpecLbl[5][3]{};
+    QDoubleSpinBox *mtSpec[5][3]{};
+    QDoubleSpinBox *mtShift[5]{};
+    void updateMultiTargetRow(int row);
+    bool buildMultiTargetWaveform();
 
     tabState currentTabState;
     QTimer exciterConnection;
