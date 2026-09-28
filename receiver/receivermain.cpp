@@ -2465,9 +2465,6 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
     oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
-    // TX1 LO-leakage + quadrature tracking: enabled and checked in ALL
-    // settings (also re-applied here, after every profile load / save).
-    oscMain->_adrv9009->enforceTx1TrackingCalibrations();
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 
