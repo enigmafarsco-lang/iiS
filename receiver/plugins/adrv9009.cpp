@@ -615,21 +615,14 @@ void adrv9009::save_widget_value(struct iio_widget *iio_w) {
  */
 void adrv9009::snapshotBoardState()
 {
-    IIO_Widget iio_w;
     boardSnapshot.clear();
 
-    // (1) READ all status into the widgets first.
-    for (guint i = 0; i < phy_devs_count; i++) {
-        iio_w.iio_update_widgets_of_device(subcomponents[i].widgets,
-                                           subcomponents[i].num_glb +
-                                           subcomponents[i].num_tx +
-                                           subcomponents[i].num_rx +
-                                           subcomponents[i].num_obsrx,
-                                           subcomponents[i].iio_dev);
-    }
-    for (guint i = 0; i < num_fpga; i++)
-        iio_w.iio_widget_update(&fpga_widgets[i]);
-
+    // (1) The widgets already hold the board state - update_widgets()
+    //     read every IIO attribute into them at startup (that is the
+    //     software's board READ).  Reading them again here over the
+    //     network blocked the GUI right after connect and the software
+    //     never came up, so the snapshot only SAVES the values the
+    //     board read already put into the widgets.  Nothing is written.
     // (2) SAVE every parameter (the widget values, including the DDS
     //     mode combos and the DDS tone freq/scale/phase fields).
     auto saveWidget = [this](QWidget *w) {
@@ -649,7 +642,9 @@ void adrv9009::snapshotBoardState()
         boardSnapshot.append({w, v});
     };
 
-    for (guint i = 0; i < phy_devs_count; i++) {
+    for (int i = 0; i < subcomponents.size(); i++) {
+        if (!subcomponents[i].widgets)
+            continue;
         const guint n = subcomponents[i].num_glb + subcomponents[i].num_tx +
                         subcomponents[i].num_rx + subcomponents[i].num_obsrx;
         for (guint j = 0; j < n; j++)
@@ -676,8 +671,8 @@ void adrv9009::snapshotBoardState()
         }
     }
 
-    printf("Set Default: saved %d parameter values from the board\n",
-           (int)boardSnapshot.size());
+    qInfo() << "Set Default: saved" << (int)boardSnapshot.size()
+            << "parameter values read at startup";
 }
 
 /**
