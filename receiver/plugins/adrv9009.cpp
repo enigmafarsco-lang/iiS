@@ -4,6 +4,7 @@
 #include <ui_adrv9009.h>
 #include <QFileInfo>
 #include <QApplication>
+#include <QTimer>
 
 #pragma region Properties {
 
@@ -2047,10 +2048,9 @@ int adrv9009::load_tal_profile(QString file_name)
         msg->setWindowTitle("Profile Configuration Failed");
         msg->setText("\nFailed to load profile using the selected file.");
         msg->show();
-
-        QThread::msleep(2000);
-
-        msg->close();
+        // auto-close without freezing the GUI thread (the old
+        // QThread::msleep(2000) blocked the whole software)
+        QTimer::singleShot(2000, msg, &QWidget::close);
 
     } else {
         if (last_profile!="")

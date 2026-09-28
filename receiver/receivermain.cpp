@@ -2266,6 +2266,24 @@ void ReceiverMain::defaultSettings()
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
 void ReceiverMain::on_btnProfileSet_clicked()
 {
+    // Phase 6 (profile-400 hang fix): every profile set/change quiesces the
+    // RF chain FIRST - TX1/TX2, RX1/RX2 and ORX1/ORX2 off before changing
+    // the profile (ORX2 is always kept off for caution; ORX1 is re-enabled
+    // only after the I/Q signal comes back).  Writing the profile while
+    // TX/RX/ORX are active - especially the 400 profile at 491.52 MS/s -
+    // wedges the board and the blocking profile_config write stalls the
+    // software ("hang and stall").
+    if (oscMain && oscMain->_adrv9009)
+    {
+        adrv9009 *adrv = oscMain->_adrv9009;
+        if (adrv->power_TX1_DownChk) { adrv->power_TX1_DownChk->setChecked(true); adrv->power_TX1_DownChk->stateChanged(1); } // TX1 off
+        if (adrv->powerTX2DownChk)   { adrv->powerTX2DownChk->setChecked(true);   adrv->powerTX2DownChk->stateChanged(1); }   // TX2 off
+        if (adrv->rx1Powerdown)      { adrv->rx1Powerdown->setChecked(true);      adrv->rx1Powerdown->stateChanged(1); }      // RX1 off
+        if (adrv->rx2Powerdown)      { adrv->rx2Powerdown->setChecked(true);      adrv->rx2Powerdown->stateChanged(1); }      // RX2 off
+        if (adrv->obs2Powerdown)     { adrv->obs2Powerdown->setChecked(true);     adrv->obs2Powerdown->stateChanged(1); }     // ORX2 off
+        if (adrv->power_OBSRX_Spn)   { adrv->power_OBSRX_Spn->setChecked(true);   adrv->power_OBSRX_Spn->stateChanged(1); }   // ORX1 off
+    }
+
     // Before a profile change the frequency must be 1800 MHz: check it
     // first and only then apply the user's profile (a profile write
     // reconfigures the whole RF chain, so the LO is parked at 1800 first).
@@ -2279,6 +2297,22 @@ void ReceiverMain::on_btnProfileSet_clicked()
         }
     }
 
+    // Pc = 0 and P (attenuation) = 10 - the standard values, so Pb = 10
+    // reaches the board (Pa/Pc/Pb model, constants/tx_calibration.h).
+    if (ui->dsbTxCalib)
+        ui->dsbTxCalib->setValue(0.0);
+    if (att_TX1_Spn)
+        att_TX1_Spn->setValue(10);
+    if (att_TX2_Spn)
+        att_TX2_Spn->setValue(10);
+
+    // Let the frequency settle (1 .. 5 s) before the profile write.
+    QTimer::singleShot(3000, this, [this]{ writeSelectedProfile(); });
+}
+
+// Profile write - runs after the settle delay of on_btnProfileSet_clicked().
+void ReceiverMain::writeSelectedProfile()
+{
     static const char *profileFiles[] = {
         "Tx_BW100_IR122p88_Rx_BW100_OR122p88_ORx_BW100_OR122p88_DC245p76.txt",
         "Tx_BW200_IR245p76_Rx_BW100_OR122p88_ORx_BW200_OR245p76_DC245p76.txt",
@@ -2358,6 +2392,15 @@ void ReceiverMain::on_btnProfileSet_clicked()
         // TX1/2 checkboxes are left in an undefined state.
         if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
             defaultParameters();
+
+        // The I/Q signal is back (the plot is live again): re-enable ORX1
+        // now.  ORX2 stays off in all cases (caution).
+        if (oscMain && oscMain->_adrv9009)
+        {
+            adrv9009 *adrv = oscMain->_adrv9009;
+            if (adrv->power_OBSRX_Spn) { adrv->power_OBSRX_Spn->setChecked(false); adrv->power_OBSRX_Spn->stateChanged(1); } // ORX1 on
+            if (adrv->obs2Powerdown)   { adrv->obs2Powerdown->setChecked(true);   adrv->obs2Powerdown->stateChanged(1); }   // ORX2 off
+        }
 
         frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
     });
