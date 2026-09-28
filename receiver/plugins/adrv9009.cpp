@@ -2170,6 +2170,8 @@ void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
 
 QString adrv9009::changingDac(QString mode)
 {
+    if (!dac_tx_manager)
+        return QStringLiteral("DAC manager is not ready.");
     if(mode == "set-cw" || mode == "set-sweep" )
     {
         // Phase 6: CW (and sweep) must use the on-chip DDS tone engine -

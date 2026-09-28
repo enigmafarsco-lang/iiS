@@ -14,6 +14,24 @@
 #include <QFileInfo>
 #include <cmath>
 
+// Phase 6: DAC file playback rate per ADRV9009 profile (MS/s) -
+// MEASURED on the spectrum analyser, not derived from the TAL rates.
+// Profile 200 plays a file at 122.88 MS/s (half its 245.76 MS/s TX input
+// rate) but profile 400 plays at the FULL 491.52 MS/s (its thb3
+// interpolator is bypassed) - the old uniform "0.6144 x P" table made
+// every profile-400 waveform TWICE as wide on air (a 20 MHz spot showed
+// 40 MHz).  P100 = 61.44 MS/s (the same half-rate as P200; not yet
+// verified on air).  The spot/bridge generators use the same table
+// (files/spot/generate.py, files/bridge/generate_bridge.py).
+static double txFileRateMhz(int profileBw)
+{
+    if (profileBw >= 400)
+        return 491.52;
+    if (profileBw >= 200)
+        return 122.88;
+    return 61.44; // profile 100
+}
+
 Exciter::Exciter(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::exciter)
@@ -52,7 +70,7 @@ Exciter::Exciter(QWidget *parent) :
         {
             cwGrid->addWidget(new QLabel(QStringLiteral("DDS Freq (MHz):")), 2, 0);
             cwDdsFrqSpn = new QDoubleSpinBox;
-            cwDdsFrqSpn->setRange(-122.878, 122.878);
+            cwDdsFrqSpn->setRange(-245.76, 245.76);
             cwDdsFrqSpn->setDecimals(3);
             cwDdsFrqSpn->setValue(10.0);
             cwGrid->addWidget(cwDdsFrqSpn, 2, 1);
@@ -176,7 +194,7 @@ Exciter::Exciter(QWidget *parent) :
             QVBoxLayout *vbox = new QVBoxLayout(tab);
             QHBoxLayout *row = new QHBoxLayout;
             *startSpn = new QDoubleSpinBox;
-            (*startSpn)->setRange(-122.878, 122.878);
+            (*startSpn)->setRange(-245.76, 245.76);
             (*startSpn)->setDecimals(2);
             (*startSpn)->setValue(0.0);
             *bwSpn = new QDoubleSpinBox;
@@ -292,9 +310,9 @@ Exciter::Exciter(QWidget *parent) :
     // Phase 6: the Sweep tab synthesizes BASEBAND stepped-sine I/Q like the
     // LFM tab (the LO does not move), so its start/stop/step live in the
     // playback band of the DAC file, not in the RF band of the cart.
-    ui->spnSweepStartFrq->setRange (-122.878, 122.878);
+    ui->spnSweepStartFrq->setRange (-245.76, 245.76);
     ui->spnSweepStopFrq->setRange  (-122.878, 122.878);
-    ui->spnSweepStep->setRange     (0.01, 245.76);
+    ui->spnSweepStep->setRange     (0.01, 491.52);
     ui->spnSweepStartFrq->setValue (0.0);
     ui->spnSweepStopFrq->setValue  (10.0);
     ui->spnSweepStep->setValue     (2.0);
@@ -914,11 +932,10 @@ void Exciter::setDataSlot()
 
         QString impulseFileName = "Impulse.txt";
         // Same per-profile I/Q playback rate as the spot files
-        // (files/spot/generate.py): the board plays the DAC buffer at
-        // half the profile's sample rate - 61.44/122.88/245.76 MS/s for
-        // the 100/200/400 profiles (measured: a spot/shift is exactly
-        // half as wide when this rate is doubled).
-        const double impulseFs = profileBw * 61.44 / 100.0;
+        // (files/spot/generate.py): 61.44/122.88/491.52 MS/s for the
+        // 100/200/400 profiles (measured on the analyser, see
+        // txFileRateMhz()).
+        const double impulseFs = txFileRateMhz(profileBw);
         createImpulseFile(pri, pw, impulseFileName, impulseFs);
 
         if (!returnfilePath(impulseFileName)) return;
@@ -1269,9 +1286,10 @@ bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files
-    // (files/spot/generate.py): half the profile's sample rate -
-    // 61.44/122.88/245.76 MS/s for the 100/200/400 profiles.
-    const double fsMhz = profileBw * 61.44 / 100.0;
+    // (files/spot/generate.py): 61.44/122.88/491.52 MS/s for the
+    // 100/200/400 profiles (measured on the analyser, see
+    // txFileRateMhz()).
+    const double fsMhz = txFileRateMhz(profileBw);
     const double twoPi = 2.0 * M_PI;
 
     QVector<double> sumI(N, 0.0);
@@ -1496,9 +1514,9 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
 {
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files:
-    // half the profile's sample rate - 61.44/122.88/245.76 MS/s for the
-    // 100/200/400 profiles.
-    const double fsMhz = profileBw * 61.44 / 100.0;
+    // 61.44/122.88/491.52 MS/s for the 100/200/400 profiles (measured on
+    // the analyser, see txFileRateMhz()).
+    const double fsMhz = txFileRateMhz(profileBw);
     // The whole sweep must fit inside the file's Nyquist band
     // (-fs/2 .. +fs/2) or it folds and does not look like an LFM.
     {
@@ -1548,8 +1566,9 @@ bool Exciter::buildSweepFile(const QString &fileName,
     // file equally - and the phase runs continuously across tone changes.
     const int N = 262144;
     // Board playback rate, same calibration as the spot/impulse files:
-    // 61.44/122.88/245.76 MS/s for the 100/200/400 profiles.
-    const double fsMhz = profileBw * 61.44 / 100.0;
+    // 61.44/122.88/491.52 MS/s for the 100/200/400 profiles (measured on
+    // the analyser, see txFileRateMhz()).
+    const double fsMhz = txFileRateMhz(profileBw);
     const double twoPi = 2.0 * M_PI;
 
     if (fStepMhz <= 0.0)

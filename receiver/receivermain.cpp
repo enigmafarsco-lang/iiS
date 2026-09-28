@@ -504,9 +504,9 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     spnSweepPower     = ui->spnSweepPower;
     // Phase 6: the Sweep tab is baseband stepped-sine I/Q now (like the LFM
     // tab, fixed LO) - mirror the exciter's baseband ranges here.
-    spnSweepStartFrq->setRange(-122.878, 122.878);
-    spnSweepStopFrq->setRange (-122.878, 122.878);
-    spnSweepStep->setRange    (0.01, 245.76);
+    spnSweepStartFrq->setRange(-245.76, 245.76);
+    spnSweepStopFrq->setRange (-245.76, 245.76);
+    spnSweepStep->setRange    (0.01, 491.52);
     spnDelay          = ui->spnDelay;
     spnImpulseFrq     = ui->spnImpulseFrq;
     spnImpulsePower   = ui->spnImpulsePower;
@@ -2232,6 +2232,7 @@ void ReceiverMain::defaultSettings()
                     return;
                 frqDomainPlot->setEnabled(true);
                 defaultParameters();
+                runStartupCalibration();
             });
         }
         else
@@ -2239,11 +2240,13 @@ void ReceiverMain::defaultSettings()
             qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
                        << fileAddress;
             defaultParameters();
+            runStartupCalibration();
         }
     }
     else
     {
         defaultParameters();
+        runStartupCalibration();
     }
     // TX1 is OFF whenever defaults are applied at start (safe default).
     if (power_TX1_DownChk)
@@ -2251,6 +2254,30 @@ void ReceiverMain::defaultSettings()
         power_TX1_DownChk->stateChanged(1);  // force a hardware write
         power_TX1_DownChk->setChecked(true); // TX off
     }
+}
+
+// Phase 6: run the ADRV9009 calibration ONCE right after software start -
+// all calibration items except lol-ext and fhm (the same selection
+// defaultParameters() establishes), then the "calibrate" button write.
+// Never runs again (profile changes / settings saves only re-apply the
+// checkbox defaults, they do not recalibrate).
+void ReceiverMain::runStartupCalibration()
+{
+    if (startupCalDone)
+        return;
+    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
+        return;
+    adrv9009 *adrv = oscMain->_adrv9009;
+    if (!adrv->calibrateBtn)
+        return;
+    startupCalDone = true;
+    adrv->cal_rx_qec_chk->setChecked(true);
+    adrv->cal_tx_qec_chk->setChecked(true);
+    adrv->cal_tx_lol_chk->setChecked(true);
+    adrv->cal_rx_phase_chk->setChecked(true);
+    adrv->cal_tx_lol_ext_chk->setChecked(false); // lol-ext excluded
+    adrv->cal_fhm_chk->setChecked(false);        // fhm excluded
+    adrv->calibrateBtn->click();
 }
 
 
@@ -2272,6 +2299,19 @@ void ReceiverMain::on_btnProfileSet_clicked()
             frqSpn->setValue(1800.0);
             ui->spnFrq->setValue(abs(DC_6_UPTO_8_12 - 1800.0));
         }
+    }
+
+    // Phase 6: after parking the frequency at 1800 - and BEFORE the
+    // profile write - put ALL settings back to their defaults: TX1/2 off,
+    // RX/OBS powerdown defaults, TX gain 10 dB, ADRV9009 calibration
+    // checkboxes (all except lol-ext and fhm), control-unit and
+    // seek/hopping defaults (defaultParameters()), and switch the DAC out
+    // of "DAC Buffer Output" into the DDS tone mode so no waveform keeps
+    // streaming while the profile reconfigures the whole RF chain.
+    if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
+    {
+        defaultParameters();
+        oscMain->_adrv9009->changingDac("set-cw"); // buffer -> DDS mode
     }
 
     static const char *profileFiles[] = {

@@ -248,6 +248,10 @@ public:
     void plotHistogram(QCustomPlot *,std::unordered_map<double, double > *);
     void plotInit();
     void defaultSettings();
+    // Phase 6: one-shot ADRV9009 calibration after software start (all
+    // calibration items except lol-ext and fhm), then never again.
+    void runStartupCalibration();
+    bool startupCalDone{false};
     void smartNoise();
 
     double centerFrq{};

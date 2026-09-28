@@ -55,32 +55,38 @@ TEXT
 Each file is complex Gaussian noise confined to a flat band of
 `N` MHz centred at DC.
 
-**Assumed sample rate: `Fs = 0.6144 x P MHz`** — the board consumes
-the DAC buffer at half the profile's sample rate (the Talise TX
-input / ORx output rate of Tx_BW200_IR245p76 etc. is 1.2288 x P):
+**Sample rate: measured per profile** — the rate the board really
+consumes the DAC buffer at (measured on the spectrum analyser):
 
 | profile | file rate | widest spot |
 |---|---|---|
 | 100 | 61.44 MS/s | 61.44 MHz |
 | 200 | 122.88 MS/s | 122.88 MHz |
-| 400 | 245.76 MS/s | 245.76 MHz |
+| 400 | **491.52 MS/s** | 491.52 MHz |
 
-The earlier `P^2/800` and `0.5 x P` assumptions made the on-air band
-wrong and different per profile.  With the rate above **a spot of `N` MHz
-occupies exactly `N` MHz**: type 100, see 100.
+Profile 200 plays a file at half its 245.76 MS/s Talise TX input rate,
+but profile 400 plays at the **full 491.52 MS/s** (its thb3 interpolator
+is bypassed) — the earlier uniform `0.6144 x P` table made every
+profile-400 waveform **twice as wide on air** (a 20 MHz spot showed
+40 MHz).  With these rates **a spot of `N` MHz occupies exactly `N`
+MHz**: type 100, see 100.
 
 Consequences:
 
 * the widest spot a profile can produce is its playback rate
-  (Nyquist): **12.5 / 50 / 200 MHz** for the 100/200/400 profiles;
+  (full I/Q span): **61.44 / 122.88 / 491.52 MHz** for the
+  100/200/400 profiles;
 * `N` above that produces the profile's maximum (full-band)
   waveform;
 * to re-anchor a rate (different board/clock), edit
-  `profile_rate_mhz()` in `generate.py` and regenerate.
+  `profile_rate_mhz()` in `generate.py` and regenerate;
+* **regenerate the profile-400 files after this change** — the
+  100/200 sets are unchanged.
 
 (The Talise profile files run the TX datapath at `1.2288 x P` MHz —
 122.88/245.76/491.52 MS/s — with 16/8/4x interpolation to the
-1966.08 MS/s DAC; the DAC buffer is consumed at half of that.)
+1966.08 MS/s DAC; the board consumes the DAC buffer at half that
+clock on profiles 100/200 and at the full clock on profile 400.)
 
 The DAC loader auto-scales each file's peak to full scale.
 
@@ -103,16 +109,16 @@ The DAC loader auto-scales each file's peak to full scale.
   per-bin statistical ripples.
 
 All MHz figures are in the file's sample-rate units
-(Fs = 0.6144 x P MHz, see above).  If the DAC plays the file at a
+(Fs = the measured per-profile rate, see above).  If the DAC plays the file at a
 different clock, scale the displayed band by clock/Fs.
 
 ## Impulse (pulse) tab
 
 `Impulse.txt` is generated live by the app from the PRI / pulse-width
-spins.  Samples are created at the same profile playback rate
-(`P^2/800` MS/s = 12.5/50/200, `profileBw` from the Profile tab):
+spins.  Samples are created at the same measured profile playback
+rate (61.44/122.88/491.52 MS/s, `profileBw` from the Profile tab):
 `samples = microseconds x rate`, so a 10 us pulse at profile 200 is
-500 samples (profile 100: 125, profile 400: 2000).  Older app
+1229 samples (profile 100: 614, profile 400: 4915).  Older app
 versions wrote `us x 487.8` samples (1 MS/s base plus a bogus
 x2000/4.1 factor) regardless of profile — pulses came out 5-1000x
 too wide (2.4x on the 400 profile up to ~39x on the 100 profile).
@@ -120,7 +126,7 @@ too wide (2.4x on the 400 profile up to ~39x on the 100 profile).
 ## Sweep tab
 
 `Sweep.txt` is generated live by the app like the LFM tab: a stepped-sine
-I/Q built in-app at the profile playback rate (`0.6144 x P` MS/s) with
+I/Q built in-app at the measured profile playback rate with
 **baseband** start / stop / step frequencies (the LO does not move).  The
 tones sit at `start, start+step, ...` toward `stop` - start 0, stop 10,
 step 2 gives exactly the tones 0/2/4/6/8/10 MHz - and they share the
