@@ -117,6 +117,7 @@ private slots:
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
     void writeSelectedProfile();
+    void applyDefaultMode();
 
     //    QTimer * frqTimer;
 
@@ -421,6 +422,9 @@ signals:
     // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
     // Routed to the exciter so spot noise files match the active profile.
     void profileBandwidthChanged(int bwMHz);
+    // Phase 6: ask the exciter to enter the default mode (CW/DDS tone,
+    // power = 10, dbfs = -10) before / after every profile change.
+    void profileDefaultModeSignal();
 
     // Phase 6: TX calibration (Calibrated mismatch power, dB) of the
     // Calibration tab changed - refresh every calibrated TX power display.

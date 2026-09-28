@@ -2264,25 +2264,54 @@ void ReceiverMain::defaultSettings()
 // files/filters/adrv9009 folder shipped with the project (with fallbacks
 // for the build dir and the user's local checkout), then snaps the
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
-void ReceiverMain::on_btnProfileSet_clicked()
+// Phase 6: the default mode - the state every profile change starts from
+// and returns to (user-defined):
+//     CW tab in DDS tone mode (DAC buffer -> DDS tone mode, "One CW Tone"
+//     on both TX1 and TX2), power = 10 dB, DDS scale = -10 dBFS,
+//     TX1 ON / TX2 OFF, ORX1 ON / ORX2 OFF (ORX2 always off for caution),
+//     RX1/RX2 off, all other settings default, Pc = 0 (so Pb = P = 10).
+void ReceiverMain::applyDefaultMode()
 {
-    // Phase 6 (profile-400 hang fix): every profile set/change quiesces the
-    // RF chain FIRST - TX1/TX2, RX1/RX2 and ORX1/ORX2 off before changing
-    // the profile (ORX2 is always kept off for caution; ORX1 is re-enabled
-    // only after the I/Q signal comes back).  Writing the profile while
-    // TX/RX/ORX are active - especially the 400 profile at 491.52 MS/s -
-    // wedges the board and the blocking profile_config write stalls the
-    // software ("hang and stall").
+    // all other settings -> default (RX1/2 off, ORX1 on / ORX2 off, TX1/2
+    // off, P = 10, cal-box defaults, control-unit / seek / hopping defaults)
+    if (receiverIsConnected && oscMain && oscMain->_adrv9009)
+        defaultParameters();
+
+    // Pc = 0 -> Pb = P = 10 (Pa/Pc/Pb model)
+    if (ui->dsbTxCalib)
+        ui->dsbTxCalib->setValue(0.0);
+
+    // CW/DDS mode on the exciter (tab -> CW, dbfs = -10, DAC buffer ->
+    // DDS tone mode through the regular CW "On" path)
+    emit profileDefaultModeSignal();
+
+    // The CW "On" path turns TX1 on with P = 0 - re-assert the default
+    // P = 10 and the required TX2 / ORX / RX states on top of it.
     if (oscMain && oscMain->_adrv9009)
     {
         adrv9009 *adrv = oscMain->_adrv9009;
-        if (adrv->power_TX1_DownChk) { adrv->power_TX1_DownChk->setChecked(true); adrv->power_TX1_DownChk->stateChanged(1); } // TX1 off
+        if (att_TX1_Spn) att_TX1_Spn->setValue(10);
+        if (att_TX2_Spn) att_TX2_Spn->setValue(10);
+        if (adrv->power_TX1_DownChk) { adrv->power_TX1_DownChk->setChecked(false); adrv->power_TX1_DownChk->stateChanged(1); } // TX1 on
         if (adrv->powerTX2DownChk)   { adrv->powerTX2DownChk->setChecked(true);   adrv->powerTX2DownChk->stateChanged(1); }   // TX2 off
+        if (adrv->power_OBSRX_Spn)   { adrv->power_OBSRX_Spn->setChecked(false);  adrv->power_OBSRX_Spn->stateChanged(1); }   // ORX1 on
+        if (adrv->obs2Powerdown)     { adrv->obs2Powerdown->setChecked(true);     adrv->obs2Powerdown->stateChanged(1); }     // ORX2 off
         if (adrv->rx1Powerdown)      { adrv->rx1Powerdown->setChecked(true);      adrv->rx1Powerdown->stateChanged(1); }      // RX1 off
         if (adrv->rx2Powerdown)      { adrv->rx2Powerdown->setChecked(true);      adrv->rx2Powerdown->stateChanged(1); }      // RX2 off
-        if (adrv->obs2Powerdown)     { adrv->obs2Powerdown->setChecked(true);     adrv->obs2Powerdown->stateChanged(1); }     // ORX2 off
-        if (adrv->power_OBSRX_Spn)   { adrv->power_OBSRX_Spn->setChecked(true);   adrv->power_OBSRX_Spn->stateChanged(1); }   // ORX1 off
     }
+}
+
+void ReceiverMain::on_btnProfileSet_clicked()
+{
+    // Phase 6 (profile-400 hang fix): every profile set/change FIRST puts
+    // ALL modes back to the default mode (applyDefaultMode: CW/DDS,
+    // power = 10, dbfs = -10, TX1 on / TX2 off, ORX1 on / ORX2 off,
+    // RX1/RX2 off, other settings default), parks the frequency at 1800
+    // and lets it settle (1 .. 5 s) BEFORE the profile write.  Writing
+    // the profile in the middle of an active mode - especially the 400
+    // profile at 491.52 MS/s - wedged the board and the blocking
+    // profile_config write stalled the software ("hang and stall").
+    applyDefaultMode();
 
     // Before a profile change the frequency must be 1800 MHz: check it
     // first and only then apply the user's profile (a profile write
@@ -2296,15 +2325,8 @@ void ReceiverMain::on_btnProfileSet_clicked()
             ui->spnFrq->setValue(abs(DC_6_UPTO_8_12 - 1800.0));
         }
     }
-
-    // Pc = 0 and P (attenuation) = 10 - the standard values, so Pb = 10
-    // reaches the board (Pa/Pc/Pb model, constants/tx_calibration.h).
-    if (ui->dsbTxCalib)
-        ui->dsbTxCalib->setValue(0.0);
-    if (att_TX1_Spn)
-        att_TX1_Spn->setValue(10);
-    if (att_TX2_Spn)
-        att_TX2_Spn->setValue(10);
+    if (ui->spnCWFrq)
+        ui->spnCWFrq->setValue(1800.0); // CW tab frequency mirrors to the exciter
 
     // Let the frequency settle (1 .. 5 s) before the profile write.
     QTimer::singleShot(3000, this, [this]{ writeSelectedProfile(); });
@@ -2382,25 +2404,15 @@ void ReceiverMain::writeSelectedProfile()
     QTimer::singleShot(10000, this, [this, bw, profileFsMhz]{
         if (!frqDomainPlot)
             return;
-        frqDomainPlot->setEnabled(true);
+        frqDomainPlot->setEnabled(true); // the I/Q signal is back
 
-        // The profile write reconfigures the board, so re-apply the startup
-        // default settings (same path as at application start in
-        // defaultSettings()): RX1/2 off, TX1/2 off, OBS RX1 on, OBS RX2
-        // off, TX gain 10 dB, seek/hopping defaults, control-unit writes
-        // and plot restart. Without this the spectrum stays blank and the
-        // TX1/2 checkboxes are left in an undefined state.
+        // The profile write reconfigures the board, so re-apply the
+        // default mode (applyDefaultMode: CW/DDS, power = 10, dbfs = -10,
+        // TX1 on / TX2 off, ORX1 on / ORX2 off, RX1/RX2 off, other
+        // settings default).  Without this the spectrum stays blank and
+        // the TX1/2 checkboxes are left in an undefined state.
         if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
-            defaultParameters();
-
-        // The I/Q signal is back (the plot is live again): re-enable ORX1
-        // now.  ORX2 stays off in all cases (caution).
-        if (oscMain && oscMain->_adrv9009)
-        {
-            adrv9009 *adrv = oscMain->_adrv9009;
-            if (adrv->power_OBSRX_Spn) { adrv->power_OBSRX_Spn->setChecked(false); adrv->power_OBSRX_Spn->stateChanged(1); } // ORX1 on
-            if (adrv->obs2Powerdown)   { adrv->obs2Powerdown->setChecked(true);   adrv->obs2Powerdown->stateChanged(1); }   // ORX2 off
-        }
+            applyDefaultMode();
 
         frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
     });
