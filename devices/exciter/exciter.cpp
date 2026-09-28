@@ -1185,10 +1185,10 @@ void Exciter::on_btnDisableWB_clicked(bool checked)
 
 void Exciter::refreshTxPowerDisplay()
 {
-    // Phase 6: the "Current P (attenuation)" readout shows the calibrated
-    // TX power used everywhere in the software: P + TX calibration
-    // (constants/tx_calibration.h, default -6 dB).
-    ui->lblCurrentPower->setNum(TxCalibration::effective(ui->spnCWPower->value()));
+    // Phase 6: the "Current P (attenuation)" readout shows Pb = Pa + Pc -
+    // the calibrated power sent to the board and used everywhere in the
+    // software (constants/tx_calibration.h, default Pc = 0 dB).
+    ui->lblCurrentPower->setNum(TxCalibration::boardP(ui->spnCWPower->value()));
 }
 
 void Exciter::updateMultiTargetRow(int row, bool applyDefaults)

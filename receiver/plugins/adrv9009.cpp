@@ -34,20 +34,25 @@ static bool has_dpd;
 static QWidget *rx_phase_rotation[2];
 
 static const gdouble mhz_scale = 1000000.0;
-static const gdouble inv_scale = -1.0;
+// Phase 6: the two TX gain widgets run unscaled - see txGainCalConvert.
+static const gdouble no_scale = 1.0;
 
-// Phase 6: TX calibration - translate between the raw P (attenuation) the
-// user types into the TX1/TX2 attenuation spinboxes and the CALIBRATED
-// hardware gain actually written to the "hardwaregain" attribute
-// (effective P = P + TX calibration, see constants/tx_calibration.h).
-// spin_button_save() hands us the already-scaled value (gain = -P) and
-// needs the calibrated gain -(P + cal) = v - cal; the read path hands us
-// the raw attribute and needs v + cal back so the spinbox keeps showing
-// the raw P the user typed.
+// Phase 6: TX calibration - the Pa / Pc / Pb power model (see
+// constants/tx_calibration.h):
+//
+//     Pa = P (attenuation) typed into the TX1/TX2 attenuation spinboxes
+//     Pc = P calibration ("calibrated mismatch power", default 0 dB)
+//     Pb = Pa + Pc = the power SENT TO THE BOARD
+//
+// The board is commanded with Pb as attenuation; the "hardwaregain"
+// attribute takes the signed gain, so the written value is -Pb.  The two
+// TX gain widgets run unscaled (scale 1.0), so on save this function gets
+// the raw spinbox value Pa, and on read the raw attribute value -Pb.
 static double txGainCalConvert(double v, bool toWidget)
 {
-    return toWidget ? v + TxCalibration::offsetDb()
-                    : v - TxCalibration::offsetDb();
+    const double pc = TxCalibration::offsetDb();
+    return toWidget ? -v - pc    // attribute -Pb -> spinbox Pa = Pb - Pc
+                    : -(v + pc); // spinbox Pa -> attribute -Pb, Pb = Pa + Pc
 }
 
 static const gdouble scale100 = 100.0;
@@ -182,9 +187,9 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
     track_TX2_Chk     = findChild<QCheckBox      *>("tx2_quadrature_tracking_en");
     att_TX2_Spn       = findChild<QDoubleSpinBox *>("hardware_gain_tx2");
     powerTX2DownChk   = findChild<QCheckBox      *>("tx2_powerdown_en");
-    // Phase 6: warn (maximum-power limit) whenever the P (attenuation) +
-    // TX calibration would go below zero - these two spinboxes are the
-    // master copies every other TX power control mirrors into.
+    // Phase 6: warn (maximum-power limit) whenever the power sent to the
+    // board Pb = P + calibration would go below zero - these two spinboxes
+    // are the master copies every other TX power control mirrors into.
     if (att_TX1_Spn)
         connect(att_TX1_Spn, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 this, [](double val){ TxCalibration::checkP(val); });
@@ -588,6 +593,27 @@ void adrv9009::glb_settings_update_labels()
  */
 void adrv9009::save_widget_value(struct iio_widget *iio_w) {
     iio_w->save(iio_w);
+}
+
+/**
+ * @brief adrv9009::resaveTxGainWidgets
+ *
+ * Re-write the TX1/TX2 "hardwaregain" attributes with the CURRENT
+ * calibration so the board always carries the power Pb = Pa + Pc
+ * (txGainCalConvert reads TxCalibration::offsetDb() live at save time).
+ * Called whenever the P calibration (Pc) changes - the spinboxes keep
+ * showing Pa while the board value follows Pb.
+ */
+void adrv9009::resaveTxGainWidgets()
+{
+    for (int i = 0; i < subcomponents.size(); i++) {
+        for (unsigned int j = 0; j < subcomponents[i].num_tx; j++) {
+            struct iio_widget *w = &subcomponents[i].tx_widgets[j];
+            if (w->save && (w->widget == (QWidget *)att_TX1_Spn ||
+                            w->widget == (QWidget *)att_TX2_Spn))
+                w->save(w);
+        }
+    }
 }
 
 /**
@@ -1252,16 +1278,17 @@ QWidget *adrv9009::init()
 
             iio_w.iio_spin_button_init(&subcomponents[i].tx_widgets[subcomponents[i].num_tx++],
                     subcomponents[i].iio_dev, subcomponents[i].out_ch0, "hardwaregain",
-                    ui->hardware_gain_tx1, &inv_scale);
-            // Phase 6: the hardware gain is written calibrated (P + TX
-            // calibration) while the spinbox keeps the raw P.
+                    ui->hardware_gain_tx1, &no_scale);
+            // Phase 6: the board is commanded with the calibrated power
+            // Pb = Pa + Pc (written as the signed gain -Pb) while the
+            // spinbox keeps the raw P (attenuation) Pa.
             iio_w.iio_spin_button_set_convert_function(
                     &subcomponents[i].tx_widgets[subcomponents[i].num_tx - 1],
                     txGainCalConvert);
 
             iio_w.iio_spin_button_init(&subcomponents[i].tx_widgets[subcomponents[i].num_tx++],
                     subcomponents[i].iio_dev, subcomponents[i].out_ch1, "hardwaregain",
-                    ui->hardware_gain_tx2, &inv_scale);
+                    ui->hardware_gain_tx2, &no_scale);
             iio_w.iio_spin_button_set_convert_function(
                     &subcomponents[i].tx_widgets[subcomponents[i].num_tx - 1],
                     txGainCalConvert);

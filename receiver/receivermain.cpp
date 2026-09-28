@@ -1761,10 +1761,11 @@ void ReceiverMain::connection()
     connect(ui->spnImpulsePRI,        QOverload<double>::of(&QDoubleSpinBox::valueChanged),[&](double val){emit impPriSignal(val);});
     connect(ui->spnWBPower,           QOverload<double>::of(&QDoubleSpinBox::valueChanged),[&](double val){emit wbPowerSignal(val);});
 
-    // Phase 6: TX calibration (Calibration tab).  The calibrated mismatch
-    // power (default -6 dB) is added to the P (attenuation) everywhere the
-    // TX power appears in the software; P + calibration must stay >= 0 or
-    // the maximum-power warning is raised (constants/tx_calibration.h).
+    // Phase 6: TX calibration (Calibration tab) - the Pa/Pc/Pb power model
+    // (constants/tx_calibration.h): Pa = P (attenuation), Pc = calibrated
+    // mismatch power (default 0 dB), and Pb = Pa + Pc is the power sent to
+    // the board and shown everywhere the TX power appears in the software.
+    // Pb must stay >= 0 or the maximum-power warning is raised.
     TxCalibration::setOffsetDb(ui->dsbTxCalib->value());
     connect(ui->dsbTxCalib, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [&](double val){
@@ -1773,6 +1774,10 @@ void ReceiverMain::connection()
                     TxCalibration::checkP(att_TX1_Spn->value());
                 else if (att_TX2_Spn)
                     TxCalibration::checkP(att_TX2_Spn->value());
+                // Pb = Pa + Pc changed: re-write the TX gains so the board
+                // immediately carries the new calibrated power.
+                if (oscMain && oscMain->_adrv9009)
+                    oscMain->_adrv9009->resaveTxGainWidgets();
                 emit txCalibChangedSignal(val);
             });
 

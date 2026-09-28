@@ -1892,7 +1892,7 @@
                  <item>
                   <widget class="QDoubleSpinBox" name="dsbTxCalib">
                    <property name="toolTip">
-                    <string>Calibrated mismatch power in dB. This number is added to the P (attenuation) everywhere the TX power appears in the software. Default -6 dB; P + this value must stay &gt;= 0.</string>
+                    <string>Calibrated mismatch power in dB (Pc). This number is added to the P (attenuation) Pa to give the power Pb sent to the board: Pb = Pa + Pc. Default 0 dB; Pb must stay &gt;= 0.</string>
                    </property>
                    <property name="minimum">
                     <double>-100.000000000000000</double>
@@ -1904,7 +1904,7 @@
                     <number>1</number>
                    </property>
                    <property name="value">
-                    <double>-6.000000000000000</double>
+                    <double>0.000000000000000</double>
                    </property>
                   </widget>
                  </item>
