@@ -2222,46 +2222,12 @@ void ReceiverMain::defaultSettings()
         return;
     }
 
-    // Phase 6: at software start, BEFORE changing anything, read all
-    // status (DDS mode, RX mode, TX and all parameters) and save it -
-    // the "Set Default" button of the Profile tab asserts these first
-    // values later.
+    // Phase 6: at software start ONLY READ the board state and save it
+    // (DDS mode, RX mode, TX and all parameters) - the Profile tab's
+    // "Set Default" button asserts these first values later.  Startup
+    // must not SET anything on the board: no profile write, no frequency
+    // change, no power changes - just read, like the old version.
     oscMain->_adrv9009->snapshotBoardState();
-
-    // The original project contains an absolute /home/seraj3/... profile path.
-    // Do not start profile loading with a non-existent file: that path used to
-    // enter an asynchronous UI update path and could abort the Qt application.
-    if (rfBandlbl->text().split(" ").value(0).toDouble() != 400)
-    {
-        if (QFileInfo::exists(fileAddress))
-        {
-            frqDomainPlot->setEnabled(false);
-            oscMain->_adrv9009->on_profile_config_clicked(fileAddress);
-
-            QTimer::singleShot(10000, this, [this]{
-                if (!frqDomainPlot)
-                    return;
-                frqDomainPlot->setEnabled(true);
-                defaultParameters();
-            });
-        }
-        else
-        {
-            qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
-                       << fileAddress;
-            defaultParameters();
-        }
-    }
-    else
-    {
-        defaultParameters();
-    }
-    // TX1 is OFF whenever defaults are applied at start (safe default).
-    if (power_TX1_DownChk)
-    {
-        power_TX1_DownChk->stateChanged(1);  // force a hardware write
-        power_TX1_DownChk->setChecked(true); // TX off
-    }
 }
 
 
