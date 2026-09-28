@@ -388,10 +388,6 @@ void MainWindow::connections()
                     adrv9009::setCwDdsParams(f, s, p);
                 });
 
-        // Phase 6: the default mode (CW/DDS, power 10, dbfs -10) entered
-        // before every profile change and re-applied after the write.
-        connect(receiverWindow, &ReceiverMain::profileDefaultModeSignal,
-                ui->exiter, &Exciter::enterDefaultMode);
 
 
         //smart noise and exciter

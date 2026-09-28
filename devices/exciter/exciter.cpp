@@ -757,25 +757,6 @@ void Exciter::setModeActive(const QString &mode, bool on)
     emit modeActivitySignal(!activeModes.isEmpty());
 }
 
-// ---------------------------------------------------------------------------
-// Phase 6: the default mode - the state every profile change starts from
-// and returns to: CW tab in DDS tone mode ("One CW Tone" on both TX1 and
-// TX2 - the DAC buffer is switched to the DDS tone mode), power = 10 dB,
-// DDS tone 10 MHz / -10 dBFS / 0 deg.  Runs the regular CW "On" path
-// (setDataSlot case 0) so the exciter mode state, the control-unit
-// messages and the TX1-follows-mode handling all stay consistent.
-// ---------------------------------------------------------------------------
-void Exciter::enterDefaultMode()
-{
-    if (ui->tabWidget && ui->tabWidget->currentIndex() != 0)
-        ui->tabWidget->setCurrentIndex(0);              // CW tab
-    if (cwDdsFrqSpn)   cwDdsFrqSpn->setValue(10.0);     // DDS tone freq
-    if (cwDdsScaleSpn) cwDdsScaleSpn->setValue(-10.0);  // dbfs = -10
-    if (cwDdsPhaseSpn) cwDdsPhaseSpn->setValue(0.0);
-    if (ui->spnCWPower) ui->spnCWPower->setValue(10);   // power = 10
-    setDataSlot();                                      // CW/DDS mode on
-}
-
 void Exciter::setDataSlot()
 {
 

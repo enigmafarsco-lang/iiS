@@ -212,6 +212,16 @@
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="btnSetDefault">
+                   <property name="toolTip">
+                    <string>Assert all parameter values read at software start (DDS mode, RX mode, TX and all other parameters), except RX1/2 and ORX1/2 which keep the software states (RX1/2 off, ORX1 on, ORX2 off).</string>
+                   </property>
+                   <property name="text">
+                    <string>Set Default</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>

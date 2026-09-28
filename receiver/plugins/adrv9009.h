@@ -181,6 +181,13 @@ public:
     // Re-write TX1/TX2 hardwaregain so the board carries Pb = Pa + Pc
     // with the current P calibration (constants/tx_calibration.h).
     void resaveTxGainWidgets();
+    // Phase 6: "Set Default".  snapshotBoardState() runs at software start
+    // BEFORE anything is changed: it reads all status (DDS mode, RX mode,
+    // TX and all parameters) and saves every value.  restoreBoardState()
+    // asserts those first values, except the RX1/2 and ORX1/2 powerdowns
+    // which keep the software states (RX1/2 off, ORX1 on, ORX2 off).
+    void snapshotBoardState();
+    void restoreBoardState();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);
@@ -247,7 +254,10 @@ private:
     void ConnectSignals();
 
     QString last_profile="";
-    int load_tal_profile(QString file_name);
+    // Phase 6: saved board state for "Set Default" (widget -> value).
+    struct SavedWidgetValue { QWidget *widget; double value; };
+    QVector<SavedWidgetValue> boardSnapshot;
+    void load_tal_profile(QString file_name);
     void update_label_with_scale_from(QLabel *label, iio_device *dev, const char *channel, const char *attribute,const char *attribute_scale, bool output, const char *unit, int scale);
 
 signals:

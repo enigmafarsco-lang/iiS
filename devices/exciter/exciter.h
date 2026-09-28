@@ -192,10 +192,6 @@ public slots:
     // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz), set from
     // the receiver Profile tab. Selects spot{N}mhz_{P}.txt in the Spot tab.
     void setProfileBw(int bwMHz);
-    // Phase 6: the default mode (entered before every profile change and
-    // re-applied after the profile write): CW tab in DDS tone mode with
-    // power = 10 dB and DDS scale = -10 dBFS.
-    void enterDefaultMode();
     //    void receiveIpAddressSlot(bool);
     void connectToDevice();
     void initConnection(bool);
