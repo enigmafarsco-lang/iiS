@@ -2,6 +2,7 @@
 #define EXCITER_H
 
 #include <QSet>
+#include <QVector>
 #include <QWidget>
 #include <QCheckBox>
 #include <QComboBox>
@@ -106,18 +107,27 @@ private:
     QDoubleSpinBox *bridgeSpn{nullptr};
 
     // Phase 6: Multi Target tab - up to 5 selectable targets, each with its
-    // own modulation (Spot/CW/Impulse/LFM/NLFM), its own specification and
-    // its own frequency shift (a complex exponential multiplier).  Every
-    // selected target is rendered to its own txt file, the shifted targets
-    // are summed into one I/Q stream (MultiTarget.txt) which is sent to the
-    // DAC buffer.
+    // own modulation (Spot/CW/Impulse/LFM/NLFM/Bridge noise), its own
+    // specification and its own frequency shift (a complex exponential
+    // multiplier).  Every selected target is rendered to its own txt file,
+    // the shifted targets are summed into one I/Q stream (MultiTarget.txt)
+    // which is sent to the DAC buffer.  LFM/NLFM rows carry just the three
+    // LFM/NLFM tab parameters (start frequency / BW / T) and NO frequency
+    // shift - the chirp formula is the exact one of the LFM/NLFM tabs.
     QCheckBox *mtEnable[5]{};
     QComboBox *mtType[5]{};
     QLabel *mtSpecLbl[5][3]{};
     QDoubleSpinBox *mtSpec[5][3]{};
+    QLabel *mtShiftLbl[5]{};
     QDoubleSpinBox *mtShift[5]{};
-    void updateMultiTargetRow(int row);
+    void updateMultiTargetRow(int row, bool applyDefaults);
     bool buildMultiTargetWaveform();
+    // Load a TEXT-header I/Q pair file (files/spot/generate.py and
+    // files/bridge/generate_bridge.py format) into the sample buffers.
+    // Returns the number of samples read (0 = empty or unreadable).
+    int loadIqTextSamples(const QString &path,
+                          QVector<double> &ti, QVector<double> &tq,
+                          int nMax);
 
     // Phase 6: CW tab DDS tone parameters (shown on the CW tab like the
     // iio-oscilloscope DDS panel): the CW tab drives the on-chip DDS tone
@@ -137,6 +147,21 @@ private:
     QDoubleSpinBox *nlfmTSpn{nullptr};
     bool buildChirpFile(const QString &fileName, bool nlfm,
                         double f0Mhz, double bwMhz, double tUs);
+    // Phase 6: the ONE chirp formula shared by the LFM/NLFM tabs and the
+    // Multi Target LFM/NLFM rows: phase(tau) = 2*pi*(f0*tau + B*tau^2/2T)
+    // over a repeating pulse of duration T (us), NLFM adds raised-cosine
+    // amplitude coding.  Fills n samples of I/Q at fsMhz MS/s.
+    void fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
+                          double fsMhz, bool nlfm,
+                          double f0Mhz, double bwMhz, double tUs);
+
+    // Phase 6: Sweep tab - stepped-sine I/Q synthesis (like the LFM tab,
+    // in-app sine at baseband, fixed LO): tones at start, start+step, ...
+    // toward stop (e.g. start 0, stop 10, step 2 -> 0/2/4/6/8/10 MHz),
+    // equal dwell per tone inside the looping file (the per-tone time is
+    // not critical), continuous phase across tone changes.
+    bool buildSweepFile(const QString &fileName,
+                        double fStartMhz, double fStopMhz, double fStepMhz);
 
     tabState currentTabState;
     QTimer exciterConnection;
@@ -157,6 +182,12 @@ private slots:
 public slots:
     void joshanFuncDataSlot();
     void joshanStatusDataSlot();
+
+    // Phase 6: refresh the "Current P (attenuation)" readout - it shows
+    // the calibrated TX power (P + TX calibration, see
+    // constants/tx_calibration.h).  Called when the P changes and when
+    // the TX calibration value of the Calibration tab changes.
+    void refreshTxPowerDisplay();
 
     // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz), set from
     // the receiver Profile tab. Selects spot{N}mhz_{P}.txt in the Spot tab.

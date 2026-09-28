@@ -1,5 +1,6 @@
 #include "receivermain.h"
 #include "ui_receivermain.h"
+#include "constants/tx_calibration.h"
 //178.22.122.100, 185.51.200.2
 #include <receiver/config.h>
 #include <receiver/backtrace.h>
@@ -501,6 +502,11 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     spnSweepStopFrq   = ui->spnSweepStopFrq;
     spnSweepStep      = ui->spnSweepStep;
     spnSweepPower     = ui->spnSweepPower;
+    // Phase 6: the Sweep tab is baseband stepped-sine I/Q now (like the LFM
+    // tab, fixed LO) - mirror the exciter's baseband ranges here.
+    spnSweepStartFrq->setRange(-122.878, 122.878);
+    spnSweepStopFrq->setRange (-122.878, 122.878);
+    spnSweepStep->setRange    (0.01, 245.76);
     spnDelay          = ui->spnDelay;
     spnImpulseFrq     = ui->spnImpulseFrq;
     spnImpulsePower   = ui->spnImpulsePower;
@@ -1754,6 +1760,21 @@ void ReceiverMain::connection()
     connect(ui->spnImpulsePulseWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged),[&](double val){emit impPwSignal(val);});
     connect(ui->spnImpulsePRI,        QOverload<double>::of(&QDoubleSpinBox::valueChanged),[&](double val){emit impPriSignal(val);});
     connect(ui->spnWBPower,           QOverload<double>::of(&QDoubleSpinBox::valueChanged),[&](double val){emit wbPowerSignal(val);});
+
+    // Phase 6: TX calibration (Calibration tab).  The calibrated mismatch
+    // power (default -6 dB) is added to the P (attenuation) everywhere the
+    // TX power appears in the software; P + calibration must stay >= 0 or
+    // the maximum-power warning is raised (constants/tx_calibration.h).
+    TxCalibration::setOffsetDb(ui->dsbTxCalib->value());
+    connect(ui->dsbTxCalib, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [&](double val){
+                TxCalibration::setOffsetDb(val);
+                if (att_TX1_Spn)
+                    TxCalibration::checkP(att_TX1_Spn->value());
+                else if (att_TX2_Spn)
+                    TxCalibration::checkP(att_TX2_Spn->value());
+                emit txCalibChangedSignal(val);
+            });
 
     connect(ui->btnSetCW ,      &QPushButton::clicked,[&]{emit cwOnBtnSignal    ();});
     connect(ui->btnDisableCW ,  &QPushButton::clicked,[&]{emit cwOffBtnSignal   ();});

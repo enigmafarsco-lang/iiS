@@ -1876,6 +1876,54 @@
               <string>Calibration</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_33">
+              <item row="9" column="0">
+               <widget class="QGroupBox" name="grbTxCalib">
+                <property name="title">
+                 <string>TX Calibration</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayoutTxCalib">
+                 <item>
+                  <widget class="QLabel" name="lblTxCalib">
+                   <property name="text">
+                    <string>Calibrated mismatch power (dB):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="dsbTxCalib">
+                   <property name="toolTip">
+                    <string>Calibrated mismatch power in dB. This number is added to the P (attenuation) everywhere the TX power appears in the software. Default -6 dB; P + this value must stay &gt;= 0.</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-100.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>100.000000000000000</double>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="value">
+                    <double>-6.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacerTxCalib">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
               <item row="10" column="0">
                <widget class="QGroupBox" name="grbAdrvCalib">
                 <property name="title">

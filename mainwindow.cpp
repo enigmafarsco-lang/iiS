@@ -233,6 +233,9 @@ void MainWindow::connections()
         // Phase 5: Profile tab (100/200/400 MHz) -> exciter spot file selection
         connect(receiverWindow, &ReceiverMain::profileBandwidthChanged, ui->exiter, &Exciter::setProfileBw);
 
+        // Phase 6: TX calibration (Calibration tab) -> calibrated power readout
+        connect(receiverWindow, &ReceiverMain::txCalibChangedSignal, ui->exiter, &Exciter::refreshTxPowerDisplay);
+
 
 
         //these connections are for connecting exciter panel in receiver to exciter panel in transmmiter
@@ -276,9 +279,9 @@ void MainWindow::connections()
 
 
         //setting sweep
-        ui->exiter->spnSweepStart->setValue(receiverWindow->frqDomainPlot->txt_start_freq->value());
-        ui->exiter->spnSweepStop->setValue(receiverWindow->frqDomainPlot->txt_stop_freq->value());
-        ui->exiter->spnSweepStep->setValue(receiverWindow->frqDomainPlot->txt_freq_step->value());
+        // (Phase 6: the Sweep tab synthesizes baseband stepped-sine I/Q at a
+        // fixed LO now - its start/stop/step no longer mirror the RF
+        // hop-seek fields of the frequency-domain plot.)
 
         //seeting frq value according to frq value of cart
         ui->exiter->spnCWFrq->setValue(abs(DC_6_UPTO_8_12 - receiverWindow->frqSpn->value()));
@@ -291,8 +294,6 @@ void MainWindow::connections()
 
         receiverWindow->spnCWFrq->setValue(abs(DC_6_UPTO_8_12 - receiverWindow->frqSpn->value()));
         receiverWindow->spnSpotFrq->setValue(abs(DC_6_UPTO_8_12 - receiverWindow->frqSpn->value()));
-        receiverWindow->spnSweepStartFrq->setValue(receiverWindow->frqDomainPlot->txt_start_freq->value());
-        receiverWindow->spnSweepStopFrq->setValue(receiverWindow->frqDomainPlot->txt_stop_freq->value());
         receiverWindow->spnImpulseFrq->setValue(abs(DC_6_UPTO_8_12 - receiverWindow->frqSpn->value()));
 
         receiverWindow->spnCWPower->setValue(receiverWindow->att_TX1_Spn->value());
@@ -301,7 +302,6 @@ void MainWindow::connections()
         receiverWindow->spnImpulsePower->setValue(receiverWindow->att_TX1_Spn->value());
         receiverWindow->spnWBPower->setValue(receiverWindow->att_TX1_Spn->value());
 
-        receiverWindow->spnSweepStep->setValue(receiverWindow->frqDomainPlot->txt_freq_step->value());
         receiverWindow->spnDelay->setValue(receiverWindow->frqDomainPlot->txt_freq_delay->value());
 //        ui->exiter->spnImpPw->setValue(val);
 //        ui->exiter->spnImpPri->setValue(val);
@@ -333,18 +333,18 @@ void MainWindow::connections()
         connect(receiverWindow, &ReceiverMain::seekingStatusSignal,[&](QString msg){emit dacMsgSignal(msg,"");});
         connect(receiverWindow, &ReceiverMain::seekingStatusSignal,[&](QString msg){emit dacMsgSignal(msg,"");});
 
-        connect(receiverWindow->frqDomainPlot->txt_start_freq,QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ ui->exiter->spnSweepStart->setValue(val);});
-        connect(receiverWindow->frqDomainPlot->txt_stop_freq,QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ ui->exiter->spnSweepStop->setValue(val);});
-        connect(receiverWindow->frqDomainPlot->txt_freq_step, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ ui->exiter->spnSweepStep->setValue(val);});
+        // (Phase 6: the RF hop-seek fields of the frequency-domain plot no
+        // longer feed the Sweep tab - it synthesizes baseband stepped-sine
+        // I/Q now and its start/stop/step are in MHz of the DAC file.)
 
 
         //--------- sending to cart
         //these connections are for changing cart values with exciter panel
         connect(ui->exiter, &Exciter::sendFrqDataSignal,  receiverWindow,&ReceiverMain::frqValueChenged );
         connect(ui->exiter, &Exciter::sendPowerToCart,    [&](double val){receiverWindow->att_TX1_Spn->setValue(val);});
-        connect(ui->exiter, &Exciter::sendStartFrqToCart, [&](double val){receiverWindow->frqDomainPlot->txt_start_freq->setValue(val);});
-        connect(ui->exiter, &Exciter::sendStoptFrqToCart, [&](double val){receiverWindow->frqDomainPlot->txt_stop_freq->setValue(val);});
-        connect(ui->exiter, &Exciter::sendStepFrqToCart,  [&](double val){receiverWindow->frqDomainPlot->txt_freq_step->setValue(val);});
+        // (Phase 6: the Sweep tab no longer emits sendStartFrqToCart /
+        // sendStoptFrqToCart / sendStepFrqToCart - the baseband stepped
+        // sweep is synthesized into Sweep.txt instead of hopping the LO.)
 
         connect(ui->exiter, &Exciter::startHopp, [&](){receiverWindow->frqAndSeekStopCapturing(true);});
         connect(ui->exiter, &Exciter::stoptHopp, [&](){receiverWindow->frqAndSeekStopCapturing(false);});

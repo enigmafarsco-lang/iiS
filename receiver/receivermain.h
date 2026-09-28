@@ -419,6 +419,10 @@ signals:
     // Routed to the exciter so spot noise files match the active profile.
     void profileBandwidthChanged(int bwMHz);
 
+    // Phase 6: TX calibration (Calibrated mismatch power, dB) of the
+    // Calibration tab changed - refresh every calibrated TX power display.
+    void txCalibChangedSignal(double);
+
 
     void frqValues      (QCustomSeries a);
     void frqValueSignal      (double,double);

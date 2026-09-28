@@ -1,6 +1,7 @@
 
 #include "exciter.h"
 #include "ui_exciter.h"
+#include "constants/tx_calibration.h"
 #include <QLineEdit>
 #include <QRegularExpression>
 #include <QCheckBox>
@@ -26,6 +27,8 @@ Exciter::Exciter(QWidget *parent) :
     if (ui->cmbBW->lineEdit())
         ui->cmbBW->lineEdit()->setPlaceholderText(
             QStringLiteral("1 - %1 MHz").arg(profileBw));
+    // Default spot bandwidth: 10 (MHz).
+    ui->cmbBW->setEditText(QStringLiteral("10"));
     //    QPushButton * getBtn[] = {ui->btnGetCW,ui->btnGetWB,ui->btnDisableSpot,ui->btnStopSweep,ui->btnDisImpulse};
     QPushButton * setBtn[] = {ui->btnSetCW,ui->btnSetWB, ui->btnLoadSpot, ui->btnStartSweep, ui->btnLoadImpulse};
 
@@ -100,11 +103,13 @@ Exciter::Exciter(QWidget *parent) :
 
     //=================== Phase 6: Multi Target tab ====================
     // Up to 5 selectable targets.  Each target: enable checkbox +
-    // modulation type (Spot/CW/Impulse/LFM/NLFM) + its own specification
-    // (fields relabel per type) + its own frequency shift.  On "Generate &
-    // Send" every selected target is written to its own txt file, shifted
-    // by its own complex exponential (e^{j 2 pi f t}) and summed into one
-    // I/Q stream (MultiTarget.txt) that is sent to the DAC buffer.
+    // modulation type (Spot/CW/Impulse/LFM/NLFM/Bridge) + its own
+    // specification (fields relabel per type) + its own frequency shift
+    // (LFM/NLFM rows have NO shift - just start frequency / BW / T like
+    // the LFM/NLFM tabs).  On "Generate & Send" every selected target is
+    // written to its own txt file, shifted by its own complex exponential
+    // (e^{j 2 pi f t}) and summed into one I/Q stream (MultiTarget.txt)
+    // that is sent to the DAC buffer.
     {
         QWidget *mtTab = new QWidget;
         QVBoxLayout *mtVbox = new QVBoxLayout(mtTab);
@@ -116,7 +121,7 @@ Exciter::Exciter(QWidget *parent) :
             mtType[t] = new QComboBox;
             mtType[t]->addItems({QStringLiteral("Spot"), QStringLiteral("CW"),
                                  QStringLiteral("Impulse"), QStringLiteral("LFM"),
-                                 QStringLiteral("NLFM")});
+                                 QStringLiteral("NLFM"), QStringLiteral("Bridge")});
             row->addWidget(mtType[t]);
             for (int s = 0; s < 3; s++)
             {
@@ -126,7 +131,8 @@ Exciter::Exciter(QWidget *parent) :
                 mtSpec[t][s]->setDecimals(2);
                 row->addWidget(mtSpec[t][s]);
             }
-            row->addWidget(new QLabel(QStringLiteral("Shift (MHz):")));
+            mtShiftLbl[t] = new QLabel(QStringLiteral("Shift (MHz):"));
+            row->addWidget(mtShiftLbl[t]);
             mtShift[t] = new QDoubleSpinBox;
             mtShift[t]->setMinimum(-200.0);
             mtShift[t]->setMaximum(200.0);
@@ -136,7 +142,7 @@ Exciter::Exciter(QWidget *parent) :
             const int rowT = t;
             connect(mtType[t],
                     QOverload<int>::of(&QComboBox::currentIndexChanged),
-                    this, [this, rowT]() { updateMultiTargetRow(rowT); });
+                    this, [this, rowT]() { updateMultiTargetRow(rowT, true); });
         }
         QPushButton *btnSetMulti = new QPushButton(QStringLiteral("Generate & Send Multi Target"));
         mtVbox->addWidget(btnSetMulti);
@@ -150,7 +156,7 @@ Exciter::Exciter(QWidget *parent) :
             setModeActive("multitarget", false);
         });
         for (int t = 0; t < 5; t++)
-            updateMultiTargetRow(t);
+            updateMultiTargetRow(t, true);
     }
 
     //=================== Phase 6: LFM / NLFM tabs ====================
@@ -255,7 +261,9 @@ Exciter::Exciter(QWidget *parent) :
 
 
     connect(ui->spnCWFrq, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ ui->lblCurrentFrq->setNum(ui->spnCWFrq->value());});
-    connect(ui->spnCWPower, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ ui->lblCurrentPower->setNum(ui->spnCWPower->value());});
+    // Phase 6: "Current P (attenuation)" shows the calibrated TX power
+    // (P + TX calibration, see constants/tx_calibration.h).
+    connect(ui->spnCWPower, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val){ refreshTxPowerDisplay();});
 
     connect(ui->chbPower, &QCheckBox::stateChanged, [&](int val){
 
@@ -272,8 +280,6 @@ Exciter::Exciter(QWidget *parent) :
         ui->spnCWFrq->setRange         (200,6000);
         ui->spnSpotFrq->setRange       (200,6000);
         ui->spnImpulseFrq->setRange    (200,6000);
-        ui->spnSweepStopFrq->setRange  (200,6000);
-        ui->spnSweepStartFrq->setRange (200,6000);
     }
 
     else
@@ -281,12 +287,21 @@ Exciter::Exciter(QWidget *parent) :
         ui->spnCWFrq->setRange         (8000,12000);
         ui->spnSpotFrq->setRange       (8000,12000);
         ui->spnImpulseFrq->setRange    (8000,12000);
-        ui->spnSweepStopFrq->setRange  (8000,12000);
-        ui->spnSweepStartFrq->setRange (8000,12000);
     }
+
+    // Phase 6: the Sweep tab synthesizes BASEBAND stepped-sine I/Q like the
+    // LFM tab (the LO does not move), so its start/stop/step live in the
+    // playback band of the DAC file, not in the RF band of the cart.
+    ui->spnSweepStartFrq->setRange (-122.878, 122.878);
+    ui->spnSweepStopFrq->setRange  (-122.878, 122.878);
+    ui->spnSweepStep->setRange     (0.01, 245.76);
+    ui->spnSweepStartFrq->setValue (0.0);
+    ui->spnSweepStopFrq->setValue  (10.0);
+    ui->spnSweepStep->setValue     (2.0);
 
     //-------------------------------------------------------------------
     ui->chbPower->setVisible(false);
+    refreshTxPowerDisplay();
 }
 
 Exciter::~Exciter()
@@ -854,21 +869,21 @@ void Exciter::setDataSlot()
         //===========================Sweep=====================================
     case 2:
     {
-        if ( ui->spnSweepStartFrq->value() >= minFrqLimit and  ui->spnSweepStartFrq->value() < maxFrqLimit ) return;
-        if ( ui->spnSweepStopFrq->value() >= minFrqLimit and  ui->spnSweepStopFrq->value() < maxFrqLimit ) return;
-
+        // Phase 6: the Sweep tab synthesizes a stepped-sine I/Q file like
+        // the LFM tab (baseband tones at start, start+step, ... stop - e.g.
+        // 0/2/4/6/8/10 MHz for start 0, stop 10, step 2).  The LO does not
+        // change: the whole sweep lives inside the DAC file, no cart
+        // hopping.
         emit turnOffSmartNoiseSignal();
         currentTabState = Sweep;
         setModeActive("sweep", true);
-        changeDacSignal("set-sweep");
-        QTimer::singleShot(100, [&]{emit sendStartFrqToCart(ui->spnSweepStartFrq->value());});
-        QTimer::singleShot(100, [&]{emit sendStoptFrqToCart(ui->spnSweepStopFrq->value());});
-        QTimer::singleShot(100, [&]{emit sendStepFrqToCart(ui->spnSweepStep->value());});
-        QTimer::singleShot(100, [&]{emit sendPowerToCart(ui->spnSweepPower->value());});
-
-        QTimer::singleShot(600, [&]{emit startHopp();}); //when user click on start in sweep ecxiter, first stop capturing
-        //        ui->btnStartSweep->setStyleSheet("background-color:#186a3b");
-        //        ui->btnStopSweep->setStyleSheet("background-color:black");
+        if (!buildSweepFile("Sweep.txt", ui->spnSweepStartFrq->value(),
+                            ui->spnSweepStopFrq->value(),
+                            ui->spnSweepStep->value()))
+            return;
+        fileName = "Sweep.txt";
+        if (!returnfilePath(fileName)) return;
+        emit sendFileToCardSignal(fileName, 0, "sweep");
         isExciterOn = true;
         break;
     }
@@ -1109,10 +1124,8 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
 
 void Exciter::on_btnStopSweep_clicked()
 {
-    QTimer::singleShot(1000, [&]{emit stoptHopp();});
+    if (isExciterOn) emit changeDacSignal("Sweep");
     setModeActive("sweep", false);
-    //    ui->btnStartSweep->setStyleSheet("background-color:black");
-    //    ui->btnStopSweep->setStyleSheet("background-color:black");
 }
 
 
@@ -1153,45 +1166,103 @@ void Exciter::on_btnDisableWB_clicked(bool checked)
 // Phase 6: Multi Target tab
 // ---------------------------------------------------------------------------
 
-void Exciter::updateMultiTargetRow(int row)
+void Exciter::refreshTxPowerDisplay()
 {
-    // Per-type specification fields: label / min / max / decimals.
+    // Phase 6: the "Current P (attenuation)" readout shows the calibrated
+    // TX power used everywhere in the software: P + TX calibration
+    // (constants/tx_calibration.h, default -6 dB).
+    ui->lblCurrentPower->setNum(TxCalibration::effective(ui->spnCWPower->value()));
+}
+
+void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
+{
+    // Per-type specification fields: label / min / max / decimals / default.
     struct SpecDef {
         const char *lbl[3];
         double min[3];
         double max[3];
         int dec[3];
+        double dflt[3];
     };
-    static const SpecDef defs[5] = {
+    static const SpecDef defs[6] = {
         // Spot: bandwidth of the pre-generated spot{N}mhz_{P}.txt file
-        {{"BW (MHz)", "--", "--"}, {1.0, -1.0, -1.0}, {400.0, 1.0, 1.0}, {0, 0, 0}},
+        // (default 10 MHz).
+        {{"BW (MHz)", "--", "--"}, {1.0, -1.0, -1.0}, {400.0, 1.0, 1.0}, {0, 0, 0}, {10.0, 0.0, 0.0}},
         // CW: baseband tone frequency (MHz)
-        {{"Frq (MHz)", "--", "--"}, {-120.0, -1.0, -1.0}, {120.0, 1.0, 1.0}, {2, 0, 0}},
+        {{"Frq (MHz)", "--", "--"}, {-120.0, -1.0, -1.0}, {120.0, 1.0, 1.0}, {2, 0, 0}, {0.0, 0.0, 0.0}},
         // Impulse: PRI and pulse width (us)
-        {{"PRI (us)", "PW (us)", "--"}, {1.0, 0.05, -1.0}, {50000.0, 10000.0, 1.0}, {1, 2, 0}},
+        {{"PRI (us)", "PW (us)", "--"}, {1.0, 0.05, -1.0}, {50000.0, 10000.0, 1.0}, {1, 2, 0}, {1.0, 0.05, 0.0}},
         // LFM: start frequency (MHz), bandwidth (MHz), pulse duration (us)
-        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}},
+        // - exactly the LFM/NLFM tab parameters (no shift on these rows)
+        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}, {0.0, 10.0, 10.0}},
         // NLFM: same fields as LFM (raised-cosine amplitude coding)
-        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}},
+        {{"Start (MHz)", "BW (MHz)", "T (us)"}, {-120.0, 0.1, 0.1}, {120.0, 200.0, 10000.0}, {2, 2, 2}, {0.0, 10.0, 10.0}},
+        // Bridge: bandwidth of the generated bridge{N}mhz_{P}.txt noise
+        // (default 10 MHz, like the Bridge Noise tab)
+        {{"BW (MHz)", "--", "--"}, {1.0, -1.0, -1.0}, {400.0, 1.0, 1.0}, {0, 0, 0}, {10.0, 0.0, 0.0}},
     };
     if (row < 0 || row > 4 || !mtType[row])
         return;
-    const SpecDef &d = defs[mtType[row]->currentIndex()];
+    const int typeIdx = mtType[row]->currentIndex();
+    const SpecDef &d = defs[typeIdx];
     for (int s2 = 0; s2 < 3; s2++)
     {
-        const bool used = (mtType[row]->currentIndex() == 0) ? (s2 == 0)
-                     : (mtType[row]->currentIndex() == 1) ? (s2 == 0)
-                     : (mtType[row]->currentIndex() == 2) ? (s2 < 2)
+        const bool used = (typeIdx == 0) ? (s2 == 0)
+                     : (typeIdx == 1) ? (s2 == 0)
+                     : (typeIdx == 2) ? (s2 < 2)
+                     : (typeIdx == 5) ? (s2 == 0)
                      : true;
         mtSpecLbl[row][s2]->setText(used ? d.lbl[s2] : QStringLiteral("--"));
         mtSpec[row][s2]->setEnabled(used);
+        mtSpec[row][s2]->setVisible(used);
+        mtSpecLbl[row][s2]->setVisible(used);
         if (used)
         {
             mtSpec[row][s2]->setMinimum(d.min[s2]);
             mtSpec[row][s2]->setMaximum(d.max[s2]);
             mtSpec[row][s2]->setDecimals(d.dec[s2]);
+            if (applyDefaults)
+                mtSpec[row][s2]->setValue(d.dflt[s2]);
         }
     }
+    // LFM / NLFM rows carry just start frequency / BW / T like the
+    // LFM/NLFM tabs - NO frequency shift.  The other types keep their
+    // shift field.
+    const bool hasShift = (typeIdx != 3 && typeIdx != 4);
+    mtShift[row]->setVisible(hasShift);
+    mtShiftLbl[row]->setVisible(hasShift);
+}
+
+int Exciter::loadIqTextSamples(const QString &path,
+                               QVector<double> &ti, QVector<double> &tq,
+                               int nMax)
+{
+    QFile in(path);
+    if (!in.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qWarning() << "MultiTarget: cannot open" << path;
+        return 0;
+    }
+    QTextStream r(&in);
+    QString header;
+    r >> header; // "TEXT" header token
+    int n2 = 0;
+    // Whitespace-agnostic I/Q extraction (spaces, tabs, CR/LF all work).
+    // The old line splitting used a C string literal whose "\s+" escape
+    // was broken (the regex was really "s+"), so it never matched a data
+    // line and every spot row read zero samples.
+    while (n2 < nMax && !r.atEnd())
+    {
+        double a, b;
+        r >> a >> b;
+        if (r.status() != QTextStream::Ok)
+            break;
+        ti[n2] = a;
+        tq[n2] = b;
+        n2++;
+    }
+    in.close();
+    return n2;
 }
 
 bool Exciter::buildMultiTargetWaveform()
@@ -1215,56 +1286,43 @@ bool Exciter::buildMultiTargetWaveform()
         QVector<double> ti(N, 0.0);
         QVector<double> tq(N, 0.0);
 
-        if (type == 0)
+        if (type == 0 || type == 5)
         {
-            // Spot: load the generated spot{N}mhz_{P}.txt (262144 samples)
+            // Spot / Bridge: load the generated band-limited noise file
+            // (262144 samples) - spot/spot{N}mhz_{P}.txt or
+            // bridge/bridge{N}mhz_{P}.txt.
             const int n = int(mtSpec[t][0]->value());
-            const QString f = QString("spot/spot%1mhz_%2.txt").arg(n).arg(profileBw);
+            const bool isBridge = (type == 5);
+            const QString f = isBridge
+                ? QString("bridge/bridge%1mhz_%2.txt").arg(n).arg(profileBw)
+                : QString("spot/spot%1mhz_%2.txt").arg(n).arg(profileBw);
             const QString path = resolveFileInAppFolders(f);
+            const QString what = isBridge ? tr("Bridge noise") : tr("Spot");
+            const QString genHint = isBridge
+                ? tr("Run files/bridge/generate_bridge.py first.")
+                : tr("Run files/spot/generate.py first.");
+            const QString regenHint = isBridge
+                ? tr("Regenerate it with files/bridge/generate_bridge.py.")
+                : tr("Regenerate it with files/spot/generate.py.");
             if (path.isEmpty())
             {
                 QMessageBox msgBox;
-                msgBox.setText(tr("Spot file for target %1 not found:\n%2\n\n"
-                                  "Run files/spot/generate.py first.")
-                                   .arg(t + 1).arg(QDir::currentPath() + "/" + f));
+                msgBox.setText(tr("%1 file for target %2 not found:\n%3\n\n%4")
+                                   .arg(what).arg(t + 1)
+                                   .arg(QDir::currentPath() + "/" + f)
+                                   .arg(genHint));
                 msgBox.exec();
                 return false;
             }
-            QFile in(path);
-            if (!in.open(QIODevice::ReadOnly | QIODevice::Text))
-            {
-                qWarning() << "MultiTarget: cannot open" << path;
-                return false;
-            }
-            QTextStream r(&in);
-            QString header;
-            r >> header; // "TEXT" header token
-            int n2 = 0;
-            // Whitespace-agnostic I/Q extraction (spaces, tabs, CR/LF all
-            // work).  The old line splitting used a C string literal whose
-            // "\\s+" escape was broken (the regex was really "s+"), so it
-            // never matched a data line and every spot row read zero
-            // samples.
-            while (n2 < N && !r.atEnd())
-            {
-                double a, b;
-                r >> a >> b;
-                if (r.status() != QTextStream::Ok)
-                    break;
-                ti[n2] = a;
-                tq[n2] = b;
-                n2++;
-            }
-            in.close();
+            const int n2 = loadIqTextSamples(path, ti, tq, N);
             if (n2 == 0)
             {
-                // Never transmit a silent file: an empty/unparsable spot
+                // Never transmit a silent file: an empty/unparsable noise
                 // file used to produce an all-zero waveform and the user
                 // just saw "nothing" on the spectrum.
                 QMessageBox msgBox;
-                msgBox.setText(tr("Spot file for target %1 contains no samples:\n%2\n\n"
-                                  "Regenerate it with files/spot/generate.py.")
-                                   .arg(t + 1).arg(path));
+                msgBox.setText(tr("%1 file for target %2 contains no samples:\n%3\n\n%4")
+                                   .arg(what).arg(t + 1).arg(path).arg(regenHint));
                 msgBox.exec();
                 return false;
             }
@@ -1309,8 +1367,9 @@ bool Exciter::buildMultiTargetWaveform()
         }
         else
         {
-            // LFM / NLFM: (chirp) pulse train, period T, start f0, BW B.
-            // phase(t) = 2 pi (f0 t + B t^2 / (2 T))
+            // LFM / NLFM: the exact waveform of the LFM/NLFM tabs - just
+            // start frequency / BW / T (no frequency shift on these rows).
+            // phase(tau) = 2 pi (f0 tau + B tau^2 / (2 T)), period T.
             const double f0 = mtSpec[t][0]->value();
             const double B = mtSpec[t][1]->value();
             const double T = mtSpec[t][2]->value();
@@ -1326,27 +1385,14 @@ bool Exciter::buildMultiTargetWaveform()
                 msgBox.exec();
                 return false;
             }
-            const int Tsamp = qMax(2, int(T * fsMhz));
-            const double Tm = (double)Tsamp / fsMhz; // seconds
-            for (int i = 0; i < N; i++)
-            {
-                const int m = i % Tsamp;
-                const double tau = (double)m / fsMhz;
-                const double ph = twoPi * (f0 * tau + B * tau * tau / (2.0 * Tm));
-                double amp = 1.0;
-                if (type == 4)
-                {
-                    // NLFM: raised-cosine amplitude coding over the pulse
-                    amp = 0.5 * (1.0 - std::cos(twoPi * m / Tsamp));
-                }
-                ti[i] = amp * std::cos(ph);
-                tq[i] = amp * std::sin(ph);
-            }
+            fillChirpSamples(ti, tq, N, fsMhz, type == 4, f0, B, T);
         }
 
         // Frequency shift = complex exponential multiplier ("DDS sine"):
         //   s'(n) = s(n) * e^{j 2 pi f_shift n / fs}
-        const double fsh = mtShift[t]->value();
+        // LFM/NLFM rows carry no shift (start frequency / BW / T only, the
+        // exact LFM/NLFM tab formula) - their placement comes from f0.
+        const double fsh = (type == 3 || type == 4) ? 0.0 : mtShift[t]->value();
         if (std::abs(fsh) > fsMhz / 2.0)
         {
             QMessageBox msgBox;
@@ -1418,6 +1464,33 @@ bool Exciter::buildMultiTargetWaveform()
 // Phase 6: LFM / NLFM tabs
 // ---------------------------------------------------------------------------
 
+void Exciter::fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
+                               double fsMhz, bool nlfm,
+                               double f0Mhz, double bwMhz, double tUs)
+{
+    // THE chirp formula, shared by the LFM/NLFM tabs and the Multi Target
+    // LFM/NLFM rows so both build the exact same waveform: a repeating
+    // pulse of duration T with phase(tau) = 2*pi*(f0*tau + B*tau^2/(2*T)),
+    // NLFM adds raised-cosine amplitude coding over the pulse.
+    const double twoPi = 2.0 * M_PI;
+    const int Tsamp = qMax(2, int(tUs * fsMhz));
+    const double Tm = (double)Tsamp / fsMhz;
+    for (int i = 0; i < n; i++)
+    {
+        const int m = i % Tsamp;
+        const double tau = (double)m / fsMhz;
+        const double ph = twoPi * (f0Mhz * tau + bwMhz * tau * tau / (2.0 * Tm));
+        double amp = 1.0;
+        if (nlfm)
+        {
+            // NLFM: raised-cosine amplitude coding over the pulse
+            amp = 0.5 * (1.0 - std::cos(twoPi * m / Tsamp));
+        }
+        ti[i] = amp * std::cos(ph);
+        tq[i] = amp * std::sin(ph);
+    }
+}
+
 bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
                              double f0Mhz, double bwMhz, double tUs)
 {
@@ -1426,7 +1499,6 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
     // half the profile's sample rate - 61.44/122.88/245.76 MS/s for the
     // 100/200/400 profiles.
     const double fsMhz = profileBw * 61.44 / 100.0;
-    const double twoPi = 2.0 * M_PI;
     // The whole sweep must fit inside the file's Nyquist band
     // (-fs/2 .. +fs/2) or it folds and does not look like an LFM.
     {
@@ -1443,26 +1515,9 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
             return false;
         }
     }
-    const int Tsamp = qMax(2, int(tUs * fsMhz));
-    const double Tm = (double)Tsamp / fsMhz; // seconds
-
     QVector<double> ti(N, 0.0);
     QVector<double> tq(N, 0.0);
-    for (int i = 0; i < N; i++)
-    {
-        const int m = i % Tsamp;
-        const double tau = (double)m / fsMhz;
-        // phase(t) = 2*pi*(f0*t + B*t^2/(2*T))  (repeating pulse, period T)
-        const double ph = twoPi * (f0Mhz * tau + bwMhz * tau * tau / (2.0 * Tm));
-        double amp = 1.0;
-        if (nlfm)
-        {
-            // NLFM: raised-cosine amplitude coding over the pulse
-            amp = 0.5 * (1.0 - std::cos(twoPi * m / Tsamp));
-        }
-        ti[i] = amp * std::cos(ph);
-        tq[i] = amp * std::sin(ph);
-    }
+    fillChirpSamples(ti, tq, N, fsMhz, nlfm, f0Mhz, bwMhz, tUs);
 
     QFile out(fileName);
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -1474,6 +1529,90 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
     w << "TEXT\n";
     for (int i = 0; i < N; i++)
         w << ti[i] << " " << tq[i] << "\n";
+    out.close();
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: Sweep tab - stepped-sine I/Q synthesis
+// ---------------------------------------------------------------------------
+
+bool Exciter::buildSweepFile(const QString &fileName,
+                             double fStartMhz, double fStopMhz, double fStepMhz)
+{
+    // The Sweep tab builds its I/Q in-app with a sine function like the LFM
+    // tab (baseband, fixed LO - no cart hopping): the tone steps through
+    // f = start, start+step, ... toward stop (start 0, stop 10, step 2
+    // gives exactly the tones 0, 2, 4, 6, 8, 10 MHz).  The time spent on
+    // each tone is not critical - the tones share the looping 262144-sample
+    // file equally - and the phase runs continuously across tone changes.
+    const int N = 262144;
+    // Board playback rate, same calibration as the spot/impulse files:
+    // 61.44/122.88/245.76 MS/s for the 100/200/400 profiles.
+    const double fsMhz = profileBw * 61.44 / 100.0;
+    const double twoPi = 2.0 * M_PI;
+
+    if (fStepMhz <= 0.0)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("The sweep step must be positive."));
+        msgBox.exec();
+        return false;
+    }
+    // Every tone must sit inside the playback band (-fs/2 .. +fs/2) or it
+    // folds; the tones all lie between start and stop.
+    const double lo = qMin(fStartMhz, fStopMhz);
+    const double hi = qMax(fStartMhz, fStopMhz);
+    if (lo < -fsMhz / 2.0 || hi > fsMhz / 2.0)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("Sweep %1 .. %2 MHz exceeds the playback band "
+                          "(+/- %3 MHz on this profile). Reduce the start or "
+                          "stop frequency.")
+                           .arg(lo).arg(hi).arg(fsMhz / 2.0));
+        msgBox.exec();
+        return false;
+    }
+    const double dir = (fStopMhz >= fStartMhz) ? 1.0 : -1.0;
+    const int nTones = int(std::floor(std::abs(fStopMhz - fStartMhz) /
+                                      fStepMhz + 1e-9)) + 1;
+    if (nTones > N)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("The sweep step %1 MHz is too small: %2 tones do "
+                          "not fit in the waveform file.")
+                           .arg(fStepMhz).arg(nTones));
+        msgBox.exec();
+        return false;
+    }
+
+    QVector<double> ti(N, 0.0);
+    QVector<double> tq(N, 0.0);
+    double ph = 0.0;
+    int i = 0;
+    for (int k = 0; k < nTones; k++)
+    {
+        const double f = fStartMhz + dir * fStepMhz * k;
+        const double w = twoPi * f / fsMhz;
+        const int iEnd = (k + 1) * N / nTones;
+        for (; i < iEnd; i++)
+        {
+            ti[i] = std::cos(ph);
+            tq[i] = std::sin(ph);
+            ph += w;
+        }
+    }
+
+    QFile out(fileName);
+    if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() << "Sweep: cannot write" << fileName;
+        return false;
+    }
+    QTextStream w2(&out);
+    w2 << "TEXT\n";
+    for (int j = 0; j < N; j++)
+        w2 << ti[j] << " " << tq[j] << "\n";
     out.close();
     return true;
 }

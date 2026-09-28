@@ -130,6 +130,7 @@ HEADERS += \
     components/led/led.h \
     components/led/widgetwithbackground.h \
     constants/project_constans.h \
+    constants/tx_calibration.h \
     devices/cooling/cooling3.h \
     devices/cooling/packetmanager.h \
     devices/cooling/tcpclient.h \

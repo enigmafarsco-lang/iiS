@@ -117,6 +117,26 @@ versions wrote `us x 487.8` samples (1 MS/s base plus a bogus
 x2000/4.1 factor) regardless of profile — pulses came out 5-1000x
 too wide (2.4x on the 400 profile up to ~39x on the 100 profile).
 
+## Sweep tab
+
+`Sweep.txt` is generated live by the app like the LFM tab: a stepped-sine
+I/Q built in-app at the profile playback rate (`0.6144 x P` MS/s) with
+**baseband** start / stop / step frequencies (the LO does not move).  The
+tones sit at `start, start+step, ...` toward `stop` - start 0, stop 10,
+step 2 gives exactly the tones 0/2/4/6/8/10 MHz - and they share the
+looping 262144-sample file equally (the per-tone dwell is not critical),
+with continuous phase across tone changes.
+
+## Multi Target tab
+
+* LFM/NLFM rows take just **start frequency / BW / T** (the exact
+  LFM/NLFM tab formula, `phase = 2*pi*(f0*t + B*t^2/2T)`) and have **no
+  frequency shift** - the chirp placement comes from the start frequency.
+* **Bridge** rows load `bridge/bridge{N}mhz_{P}.txt` (run
+  `files/bridge/generate_bridge.py` first) - band-limited noise like a
+  Spot row but an independent realization.
+* Spot / Bridge rows default to a 10 MHz bandwidth.
+
 ## What must NOT be committed
 
 The generated `spot*.txt` files are blocked by this folder's

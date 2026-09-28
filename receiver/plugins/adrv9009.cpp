@@ -1,5 +1,6 @@
 #include "adrv9009.h"
 #include "qtconcurrentrun.h"
+#include "constants/tx_calibration.h"
 #include <ui_adrv9009.h>
 #include <QFileInfo>
 #include <QApplication>
@@ -34,6 +35,21 @@ static QWidget *rx_phase_rotation[2];
 
 static const gdouble mhz_scale = 1000000.0;
 static const gdouble inv_scale = -1.0;
+
+// Phase 6: TX calibration - translate between the raw P (attenuation) the
+// user types into the TX1/TX2 attenuation spinboxes and the CALIBRATED
+// hardware gain actually written to the "hardwaregain" attribute
+// (effective P = P + TX calibration, see constants/tx_calibration.h).
+// spin_button_save() hands us the already-scaled value (gain = -P) and
+// needs the calibrated gain -(P + cal) = v - cal; the read path hands us
+// the raw attribute and needs v + cal back so the spinbox keeps showing
+// the raw P the user typed.
+static double txGainCalConvert(double v, bool toWidget)
+{
+    return toWidget ? v + TxCalibration::offsetDb()
+                    : v - TxCalibration::offsetDb();
+}
+
 static const gdouble scale100 = 100.0;
 
 static const char *freq_name;
@@ -166,6 +182,15 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
     track_TX2_Chk     = findChild<QCheckBox      *>("tx2_quadrature_tracking_en");
     att_TX2_Spn       = findChild<QDoubleSpinBox *>("hardware_gain_tx2");
     powerTX2DownChk   = findChild<QCheckBox      *>("tx2_powerdown_en");
+    // Phase 6: warn (maximum-power limit) whenever the P (attenuation) +
+    // TX calibration would go below zero - these two spinboxes are the
+    // master copies every other TX power control mirrors into.
+    if (att_TX1_Spn)
+        connect(att_TX1_Spn, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                this, [](double val){ TxCalibration::checkP(val); });
+    if (att_TX2_Spn)
+        connect(att_TX2_Spn, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                this, [](double val){ TxCalibration::checkP(val); });
     //--- OBSRX ------------------------------------------------------------------
     track_OBSRX_Chk   = findChild<QCheckBox      *>("obs1_quadrature_tracking_en");
     sampleRateOBSlbl  = findChild<QLabel         *>("label_sampling_freq_obs");
@@ -1228,10 +1253,18 @@ QWidget *adrv9009::init()
             iio_w.iio_spin_button_init(&subcomponents[i].tx_widgets[subcomponents[i].num_tx++],
                     subcomponents[i].iio_dev, subcomponents[i].out_ch0, "hardwaregain",
                     ui->hardware_gain_tx1, &inv_scale);
+            // Phase 6: the hardware gain is written calibrated (P + TX
+            // calibration) while the spinbox keeps the raw P.
+            iio_w.iio_spin_button_set_convert_function(
+                    &subcomponents[i].tx_widgets[subcomponents[i].num_tx - 1],
+                    txGainCalConvert);
 
             iio_w.iio_spin_button_init(&subcomponents[i].tx_widgets[subcomponents[i].num_tx++],
                     subcomponents[i].iio_dev, subcomponents[i].out_ch1, "hardwaregain",
                     ui->hardware_gain_tx2, &inv_scale);
+            iio_w.iio_spin_button_set_convert_function(
+                    &subcomponents[i].tx_widgets[subcomponents[i].num_tx - 1],
+                    txGainCalConvert);
 
             subcomponents[i].tx_sample_freq = subcomponents[i].num_tx;
 
