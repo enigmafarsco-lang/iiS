@@ -2,6 +2,7 @@
 #define ADRv9009_H
 
 #include <QWidget>
+#include <QVector>
 #include "dacDataManager.h"
 #include "receiver/globals.h"
 #include <receiver/osc.h>
