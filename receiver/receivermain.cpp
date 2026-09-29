@@ -2380,6 +2380,37 @@ void ReceiverMain::writeSelectedProfile()
             QTimer::singleShot(10000, this, [this, profileFsMhz]{
                 if (!frqDomainPlot)
                     return;
+                // After a profile change the channels end in the software
+                // states: RX1/RX2 off, ORX2 off, TX1/TX2 off - only ORX1
+                // on (it feeds the spectrum).  Forced checkbox writes so
+                // the board is commanded even when a box is unchanged.
+                if (oscMain && oscMain->_adrv9009) {
+                    adrv9009 *adrv = oscMain->_adrv9009;
+                    if (adrv->power_TX1_DownChk) {
+                        adrv->power_TX1_DownChk->setChecked(true);
+                        adrv->power_TX1_DownChk->stateChanged(1);
+                    }
+                    if (adrv->powerTX2DownChk) {
+                        adrv->powerTX2DownChk->setChecked(true);
+                        adrv->powerTX2DownChk->stateChanged(1);
+                    }
+                    if (adrv->rx1Powerdown) {
+                        adrv->rx1Powerdown->setChecked(true);
+                        adrv->rx1Powerdown->stateChanged(1);
+                    }
+                    if (adrv->rx2Powerdown) {
+                        adrv->rx2Powerdown->setChecked(true);
+                        adrv->rx2Powerdown->stateChanged(1);
+                    }
+                    if (adrv->obs2Powerdown) {
+                        adrv->obs2Powerdown->setChecked(true);
+                        adrv->obs2Powerdown->stateChanged(1);
+                    }
+                    if (adrv->power_OBSRX_Spn) { // ORX1 on
+                        adrv->power_OBSRX_Spn->setChecked(false);
+                        adrv->power_OBSRX_Spn->stateChanged(0);
+                    }
+                }
                 frqDomainPlot->setEnabled(true); // the I/Q signal is back
                 frqDomainPlot->setActiveBandwidth(profileFsMhz); // freq +/- Fs/2 axis window
                 profileSetBusy = false;
