@@ -188,19 +188,12 @@ public:
     // TX and all parameters) and saves every value.  restoreBoardState()
     // asserts those first values, except the RX1/2 and ORX1/2 powerdowns
     // which keep the software states (RX1/2 off, ORX1 on, ORX2 off).
-    // Phase 6: "Set Default" / "Factory Reset" (Profile tab).
-    // snapshotBoardState() saves every parameter value read at software
-    // start (DDS mode, RX mode, TX and all parameters); restoreBoardState()
-    // asserts them.  With withSoftwareRxOrxStates=true (Set Default) the
-    // RX1/2 and ORX1/2 keep the software states (RX1/2 off, ORX1 on,
-    // ORX2 off); with false (Factory Reset) ALL saved values apply.
-    // save/loadSettingsTo/FromIni persist the same values to an ini file
-    // (files/default_settings.ini) - the "Save Setting" button.
     void snapshotBoardState();
-    void restoreBoardState(bool withSoftwareRxOrxStates = true);
+    void restoreBoardState();
     void applySoftwareRxOrxStates();
     bool saveSettingsToIni(const QString &fileName);
     bool loadSettingsFromIni(const QString &fileName);
+    void firmwareResetOverLan();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);

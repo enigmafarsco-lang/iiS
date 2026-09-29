@@ -709,8 +709,8 @@ void adrv9009::applyWidgetValue(QWidget *w, double v)
 /**
  * @brief adrv9009::applySoftwareRxOrxStates
  *
- * The software states of the RX/ORX powerdowns (NOT board defaults):
- * RX1/2 off, ORX1 on, ORX2 off (ORX2 is always off for caution).
+ * The software states of the RX/ORX powerdowns: RX1/2 off, ORX1 on,
+ * ORX2 off (always off for caution).
  */
 void adrv9009::applySoftwareRxOrxStates()
 {
@@ -723,37 +723,35 @@ void adrv9009::applySoftwareRxOrxStates()
 /**
  * @brief adrv9009::restoreBoardState
  *
- * Phase 6: "Set Default" / "Factory Reset" apply.  Asserts all parameter
- * values read at software start (the snapshot).  With
- * withSoftwareRxOrxStates (Set Default) the RX1/2 and ORX1/2 powerdowns
- * are NOT taken from the snapshot - the software states are asserted
- * instead (RX1/2 off, ORX1 on, ORX2 off).  With false (Factory Reset)
- * every saved value applies as read.
+ * Phase 6: "Set Default" apply.  Asserts all parameter values read at
+ * software start (the snapshot), EXCEPT the RX1/2 and ORX1/2 powerdowns -
+ * those keep the software states: RX1/2 off, ORX1 on, ORX2 off.
  */
-void adrv9009::restoreBoardState(bool withSoftwareRxOrxStates)
+void adrv9009::restoreBoardState()
 {
     for (const SavedWidgetValue &s : boardSnapshot)
     {
         QWidget *w = s.widget;
         if (!w)
             continue;
-        if (withSoftwareRxOrxStates &&
-            (w == (QWidget *)rx1Powerdown || w == (QWidget *)rx2Powerdown ||
-             w == (QWidget *)power_OBSRX_Spn || w == (QWidget *)obs2Powerdown))
+        // RX1/2 and ORX1/2 powerdown states are NOT restored from the
+        // snapshot - the software states are asserted below instead.
+        if (w == (QWidget *)rx1Powerdown || w == (QWidget *)rx2Powerdown ||
+            w == (QWidget *)power_OBSRX_Spn || w == (QWidget *)obs2Powerdown)
             continue;
         applyWidgetValue(w, s.value);
     }
 
-    if (withSoftwareRxOrxStates)
-        applySoftwareRxOrxStates();
+    applySoftwareRxOrxStates();
 }
 
 /**
  * @brief adrv9009::settingsWidgetList
  *
- * The saved-settings universe: every parameter widget (IIO widgets of the
- * subcomponents, FPGA widgets and the DDS mode / tone fields) with a
- * stable, unique ini key.  Same order always, so save/load agree.
+ * The saved-settings universe: every parameter widget (the IIO widgets of
+ * the subcomponents, FPGA widgets and the DDS mode / tone fields) with a
+ * stable unique ini key.  The order is always the same, so save and load
+ * agree.
  */
 QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
 {
@@ -798,8 +796,8 @@ QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
 /**
  * @brief adrv9009::saveSettingsToIni
  *
- * "Save Setting" (Profile tab): write every parameter value to the ini
- * file (files/default_settings.ini).  "Set Default" recalls it later.
+ * "Save" (Profile tab): write every setting of the software to the ini
+ * file in the files folder (files/default_settings.ini).
  */
 bool adrv9009::saveSettingsToIni(const QString &fileName)
 {
@@ -817,8 +815,8 @@ bool adrv9009::saveSettingsToIni(const QString &fileName)
 /**
  * @brief adrv9009::loadSettingsFromIni
  *
- * Recall the values saved by saveSettingsToIni() and apply them to all
- * menus (forced widget writes -> the board is commanded).
+ * "Set Default": set the saved ini file into the software - every value
+ * is applied to its menu (forced widget writes -> the board is commanded).
  */
 bool adrv9009::loadSettingsFromIni(const QString &fileName)
 {
@@ -832,6 +830,32 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
         applyWidgetValue(e.second, settings.value(e.first).toDouble());
     }
     return true;
+}
+
+/**
+ * @brief adrv9009::firmwareResetOverLan
+ *
+ * "Reset" (Profile tab): the documented ADRV9009 firmware reset over the
+ * LAN/IIO link - write 1 to the "initialize" attribute of adrv9009-phy.
+ * The driver then resets and reinitializes the ADRV9009 from reset and
+ * re-runs all calibrations (takes several seconds).  See the ADI wiki
+ * (ADRV9009 Linux device driver, Runtime Device Driver Customization).
+ */
+void adrv9009::firmwareResetOverLan()
+{
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) {
+        qWarning() << "ADRV9009 firmware reset: device" << PHY_DEVICE << "not found";
+        return;
+    }
+    ssize_t ret = iio_device_attr_write(dev, "initialize", "1");
+    if (ret >= 0)
+        qInfo() << "ADRV9009 firmware reset over LAN: initialize=1 written - the "
+                   "device resets and reinitializes (calibrations re-run)";
+    else
+        qWarning() << "ADRV9009 firmware reset over LAN: initialize write FAILED:" << (long long)ret;
+    // Re-read the widgets once the re-init is done.
+    QTimer::singleShot(10000, this, [this]{ update_widgets(); });
 }
 
 void adrv9009::resaveTxGainWidgets()

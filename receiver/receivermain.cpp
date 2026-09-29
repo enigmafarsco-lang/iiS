@@ -2225,26 +2225,43 @@ void ReceiverMain::defaultSettings()
 
     // Phase 6: FIRST read all status (DDS mode, RX mode, TX and all
     // parameters) and save it - before any change - so the Profile tab's
-    // "Set Default" / "Factory Reset" buttons can assert these first
-    // values later.
+    // "Set Default" button can assert these first values later.
     oscMain->_adrv9009->snapshotBoardState();
 
-    // The software default parameters (TX1/2 + RX1/2 off, ORX1 on,
-    // ORX2 off, attenuation 10, calibration defaults, ...).
-    defaultParameters();
+    // The original project contains an absolute /home/seraj3/... profile path.
+    // Do not start profile loading with a non-existent file: that path used to
+    // enter an asynchronous UI update path and could abort the Qt application.
+    if (rfBandlbl->text().split(" ").value(0).toDouble() != 400)
+    {
+        if (QFileInfo::exists(fileAddress))
+        {
+            frqDomainPlot->setEnabled(false);
+            oscMain->_adrv9009->on_profile_config_clicked(fileAddress);
 
+            QTimer::singleShot(10000, this, [this]{
+                if (!frqDomainPlot)
+                    return;
+                frqDomainPlot->setEnabled(true);
+                defaultParameters();
+            });
+        }
+        else
+        {
+            qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
+                       << fileAddress;
+            defaultParameters();
+        }
+    }
+    else
+    {
+        defaultParameters();
+    }
     // TX1 is OFF whenever defaults are applied at start (safe default).
     if (power_TX1_DownChk)
     {
         power_TX1_DownChk->stateChanged(1);  // force a hardware write
         power_TX1_DownChk->setChecked(true); // TX off
     }
-
-    // At the moment the software starts it sets the profile to the
-    // Profile tab's default (200 MHz BW) through the same clean path as
-    // the Set button - it does not change the frequency.  The completion
-    // tail applies the RX/ORG states and re-enables the plot.
-    writeSelectedProfile();
 }
 
 
@@ -2257,8 +2274,7 @@ void ReceiverMain::defaultSettings()
 // at software start (the board snapshot: DDS mode, RX mode, TX and all
 // parameters), except RX1/2 and ORX1/2 which keep the software states
 // (RX1/2 off, ORX1 on, ORX2 off).
-// The settings ini (files/default_settings.ini): recall an existing save
-// first, otherwise the write location in the first existing files/ folder.
+// The settings ini (files/default_settings.ini) in the files folder.
 QString ReceiverMain::settingsIniPath()
 {
     const QStringList dirs = {
@@ -2276,64 +2292,12 @@ QString ReceiverMain::settingsIniPath()
     return dirs.first() + "/default_settings.ini";
 }
 
-void ReceiverMain::on_btnSetDefault_clicked()
+// "Save": save all settings of the software to the ini file in the files folder.
+void ReceiverMain::on_btnSave_clicked()
 {
     if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
     {
-        qWarning() << "Receiver: Set Default skipped because the board is not connected";
-        return;
-    }
-    const QString iniPath = settingsIniPath();
-    if (QFileInfo::exists(iniPath)) {
-        // The values saved by "Save Setting" are the default values -
-        // recall them and set them to all menus.
-        oscMain->_adrv9009->loadSettingsFromIni(iniPath);
-        QSettings settings(iniPath, QSettings::IniFormat);
-        if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
-            att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
-        if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
-            att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
-        if (settings.contains("receiver/txCalib"))
-            ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
-        qInfo() << "Set Default: recalled" << iniPath;
-    } else {
-        // No saved settings yet: the values read at software start.
-        oscMain->_adrv9009->restoreBoardState(true);
-        qInfo() << "Set Default: applied the values read at software start";
-    }
-    // The exception: RX1/2 off, ORX1 on, ORX2 off - in every case.
-    oscMain->_adrv9009->applySoftwareRxOrxStates();
-}
-
-void ReceiverMain::on_btnFactoryReset_clicked()
-{
-    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
-    {
-        qWarning() << "Receiver: Factory Reset skipped because the board is not connected";
-        return;
-    }
-    const QString iniPath = settingsIniPath();
-    if (QFileInfo::exists(iniPath)) {
-        oscMain->_adrv9009->loadSettingsFromIni(iniPath);
-        QSettings settings(iniPath, QSettings::IniFormat);
-        if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
-            att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
-        if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
-            att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
-        if (settings.contains("receiver/txCalib"))
-            ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
-    } else {
-        oscMain->_adrv9009->restoreBoardState(false);
-    }
-    // Factory Reset: ALL settings go to the default values - no exception.
-    qInfo() << "Factory Reset: all settings set to the default values";
-}
-
-void ReceiverMain::on_btnSaveSetting_clicked()
-{
-    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
-    {
-        qWarning() << "Receiver: Save Setting skipped because the board is not connected";
+        qWarning() << "Receiver: Save skipped because the board is not connected";
         return;
     }
     const QString iniPath = settingsIniPath();
@@ -2347,9 +2311,47 @@ void ReceiverMain::on_btnSaveSetting_clicked()
     settings.setValue("receiver/txCalib", ui->dsbTxCalib->value());
     settings.sync();
     if (ok && settings.status() == QSettings::NoError)
-        qInfo() << "Save Setting: all settings saved to" << iniPath;
+        qInfo() << "Save: all settings saved to" << iniPath;
     else
-        qWarning() << "Save Setting: FAILED to save" << iniPath;
+        qWarning() << "Save: FAILED to save" << iniPath;
+}
+
+// "Set Default": set the saved ini file into the software (all menus).
+void ReceiverMain::on_btnSetDefault_clicked()
+{
+    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
+    {
+        qWarning() << "Receiver: Set Default skipped because the board is not connected";
+        return;
+    }
+    const QString iniPath = settingsIniPath();
+    if (!QFileInfo::exists(iniPath)) {
+        QMessageBox::warning(this, tr("Set Default"),
+            tr("No saved settings file:\n%1\n\nPress Save first.").arg(iniPath));
+        return;
+    }
+    oscMain->_adrv9009->loadSettingsFromIni(iniPath);
+    QSettings settings(iniPath, QSettings::IniFormat);
+    if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
+        att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
+    if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
+        att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
+    if (settings.contains("receiver/txCalib"))
+        ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
+    // The software states: RX1/2 off, ORX1 on, ORX2 off.
+    oscMain->_adrv9009->applySoftwareRxOrxStates();
+    qInfo() << "Set Default: the saved ini is set into the software:" << iniPath;
+}
+
+// "Reset": ADRV9009 firmware reset over the LAN (initialize=1).
+void ReceiverMain::on_btnReset_clicked()
+{
+    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
+    {
+        qWarning() << "Receiver: Reset skipped because the board is not connected";
+        return;
+    }
+    oscMain->_adrv9009->firmwareResetOverLan();
 }
 
 void ReceiverMain::on_btnProfileSet_clicked()
