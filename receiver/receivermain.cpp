@@ -2274,25 +2274,46 @@ void ReceiverMain::defaultSettings()
 // at software start (the board snapshot: DDS mode, RX mode, TX and all
 // parameters), except RX1/2 and ORX1/2 which keep the software states
 // (RX1/2 off, ORX1 on, ORX2 off).
-// The settings ini (files/default_settings.ini) in the files folder.
-QString ReceiverMain::settingsIniPath()
+// The settings ini files live in the MAIN PROJECT files folder
+// (PROJECT_FILES_DIR = <project>/files, compiled in by seraj3.pro) -
+// not in the shadow build's files/ folder.
+QString ReceiverMain::settingsIniPath(const QString &fileName)
 {
-    const QStringList dirs = {
-        QDir::currentPath() + "/files",
-        QCoreApplication::applicationDirPath() + "/files",
-    };
+    QStringList dirs;
+#ifdef PROJECT_FILES_DIR
+    dirs << QStringLiteral(PROJECT_FILES_DIR);
+#endif
+    dirs << QDir::currentPath() + "/files"
+         << QCoreApplication::applicationDirPath() + "/files";
+
     for (const QString &d : dirs) {
-        const QString p = d + "/default_settings.ini";
+        const QString p = QDir(d).absoluteFilePath(fileName);
         if (QFileInfo::exists(p))
             return p;
     }
-    for (const QString &d : dirs)
-        if (QFileInfo(d).isDir())
-            return d + "/default_settings.ini";
-    return dirs.first() + "/default_settings.ini";
+    // Not saved yet: the main project files folder is the save location.
+    return QDir(dirs.first()).absoluteFilePath(fileName);
 }
 
-// "Save": save all settings of the software to the ini file in the files folder.
+// Set every saved value of the ini into the software (all menus) and
+// assert the RX/ORG software states (RX1/2 off, ORX1 on, ORX2 off).
+void ReceiverMain::applySettingsIni(const QString &fileName)
+{
+    if (!oscMain || !oscMain->_adrv9009)
+        return;
+    oscMain->_adrv9009->loadSettingsFromIni(fileName);
+    QSettings settings(fileName, QSettings::IniFormat);
+    if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
+        att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
+    if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
+        att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
+    if (settings.contains("receiver/txCalib"))
+        ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
+    oscMain->_adrv9009->applySoftwareRxOrxStates();
+}
+
+// "Save": save all settings the user changed in the software to the USER
+// settings file in the main project files folder.
 void ReceiverMain::on_btnSave_clicked()
 {
     if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
@@ -2300,7 +2321,7 @@ void ReceiverMain::on_btnSave_clicked()
         qWarning() << "Receiver: Save skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath();
+    const QString iniPath = settingsIniPath("user_settings.ini");
     QDir().mkpath(QFileInfo(iniPath).absolutePath());
     const bool ok = oscMain->_adrv9009->saveSettingsToIni(iniPath);
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -2311,9 +2332,27 @@ void ReceiverMain::on_btnSave_clicked()
     settings.setValue("receiver/txCalib", ui->dsbTxCalib->value());
     settings.sync();
     if (ok && settings.status() == QSettings::NoError)
-        qInfo() << "Save: all settings saved to" << iniPath;
+        qInfo() << "Save: user settings saved to" << iniPath;
     else
         qWarning() << "Save: FAILED to save" << iniPath;
+}
+
+// "Set User Setting": load the USER settings file into the software.
+void ReceiverMain::on_btnSetUserSetting_clicked()
+{
+    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
+    {
+        qWarning() << "Receiver: Set User Setting skipped because the board is not connected";
+        return;
+    }
+    const QString iniPath = settingsIniPath("user_settings.ini");
+    if (!QFileInfo::exists(iniPath)) {
+        QMessageBox::warning(this, tr("Set User Setting"),
+            tr("No user settings file:\n%1\n\nPress Save first.").arg(iniPath));
+        return;
+    }
+    applySettingsIni(iniPath);
+    qInfo() << "Set User Setting: loaded" << iniPath;
 }
 
 // "Set Default": set the saved ini file into the software (all menus).
@@ -2324,23 +2363,14 @@ void ReceiverMain::on_btnSetDefault_clicked()
         qWarning() << "Receiver: Set Default skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath();
+    const QString iniPath = settingsIniPath("default_settings.ini");
     if (!QFileInfo::exists(iniPath)) {
         QMessageBox::warning(this, tr("Set Default"),
-            tr("No saved settings file:\n%1\n\nPress Save first.").arg(iniPath));
+            tr("No default settings file:\n%1").arg(iniPath));
         return;
     }
-    oscMain->_adrv9009->loadSettingsFromIni(iniPath);
-    QSettings settings(iniPath, QSettings::IniFormat);
-    if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
-        att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
-    if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
-        att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
-    if (settings.contains("receiver/txCalib"))
-        ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
-    // The software states: RX1/2 off, ORX1 on, ORX2 off.
-    oscMain->_adrv9009->applySoftwareRxOrxStates();
-    qInfo() << "Set Default: the saved ini is set into the software:" << iniPath;
+    applySettingsIni(iniPath);
+    qInfo() << "Set Default: the default ini is set into the software:" << iniPath;
 }
 
 // "Reset": ADRV9009 firmware reset over the LAN (initialize=1).
@@ -2356,10 +2386,13 @@ void ReceiverMain::on_btnReset_clicked()
 
 void ReceiverMain::on_btnProfileSet_clicked()
 {
-    // A profile change must NOT change anything except the frequency:
-    // park the frequency at 1800 MHz first, then write the profile.
     if (profileSetBusy)
         return; // a profile change is already running
+
+    // FIRST set the default settings (files/default_settings.ini of the
+    // main project) into the software - the board gets its states and the
+    // 1800 MHz frequency from there.
+    applySettingsIni(settingsIniPath("default_settings.ini"));
 
     if (frqSpn)
     {
@@ -2371,9 +2404,9 @@ void ReceiverMain::on_btnProfileSet_clicked()
         }
     }
 
-    // Let the frequency settle (1 .. 5 s) before the profile write.
+    // Let the settings stabilize (1 .. 2 s) and THEN change the profile.
     profileSetBusy = true;
-    QTimer::singleShot(3000, this, [this]{ writeSelectedProfile(); });
+    QTimer::singleShot(2000, this, [this]{ writeSelectedProfile(); });
 }
 
 // Profile write - runs after the settle delay of on_btnProfileSet_clicked().
