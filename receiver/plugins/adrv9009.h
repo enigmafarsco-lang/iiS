@@ -191,8 +191,9 @@ public:
     void snapshotBoardState();
     void restoreBoardState();
     void applySoftwareRxOrxStates();
+    void applyTx1TrackingAndCalibrations();
     bool saveSettingsToIni(const QString &fileName);
-    bool loadSettingsFromIni(const QString &fileName);
+    bool loadSettingsFromIni(const QString &fileName, bool withExciter = true);
     void firmwareResetOverLan();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.

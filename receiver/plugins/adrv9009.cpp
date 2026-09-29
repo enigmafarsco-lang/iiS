@@ -721,6 +721,26 @@ void adrv9009::applySoftwareRxOrxStates()
 }
 
 /**
+ * @brief adrv9009::applyTx1TrackingAndCalibrations
+ *
+ * Enable the TX1 LO-leakage / quadrature tracking ("quad / lol cal in
+ * tx1") and the ADRV9009 calibrations - all except ext and fhm.  Used
+ * once after system start and again after every profile change (only at
+ * those moments - never on a widget sync).
+ */
+void adrv9009::applyTx1TrackingAndCalibrations()
+{
+    if (track_TX1_Chk) { track_TX1_Chk->setChecked(true); track_TX1_Chk->stateChanged(1); }
+    if (lo_TX1_Chk)    { lo_TX1_Chk->setChecked(true);    lo_TX1_Chk->stateChanged(1); }
+    if (cal_rx_qec_chk)    { cal_rx_qec_chk->setChecked(true);    cal_rx_qec_chk->stateChanged(1); }
+    if (cal_tx_qec_chk)    { cal_tx_qec_chk->setChecked(true);    cal_tx_qec_chk->stateChanged(1); }
+    if (cal_tx_lol_chk)    { cal_tx_lol_chk->setChecked(true);    cal_tx_lol_chk->stateChanged(1); }
+    if (cal_rx_phase_chk)  { cal_rx_phase_chk->setChecked(true);  cal_rx_phase_chk->stateChanged(1); }
+    if (cal_tx_lol_ext_chk) { cal_tx_lol_ext_chk->setChecked(false); cal_tx_lol_ext_chk->stateChanged(0); }
+    if (cal_fhm_chk)       { cal_fhm_chk->setChecked(false);       cal_fhm_chk->stateChanged(0); }
+}
+
+/**
  * @brief adrv9009::restoreBoardState
  *
  * Phase 6: "Set Default" apply.  Asserts all parameter values read at
@@ -818,7 +838,7 @@ bool adrv9009::saveSettingsToIni(const QString &fileName)
  * "Set Default": set the saved ini file into the software - every value
  * is applied to its menu (forced widget writes -> the board is commanded).
  */
-bool adrv9009::loadSettingsFromIni(const QString &fileName)
+bool adrv9009::loadSettingsFromIni(const QString &fileName, bool withExciter)
 {
     if (!QFileInfo::exists(fileName))
         return false;
@@ -826,6 +846,11 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
     const QVector<QPair<QString, QWidget *> > list = settingsWidgetList();
     for (const QPair<QString, QWidget *> &e : list) {
         if (!e.second || !settings.contains(e.first))
+            continue;
+        // The exciter section (the DDS mode / tone fields) stays untouched
+        // unless the caller wants it - a profile change must not change
+        // the exciter menu (that doubled and noised the generated signal).
+        if (!withExciter && e.first.startsWith("dac"))
             continue;
         applyWidgetValue(e.second, settings.value(e.first).toDouble());
     }

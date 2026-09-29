@@ -122,7 +122,7 @@ private slots:
     void on_btnSetDefault_clicked();
     void on_btnReset_clicked();
     QString settingsIniPath(const QString &fileName);
-    void applySettingsIni(const QString &fileName);
+    void applySettingsIni(const QString &fileName, bool withExciter = true);
     void writeSelectedProfile();
 
     //    QTimer * frqTimer;

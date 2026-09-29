@@ -2223,45 +2223,24 @@ void ReceiverMain::defaultSettings()
         return;
     }
 
-    // Phase 6: FIRST read all status (DDS mode, RX mode, TX and all
-    // parameters) and save it - before any change - so the Profile tab's
-    // "Set Default" button can assert these first values later.
+    // FIRST read all status and save it (before any change).
     oscMain->_adrv9009->snapshotBoardState();
 
-    // The original project contains an absolute /home/seraj3/... profile path.
-    // Do not start profile loading with a non-existent file: that path used to
-    // enter an asynchronous UI update path and could abort the Qt application.
-    if (rfBandlbl->text().split(" ").value(0).toDouble() != 400)
-    {
-        if (QFileInfo::exists(fileAddress))
-        {
-            frqDomainPlot->setEnabled(false);
-            oscMain->_adrv9009->on_profile_config_clicked(fileAddress);
+    // (1) once after system start: TX1 LOL/quadrature tracking + the
+    //     ADRV9009 calibrations - all except ext and fhm.
+    oscMain->_adrv9009->applyTx1TrackingAndCalibrations();
 
-            QTimer::singleShot(10000, this, [this]{
-                if (!frqDomainPlot)
-                    return;
-                frqDomainPlot->setEnabled(true);
-                defaultParameters();
-            });
-        }
-        else
-        {
-            qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
-                       << fileAddress;
-            defaultParameters();
-        }
-    }
-    else
-    {
-        defaultParameters();
-    }
-    // TX1 is OFF whenever defaults are applied at start (safe default).
-    if (power_TX1_DownChk)
-    {
-        power_TX1_DownChk->stateChanged(1);  // force a hardware write
-        power_TX1_DownChk->setChecked(true); // TX off
-    }
+    // (2) change the settings to default (the exciter stays untouched).
+    defaultParameters();
+    applySettingsIni(settingsIniPath("default_settings.ini"), false);
+
+    // (3) change the profile to 200 (the Profile tab default) - after
+    //     1 .. 2 s stabilization.  The completion tail of
+    //     writeSelectedProfile() does (4): the same calibrations again,
+    //     the channel states and TX1 off.
+    frqDomainPlot->setEnabled(false);
+    profileSetBusy = true;
+    QTimer::singleShot(2000, this, [this]{ writeSelectedProfile(); });
 }
 
 
@@ -2297,11 +2276,11 @@ QString ReceiverMain::settingsIniPath(const QString &fileName)
 
 // Set every saved value of the ini into the software (all menus) and
 // assert the RX/ORG software states (RX1/2 off, ORX1 on, ORX2 off).
-void ReceiverMain::applySettingsIni(const QString &fileName)
+void ReceiverMain::applySettingsIni(const QString &fileName, bool withExciter)
 {
     if (!oscMain || !oscMain->_adrv9009)
         return;
-    oscMain->_adrv9009->loadSettingsFromIni(fileName);
+    oscMain->_adrv9009->loadSettingsFromIni(fileName, withExciter);
     QSettings settings(fileName, QSettings::IniFormat);
     if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
         att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
@@ -2389,10 +2368,10 @@ void ReceiverMain::on_btnProfileSet_clicked()
     if (profileSetBusy)
         return; // a profile change is already running
 
-    // FIRST set the default settings (files/default_settings.ini of the
-    // main project) into the software - the board gets its states and the
-    // 1800 MHz frequency from there.
-    applySettingsIni(settingsIniPath("default_settings.ini"));
+    // FIRST change the settings to default (files/default_settings.ini of
+    // the main project) - the board gets its states and the 1800 MHz
+    // frequency from there.  The exciter section stays untouched.
+    applySettingsIni(settingsIniPath("default_settings.ini"), false);
 
     if (frqSpn)
     {
@@ -2484,12 +2463,12 @@ void ReceiverMain::writeSelectedProfile()
             QTimer::singleShot(10000, this, [this, profileFsMhz]{
                 if (!frqDomainPlot)
                     return;
-                // After a profile change the channels end in the software
-                // states: RX1/RX2 off, ORX2 off, TX1/TX2 off - only ORX1
-                // on (it feeds the spectrum).  Forced checkbox writes so
-                // the board is commanded even when a box is unchanged.
+                // After a profile change: enable LOL/quadrature in TX1
+                // and the ADRV9009 calibrations (all except ext and fhm),
+                // then the channel states and TX1 off ("like before").
                 if (oscMain && oscMain->_adrv9009) {
                     adrv9009 *adrv = oscMain->_adrv9009;
+                    adrv->applyTx1TrackingAndCalibrations();
                     if (adrv->power_TX1_DownChk) {
                         adrv->power_TX1_DownChk->setChecked(true);
                         adrv->power_TX1_DownChk->stateChanged(1);
