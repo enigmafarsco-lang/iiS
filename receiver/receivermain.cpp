@@ -2267,7 +2267,7 @@ void ReceiverMain::defaultSettings()
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
 // The default settings file in the MAIN PROJECT files folder
 // (PROJECT_FILES_DIR = <project>/files, compiled in by seraj3.pro).
-QString ReceiverMain::settingsIniPath()
+QString ReceiverMain::settingsIniPath(const QString &fileName)
 {
     QStringList dirs;
 #ifdef PROJECT_FILES_DIR
@@ -2276,7 +2276,6 @@ QString ReceiverMain::settingsIniPath()
     dirs << QDir::currentPath() + "/files"
          << QCoreApplication::applicationDirPath() + "/files";
 
-    const QString fileName = "default_settings.ini";
     for (const QString &d : dirs) {
         const QString pth = QDir(d).absoluteFilePath(fileName);
         if (QFileInfo::exists(pth))
@@ -2293,7 +2292,7 @@ void ReceiverMain::on_btnSave_clicked()
         qWarning() << "Receiver: Save skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath();
+    const QString iniPath = settingsIniPath("default_settings.ini");
     QDir().mkpath(QFileInfo(iniPath).absolutePath());
     const bool ok = oscMain->_adrv9009->saveSettingsToIni(iniPath);
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -2318,7 +2317,7 @@ void ReceiverMain::on_btnSetDefault_clicked()
         qWarning() << "Receiver: Set Default skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath();
+    const QString iniPath = settingsIniPath("default_settings.ini");
     if (!QFileInfo::exists(iniPath)) {
         QMessageBox::warning(this, tr("Set Default"),
             tr("No default settings file:\n%1\n\nPress Save first.").arg(iniPath));
@@ -2351,6 +2350,26 @@ void ReceiverMain::on_btnReset_clicked()
         return;
     }
     oscMain->_adrv9009->firmwareResetOverLan();
+}
+
+// "default iio-osc": load the iio-oscilloscope settings file
+// (files/default_iio_osc.ini) and apply everything that can be set over
+// the LAN.  Only when the user presses the button.
+void ReceiverMain::on_btnDefaultIioOsc_clicked()
+{
+    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
+    {
+        qWarning() << "Receiver: default iio-osc skipped because the board is not connected";
+        return;
+    }
+    const QString iniPath = settingsIniPath("default_iio_osc.ini");
+    if (!QFileInfo::exists(iniPath)) {
+        QMessageBox::warning(this, tr("default iio-osc"),
+            tr("No iio-oscilloscope settings file:\n%1").arg(iniPath));
+        return;
+    }
+    oscMain->_adrv9009->loadIioOscSettings(iniPath);
+    qInfo() << "default iio-osc: file applied over the LAN:" << iniPath;
 }
 
 void ReceiverMain::on_btnProfileSet_clicked()
@@ -2523,9 +2542,6 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
     oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
-    // TX1 LO-leakage + quadrature tracking: enabled and checked in ALL
-    // settings (also re-applied here, after every profile load / save).
-    oscMain->_adrv9009->enforceTx1TrackingCalibrations();
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 

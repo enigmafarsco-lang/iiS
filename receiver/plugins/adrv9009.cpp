@@ -3,6 +3,8 @@
 #include "constants/tx_calibration.h"
 #include <ui_adrv9009.h>
 #include <QFileInfo>
+#include <algorithm>
+#include <cmath>
 #include <QApplication>
 
 #pragma region Properties {
@@ -703,6 +705,139 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
         applyWidgetValue(e.second, settings.value(e.first).toDouble());
     }
     return true;
+}
+
+/**
+ * @brief adrv9009::loadIioOscSettings
+ *
+ * "default iio-osc": apply the settings of an iio-oscilloscope profile
+ * file over the LAN/IIO link.  Only the entries that can be set through
+ * the link are used:
+ *   debug.<device>.<debug attribute>       -> iio_device_debug_attr_write
+ *   <device>.<in|out>_<chan>[_<name>]_<attr> -> iio_channel_attr_write
+ *   <device>.<attribute>                   -> iio_device_attr_write
+ * The window / tooltip settings of the iio-oscilloscope itself ([IIO
+ * Oscilloscope]) and the plugin state keys are not board settings and
+ * are skipped.
+ */
+bool adrv9009::loadIioOscSettings(const QString &fileName)
+{
+    if (!globals::ctx)
+        return false;
+    if (!QFileInfo::exists(fileName))
+        return false;
+    QFile f(fileName);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    int applied = 0, skipped = 0;
+    QString section;
+    QTextStream in(&f);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty() || line.startsWith('#') || line.startsWith(';'))
+            continue;
+        if (line.startsWith('[')) {
+            section = line.mid(1, line.size() - 2).trimmed();
+            continue;
+        }
+        if (section.compare("IIO Oscilloscope", Qt::CaseInsensitive) == 0)
+            continue;
+        const int eq = line.indexOf('=');
+        if (eq <= 0)
+            continue;
+        QString key = line.left(eq).trimmed();
+        QString value = line.mid(eq + 1).trimmed();
+        if (value.isEmpty())
+            continue;
+        // "30.000000 dB" -> "30.000000"; whole numbers without decimals
+        // ("1800000000", "-10.000000" -> "-10") as the kernel wants.
+        {
+            const int sp = value.indexOf(' ');
+            if (sp > 0) {
+                bool ok = false;
+                value.left(sp).toDouble(&ok);
+                if (ok)
+                    value = value.left(sp);
+            }
+            bool okNum = false;
+            const double dv = value.toDouble(&okNum);
+            if (okNum && dv == std::floor(dv) &&
+                qAbs(dv) < 1e15 && (value.contains('.') || value.contains('e') ||
+                                    value.contains('E')))
+                value = QString::number((qlonglong)dv);
+        }
+        const QByteArray val = value.toUtf8();
+
+        if (key.startsWith("debug.")) {
+            const QString body = key.mid(6);
+            const int dot = body.indexOf('.');
+            if (dot <= 0) { skipped++; continue; }
+            struct iio_device *dev = iio_context_find_device(
+                globals::ctx, body.left(dot).toUtf8().constData());
+            const QByteArray attr = body.mid(dot + 1).toUtf8();
+            if (dev && iio_device_debug_attr_write(dev, attr.constData(),
+                                                   val.constData()) >= 0)
+                applied++;
+            else
+                skipped++;
+            continue;
+        }
+
+        const int dot = key.indexOf('.');
+        if (dot <= 0) { skipped++; continue; }
+        struct iio_device *dev = iio_context_find_device(
+            globals::ctx, key.left(dot).toUtf8().constData());
+        const QString rest = key.mid(dot + 1);
+        if (!dev) { skipped++; continue; }
+
+        // <device>.<in|out>_<channel id>[_<channel name>]_<attribute>
+        bool done = false;
+        const unsigned int nch = iio_device_get_channels_count(dev);
+        for (unsigned int c = 0; c < nch && !done; c++) {
+            struct iio_channel *ch = iio_device_get_channel(dev, c);
+            if (!ch)
+                continue;
+            const QString dir = iio_channel_is_output(ch) ? QStringLiteral("out_")
+                                                          : QStringLiteral("in_");
+            const QString id = QString::fromUtf8(iio_channel_get_id(ch));
+            const char *nm = iio_channel_get_name(ch);
+            const QString name = nm ? QString::fromUtf8(nm) : QString();
+            QStringList prefixes;
+            prefixes << dir + id;
+            if (!name.isEmpty() && name != id)
+                prefixes << dir + id + "_" + name << dir + name;
+            std::sort(prefixes.begin(), prefixes.end(),
+                      [](const QString &a, const QString &b) {
+                          return a.size() > b.size();
+                      });
+            for (const QString &p : prefixes) {
+                if (!rest.startsWith(p + "_"))
+                    continue;
+                const QByteArray attr = rest.mid(p.size() + 1).toUtf8();
+                if (iio_channel_attr_write(ch, attr.constData(),
+                                           val.constData()) >= 0)
+                    applied++;
+                else
+                    skipped++;
+                done = true;
+                break;
+            }
+        }
+        if (done)
+            continue;
+
+        // <device>.<attribute>
+        const QByteArray attr = rest.toUtf8();
+        if (iio_device_attr_write(dev, attr.constData(), val.constData()) >= 0)
+            applied++;
+        else
+            skipped++;
+    }
+    qInfo() << "default iio-osc:" << applied << "settings applied over the LAN,"
+            << skipped << "skipped";
+    return applied > 0;
 }
 
 // "Reset": the documented ADRV9009 firmware reset over the LAN/IIO link -

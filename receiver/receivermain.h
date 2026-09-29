@@ -119,7 +119,8 @@ private slots:
     void on_btnSave_clicked();
     void on_btnSetDefault_clicked();
     void on_btnReset_clicked();
-    QString settingsIniPath();
+    void on_btnDefaultIioOsc_clicked();
+    QString settingsIniPath(const QString &fileName);
 
     //    QTimer * frqTimer;
 

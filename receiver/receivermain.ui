@@ -242,6 +242,16 @@
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="btnDefaultIioOsc">
+                   <property name="toolTip">
+                    <string>Load files/default_iio_osc.ini (the iio-oscilloscope profile) and apply every setting that can be set over the LAN.</string>
+                   </property>
+                   <property name="text">
+                    <string>default iio-osc</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>
