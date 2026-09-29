@@ -670,49 +670,168 @@ void adrv9009::snapshotBoardState()
             << "parameter values read at startup";
 }
 
+double adrv9009::widgetValue(QWidget *w) const
+{
+    if (!w)
+        return 0.0;
+    if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox *>(w))
+        return sb->value();
+    if (QCheckBox *cb = qobject_cast<QCheckBox *>(w))
+        return cb->isChecked() ? 1.0 : 0.0;
+    if (QComboBox *cmb = qobject_cast<QComboBox *>(w))
+        return cmb->currentIndex();
+    if (QSpinBox *sb = qobject_cast<QSpinBox *>(w))
+        return sb->value();
+    return 0.0;
+}
+
+void adrv9009::applyWidgetValue(QWidget *w, double v)
+{
+    if (!w)
+        return;
+    if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox *>(w)) {
+        sb->setValue(v);
+        sb->valueChanged(v); // force the IIO write even if unchanged
+    } else if (QCheckBox *cb = qobject_cast<QCheckBox *>(w)) {
+        cb->setChecked(v != 0.0);
+        cb->stateChanged(v != 0.0 ? 1 : 0); // force the IIO write
+    } else if (QComboBox *cmb = qobject_cast<QComboBox *>(w)) {
+        cmb->setCurrentIndex((int)v);
+        // force the IIO write / DDS apply even when unchanged
+        cmb->currentTextChanged(cmb->currentText());
+        cmb->currentIndexChanged(cmb->currentIndex());
+    } else if (QSpinBox *sb = qobject_cast<QSpinBox *>(w)) {
+        sb->setValue((int)v);
+        sb->valueChanged((int)v); // force the IIO write
+    }
+}
+
+/**
+ * @brief adrv9009::applySoftwareRxOrxStates
+ *
+ * The software states of the RX/ORX powerdowns (NOT board defaults):
+ * RX1/2 off, ORX1 on, ORX2 off (ORX2 is always off for caution).
+ */
+void adrv9009::applySoftwareRxOrxStates()
+{
+    if (rx1Powerdown)  { rx1Powerdown->setChecked(true);   rx1Powerdown->stateChanged(1); }  // RX1 off
+    if (rx2Powerdown)  { rx2Powerdown->setChecked(true);   rx2Powerdown->stateChanged(1); }  // RX2 off
+    if (power_OBSRX_Spn) { power_OBSRX_Spn->setChecked(false); power_OBSRX_Spn->stateChanged(0); } // ORX1 on
+    if (obs2Powerdown) { obs2Powerdown->setChecked(true);  obs2Powerdown->stateChanged(1); }  // ORX2 off
+}
+
 /**
  * @brief adrv9009::restoreBoardState
  *
- * Phase 6: "Set Default" apply.  Asserts all parameter values read at
- * software start (the snapshot), EXCEPT the RX1/2 and ORX1/2 powerdowns -
- * those keep the software states: RX1/2 off, ORX1 on, ORX2 off.
+ * Phase 6: "Set Default" / "Factory Reset" apply.  Asserts all parameter
+ * values read at software start (the snapshot).  With
+ * withSoftwareRxOrxStates (Set Default) the RX1/2 and ORX1/2 powerdowns
+ * are NOT taken from the snapshot - the software states are asserted
+ * instead (RX1/2 off, ORX1 on, ORX2 off).  With false (Factory Reset)
+ * every saved value applies as read.
  */
-void adrv9009::restoreBoardState()
+void adrv9009::restoreBoardState(bool withSoftwareRxOrxStates)
 {
     for (const SavedWidgetValue &s : boardSnapshot)
     {
         QWidget *w = s.widget;
         if (!w)
             continue;
-        // RX1/2 and ORX1/2 powerdown states are NOT restored from the
-        // snapshot - the software states are asserted below instead.
-        if (w == (QWidget *)rx1Powerdown || w == (QWidget *)rx2Powerdown ||
-            w == (QWidget *)power_OBSRX_Spn || w == (QWidget *)obs2Powerdown)
+        if (withSoftwareRxOrxStates &&
+            (w == (QWidget *)rx1Powerdown || w == (QWidget *)rx2Powerdown ||
+             w == (QWidget *)power_OBSRX_Spn || w == (QWidget *)obs2Powerdown))
             continue;
-
-        if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox *>(w)) {
-            sb->setValue(s.value);
-            sb->valueChanged(s.value); // force the IIO write even if unchanged
-        } else if (QCheckBox *cb = qobject_cast<QCheckBox *>(w)) {
-            cb->setChecked(s.value != 0.0);
-            cb->stateChanged(s.value != 0.0 ? 1 : 0); // force the IIO write
-        } else if (QComboBox *cmb = qobject_cast<QComboBox *>(w)) {
-            cmb->setCurrentIndex((int)s.value);
-            // force the IIO write / DDS apply even when unchanged
-            cmb->currentTextChanged(cmb->currentText());
-            cmb->currentIndexChanged(cmb->currentIndex());
-        } else if (QSpinBox *sb = qobject_cast<QSpinBox *>(w)) {
-            sb->setValue((int)s.value);
-            sb->valueChanged((int)s.value); // force the IIO write
-        }
+        applyWidgetValue(w, s.value);
     }
 
-    // The software states for the RX/ORX powerdowns.
-    if (rx1Powerdown)  { rx1Powerdown->setChecked(true);   rx1Powerdown->stateChanged(1); }  // RX1 off
-    if (rx2Powerdown)  { rx2Powerdown->setChecked(true);   rx2Powerdown->stateChanged(1); }  // RX2 off
-    if (power_OBSRX_Spn) { power_OBSRX_Spn->setChecked(false); power_OBSRX_Spn->stateChanged(0); } // ORX1 on
-    if (obs2Powerdown) { obs2Powerdown->setChecked(true);  obs2Powerdown->stateChanged(1); }  // ORX2 off
+    if (withSoftwareRxOrxStates)
+        applySoftwareRxOrxStates();
+}
 
+/**
+ * @brief adrv9009::settingsWidgetList
+ *
+ * The saved-settings universe: every parameter widget (IIO widgets of the
+ * subcomponents, FPGA widgets and the DDS mode / tone fields) with a
+ * stable, unique ini key.  Same order always, so save/load agree.
+ */
+QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
+{
+    QVector<QPair<QString, QWidget *> > list;
+    for (int i = 0; i < subcomponents.size(); i++) {
+        if (!subcomponents[i].widgets)
+            continue;
+        const guint n = subcomponents[i].num_glb + subcomponents[i].num_tx +
+                        subcomponents[i].num_rx + subcomponents[i].num_obsrx;
+        for (guint j = 0; j < n; j++) {
+            QWidget *w = subcomponents[i].widgets[j].widget;
+            list.append(qMakePair(QString("sub%1_%2_%3").arg(i).arg(j)
+                                      .arg(w ? w->objectName() : QString()), w));
+        }
+    }
+    for (guint i = 0; i < num_fpga; i++) {
+        QWidget *w = fpga_widgets[i].widget;
+        list.append(qMakePair(QString("fpga%1_%2").arg(i)
+                                  .arg(w ? w->objectName() : QString()), w));
+    }
+    if (dac_tx_manager) {
+        for (guint d = 0; d < 2; d++) {
+            struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
+                                            : &dac_tx_manager->dac2;
+            for (guint i = 0; i < ddac->tx_count; i++) {
+                list.append(qMakePair(QString("dac%1_tx%2_mode").arg(d).arg(i),
+                                      ddac->txs[i].dds_mode_widget));
+                for (unsigned t = 0; t < 4; t++) {
+                    struct dds_tone *tone = ddac->txs[i].dds_tones[t];
+                    if (!tone)
+                        continue;
+                    list.append(qMakePair(QString("dac%1_tx%2_t%3_freq").arg(d).arg(i).arg(t), tone->freq));
+                    list.append(qMakePair(QString("dac%1_tx%2_t%3_scale").arg(d).arg(i).arg(t), tone->scale));
+                    list.append(qMakePair(QString("dac%1_tx%2_t%3_phase").arg(d).arg(i).arg(t), tone->phase));
+                }
+            }
+        }
+    }
+    return list;
+}
+
+/**
+ * @brief adrv9009::saveSettingsToIni
+ *
+ * "Save Setting" (Profile tab): write every parameter value to the ini
+ * file (files/default_settings.ini).  "Set Default" recalls it later.
+ */
+bool adrv9009::saveSettingsToIni(const QString &fileName)
+{
+    QSettings settings(fileName, QSettings::IniFormat);
+    const QVector<QPair<QString, QWidget *> > list = settingsWidgetList();
+    for (const QPair<QString, QWidget *> &e : list) {
+        if (!e.second)
+            continue;
+        settings.setValue(e.first, widgetValue(e.second));
+    }
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+/**
+ * @brief adrv9009::loadSettingsFromIni
+ *
+ * Recall the values saved by saveSettingsToIni() and apply them to all
+ * menus (forced widget writes -> the board is commanded).
+ */
+bool adrv9009::loadSettingsFromIni(const QString &fileName)
+{
+    if (!QFileInfo::exists(fileName))
+        return false;
+    QSettings settings(fileName, QSettings::IniFormat);
+    const QVector<QPair<QString, QWidget *> > list = settingsWidgetList();
+    for (const QPair<QString, QWidget *> &e : list) {
+        if (!e.second || !settings.contains(e.first))
+            continue;
+        applyWidgetValue(e.second, settings.value(e.first).toDouble());
+    }
+    return true;
 }
 
 void adrv9009::resaveTxGainWidgets()

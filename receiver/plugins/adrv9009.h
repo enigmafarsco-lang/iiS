@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QPair>
+#include <QSettings>
 #include "dacDataManager.h"
 #include "receiver/globals.h"
 #include <receiver/osc.h>
@@ -186,8 +188,19 @@ public:
     // TX and all parameters) and saves every value.  restoreBoardState()
     // asserts those first values, except the RX1/2 and ORX1/2 powerdowns
     // which keep the software states (RX1/2 off, ORX1 on, ORX2 off).
+    // Phase 6: "Set Default" / "Factory Reset" (Profile tab).
+    // snapshotBoardState() saves every parameter value read at software
+    // start (DDS mode, RX mode, TX and all parameters); restoreBoardState()
+    // asserts them.  With withSoftwareRxOrxStates=true (Set Default) the
+    // RX1/2 and ORX1/2 keep the software states (RX1/2 off, ORX1 on,
+    // ORX2 off); with false (Factory Reset) ALL saved values apply.
+    // save/loadSettingsTo/FromIni persist the same values to an ini file
+    // (files/default_settings.ini) - the "Save Setting" button.
     void snapshotBoardState();
-    void restoreBoardState();
+    void restoreBoardState(bool withSoftwareRxOrxStates = true);
+    void applySoftwareRxOrxStates();
+    bool saveSettingsToIni(const QString &fileName);
+    bool loadSettingsFromIni(const QString &fileName);
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);
@@ -257,6 +270,9 @@ private:
     // Phase 6: saved board state for "Set Default" (widget -> value).
     struct SavedWidgetValue { QWidget *widget; double value; };
     QVector<SavedWidgetValue> boardSnapshot;
+    double widgetValue(QWidget *w) const;
+    void applyWidgetValue(QWidget *w, double v);
+    QVector<QPair<QString, QWidget *> > settingsWidgetList();
     void load_tal_profile(QString file_name);
     void update_label_with_scale_from(QLabel *label, iio_device *dev, const char *channel, const char *attribute,const char *attribute_scale, bool output, const char *unit, int scale);
 

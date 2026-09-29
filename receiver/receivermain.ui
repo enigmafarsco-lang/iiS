@@ -222,6 +222,26 @@
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="btnSaveSetting">
+                   <property name="toolTip">
+                    <string>Save all current settings to files/default_settings.ini. Set Default recalls them later.</string>
+                   </property>
+                   <property name="text">
+                    <string>Save Setting</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnFactoryReset">
+                   <property name="toolTip">
+                    <string>Set ALL settings to the default values - including the RX1/2 and ORX1/2 states (no exceptions).</string>
+                   </property>
+                   <property name="text">
+                    <string>Factory Reset</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>

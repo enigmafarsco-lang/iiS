@@ -118,6 +118,9 @@ private slots:
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
     void on_btnSetDefault_clicked();
+    void on_btnSaveSetting_clicked();
+    void on_btnFactoryReset_clicked();
+    QString settingsIniPath();
     void writeSelectedProfile();
 
     //    QTimer * frqTimer;
