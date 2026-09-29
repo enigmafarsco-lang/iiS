@@ -180,7 +180,6 @@ public:
     // TX1 LO-leakage + quadrature tracking: forced enabled + checked
     // (and locked) - must hold in ALL settings, re-applied after every
     // profile load / widget sync.
-    void enforceTx1TrackingCalibrations();
     // Re-write TX1/TX2 hardwaregain so the board carries Pb = Pa + Pc
     // with the current P calibration (constants/tx_calibration.h).
     void resaveTxGainWidgets();
