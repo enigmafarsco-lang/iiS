@@ -8,6 +8,7 @@
 #include "receiver/globals.h"
 #include <QFileInfo>
 #include <QSettings>
+#include <receiver/settings.h>
 #include <QProcess>
 #include <QDir>
 #include <QCoreApplication>
@@ -2284,6 +2285,41 @@ QString ReceiverMain::settingsIniPath(const QString &fileName)
     return QDir(dirs.first()).absoluteFilePath(fileName);
 }
 
+/**
+ * @brief ReceiverMain::applyInitialSetup
+ *
+ * The Initial Setup settings (files/initial_setup.ini - written by the
+ * small Initial Setup app beside the project): assert the settings at
+ * startup.  The profile the user chose (e.g. 400) is asserted instead of
+ * the 200 default - first in the Profile tab and the exciter, then on
+ * the board with the same flow as the Set button; the TX1 state (off by
+ * default) comes after that flow.
+ */
+void ReceiverMain::applyInitialSetup()
+{
+    const int profile = InitialSetup::profile();
+    if (ui->rdoProfile100 && ui->rdoProfile200 && ui->rdoProfile400)
+    {
+        if (profile >= 400)
+            ui->rdoProfile400->setChecked(true);
+        else if (profile <= 100)
+            ui->rdoProfile100->setChecked(true);
+        else
+            ui->rdoProfile200->setChecked(true);
+    }
+    emit profileBandwidthChanged(profile);
+
+    // Assert the profile on the board with the Set-button flow, then the
+    // TX1 state (the flow turns TX1 off first).
+    QTimer::singleShot(2000, this, [this](){ on_btnProfileSet_clicked(); });
+    QTimer::singleShot(20000, this, [this]() {
+        if (oscMain && oscMain->_adrv9009)
+            oscMain->_adrv9009->setTx1On(InitialSetup::tx1());
+    });
+    qInfo() << "Initial Setup asserted: IP" << InitialSetup::ip()
+            << "profile" << profile << "TX1" << (InitialSetup::tx1() ? "on" : "off");
+}
+
 // "Save": save all settings of the software to the default file.
 void ReceiverMain::on_btnSave_clicked()
 {
@@ -2544,6 +2580,11 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
+
+    // The Initial Setup settings (files/initial_setup.ini) are asserted
+    // at startup: the selected profile (e.g. 400 instead of the 200
+    // default), the board IP and the TX1 state.
+    applyInitialSetup();
 
     //Control unit adrv
     THCW1->setValue(8000000);

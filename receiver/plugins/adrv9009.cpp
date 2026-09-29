@@ -708,6 +708,18 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
 }
 
 /**
+ * @brief adrv9009::setTx1On
+ *
+ * TX1 on/off (the Initial Setup setting asserted at startup) - on means
+ * the transmitter is NOT powered down.
+ */
+void adrv9009::setTx1On(bool on)
+{
+    if (ui->tx1_powerdown_en)
+        ui->tx1_powerdown_en->setChecked(!on);
+}
+
+/**
  * @brief adrv9009::loadIioOscSettings
  *
  * "default iio-osc": apply the settings of an iio-oscilloscope profile
