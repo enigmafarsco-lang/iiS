@@ -2297,6 +2297,15 @@ QString ReceiverMain::settingsIniPath(const QString &fileName)
  */
 void ReceiverMain::applyInitialSetup()
 {
+    // ONCE at first startup only - the adrv9009 signal can run
+    // defaultSettings() several times; the Initial Setup settings are
+    // asserted exactly once, at the very first start ("assert it at start
+    // up once at first").  Never again - no repeated profile changes.
+    static bool done = false;
+    if (done)
+        return;
+    done = true;
+
     const int profile = InitialSetup::profile();
     if (ui->rdoProfile100 && ui->rdoProfile200 && ui->rdoProfile400)
     {
