@@ -2223,24 +2223,40 @@ void ReceiverMain::defaultSettings()
         return;
     }
 
-    // FIRST read all status and save it (before any change).
-    oscMain->_adrv9009->snapshotBoardState();
+    // The original project contains an absolute /home/seraj3/... profile path.
+    // Do not start profile loading with a non-existent file: that path used to
+    // enter an asynchronous UI update path and could abort the Qt application.
+    if (rfBandlbl->text().split(" ").value(0).toDouble() != 400)
+    {
+        if (QFileInfo::exists(fileAddress))
+        {
+            frqDomainPlot->setEnabled(false);
+            oscMain->_adrv9009->on_profile_config_clicked(fileAddress);
 
-    // (1) once after system start: TX1 LOL/quadrature tracking + the
-    //     ADRV9009 calibrations - all except ext and fhm.
-    oscMain->_adrv9009->applyTx1TrackingAndCalibrations();
-
-    // (2) change the settings to default (the exciter stays untouched).
-    defaultParameters();
-    applySettingsIni(settingsIniPath("default_settings.ini"), false);
-
-    // (3) change the profile to 200 (the Profile tab default) - after
-    //     1 .. 2 s stabilization.  The completion tail of
-    //     writeSelectedProfile() does (4): the same calibrations again,
-    //     the channel states and TX1 off.
-    frqDomainPlot->setEnabled(false);
-    profileSetBusy = true;
-    QTimer::singleShot(2000, this, [this]{ writeSelectedProfile(); });
+            QTimer::singleShot(10000, this, [this]{
+                if (!frqDomainPlot)
+                    return;
+                frqDomainPlot->setEnabled(true);
+                defaultParameters();
+            });
+        }
+        else
+        {
+            qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
+                       << fileAddress;
+            defaultParameters();
+        }
+    }
+    else
+    {
+        defaultParameters();
+    }
+    // TX1 is OFF whenever defaults are applied at start (safe default).
+    if (power_TX1_DownChk)
+    {
+        power_TX1_DownChk->stateChanged(1);  // force a hardware write
+        power_TX1_DownChk->setChecked(true); // TX off
+    }
 }
 
 
@@ -2249,14 +2265,9 @@ void ReceiverMain::defaultSettings()
 // files/filters/adrv9009 folder shipped with the project (with fallbacks
 // for the build dir and the user's local checkout), then snaps the
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
-// Phase 6: "Set Default" (Profile tab) - assert all parameter values read
-// at software start (the board snapshot: DDS mode, RX mode, TX and all
-// parameters), except RX1/2 and ORX1/2 which keep the software states
-// (RX1/2 off, ORX1 on, ORX2 off).
-// The settings ini files live in the MAIN PROJECT files folder
-// (PROJECT_FILES_DIR = <project>/files, compiled in by seraj3.pro) -
-// not in the shadow build's files/ folder.
-QString ReceiverMain::settingsIniPath(const QString &fileName)
+// The default settings file in the MAIN PROJECT files folder
+// (PROJECT_FILES_DIR = <project>/files, compiled in by seraj3.pro).
+QString ReceiverMain::settingsIniPath()
 {
     QStringList dirs;
 #ifdef PROJECT_FILES_DIR
@@ -2265,34 +2276,16 @@ QString ReceiverMain::settingsIniPath(const QString &fileName)
     dirs << QDir::currentPath() + "/files"
          << QCoreApplication::applicationDirPath() + "/files";
 
+    const QString fileName = "default_settings.ini";
     for (const QString &d : dirs) {
-        const QString p = QDir(d).absoluteFilePath(fileName);
-        if (QFileInfo::exists(p))
-            return p;
+        const QString pth = QDir(d).absoluteFilePath(fileName);
+        if (QFileInfo::exists(pth))
+            return pth;
     }
-    // Not saved yet: the main project files folder is the save location.
     return QDir(dirs.first()).absoluteFilePath(fileName);
 }
 
-// Set every saved value of the ini into the software (all menus) and
-// assert the RX/ORG software states (RX1/2 off, ORX1 on, ORX2 off).
-void ReceiverMain::applySettingsIni(const QString &fileName, bool withExciter)
-{
-    if (!oscMain || !oscMain->_adrv9009)
-        return;
-    oscMain->_adrv9009->loadSettingsFromIni(fileName, withExciter);
-    QSettings settings(fileName, QSettings::IniFormat);
-    if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
-        att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
-    if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
-        att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
-    if (settings.contains("receiver/txCalib"))
-        ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
-    oscMain->_adrv9009->applySoftwareRxOrxStates();
-}
-
-// "Save": save all settings the user changed in the software to the USER
-// settings file in the main project files folder.
+// "Save": save all settings of the software to the default file.
 void ReceiverMain::on_btnSave_clicked()
 {
     if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
@@ -2300,7 +2293,7 @@ void ReceiverMain::on_btnSave_clicked()
         qWarning() << "Receiver: Save skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath("user_settings.ini");
+    const QString iniPath = settingsIniPath();
     QDir().mkpath(QFileInfo(iniPath).absolutePath());
     const bool ok = oscMain->_adrv9009->saveSettingsToIni(iniPath);
     QSettings settings(iniPath, QSettings::IniFormat);
@@ -2311,30 +2304,13 @@ void ReceiverMain::on_btnSave_clicked()
     settings.setValue("receiver/txCalib", ui->dsbTxCalib->value());
     settings.sync();
     if (ok && settings.status() == QSettings::NoError)
-        qInfo() << "Save: user settings saved to" << iniPath;
+        qInfo() << "Save: all settings saved to" << iniPath;
     else
         qWarning() << "Save: FAILED to save" << iniPath;
 }
 
-// "Set User Setting": load the USER settings file into the software.
-void ReceiverMain::on_btnSetUserSetting_clicked()
-{
-    if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
-    {
-        qWarning() << "Receiver: Set User Setting skipped because the board is not connected";
-        return;
-    }
-    const QString iniPath = settingsIniPath("user_settings.ini");
-    if (!QFileInfo::exists(iniPath)) {
-        QMessageBox::warning(this, tr("Set User Setting"),
-            tr("No user settings file:\n%1\n\nPress Save first.").arg(iniPath));
-        return;
-    }
-    applySettingsIni(iniPath);
-    qInfo() << "Set User Setting: loaded" << iniPath;
-}
-
-// "Set Default": set the saved ini file into the software (all menus).
+// "Set Default": set the default file into the software (all menus),
+// except RX1/2 and ORX1/2 which keep the software states.
 void ReceiverMain::on_btnSetDefault_clicked()
 {
     if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
@@ -2342,17 +2318,30 @@ void ReceiverMain::on_btnSetDefault_clicked()
         qWarning() << "Receiver: Set Default skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath("default_settings.ini");
+    const QString iniPath = settingsIniPath();
     if (!QFileInfo::exists(iniPath)) {
         QMessageBox::warning(this, tr("Set Default"),
-            tr("No default settings file:\n%1").arg(iniPath));
+            tr("No default settings file:\n%1\n\nPress Save first.").arg(iniPath));
         return;
     }
-    applySettingsIni(iniPath);
-    qInfo() << "Set Default: the default ini is set into the software:" << iniPath;
+    oscMain->_adrv9009->loadSettingsFromIni(iniPath);
+    QSettings settings(iniPath, QSettings::IniFormat);
+    if (att_TX1_Spn && settings.contains("receiver/att_TX1"))
+        att_TX1_Spn->setValue(settings.value("receiver/att_TX1").toDouble());
+    if (att_TX2_Spn && settings.contains("receiver/att_TX2"))
+        att_TX2_Spn->setValue(settings.value("receiver/att_TX2").toDouble());
+    if (settings.contains("receiver/txCalib"))
+        ui->dsbTxCalib->setValue(settings.value("receiver/txCalib").toDouble());
+    // The software states: RX1/2 off, ORX1 on, ORX2 off.
+    adrv9009 *adrv = oscMain->_adrv9009;
+    if (adrv->rx1Powerdown)    { adrv->rx1Powerdown->setChecked(true);    adrv->rx1Powerdown->stateChanged(1); }
+    if (adrv->rx2Powerdown)    { adrv->rx2Powerdown->setChecked(true);    adrv->rx2Powerdown->stateChanged(1); }
+    if (adrv->power_OBSRX_Spn) { adrv->power_OBSRX_Spn->setChecked(false); adrv->power_OBSRX_Spn->stateChanged(0); }
+    if (adrv->obs2Powerdown)   { adrv->obs2Powerdown->setChecked(true);   adrv->obs2Powerdown->stateChanged(1); }
+    qInfo() << "Set Default: the default file is set into the software:" << iniPath;
 }
 
-// "Reset": ADRV9009 firmware reset over the LAN (initialize=1).
+// "Reset": ADRV9009 firmware reset over the LAN.
 void ReceiverMain::on_btnReset_clicked()
 {
     if (!receiverIsConnected || !oscMain || !oscMain->_adrv9009)
@@ -2365,14 +2354,27 @@ void ReceiverMain::on_btnReset_clicked()
 
 void ReceiverMain::on_btnProfileSet_clicked()
 {
-    if (profileSetBusy)
-        return; // a profile change is already running
+    // Phase 6 (profile-400 hang fix): every profile set/change quiesces the
+    // RF chain FIRST - TX1/TX2, RX1/RX2 and ORX1/ORX2 off before changing
+    // the profile (ORX2 is always kept off for caution; ORX1 is re-enabled
+    // only after the I/Q signal comes back).  Writing the profile while
+    // TX/RX/ORX are active - especially the 400 profile at 491.52 MS/s -
+    // wedges the board and the blocking profile_config write stalls the
+    // software ("hang and stall").
+    if (oscMain && oscMain->_adrv9009)
+    {
+        adrv9009 *adrv = oscMain->_adrv9009;
+        if (adrv->power_TX1_DownChk) { adrv->power_TX1_DownChk->setChecked(true); adrv->power_TX1_DownChk->stateChanged(1); } // TX1 off
+        if (adrv->powerTX2DownChk)   { adrv->powerTX2DownChk->setChecked(true);   adrv->powerTX2DownChk->stateChanged(1); }   // TX2 off
+        if (adrv->rx1Powerdown)      { adrv->rx1Powerdown->setChecked(true);      adrv->rx1Powerdown->stateChanged(1); }      // RX1 off
+        if (adrv->rx2Powerdown)      { adrv->rx2Powerdown->setChecked(true);      adrv->rx2Powerdown->stateChanged(1); }      // RX2 off
+        if (adrv->obs2Powerdown)     { adrv->obs2Powerdown->setChecked(true);     adrv->obs2Powerdown->stateChanged(1); }     // ORX2 off
+        if (adrv->power_OBSRX_Spn)   { adrv->power_OBSRX_Spn->setChecked(true);   adrv->power_OBSRX_Spn->stateChanged(1); }   // ORX1 off
+    }
 
-    // FIRST change the settings to default (files/default_settings.ini of
-    // the main project) - the board gets its states and the 1800 MHz
-    // frequency from there.  The exciter section stays untouched.
-    applySettingsIni(settingsIniPath("default_settings.ini"), false);
-
+    // Before a profile change the frequency must be 1800 MHz: check it
+    // first and only then apply the user's profile (a profile write
+    // reconfigures the whole RF chain, so the LO is parked at 1800 first).
     if (frqSpn)
     {
         const double freqNow = abs(DC_6_UPTO_8_12 - frqSpn->value());
@@ -2383,9 +2385,17 @@ void ReceiverMain::on_btnProfileSet_clicked()
         }
     }
 
-    // Let the settings stabilize (1 .. 2 s) and THEN change the profile.
-    profileSetBusy = true;
-    QTimer::singleShot(2000, this, [this]{ writeSelectedProfile(); });
+    // Pc = 0 and P (attenuation) = 10 - the standard values, so Pb = 10
+    // reaches the board (Pa/Pc/Pb model, constants/tx_calibration.h).
+    if (ui->dsbTxCalib)
+        ui->dsbTxCalib->setValue(0.0);
+    if (att_TX1_Spn)
+        att_TX1_Spn->setValue(10);
+    if (att_TX2_Spn)
+        att_TX2_Spn->setValue(10);
+
+    // Let the frequency settle (1 .. 5 s) before the profile write.
+    QTimer::singleShot(3000, this, [this]{ writeSelectedProfile(); });
 }
 
 // Profile write - runs after the settle delay of on_btnProfileSet_clicked().
@@ -2427,7 +2437,6 @@ void ReceiverMain::writeSelectedProfile()
         QMessageBox::warning(this, tr("Profile"),
             tr("ADR-V9009 profile file not found:\n%1\n\nLooked in:\n%2")
                 .arg(profileFiles[idx], dirs.join("\n")));
-        profileSetBusy = false;
         return;
     }
 
@@ -2451,61 +2460,38 @@ void ReceiverMain::writeSelectedProfile()
     // it afterwards or "spot/spot{N}mhz_{P}.txt" would not be found.
     const QString workDir = QDir::currentPath();
     if (oscMain && oscMain->_adrv9009) {
-        // The board write is asynchronous (the software must not hang).
-        // Start the 10 s timer only AFTER the write has completed, then
-        // re-enable the plot - without changing any setting.
-        adrv9009 *adrv = oscMain->_adrv9009;
-        QMetaObject::Connection *conn = new QMetaObject::Connection;
-        *conn = connect(adrv, &adrv9009::fileLoadIsCompleteSignal, this,
-                        [this, conn, profileFsMhz]{
-            QObject::disconnect(*conn);
-            delete conn;
-            QTimer::singleShot(10000, this, [this, profileFsMhz]{
-                if (!frqDomainPlot)
-                    return;
-                // After a profile change: enable LOL/quadrature in TX1
-                // and the ADRV9009 calibrations (all except ext and fhm),
-                // then the channel states and TX1 off ("like before").
-                if (oscMain && oscMain->_adrv9009) {
-                    adrv9009 *adrv = oscMain->_adrv9009;
-                    adrv->applyTx1TrackingAndCalibrations();
-                    if (adrv->power_TX1_DownChk) {
-                        adrv->power_TX1_DownChk->setChecked(true);
-                        adrv->power_TX1_DownChk->stateChanged(1);
-                    }
-                    if (adrv->powerTX2DownChk) {
-                        adrv->powerTX2DownChk->setChecked(true);
-                        adrv->powerTX2DownChk->stateChanged(1);
-                    }
-                    if (adrv->rx1Powerdown) {
-                        adrv->rx1Powerdown->setChecked(true);
-                        adrv->rx1Powerdown->stateChanged(1);
-                    }
-                    if (adrv->rx2Powerdown) {
-                        adrv->rx2Powerdown->setChecked(true);
-                        adrv->rx2Powerdown->stateChanged(1);
-                    }
-                    if (adrv->obs2Powerdown) {
-                        adrv->obs2Powerdown->setChecked(true);
-                        adrv->obs2Powerdown->stateChanged(1);
-                    }
-                    if (adrv->power_OBSRX_Spn) { // ORX1 on
-                        adrv->power_OBSRX_Spn->setChecked(false);
-                        adrv->power_OBSRX_Spn->stateChanged(0);
-                    }
-                }
-                frqDomainPlot->setEnabled(true); // the I/Q signal is back
-                frqDomainPlot->setActiveBandwidth(profileFsMhz); // freq +/- Fs/2 axis window
-                profileSetBusy = false;
-            });
-        });
-        adrv->on_profile_config_clicked(profilePath);
+        oscMain->_adrv9009->on_profile_config_clicked(profilePath);
     } else {
         qWarning() << "Receiver: ADRV9009 plugin not ready; profile not loaded:"
                    << profilePath;
-        profileSetBusy = false;
     }
     QDir::setCurrent(workDir);
+
+    QTimer::singleShot(10000, this, [this, bw, profileFsMhz]{
+        if (!frqDomainPlot)
+            return;
+        frqDomainPlot->setEnabled(true);
+
+        // The profile write reconfigures the board, so re-apply the startup
+        // default settings (same path as at application start in
+        // defaultSettings()): RX1/2 off, TX1/2 off, OBS RX1 on, OBS RX2
+        // off, TX gain 10 dB, seek/hopping defaults, control-unit writes
+        // and plot restart. Without this the spectrum stays blank and the
+        // TX1/2 checkboxes are left in an undefined state.
+        if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
+            defaultParameters();
+
+        // The I/Q signal is back (the plot is live again): re-enable ORX1
+        // now.  ORX2 stays off in all cases (caution).
+        if (oscMain && oscMain->_adrv9009)
+        {
+            adrv9009 *adrv = oscMain->_adrv9009;
+            if (adrv->power_OBSRX_Spn) { adrv->power_OBSRX_Spn->setChecked(false); adrv->power_OBSRX_Spn->stateChanged(1); } // ORX1 on
+            if (adrv->obs2Powerdown)   { adrv->obs2Powerdown->setChecked(true);   adrv->obs2Powerdown->stateChanged(1); }   // ORX2 off
+        }
+
+        frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
+    });
 }
 
 
@@ -2579,6 +2565,9 @@ void ReceiverMain::defaultParameters()
     oscMain->_adrv9009->cal_rx_phase_chk->setChecked(true);
     oscMain->_adrv9009->cal_tx_lol_ext_chk->setChecked(false);
     oscMain->_adrv9009->cal_fhm_chk->setChecked(false);
+    // TX1 LO-leakage + quadrature tracking: enabled and checked in ALL
+    // settings (also re-applied here, after every profile load / save).
+    oscMain->_adrv9009->enforceTx1TrackingCalibrations();
     //    oscMain->_adrv9009->power_OBSRX_Spn->setChecked(false);
 
 

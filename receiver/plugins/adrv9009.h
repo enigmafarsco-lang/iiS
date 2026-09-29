@@ -180,20 +180,12 @@ public:
     // TX1 LO-leakage + quadrature tracking: forced enabled + checked
     // (and locked) - must hold in ALL settings, re-applied after every
     // profile load / widget sync.
+    void enforceTx1TrackingCalibrations();
     // Re-write TX1/TX2 hardwaregain so the board carries Pb = Pa + Pc
     // with the current P calibration (constants/tx_calibration.h).
     void resaveTxGainWidgets();
-    // Phase 6: "Set Default".  snapshotBoardState() runs at software start
-    // BEFORE anything is changed: it reads all status (DDS mode, RX mode,
-    // TX and all parameters) and saves every value.  restoreBoardState()
-    // asserts those first values, except the RX1/2 and ORX1/2 powerdowns
-    // which keep the software states (RX1/2 off, ORX1 on, ORX2 off).
-    void snapshotBoardState();
-    void restoreBoardState();
-    void applySoftwareRxOrxStates();
-    void applyTx1TrackingAndCalibrations();
     bool saveSettingsToIni(const QString &fileName);
-    bool loadSettingsFromIni(const QString &fileName, bool withExciter = true);
+    bool loadSettingsFromIni(const QString &fileName);
     void firmwareResetOverLan();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
@@ -220,6 +212,9 @@ public slots:
     void test(QString);
 void on_profile_config_clicked(QString);
 private:
+    double widgetValue(QWidget *w) const;
+    void applyWidgetValue(QWidget *w, double v);
+    QVector<QPair<QString, QWidget *> > settingsWidgetList();
     void printHello();
     Ui::adrv9009 *ui;
     QSignalMapper *signalMapper;
@@ -261,13 +256,7 @@ private:
     void ConnectSignals();
 
     QString last_profile="";
-    // Phase 6: saved board state for "Set Default" (widget -> value).
-    struct SavedWidgetValue { QWidget *widget; double value; };
-    QVector<SavedWidgetValue> boardSnapshot;
-    double widgetValue(QWidget *w) const;
-    void applyWidgetValue(QWidget *w, double v);
-    QVector<QPair<QString, QWidget *> > settingsWidgetList();
-    void load_tal_profile(QString file_name);
+    int load_tal_profile(QString file_name);
     void update_label_with_scale_from(QLabel *label, iio_device *dev, const char *channel, const char *attribute,const char *attribute_scale, bool output, const char *unit, int scale);
 
 signals:

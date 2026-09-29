@@ -27,7 +27,6 @@ class ReceiverMain : public QWidget
     Q_OBJECT
 
     int cnt{0};
-    bool profileSetBusy{false}; // a profile change sequence is running
     void realTimePlot(QCustomPlot *customPlot);
     QCustomPlot * plt;
 
@@ -118,11 +117,9 @@ private slots:
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
     void on_btnSave_clicked();
-    void on_btnSetUserSetting_clicked();
     void on_btnSetDefault_clicked();
     void on_btnReset_clicked();
-    QString settingsIniPath(const QString &fileName);
-    void applySettingsIni(const QString &fileName, bool withExciter = true);
+    QString settingsIniPath();
     void writeSelectedProfile();
 
     //    QTimer * frqTimer;

@@ -1,6 +1,5 @@
 #include "adrv9009.h"
 #include "qtconcurrentrun.h"
-#include <QFutureWatcher>
 #include "constants/tx_calibration.h"
 #include <ui_adrv9009.h>
 #include <QFileInfo>
@@ -273,6 +272,11 @@ void adrv9009::update_widgets(void) {
                 subcomponents[0].num_rx + subcomponents[0].num_obsrx, dds);
 
 //    dacManager.dac_data_manager_update_iio_widgets(dac_tx_manager);
+
+    // Every widget sync (profile load, 20s refresh) re-reads the IIO
+    // attributes into the checkboxes and can silently turn the TX1
+    // tracking corrections off - re-assert them after every sync.
+    enforceTx1TrackingCalibrations();
 }
 
 /**
@@ -601,75 +605,6 @@ void adrv9009::save_widget_value(struct iio_widget *iio_w) {
  * Called whenever the P calibration (Pc) changes - the spinboxes keep
  * showing Pa while the board value follows Pb.
  */
-/**
- * @brief adrv9009::snapshotBoardState
- *
- * Phase 6: "Set Default" capture.  Runs at software start BEFORE anything
- * is changed: reads all status (DDS mode, RX mode, TX and every other
- * parameter bound to a widget) and saves each value for restoreBoardState().
- */
-void adrv9009::snapshotBoardState()
-{
-    boardSnapshot.clear();
-
-    // (1) The widgets already hold the board state - update_widgets()
-    //     read every IIO attribute into them at startup (that is the
-    //     software's board READ).  Reading them again here over the
-    //     network blocked the GUI right after connect and the software
-    //     never came up, so the snapshot only SAVES the values the
-    //     board read already put into the widgets.  Nothing is written.
-    // (2) SAVE every parameter (the widget values, including the DDS
-    //     mode combos and the DDS tone freq/scale/phase fields).
-    auto saveWidget = [this](QWidget *w) {
-        if (!w)
-            return;
-        double v = 0.0;
-        if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox *>(w))
-            v = sb->value();
-        else if (QCheckBox *cb = qobject_cast<QCheckBox *>(w))
-            v = cb->isChecked() ? 1.0 : 0.0;
-        else if (QComboBox *cmb = qobject_cast<QComboBox *>(w))
-            v = cmb->currentIndex();
-        else if (QSpinBox *sb = qobject_cast<QSpinBox *>(w))
-            v = sb->value();
-        else
-            return;
-        boardSnapshot.append({w, v});
-    };
-
-    for (int i = 0; i < subcomponents.size(); i++) {
-        if (!subcomponents[i].widgets)
-            continue;
-        const guint n = subcomponents[i].num_glb + subcomponents[i].num_tx +
-                        subcomponents[i].num_rx + subcomponents[i].num_obsrx;
-        for (guint j = 0; j < n; j++)
-            saveWidget(subcomponents[i].widgets[j].widget);
-    }
-    for (guint i = 0; i < num_fpga; i++)
-        saveWidget(fpga_widgets[i].widget);
-
-    if (dac_tx_manager) {
-        for (guint d = 0; d < 2; d++) {
-            struct dds_dac *ddac = (d == 0) ? &dac_tx_manager->dac1
-                                            : &dac_tx_manager->dac2;
-            for (guint i = 0; i < ddac->tx_count; i++) {
-                saveWidget(ddac->txs[i].dds_mode_widget);
-                for (unsigned t = 0; t < 4; t++) {
-                    struct dds_tone *tone = ddac->txs[i].dds_tones[t];
-                    if (!tone)
-                        continue;
-                    saveWidget(tone->freq);
-                    saveWidget(tone->scale);
-                    saveWidget(tone->phase);
-                }
-            }
-        }
-    }
-
-    qInfo() << "Set Default: saved" << (int)boardSnapshot.size()
-            << "parameter values read at startup";
-}
-
 double adrv9009::widgetValue(QWidget *w) const
 {
     if (!w)
@@ -691,88 +626,20 @@ void adrv9009::applyWidgetValue(QWidget *w, double v)
         return;
     if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox *>(w)) {
         sb->setValue(v);
-        sb->valueChanged(v); // force the IIO write even if unchanged
+        sb->valueChanged(v);
     } else if (QCheckBox *cb = qobject_cast<QCheckBox *>(w)) {
         cb->setChecked(v != 0.0);
-        cb->stateChanged(v != 0.0 ? 1 : 0); // force the IIO write
+        cb->stateChanged(v != 0.0 ? 1 : 0);
     } else if (QComboBox *cmb = qobject_cast<QComboBox *>(w)) {
         cmb->setCurrentIndex((int)v);
-        // force the IIO write / DDS apply even when unchanged
         cmb->currentTextChanged(cmb->currentText());
         cmb->currentIndexChanged(cmb->currentIndex());
     } else if (QSpinBox *sb = qobject_cast<QSpinBox *>(w)) {
         sb->setValue((int)v);
-        sb->valueChanged((int)v); // force the IIO write
+        sb->valueChanged((int)v);
     }
 }
 
-/**
- * @brief adrv9009::applySoftwareRxOrxStates
- *
- * The software states of the RX/ORX powerdowns: RX1/2 off, ORX1 on,
- * ORX2 off (always off for caution).
- */
-void adrv9009::applySoftwareRxOrxStates()
-{
-    if (rx1Powerdown)  { rx1Powerdown->setChecked(true);   rx1Powerdown->stateChanged(1); }  // RX1 off
-    if (rx2Powerdown)  { rx2Powerdown->setChecked(true);   rx2Powerdown->stateChanged(1); }  // RX2 off
-    if (power_OBSRX_Spn) { power_OBSRX_Spn->setChecked(false); power_OBSRX_Spn->stateChanged(0); } // ORX1 on
-    if (obs2Powerdown) { obs2Powerdown->setChecked(true);  obs2Powerdown->stateChanged(1); }  // ORX2 off
-}
-
-/**
- * @brief adrv9009::applyTx1TrackingAndCalibrations
- *
- * Enable the TX1 LO-leakage / quadrature tracking ("quad / lol cal in
- * tx1") and the ADRV9009 calibrations - all except ext and fhm.  Used
- * once after system start and again after every profile change (only at
- * those moments - never on a widget sync).
- */
-void adrv9009::applyTx1TrackingAndCalibrations()
-{
-    if (track_TX1_Chk) { track_TX1_Chk->setChecked(true); track_TX1_Chk->stateChanged(1); }
-    if (lo_TX1_Chk)    { lo_TX1_Chk->setChecked(true);    lo_TX1_Chk->stateChanged(1); }
-    if (cal_rx_qec_chk)    { cal_rx_qec_chk->setChecked(true);    cal_rx_qec_chk->stateChanged(1); }
-    if (cal_tx_qec_chk)    { cal_tx_qec_chk->setChecked(true);    cal_tx_qec_chk->stateChanged(1); }
-    if (cal_tx_lol_chk)    { cal_tx_lol_chk->setChecked(true);    cal_tx_lol_chk->stateChanged(1); }
-    if (cal_rx_phase_chk)  { cal_rx_phase_chk->setChecked(true);  cal_rx_phase_chk->stateChanged(1); }
-    if (cal_tx_lol_ext_chk) { cal_tx_lol_ext_chk->setChecked(false); cal_tx_lol_ext_chk->stateChanged(0); }
-    if (cal_fhm_chk)       { cal_fhm_chk->setChecked(false);       cal_fhm_chk->stateChanged(0); }
-}
-
-/**
- * @brief adrv9009::restoreBoardState
- *
- * Phase 6: "Set Default" apply.  Asserts all parameter values read at
- * software start (the snapshot), EXCEPT the RX1/2 and ORX1/2 powerdowns -
- * those keep the software states: RX1/2 off, ORX1 on, ORX2 off.
- */
-void adrv9009::restoreBoardState()
-{
-    for (const SavedWidgetValue &s : boardSnapshot)
-    {
-        QWidget *w = s.widget;
-        if (!w)
-            continue;
-        // RX1/2 and ORX1/2 powerdown states are NOT restored from the
-        // snapshot - the software states are asserted below instead.
-        if (w == (QWidget *)rx1Powerdown || w == (QWidget *)rx2Powerdown ||
-            w == (QWidget *)power_OBSRX_Spn || w == (QWidget *)obs2Powerdown)
-            continue;
-        applyWidgetValue(w, s.value);
-    }
-
-    applySoftwareRxOrxStates();
-}
-
-/**
- * @brief adrv9009::settingsWidgetList
- *
- * The saved-settings universe: every parameter widget (the IIO widgets of
- * the subcomponents, FPGA widgets and the DDS mode / tone fields) with a
- * stable unique ini key.  The order is always the same, so save and load
- * agree.
- */
 QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
 {
     QVector<QPair<QString, QWidget *> > list;
@@ -813,12 +680,7 @@ QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
     return list;
 }
 
-/**
- * @brief adrv9009::saveSettingsToIni
- *
- * "Save" (Profile tab): write every setting of the software to the ini
- * file in the files folder (files/default_settings.ini).
- */
+// "Save": write every setting of the software to the ini file.
 bool adrv9009::saveSettingsToIni(const QString &fileName)
 {
     QSettings settings(fileName, QSettings::IniFormat);
@@ -832,13 +694,8 @@ bool adrv9009::saveSettingsToIni(const QString &fileName)
     return settings.status() == QSettings::NoError;
 }
 
-/**
- * @brief adrv9009::loadSettingsFromIni
- *
- * "Set Default": set the saved ini file into the software - every value
- * is applied to its menu (forced widget writes -> the board is commanded).
- */
-bool adrv9009::loadSettingsFromIni(const QString &fileName, bool withExciter)
+// "Set Default": set the ini file into the software (all menus).
+bool adrv9009::loadSettingsFromIni(const QString &fileName)
 {
     if (!QFileInfo::exists(fileName))
         return false;
@@ -847,25 +704,15 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName, bool withExciter)
     for (const QPair<QString, QWidget *> &e : list) {
         if (!e.second || !settings.contains(e.first))
             continue;
-        // The exciter section (the DDS mode / tone fields) stays untouched
-        // unless the caller wants it - a profile change must not change
-        // the exciter menu (that doubled and noised the generated signal).
-        if (!withExciter && e.first.startsWith("dac"))
-            continue;
         applyWidgetValue(e.second, settings.value(e.first).toDouble());
     }
     return true;
 }
 
-/**
- * @brief adrv9009::firmwareResetOverLan
- *
- * "Reset" (Profile tab): the documented ADRV9009 firmware reset over the
- * LAN/IIO link - write 1 to the "initialize" attribute of adrv9009-phy.
- * The driver then resets and reinitializes the ADRV9009 from reset and
- * re-runs all calibrations (takes several seconds).  See the ADI wiki
- * (ADRV9009 Linux device driver, Runtime Device Driver Customization).
- */
+// "Reset": the documented ADRV9009 firmware reset over the LAN/IIO link -
+// write 1 to the "initialize" attribute of adrv9009-phy (the ADI ADRV9009
+// Linux device driver: the device takes a RESET and the driver
+// reinitializes it, all calibrations re-run).
 void adrv9009::firmwareResetOverLan()
 {
     struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
@@ -875,12 +722,9 @@ void adrv9009::firmwareResetOverLan()
     }
     ssize_t ret = iio_device_attr_write(dev, "initialize", "1");
     if (ret >= 0)
-        qInfo() << "ADRV9009 firmware reset over LAN: initialize=1 written - the "
-                   "device resets and reinitializes (calibrations re-run)";
+        qInfo() << "ADRV9009 firmware reset over LAN: initialize=1 written - the device resets and reinitializes";
     else
         qWarning() << "ADRV9009 firmware reset over LAN: initialize write FAILED:" << (long long)ret;
-    // Re-read the widgets once the re-init is done.
-    QTimer::singleShot(10000, this, [this]{ update_widgets(); });
 }
 
 void adrv9009::resaveTxGainWidgets()
@@ -895,12 +739,32 @@ void adrv9009::resaveTxGainWidgets()
     }
 }
 
-// Phase 6 (removed): enforceTx1TrackingCalibrations() used to force the
-// TX1 LO-leakage / quadrature tracking attributes on and re-write them at
-// every widget sync.  Writing those settings before a profile change (or
-// at startup) wedges the ARM's ADRV9009 calibration - the board then
-// stalls and does not respond.  Nothing in the software may write these
-// settings; the checkboxes stay free for the user.
+/**
+ * @brief adrv9009::enforceTx1TrackingCalibrations
+ *
+ * TX1 LO-leakage and quadrature tracking must stay ENABLED and checked
+ * in ALL settings.  The boxes are locked so they can never be turned
+ * off from the UI, and the forced stateChanged() emit runs the bound
+ * IIO write (out_voltage0 lo_leakage_tracking_en /
+ * quadrature_tracking_en) even when the box is already checked -
+ * after a profile load the attributes can be reset while the UI still
+ * shows the old state.
+ */
+void adrv9009::enforceTx1TrackingCalibrations()
+{
+    if (track_TX1_Chk)
+    {
+        track_TX1_Chk->setChecked(true);
+        track_TX1_Chk->stateChanged(1); // force the IIO attribute write
+        track_TX1_Chk->setEnabled(false);
+    }
+    if (lo_TX1_Chk)
+    {
+        lo_TX1_Chk->setChecked(true);
+        lo_TX1_Chk->stateChanged(1); // force the IIO attribute write
+        lo_TX1_Chk->setEnabled(false);
+    }
+}
 
 #pragma endregion }
 
@@ -1617,6 +1481,7 @@ QWidget *adrv9009::init()
     // checkbox -> IIO attribute write connections only exist from
     // ConnectSignals() on: forcing the checkboxes earlier only changed
     // the UI, never the hardware attributes.
+    enforceTx1TrackingCalibrations();
     rx_freq_info_update();
     printf("Updating FIR filter...\n");
     profile_update();
@@ -1633,6 +1498,8 @@ QWidget *adrv9009::init()
 
     // The checkbox -> IIO write connections only exist from here on, so
     // re-assert TX1 LO-leakage + quadrature now to actually write the
+    // out_voltage0 attributes (enforceTx1TrackingCalibrations()).
+    enforceTx1TrackingCalibrations();
 
     // Must stay on the GUI thread. The old QtConcurrent loop called QWidget
     // and libiio from a pool thread while init() was still running, which
@@ -2243,50 +2110,12 @@ static void trigger_advanced_plugin_reload(void)
 }
 
 
-// Phase 6: the blocking part of a TAL profile write (file read + the
-// "profile_config" raw write that reconfigures the whole RF chain and can
-// take tens of seconds on the 400 profile).  Runs on a WORKER THREAD so
-// the software never hangs/stalls - no Qt widgets may be touched here.
-static int tal_profile_write_blocking(const QString &path,
-                                      guint devsCount,
-                                      const QList<plugin_subcomponent> &subcomponents)
+int adrv9009::load_tal_profile(QString file_name)
 {
-    FILE *f = fopen(path.toLocal8Bit().data(), "r");
-    if (!f)
-        return -ENOENT;
-
-    fseek(f, 0, SEEK_END);
-    long len = ftell(f);
-    if (len <= 0) {
-        fclose(f);
-        return -EIO;
-    }
-    char *buf = (char *)malloc(len);
-    if (!buf) {
-        fclose(f);
-        return -ENOMEM;
-    }
-    fseek(f, 0, SEEK_SET);
-    len = fread(buf, 1, len, f);
-    fclose(f);
-
-    iio_context_set_timeout(globals::ctx, 30000);
-
-    int ret = INT_MAX;
-    for (guint i = 0; i < devsCount; i++) {
-        int ret2 = iio_device_attr_write_raw(subcomponents[i].iio_dev,
-                                             "profile_config", buf, len);
-        ret = (ret > ret2) ? ret2 : ret;
-    }
-
-    iio_context_set_timeout(globals::ctx, 3000);
-    free(buf);
-    return ret;
-}
-
-void adrv9009::load_tal_profile(QString file_name)
-{
+    int ret = -ENOMEM;
     QString  path = "";
+    QStringList ptr;
+    FILE *f;
 
     progress->setValue(10);
 
@@ -2296,78 +2125,86 @@ void adrv9009::load_tal_profile(QString file_name)
         path = file_name;
 
     if (path=="")
-    {
-        progress->setValue(100);
-        progress->close();
-        emit fileLoadIsCompleteSignal();
-        return;
-    }
+        goto err_set_filename;
 
-    QStringList ptr = file_name.split('/');
+    ptr = file_name.split('/');
 
     file_name=ptr[ptr.length()-1];
 
+    f = fopen(path.toLocal8Bit().data(), "r");
+
     progress->setValue(20);
 
-    // The board write runs on a worker thread (the software must not
-    // hang); every Qt-widget step below runs back on the GUI thread.
-    QFutureWatcher<int> *watcher = new QFutureWatcher<int>(this);
-    connect(watcher, &QFutureWatcher<int>::finished, this,
-            [this, watcher, file_name, path]()
+    if (f)
     {
-        const int ret = watcher->result();
-        watcher->deleteLater();
+        char *buf;
+        ssize_t len;
+        int ret2;
 
-        progress->setValue(40);
+        fseek(f, 0, SEEK_END);
+        len = ftell(f);
+        buf = (char*)malloc(len);
+        fseek(f, 0, SEEK_SET);
+        len = fread(buf, 1, len, f);
+        fclose(f);
 
-        QString filterPath = path;
-        if (ret < 0) {
-            fprintf(stderr, "Profile config failed: %s\n", path.toLocal8Bit().data());
+        iio_context_set_timeout(globals::ctx, 30000);
 
-            QMessageBox *msg=new QMessageBox(this);
-            msg->setWindowTitle("Profile Configuration Failed");
-            msg->setText("\nFailed to load profile using the selected file.");
-            msg->show();
-            // auto-close without freezing the GUI thread
-            QTimer::singleShot(2000, msg, &QWidget::close);
-
-        } else {
-            if (last_profile!="")
-                filterPath=last_profile;
+        ret = INT_MAX;
+        guint i = 0;
+        for (; i < phy_devs_count; i++) {
+            ret2 = iio_device_attr_write_raw(subcomponents[i].iio_dev, "profile_config", buf, len);
+            ret = (ret > ret2) ? ret2 : ret;
         }
-        progress->setValue(60);
 
-        // Skip the widget readback when the write failed: the board may
-        // still be reconfiguring and every read would block for seconds
-        // (the readback storm behind the "hang and stall").
-        if (ret >= 0)
-            profile_update();
+        iio_context_set_timeout(globals::ctx, 3000);
+        free(buf);
+    }
 
-        printf("Profile loaded: %s (ret = %i)\n", path.toLocal8Bit().data(), ret);
+    progress->setValue(40);
 
-        if (ret >= 0)
-            ui->profile_config->setText(file_name);
-        progress->setValue(80);
+    if (ret < 0) {
+        fprintf(stderr, "Profile config failed: %s\n", path.toLocal8Bit().data());
 
-        setting.setLastFilter(filterPath);
-        setting.SaveToFile();
+        QMessageBox *msg=new QMessageBox(this);
+        msg->setWindowTitle("Profile Configuration Failed");
+        msg->setText("\nFailed to load profile using the selected file.");
+        msg->show();
+        // auto-close without freezing the GUI thread (the old
+        // QThread::msleep(2000) blocked the whole software)
+        QTimer::singleShot(2000, msg, &QWidget::close);
 
-        trigger_advanced_plugin_reload();
+    } else {
+        if (last_profile!="")
+            path=last_profile;
+    }
+    progress->setValue(60);
 
-        if (ret < 0) {
-            if (last_profile!="")
-                ui->profile_config->setText(last_profile);
-            else
-                ui->profile_config->setText("(Choose File)");
-        }
-        progress->setValue(100);
-        progress->close();
+    profile_update();
 
-        emit fileLoadIsCompleteSignal();
-    });
-    watcher->setFuture(QtConcurrent::run([this, path]() {
-        return tal_profile_write_blocking(path, phy_devs_count, subcomponents);
-    }));
+    printf("Profile loaded: %s (ret = %i)\n", path.toLocal8Bit().data(), ret);
+
+    if (ret >= 0)
+        ui->profile_config->setText(file_name);
+    progress->setValue(80);
+
+    setting.setLastFilter(path);
+    setting.SaveToFile();
+
+    //    g_free(path.toLocal8Bit().data());
+    trigger_advanced_plugin_reload();
+
+err_set_filename:
+
+    if (ret < 0) {
+        if (last_profile!="")
+            ui->profile_config->setText(last_profile);
+        else
+            ui->profile_config->setText("(Choose File)");
+    }
+    progress->setValue(100);
+    progress->close();
+    return ret;
 }
 
 
@@ -2403,7 +2240,6 @@ void adrv9009::on_profile_config_clicked(QString fileName)
     if (fileName.isEmpty())
     {
         QMessageBox::warning(this, tr("Profile"), tr("Profile file was not specified."));
-        emit fileLoadIsCompleteSignal();
         return;
     }
 
@@ -2422,7 +2258,6 @@ void adrv9009::on_profile_config_clicked(QString fileName)
     if (!QFileInfo::exists(resolvedPath))
     {
         qWarning() << "ADRV9009 profile file not found:" << fileName;
-        emit fileLoadIsCompleteSignal();
         return;
     }
 

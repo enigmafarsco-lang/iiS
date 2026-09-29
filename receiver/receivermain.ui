@@ -215,7 +215,7 @@
                  <item>
                   <widget class="QPushButton" name="btnSave">
                    <property name="toolTip">
-                    <string>Save all settings the user changed to files/user_settings.ini in the main project files folder.</string>
+                    <string>Save all settings of the software to files/default_settings.ini in the main project files folder.</string>
                    </property>
                    <property name="text">
                     <string>Save</string>
@@ -223,19 +223,9 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btnSetUserSetting">
-                   <property name="toolTip">
-                    <string>Load the user settings file (files/user_settings.ini, saved with Save) into the software.</string>
-                   </property>
-                   <property name="text">
-                    <string>Set User Setting</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <widget class="QPushButton" name="btnSetDefault">
                    <property name="toolTip">
-                    <string>Set the default ini file (files/default_settings.ini of the main project) into the software - all menus. RX1/2 off, ORX1 on, ORX2 off.</string>
+                    <string>Set the default file (files/default_settings.ini) into the software - all menus. RX1/2 off, ORX1 on, ORX2 off.</string>
                    </property>
                    <property name="text">
                     <string>Set Default</string>
@@ -245,7 +235,7 @@
                  <item>
                   <widget class="QPushButton" name="btnReset">
                    <property name="toolTip">
-                    <string>ADRV9009 firmware reset over the LAN (initialize=1 on adrv9009-phy) - the device resets and reinitializes, all calibrations re-run.</string>
+                    <string>ADRV9009 firmware reset over the LAN (initialize=1 on adrv9009-phy) - the device resets and reinitializes.</string>
                    </property>
                    <property name="text">
                     <string>Reset</string>

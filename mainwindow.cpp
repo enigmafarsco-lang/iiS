@@ -389,7 +389,6 @@ void MainWindow::connections()
                 });
 
 
-
         //smart noise and exciter
         connect(ui->exiter,&Exciter::turnOffSmartNoiseSignal,receiverWindow,&ReceiverMain::stopSmartNoiseSlot);
 
