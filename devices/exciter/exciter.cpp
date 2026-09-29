@@ -1285,11 +1285,12 @@ int Exciter::loadIqTextSamples(const QString &path,
 bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;
-    // Board playback rate, same calibration as the spot/impulse files
-    // (files/spot/generate.py): 61.44/122.88/491.52 MS/s for the
-    // 100/200/400 profiles (measured on the analyser, see
-    // txFileRateMhz()).
-    const double fsMhz = txFileRateMhz(profileBw);
+    // Multi-target playback rate = the profile's TX input / playback rate
+    // (the spectrum width): 122.88 x P/100 -> 122.88 / 245.76 / 491.52
+    // MS/s for the 100/200/400 profiles.  The +/- 61.44 MHz band belongs
+    // to the 122.88/100 profile - at profile 200 the playback band is
+    // +/- 122.88 MHz (a 70 MHz shift is valid there), at 400 +/- 245.76.
+    const double fsMhz = 122.88 * profileBw / 100.0;
     const double twoPi = 2.0 * M_PI;
 
     QVector<double> sumI(N, 0.0);

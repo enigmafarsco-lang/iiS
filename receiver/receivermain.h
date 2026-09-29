@@ -120,7 +120,6 @@ private slots:
     void on_btnSetDefault_clicked();
     void on_btnReset_clicked();
     QString settingsIniPath();
-    void writeSelectedProfile();
 
     //    QTimer * frqTimer;
 

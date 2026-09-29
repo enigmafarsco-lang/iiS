@@ -4,7 +4,6 @@
 #include <ui_adrv9009.h>
 #include <QFileInfo>
 #include <QApplication>
-#include <QTimer>
 
 #pragma region Properties {
 
@@ -694,7 +693,8 @@ bool adrv9009::saveSettingsToIni(const QString &fileName)
     return settings.status() == QSettings::NoError;
 }
 
-// "Set Default": set the ini file into the software (all menus).
+// "Set Default": set the ini file into the software (all menus) - only
+// when the user presses the button.
 bool adrv9009::loadSettingsFromIni(const QString &fileName)
 {
     if (!QFileInfo::exists(fileName))
@@ -710,9 +710,7 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
 }
 
 // "Reset": the documented ADRV9009 firmware reset over the LAN/IIO link -
-// write 1 to the "initialize" attribute of adrv9009-phy (the ADI ADRV9009
-// Linux device driver: the device takes a RESET and the driver
-// reinitializes it, all calibrations re-run).
+// write 1 to the "initialize" attribute of adrv9009-phy.
 void adrv9009::firmwareResetOverLan()
 {
     struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
@@ -2170,9 +2168,10 @@ int adrv9009::load_tal_profile(QString file_name)
         msg->setWindowTitle("Profile Configuration Failed");
         msg->setText("\nFailed to load profile using the selected file.");
         msg->show();
-        // auto-close without freezing the GUI thread (the old
-        // QThread::msleep(2000) blocked the whole software)
-        QTimer::singleShot(2000, msg, &QWidget::close);
+
+        QThread::msleep(2000);
+
+        msg->close();
 
     } else {
         if (last_profile!="")
