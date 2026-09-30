@@ -25,11 +25,10 @@
 // (files/spot/generate.py, files/bridge/generate_bridge.py).
 static double txFileRateMhz(int profileBw)
 {
-    if (profileBw >= 400)
-        return 491.52;
-    if (profileBw >= 200)
-        return 122.88;
-    return 61.44; // profile 100
+    // The txt generation rate for ALL exciter tabs is 122.88 x P/100
+    // MS/s: 122.88 x 1 = 122.88 (profile 100), 122.88 x 2 = 245.76
+    // (profile 200), 122.88 x 4 = 491.52 (profile 400).
+    return 122.88 * profileBw / 100.0;
 }
 
 Exciter::Exciter(QWidget *parent) :
@@ -1359,11 +1358,16 @@ bool Exciter::buildMultiTargetWaveform()
                 msgBox.exec();
                 return false;
             }
-            const double w = twoPi * f / fsMhz;
+            // Whole cycles in the N-sample buffer (the buffer loops):
+            // the exact nearest frequency, so the tone has no step at the
+            // wrap and no spurs around it.
+            const double fSnap = std::floor(f * N / fsMhz + 0.5) * fsMhz / double(N);
+            const double w = twoPi * fSnap / fsMhz;
             for (int i = 0; i < N; i++)
             {
-                ti[i] = std::cos(w * i);
-                tq[i] = std::sin(w * i);
+                const double ph = w * i;
+                ti[i] = std::cos(ph);
+                tq[i] = std::sin(ph);
             }
         }
         else if (type == 2)
@@ -1423,11 +1427,20 @@ bool Exciter::buildMultiTargetWaveform()
         }
         if (fsh != 0.0)
         {
-            const double wsh = twoPi * fsh / fsMhz;
+            // The shift is a complex exponential multiplier ("DDS sine")
+            // s'(n) = s(n) * e^{j 2 pi fsh n / fs}.  The shift frequency is
+            // snapped to whole cycles in the N-sample buffer like the CW
+            // tone above - the buffer loops and a non-integer cycle count
+            // makes a step at the wrap; the step is what puts the "some
+            // other" spurs around the shifted tone.  The phase angle is
+            // taken modulo one buffer period so sin/cos stay exact.
+            const double fshSnap = std::floor(fsh * N / fsMhz + 0.5) * fsMhz / double(N);
+            const double wsh = twoPi * fshSnap / fsMhz;
             for (int i = 0; i < N; i++)
             {
-                const double c = std::cos(wsh * i);
-                const double sn = std::sin(wsh * i);
+                const double ph = wsh * i;
+                const double c = std::cos(ph);
+                const double sn = std::sin(ph);
                 const double a = ti[i];
                 const double b = tq[i];
                 ti[i] = a * c - b * sn;
