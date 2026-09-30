@@ -29,9 +29,7 @@ bool connectDialog::Initialize()
      */
     setting.ReadSettingFile();
 
-    // The Initial Setup setting (files/initial_setup.ini) is asserted at
-    // startup - "192.168.1.10" is the predefined default.
-    QString savedIp = InitialSetup::ip().trimmed();
+    QString savedIp = setting.getIp().trimmed();
     if (savedIp.isEmpty())
         savedIp = QStringLiteral("192.168.1.10");
 

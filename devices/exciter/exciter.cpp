@@ -1359,8 +1359,7 @@ bool Exciter::buildMultiTargetWaveform()
                 return false;
             }
             // Whole cycles in the N-sample buffer (the buffer loops):
-            // the exact nearest frequency, so the tone has no step at the
-            // wrap and no spurs around it.
+            // the exact nearest frequency - no step at the wrap, no spurs.
             const double fSnap = std::floor(f * N / fsMhz + 0.5) * fsMhz / double(N);
             const double w = twoPi * fSnap / fsMhz;
             for (int i = 0; i < N; i++)
@@ -1428,12 +1427,11 @@ bool Exciter::buildMultiTargetWaveform()
         if (fsh != 0.0)
         {
             // The shift is a complex exponential multiplier ("DDS sine")
-            // s'(n) = s(n) * e^{j 2 pi fsh n / fs}.  The shift frequency is
-            // snapped to whole cycles in the N-sample buffer like the CW
-            // tone above - the buffer loops and a non-integer cycle count
-            // makes a step at the wrap; the step is what puts the "some
-            // other" spurs around the shifted tone.  The phase angle is
-            // taken modulo one buffer period so sin/cos stay exact.
+            // s'(n) = s(n) * e^{j 2 pi fsh n / fs} - used by the Spot, CW,
+            // Impulse and Bridge rows.  The shift frequency snaps to whole
+            // cycles in the looping buffer like the tone above: a
+            // non-integer cycle count makes a step at the wrap and the
+            // step puts the "some other" spurs around the shifted signal.
             const double fshSnap = std::floor(fsh * N / fsMhz + 0.5) * fsMhz / double(N);
             const double wsh = twoPi * fshSnap / fsMhz;
             for (int i = 0; i < N; i++)
@@ -1626,13 +1624,23 @@ bool Exciter::buildSweepFile(const QString &fileName,
     for (int k = 0; k < nTones; k++)
     {
         const double f = fStartMhz + dir * fStepMhz * k;
-        const double w = twoPi * f / fsMhz;
         const int iEnd = (k + 1) * N / nTones;
+        // Whole cycles in the tone slice (the buffer loops - the phase
+        // must end where the slice started or the wrap makes spurs).
+        const int nSlice = iEnd - i;
+        const double fSnap = (nSlice > 0)
+            ? std::floor(f * nSlice / fsMhz + 0.5) * fsMhz / double(nSlice)
+            : f;
+        const double w = twoPi * fSnap / fsMhz;
         for (; i < iEnd; i++)
         {
             ti[i] = std::cos(ph);
             tq[i] = std::sin(ph);
             ph += w;
+            if (ph >= twoPi)
+                ph -= twoPi;
+            else if (ph < 0.0)
+                ph += twoPi;
         }
     }
 

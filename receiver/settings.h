@@ -13,15 +13,6 @@ namespace Ui {
 class Settings;
 }
 
-// The Initial Setup settings (files/initial_setup.ini - written by the
-// small Initial Setup app beside the project).  The main software reads
-// them at startup and asserts the settings.
-namespace InitialSetup {
-    QString ip();      // the board IP  - default "192.168.1.10"
-    int profile();     // 100/200/400   - default 200
-    bool tx1();        // TX1 on/off    - default false (off)
-}
-
 class Settings
 {
 
