@@ -645,6 +645,10 @@ bool Exciter::returnfilePath(QString &fileName)
         return false;
     }
 
+    // Hand the resolved absolute path back to the caller so the DAC
+    // loader gets the full path into the project files/ folder.
+    fileName = fullPath;
+
     // The one folder the exciter plays waveform files from.
     qInfo() << "Exciter waveform file:" << fullPath;
 
@@ -812,7 +816,25 @@ void Exciter::setDataSlot()
         }
         //            QString fileName = ("spot/iio/msk_20M.txt");
 
-        if (!returnfilePath(fileName)) return;
+        const QString spotFull = resolveFileInAppFolders(fileName);
+        if (spotFull.isEmpty())
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Spot noise file not found:\n%1\n\n"
+                              "The file name is spot<N>mhz_<P>.txt: <N> is "
+                              "the spot bandwidth in MHz (the box on this "
+                              "tab), <P> is the ACTIVE profile bandwidth "
+                              "(now %2). <P> changes only when Set is "
+                              "pressed in the Profile tab.\n\n"
+                              "Generate the file with files/spot/generate.py "
+                              "(run in the files/spot folder), e.g.\n"
+                              "  python3 generate.py --profiles %2 --bw <N>")
+                               .arg(QDir(projectFilesDir()).filePath(fileName))
+                               .arg(profileBw));
+            msgBox.exec();
+            return;
+        }
+        fileName = spotFull;
         emit sendFileToCardSignal(fileName, 0,"spot");
 
         //            try
@@ -938,8 +960,24 @@ void Exciter::setDataSlot()
         //            adrvObj->SetPower(ui->spnWBPower->value());
         //            getDataSlot();
         QString fileName = ("spot/widebandnoise.txt");
-
-        if (!returnfilePath(fileName)) return;
+        const QString wbFull = resolveFileInAppFolders(fileName);
+        if (wbFull.isEmpty())
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Wideband noise file not found:\n%1\n\n"
+                              "This tab plays the fixed file "
+                              "files/spot/widebandnoise.txt - the generator "
+                              "does not create it. Copy the full-band spot "
+                              "file of your profile over it, e.g. for the "
+                              "current profile (%2):\n"
+                              "  cp files/spot/spot%2mhz_%2.txt "
+                              "files/spot/widebandnoise.txt")
+                               .arg(QDir(projectFilesDir()).filePath(fileName))
+                               .arg(profileBw));
+            msgBox.exec();
+            return;
+        }
+        fileName = wbFull;
         emit sendFileToCardSignal(fileName, 0,"wb");
         break;
     }
