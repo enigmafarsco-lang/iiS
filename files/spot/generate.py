@@ -38,29 +38,25 @@ Sample rate (IMPORTANT - hardware anchored, per profile)
 --------------------------------------------------------
 The file's assumed sample rate is
 
-    Fs = MEASURED per profile   (P100: 61.44,  P200: 122.88,  P400: 491.52 MS/s)
+    Fs = 122.88 x P/100 MS/s   (P100: 122.88,  P200: 245.76,  P400: 491.52 MS/s)
 
-i.e. the rate the board really consumes the DAC buffer at (MEASURED
-on the spectrum analyser): profile 200 plays a file at 122.88 MS/s
-(half its 245.76 MS/s Talise TX input rate) but profile 400 plays at
-the FULL 491.52 MS/s (its thb3 interpolator is bypassed) - the earlier
-uniform 0.6144 x P table made every profile-400 waveform twice as
-wide on air (a 20 MHz spot showed 40 MHz).  With these rates a band
-of N MHz occupies exactly N MHz on the spectrum analyser: type 100,
-see 100.
+i.e. the DAC sample rate of the active ADRV9009 profile - the rate
+the board really consumes the DAC buffer at.  With these rates a
+band of N MHz occupies exactly N MHz on the spectrum analyser: type
+100, see 100.
 
 Consequences:
   * the widest band a profile can produce is its sample rate
-    (the full I/Q span): P100 -> 61.44 MHz, P200 -> 122.88 MHz,
+    (the full I/Q span): P100 -> 122.88 MHz, P200 -> 245.76 MHz,
     P400 -> 491.52 MHz;
   * N above that produces the profile's maximum (full-band)
     waveform;
   * files are still named spot{N}mhz_{P}.txt for N = 1..P.
 
 (The Talise profiles run the TX datapath at 1.2288 x P MS/s with
-16/8/4x interpolation to the 1966.08 MS/s DAC; the board consumes
-the DAC buffer at half that clock on profiles 100/200 and at the
-full clock on profile 400.  To re-anchor a rate, edit
+16/8/4x interpolation to the 1966.08 MS/s DAC, and the board
+consumes the DAC buffer at that rate: 122.88 / 245.76 / 491.52 MS/s
+for P100 / P200 / P400.  To re-anchor a rate, edit
 profile_rate_mhz() below and regenerate.)
 
 The band edge is shaped like a high-order low-pass filter, not a soft
@@ -206,19 +202,17 @@ BIN_SMOOTH = 16          # circular moving-average width for the PSD (bins)
 def profile_rate_mhz(profile_bw):
     """File sample rate (MS/s) for a profile bandwidth P.
 
-    MEASURED on the spectrum analyser: profile 200 plays a file at
-    122.88 MS/s (half its 245.76 MS/s TX input rate) but profile 400
-    plays at the FULL 491.52 MS/s (its thb3 interpolator is bypassed) -
-    the old uniform "0.6144 x P" table made every profile-400 waveform
-    twice as wide on air (a 20 MHz spot showed 40 MHz).  P100 = 61.44
-    MS/s (same half-rate as P200; not yet verified on air).  With these
-    rates a band of N MHz occupies exactly N MHz on the analyser.
+    The board plays file samples at 122.88 x P/100 MS/s - the DAC
+    sample rate of the active ADRV9009 profile: 122.88 MS/s at P100,
+    245.76 at P200, 491.52 at P400 (same rate as the app's
+    txFileRateMhz()).  With these rates a band of N MHz occupies
+    exactly N MHz on the analyser.
     """
-    rates = {100: 61.44, 200: 122.88, 400: 491.52}
+    rates = {100: 122.88, 200: 245.76, 400: 491.52}
     try:
         return rates[int(profile_bw)]
     except (TypeError, ValueError, KeyError):
-        return float(profile_bw) * 0.6144
+        return float(profile_bw) * 1.2288
 ROLLOFF_MHZ = 10.0       # stopband starts at N/2 + ROLLOFF_MHZ
 ROLLOFF_ORDER = 2        # squared raised cosine: sharper edge than 1st order
 
@@ -268,7 +262,7 @@ def _band_edge_response(bw_mhz, profile_bw, n):
             else:
                 append(0.0)
         return H
-    c = int(bw_mhz * n / p)                # brick-wall bin count
+    c = int((bw_mhz / 2.0) * n / p)       # brick-wall bin count (edge N/2)
     return [1.0 if (k if k <= half else n - k) < c else 0.0
             for k in range(n)]
 

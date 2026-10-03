@@ -15,14 +15,10 @@
 #include <QDebug>
 #include <cmath>
 
-// Phase 6: DAC file playback rate per ADRV9009 profile (MS/s) -
-// MEASURED on the spectrum analyser, not derived from the TAL rates.
-// Profile 200 plays a file at 122.88 MS/s (half its 245.76 MS/s TX input
-// rate) but profile 400 plays at the FULL 491.52 MS/s (its thb3
-// interpolator is bypassed) - the old uniform "0.6144 x P" table made
-// every profile-400 waveform TWICE as wide on air (a 20 MHz spot showed
-// 40 MHz).  P100 = 61.44 MS/s (the same half-rate as P200; not yet
-// verified on air).  The spot/bridge generators use the same table
+// Phase 6: DAC file playback rate per ADRV9009 profile (MS/s) =
+// 122.88 x P/100: the board consumes the DAC buffer at the profile's
+// DAC sample rate - 122.88 MS/s at P100, 245.76 at P200, 491.52 at
+// P400.  The spot/bridge generators use the same table
 // (files/spot/generate.py, files/bridge/generate_bridge.py).
 static double txFileRateMhz(int profileBw)
 {
@@ -1095,8 +1091,8 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
         QTextStream out(&file);
         out<< "TEXT\n";
 
-        // The board plays file samples at fs_msps = 0.5 x profile BW
-        // (the I/Q playback rate, see files/spot/generate.py).  PRI and
+        // The board plays file samples at fs_msps = 122.88 x P/100
+        // (the profile's DAC sample rate, see files/spot/generate.py).  PRI and
         // pulse width arrive in microseconds, so:
         const uint priSamp = uint(pri * fs_msps);
         uint pwSamp  = uint(pw  * fs_msps);
