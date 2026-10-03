@@ -2374,6 +2374,34 @@ void ReceiverMain::on_btnDefaultIioOsc_clicked()
 
 void ReceiverMain::on_btnProfileSet_clicked()
 {
+    int bw = 100;
+    int idx = 0;
+    if (ui->rdoProfile400->isChecked()) {
+        bw = 400;
+        idx = 2;
+    } else if (ui->rdoProfile200->isChecked()) {
+        bw = 200;
+        idx = 1;
+    }
+
+    // The 400 profile depends on the board serial number: a serial
+    // ending to 2 does not get the profile yet ("profile under
+    // construction ..."), a serial ending to 3 loads the
+    // Tx_BW400_..._03.txt Talise profile from the files folder.
+    QString serialSuffix;
+    if (idx == 2) {
+        const QString sn = boardSerialNumber();
+        qInfo() << "Profile 400: board serial number"
+                << (sn.isEmpty() ? "(not found)" : sn);
+        if (sn.endsWith(QLatin1Char('2'))) {
+            QMessageBox::information(this, tr("Profile"),
+                                     tr("profile under construction ..."));
+            return;
+        }
+        if (sn.endsWith(QLatin1Char('3')))
+            serialSuffix = QStringLiteral("_03");
+    }
+
     // Before a profile change the frequency must be 1800 MHz: check it
     // first and only then apply the user's profile (a profile write
     // reconfigures the whole RF chain, so the LO is parked at 1800 first).
@@ -2393,14 +2421,11 @@ void ReceiverMain::on_btnProfileSet_clicked()
         "Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt",
     };
 
-    int bw = 100;
-    int idx = 0;
-    if (ui->rdoProfile400->isChecked()) {
-        bw = 400;
-        idx = 2;
-    } else if (ui->rdoProfile200->isChecked()) {
-        bw = 200;
-        idx = 1;
+    // The profile file name (serial-3 boards use the _03 variant).
+    QString profileName = QString::fromLatin1(profileFiles[idx]);
+    if (!serialSuffix.isEmpty()) {
+        profileName.chop(4); // ".txt"
+        profileName += serialSuffix + QStringLiteral(".txt");
     }
 
     // Search order: project tree from the working dir, project tree from the
@@ -2409,12 +2434,18 @@ void ReceiverMain::on_btnProfileSet_clicked()
         QDir::currentPath() + "/files/filters/adrv9009",
         QCoreApplication::applicationDirPath() + "/files/filters/adrv9009",
         "/home/joshua/Documents/NIMA_USB/iiS-arena-01a0d367-iis/files/filters/adrv9009",
+        // The serial-3 400 profile lives in the main project files folder.
+#ifdef PROJECT_FILES_DIR
+        QStringLiteral(PROJECT_FILES_DIR),
+#endif
+        QDir::currentPath() + "/files",
+        QCoreApplication::applicationDirPath() + "/files",
     };
 
     QString profilePath;
     for (const QString &dir : dirs) {
-        if (QFileInfo::exists(dir + "/" + profileFiles[idx])) {
-            profilePath = dir + "/" + profileFiles[idx];
+        if (QFileInfo::exists(dir + "/" + profileName)) {
+            profilePath = dir + "/" + profileName;
             break;
         }
     }
@@ -2422,7 +2453,7 @@ void ReceiverMain::on_btnProfileSet_clicked()
     if (profilePath.isEmpty()) {
         QMessageBox::warning(this, tr("Profile"),
             tr("ADR-V9009 profile file not found:\n%1\n\nLooked in:\n%2")
-                .arg(profileFiles[idx], dirs.join("\n")));
+                .arg(profileName, dirs.join("\n")));
         return;
     }
 
@@ -2477,7 +2508,7 @@ void ReceiverMain::on_btnProfileSet_clicked()
 // Preferred source: iiod context attribute "hw_serial". Otherwise read the
 // production EEPROM (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated
 // ssh exec (BatchMode: never prompts for a password).
-void ReceiverMain::updateSerialNumber()
+QString ReceiverMain::boardSerialNumber()
 {
     QString sn;
 
@@ -2514,6 +2545,12 @@ void ReceiverMain::updateSerialNumber()
         }
     }
 
+    return sn;
+}
+
+void ReceiverMain::updateSerialNumber()
+{
+    const QString sn = boardSerialNumber();
     if (ui->lblSN)
         ui->lblSN->setText(sn.isEmpty() ? QStringLiteral("-") : sn);
     qInfo() << "Board serial number:" << (sn.isEmpty() ? "(not found)" : sn);

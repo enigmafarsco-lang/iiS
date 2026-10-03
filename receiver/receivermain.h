@@ -206,6 +206,7 @@ public:
     void frqModeIsSelected();
     void defaultParameters();
     void updateSerialNumber();
+    QString boardSerialNumber();
     void changingPlotMode(int);
     QTimer dataTimer;
 
