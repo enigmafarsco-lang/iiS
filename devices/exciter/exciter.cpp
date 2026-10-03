@@ -12,6 +12,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QDebug>
 #include <cmath>
 
 // Phase 6: DAC file playback rate per ADRV9009 profile (MS/s) -
@@ -638,6 +639,11 @@ bool Exciter::returnfilePath(QString &fileName)
         fullPath = alt;
         fileName = alt;
     }
+
+    // Show which physical file is played into the DAC buffer - the
+    // search walks the startup dir, the app folder, files/ folders and
+    // sibling projects, so the printed path tells where it really is.
+    qInfo() << "Exciter waveform file:" << fullPath;
 
     return  true;
 }
