@@ -15,9 +15,8 @@ the app shows an error (there is no legacy bridge fallback).
 
 ## Generating the files
 
-Run the generator in this folder (or any folder you keep the bridge
-files in — the app looks in `./bridge/` relative to the startup
-directory):
+Run the generator in this folder - the app looks for the bridge files
+ONLY in the project `files/bridge/` folder (this folder), nowhere else:
 
 ```bash
 python3 generate_bridge.py            # all 700 files: 100 + 200 + 400

@@ -619,30 +619,33 @@ void Exciter::isUserLoggedInSlot(double state)
 //    maxFrqLimit = maxFrq;
 //}
 
+// The exciter reads and writes its waveform txt files ONLY in the
+// project's files/ folder (PROJECT_FILES_DIR defined by seraj3.pro =
+// <project>/files, e.g. /home/joshua/Documents/NIMA_USB/
+// iiS-arena-01a0e308-iis/files).  No other folder is searched - a
+// waveform can never come from another directory or another checkout.
+static QString projectFilesDir()
+{
+#ifdef PROJECT_FILES_DIR
+    return QStringLiteral(PROJECT_FILES_DIR);
+#else
+    return QCoreApplication::applicationDirPath() + QStringLiteral("/files");
+#endif
+}
+
 bool Exciter::returnfilePath(QString &fileName)
 {
-    fullPath =  QDir::currentPath() + "/" + fileName;
+    fullPath = QDir(projectFilesDir()).filePath(fileName);
 
     if(!existsFile(fullPath.toStdString()))
     {
-        // Fall back to the application folder (and its parents) - the
-        // same search the bridge noise files use - so the app can be
-        // started from somewhere else too.
-        const QString alt = resolveFileInAppFolders(fileName);
-        if (alt.isEmpty())
-        {
-            QMessageBox msgBox;
-            msgBox.setText("File doesn't exist.");
-            msgBox.exec();
-            return false;
-        }
-        fullPath = alt;
-        fileName = alt;
+        QMessageBox msgBox;
+        msgBox.setText(QString("File doesn't exist.\n%1").arg(fullPath));
+        msgBox.exec();
+        return false;
     }
 
-    // Show which physical file is played into the DAC buffer - the
-    // search walks the startup dir, the app folder, files/ folders and
-    // sibling projects, so the printed path tells where it really is.
+    // The one folder the exciter plays waveform files from.
     qInfo() << "Exciter waveform file:" << fullPath;
 
     return  true;
@@ -676,64 +679,12 @@ bool Exciter::existsFile (const std::string& name)
 
 QString Exciter::resolveFileInAppFolders(const QString &relPath)
 {
-    // The spot files are found via QDir::currentPath() (the directory
-    // the app is started from), so that stays first; the application
-    // binary's folder (and both parents) are extra candidates for the
-    // case the app is started from somewhere else.
-    const QStringList roots = {
-        QDir::currentPath(),
-        QCoreApplication::applicationDirPath(),
-        QDir(QCoreApplication::applicationDirPath()).filePath(".."),
-        QDir(QDir::currentPath()).filePath(".."),
-    };
-
-    // Search <base>/<relPath> in every base.  The waveform generators
-    // live in the main project folder's files/ folder (files/bridge,
-    // files/spot), so the generated bridge/spot files are usually found
-    // as files/<relPath> under that folder.
-    QStringList bases = roots;
-    for (const QString &root : roots)
-        bases << QDir(root).absoluteFilePath("files");
-
-#ifdef PROJECT_FILES_DIR
-    // Source tree's files/ folder compiled in by seraj3.pro: the app is
-    // often started from a Qt Creator shadow build directory (e.g.
-    // build-seraj3-Desktop_Qt_.../Debug) that is NOT inside the project
-    // folder where the waveforms live.
-    bases << QStringLiteral(PROJECT_FILES_DIR)
-          << QDir(QStringLiteral(PROJECT_FILES_DIR)).absoluteFilePath("..");
-#endif
-
-    // Dynamic fallback: walk a few parent levels of every root and also
-    // look into each sibling's files/ folder - finds
-    // <workspace>/iiS-.../files/bridge/... when running from
-    // <workspace>/iio_projects/build-seraj3-.../.
-    for (const QString &root : roots)
-    {
-        QDir level(root);
-        for (int up = 0; up < 4; ++up)
-        {
-            bases << level.absoluteFilePath("files");
-            const QFileInfoList subs = level.entryInfoList(
-                QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable);
-            int scanned = 0;
-            for (const QFileInfo &fi : subs)
-            {
-                if (++scanned > 32)
-                    break;
-                bases << QDir(fi.absoluteFilePath()).absoluteFilePath("files");
-            }
-            if (!level.cdUp())
-                break;
-        }
-    }
-
-    for (const QString &base : bases)
-    {
-        const QString full = QDir(base).absoluteFilePath(relPath);
-        if (existsFile(full.toStdString()))
-            return full;
-    }
+    // ONLY the project's files/ folder is searched (see
+    // projectFilesDir() above) - nothing else, so a waveform file can
+    // never be picked up from another folder or another checkout.
+    const QString full = QDir(projectFilesDir()).absoluteFilePath(relPath);
+    if (existsFile(full.toStdString()))
+        return full;
     return QString();
 }
 
@@ -1006,13 +957,12 @@ void Exciter::setDataSlot()
         {
             QMessageBox msgBox;
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
-                              "(also searched the application folder and "
-                              "the project files/ folder). "
-                              "Run files/bridge/generate_bridge.py with "
-                              "'--out bridge' in the files/ folder of the "
+                              "The exciter looks only in the project "
+                              "files/ folder. Run files/bridge/generate_bridge.py "
+                              "with '--out bridge' in the files/ folder of the "
                               "main project folder (next to the spot/ "
                               "folder), then press Set again.")
-                               .arg(QDir::currentPath() + "/" + fileName));
+                               .arg(QDir(projectFilesDir()).filePath(fileName)));
             msgBox.exec();
             return;
         }
@@ -1094,11 +1044,12 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
 {
     uint iValue{}, qValue{};
 
-    QFile file(impulseFileName);
+    const QString impPath = QDir(projectFilesDir()).filePath(impulseFileName);
+    QFile file(impPath);
 
     if(file.exists())
     {
-        QFile::remove(impulseFileName);
+        QFile::remove(impPath);
     }
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -1333,7 +1284,7 @@ bool Exciter::buildMultiTargetWaveform()
                 QMessageBox msgBox;
                 msgBox.setText(tr("%1 file for target %2 not found:\n%3\n\n%4")
                                    .arg(what).arg(t + 1)
-                                   .arg(QDir::currentPath() + "/" + f)
+                                   .arg(QDir(projectFilesDir()).filePath(f))
                                    .arg(genHint));
                 msgBox.exec();
                 return false;
@@ -1453,7 +1404,8 @@ bool Exciter::buildMultiTargetWaveform()
         }
 
         // One txt file per selected object (inspectable individually)
-        const QString tf = QString("MultiTarget_t%1.txt").arg(t + 1);
+        const QString tf = QDir(projectFilesDir()).filePath(
+            QString("MultiTarget_t%1.txt").arg(t + 1));
         QFile out(tf);
         if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
         {
@@ -1481,7 +1433,7 @@ bool Exciter::buildMultiTargetWaveform()
     double peak = 0.0;
     for (int i = 0; i < N; i++)
         peak = qMax(peak, qMax(qAbs(sumI[i]), qAbs(sumQ[i])));
-    QFile out("MultiTarget.txt");
+    QFile out(QDir(projectFilesDir()).filePath(QStringLiteral("MultiTarget.txt")));
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qWarning() << "MultiTarget: cannot write MultiTarget.txt";
@@ -1555,7 +1507,7 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
     QVector<double> tq(N, 0.0);
     fillChirpSamples(ti, tq, N, fsMhz, nlfm, f0Mhz, bwMhz, tUs);
 
-    QFile out(fileName);
+    QFile out(QDir(projectFilesDir()).filePath(fileName));
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qWarning() << "Chirp: cannot write" << fileName;
@@ -1650,7 +1602,7 @@ bool Exciter::buildSweepFile(const QString &fileName,
         }
     }
 
-    QFile out(fileName);
+    QFile out(QDir(projectFilesDir()).filePath(fileName));
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qWarning() << "Sweep: cannot write" << fileName;

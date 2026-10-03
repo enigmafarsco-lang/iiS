@@ -1,0 +1,9 @@
+# Runtime-generated exciter waveforms - the app writes these into this
+# folder (the ONLY folder the exciter reads/writes) and they must not
+# be committed.
+Sweep.txt
+Lfm.txt
+Nlfm.txt
+MultiTarget.txt
+MultiTarget_t*.txt
+Impulse.txt

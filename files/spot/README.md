@@ -15,8 +15,8 @@ software falls back to the legacy `spot{N}mhz.txt` (e.g. `spot5mhz.txt`).
 
 ## Generating the files
 
-Run the generator in this folder (or any folder you keep the spot files
-in — the app looks in `./spot/` relative to the startup directory):
+Run the generator in this folder - the app looks for the spot files
+ONLY in the project `files/spot/` folder (this folder), nowhere else:
 
 ```bash
 python3 generate.py            # all 700 files: 100 + 200 + 400
