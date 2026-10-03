@@ -2393,21 +2393,21 @@ void ReceiverMain::on_btnProfileSet_clicked()
         const QString sn = boardSerialNumber();
         qInfo() << "Profile 400: board serial number"
                 << (sn.isEmpty() ? "(not found)" : sn);
-        // SN001 is a normal board: the standard 400 profile file is
-        // used, no message. Only a serial ending to 2 (the "serial
-        // number 2" board) is still under construction - nothing is set
-        // on the board and the message is shown. On SN003 (serial ending
-        // to 003 / 3) the Tx_BW400_..._03.txt Talise profile from
-        // files/ is loaded.
+        // Board serials SN001 / SN002 / SN003 for the 400 profile:
+        // SN001 has no 400 profile yet - nothing is set on the board
+        // and the "profile under construction ..." message is shown.
+        // SN002 is a normal board: the standard 400 profile file is
+        // used, no message. SN003 loads the
+        // Tx_BW400_..._03.txt Talise profile from files/.
         const QString snUp = sn.trimmed().toUpper();
-        if (snUp.endsWith(QLatin1Char('2'))) {
+        if (snUp.endsWith(QLatin1String("SN001")) ||
+            snUp.endsWith(QLatin1String("001"))) {
             QMessageBox::information(this, tr("Profile"),
                                      tr("profile under construction ..."));
             return;
         }
         if (snUp.endsWith(QLatin1String("SN003")) ||
-            snUp.endsWith(QLatin1String("003")) ||
-            snUp.endsWith(QLatin1Char('3')))
+            snUp.endsWith(QLatin1String("003")))
             serialSuffix = QStringLiteral("_03");
     }
 
