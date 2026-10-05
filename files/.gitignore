@@ -7,3 +7,5 @@ Nlfm.txt
 MultiTarget.txt
 MultiTarget_t*.txt
 Impulse.txt
+# Runtime-composed Talise profile (general + orx + tx + </profile>)
+filters/adrv9009/composed_profile.txt

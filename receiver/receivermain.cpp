@@ -6,6 +6,7 @@
 #include <receiver/backtrace.h>
 #include <receiver/connectdialog.h>
 #include "receiver/globals.h"
+#include <QFile>
 #include <QFileInfo>
 #include <QSettings>
 #include <QProcess>
@@ -1895,8 +1896,10 @@ void ReceiverMain::init()
             {
                 // The profile the user selected in the first-start form
                 // is asserted after connect (see defaultSettings()).
-                startupProfileBw = connect_dialog->selectedProfileBw();
-                qInfo() << "Startup: profile selected in IP form:" << startupProfileBw;
+                startupTxBw = connect_dialog->selectedTxBw();
+                startupOrxBw = connect_dialog->selectedOrxBw();
+                qInfo() << "Startup: profile selected in IP form: TX"
+                        << startupTxBw << "ORx" << startupOrxBw;
 
                 if(!globals::ctx)
                 {
@@ -1929,7 +1932,7 @@ void ReceiverMain::init()
                 // sample rate (122.88 x P/100 = 122.88/245.76/491.52 MHz
                 // for the 100/200/400 profiles).  Only the axis window is
                 // set here - the startup must NOT change the frequency.
-                frqDomainPlot->setActiveBandwidth(122.88 * startupProfileBw / 100.0);
+                frqDomainPlot->setActiveBandwidth(122.88 * startupTxBw / 100.0);
 
 
                 //time domain plot (first plot)
@@ -2232,11 +2235,18 @@ void ReceiverMain::defaultSettings()
     // Do not start profile loading with a non-existent file: that path used to
     // enter an asynchronous UI update path and could abort the Qt application.
     // Assert the profile the user selected in the first-start IP form
-    // (once at first startup only - never on a timer): the same rules as
-    // the Profile tab Set button - SN001 gets the "profile under
-    // construction ..." message and no change, SN003 loads the _03 file.
-    if (!applyProfileBw(startupProfileBw))
+    // (once at first startup only - never on a timer): the profile is
+    // composed from the TX and ORx section files the user chose.  The board
+    // boots at profile 100 (TX100 + ORx100) - when the user picked exactly
+    // that combination, no profile change is needed at all and nothing is
+    // written to the board.  SN001 boards get the "profile under
+    // construction ..." message and no change (400 TX profile rule).
+    if (startupTxBw == 100 && startupOrxBw == 100) {
+        syncProfileUi(100);
         defaultParameters();
+    } else if (!applyComposedProfile(startupTxBw, startupOrxBw)) {
+        defaultParameters();
+    }
     // TX1 is OFF whenever defaults are applied at start (safe default).
     if (power_TX1_DownChk)
     {
@@ -2360,28 +2370,50 @@ void ReceiverMain::on_btnDefaultIioOsc_clicked()
 
 bool ReceiverMain::applyProfileBw(int bw)
 {
-    int idx = 0;
-    if (bw == 400) {
-        idx = 2;
-    } else if (bw == 200) {
-        idx = 1;
-    }
+    // The Profile tab radios select the diagonal combinations
+    // (ORx bandwidth == TX bandwidth).
+    return applyComposedProfile(bw, bw);
+}
 
-    // The 400 profile depends on the board serial number: a serial
-    // ending to 2 does not get the profile yet ("profile under
-    // construction ..."), a serial ending to 3 loads the
-    // Tx_BW400_..._03.txt Talise profile from the files folder.
-    QString serialSuffix;
-    if (idx == 2) {
+// Sync the software UI (Profile tab radios, exciter profile, spectrum
+// window) to the given TX profile without writing to the board.
+void ReceiverMain::syncProfileUi(int bw)
+{
+    // Keep the Profile tab radios in sync with the applied profile (the
+    // startup assertion is not started from them).
+    if (bw == 400)
+        ui->rdoProfile400->setChecked(true);
+    else if (bw == 200)
+        ui->rdoProfile200->setChecked(true);
+    else
+        ui->rdoProfile100->setChecked(true);
+
+    // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
+    emit profileBandwidthChanged(bw);
+
+    // Snap the spectrum window to the profile's sample rate
+    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
+    // profiles) around the frequency.
+    if (frqDomainPlot)
+        frqDomainPlot->setActiveBandwidth(bw * 122.88 / 100.0);
+}
+
+// Compose the Talise profile from the section files and write it to the
+// board: files/filters/adrv9009/sections/general_<TX>.txt (profile tag,
+// clocks, rx) + orx_<ORx>.txt (obsRx, lpbk) + tx_<TX>.txt (tx), closed
+// with the </profile> tag.  The composed 400 profile is the _03 variant
+// (no orxMergeFilter) - the profile the SN003 boards use.
+bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
+{
+    // The 400 TX profile depends on the board serial number: a serial
+    // ending to 1 has no 400 profile yet ("profile under construction ...",
+    // nothing is set on the board).  SN002 is a normal board.  SN003 loads
+    // the _03 variant, which is exactly what the composed 400 sections
+    // produce.
+    if (txBw == 400) {
         const QString sn = boardSerialNumber();
         qInfo() << "Profile 400: board serial number"
                 << (sn.isEmpty() ? "(not found)" : sn);
-        // Board serials SN001 / SN002 / SN003 for the 400 profile:
-        // SN001 has no 400 profile yet - nothing is set on the board
-        // and the "profile under construction ..." message is shown.
-        // SN002 is a normal board: the standard 400 profile file is
-        // used, no message. SN003 loads the
-        // Tx_BW400_..._03.txt Talise profile from files/.
         const QString snUp = sn.trimmed().toUpper();
         if (snUp.endsWith(QLatin1String("SN001")) ||
             snUp.endsWith(QLatin1String("001"))) {
@@ -2389,9 +2421,6 @@ bool ReceiverMain::applyProfileBw(int bw)
                                      tr("profile under construction ..."));
             return false;
         }
-        if (snUp.endsWith(QLatin1String("SN003")) ||
-            snUp.endsWith(QLatin1String("003")))
-            serialSuffix = QStringLiteral("_03");
     }
 
     // Before a profile change the frequency must be 1800 MHz: check it
@@ -2407,70 +2436,74 @@ bool ReceiverMain::applyProfileBw(int bw)
         }
     }
 
-    static const char *profileFiles[] = {
-        "Tx_BW100_IR122p88_Rx_BW100_OR122p88_ORx_BW100_OR122p88_DC245p76.txt",
-        "Tx_BW200_IR245p76_Rx_BW100_OR122p88_ORx_BW200_OR245p76_DC245p76.txt",
-        "Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt",
-    };
-
-    // The profile file name (serial-3 boards use the _03 variant).
-    QString profileName = QString::fromLatin1(profileFiles[idx]);
-    if (!serialSuffix.isEmpty()) {
-        profileName.chop(4); // ".txt"
-        profileName += serialSuffix + QStringLiteral(".txt");
-    }
-
-    // Search order: project tree from the working dir, project tree from the
-    // executable dir, then the user's local checkout.
-    const QStringList dirs = {
-        QDir::currentPath() + "/files/filters/adrv9009",
-        QCoreApplication::applicationDirPath() + "/files/filters/adrv9009",
-        "/home/joshua/Documents/NIMA_USB/iiS-arena-01a0d367-iis/files/filters/adrv9009",
-        // The serial-3 400 profile lives in the main project files folder.
+    // Section search order: project tree from the working dir, project tree
+    // from the executable dir, then the user's local checkout and the
+    // compiled-in PROJECT_FILES_DIR.
+    const QStringList sectionDirs = {
+        QDir::currentPath() + "/files/filters/adrv9009/sections",
+        QCoreApplication::applicationDirPath() + "/files/filters/adrv9009/sections",
+        "/home/joshua/Documents/NIMA_USB/iiS-arena-01a0d367-iis/files/filters/adrv9009/sections",
 #ifdef PROJECT_FILES_DIR
-        QStringLiteral(PROJECT_FILES_DIR),
+        QStringLiteral(PROJECT_FILES_DIR) + "/filters/adrv9009/sections",
 #endif
-        QDir::currentPath() + "/files",
-        QCoreApplication::applicationDirPath() + "/files",
     };
 
-    QString profilePath;
-    for (const QString &dir : dirs) {
-        if (QFileInfo::exists(dir + "/" + profileName)) {
-            profilePath = dir + "/" + profileName;
+    QString sectionDir;
+    for (const QString &dir : sectionDirs) {
+        if (QFileInfo::exists(dir + QString("/general_%1.txt").arg(txBw))) {
+            sectionDir = dir;
             break;
         }
     }
-
-    if (profilePath.isEmpty()) {
+    if (sectionDir.isEmpty()) {
         QMessageBox::warning(this, tr("Profile"),
-            tr("ADR-V9009 profile file not found:\n%1\n\nLooked in:\n%2")
-                .arg(profileName, dirs.join("\n")));
+            tr("ADR-V9009 profile sections not found (general_%1.txt):\n%2")
+                .arg(txBw).arg(sectionDirs.join("\n")));
         return false;
     }
 
-    // Keep the Profile tab radios in sync with the applied profile (the
-    // startup assertion is not started from them).
-    if (bw == 400)
-        ui->rdoProfile400->setChecked(true);
-    else if (bw == 200)
-        ui->rdoProfile200->setChecked(true);
-    else
-        ui->rdoProfile100->setChecked(true);
-
-    // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
-    emit profileBandwidthChanged(bw);
-
-    // Snap the spectrum window to the profile's sample rate
-    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
-    // profiles) around the frequency, and disable the plot while the
-    // profile write to the board runs (same pattern as
-    // defaultSettings() above).
-    const double profileFsMhz = bw * 122.88 / 100.0;
-    if (frqDomainPlot) {
-        frqDomainPlot->setActiveBandwidth(profileFsMhz);
-        frqDomainPlot->setEnabled(false);
+    auto readSection = [&sectionDir](const QString &name, QString &out) {
+        QFile f(sectionDir + QLatin1Char('/') + name);
+        if (!f.open(QIODevice::ReadOnly))
+            return false;
+        out = QString::fromUtf8(f.readAll());
+        return true;
+    };
+    const QString generalName = QString("general_%1.txt").arg(txBw);
+    const QString orxName = QString("orx_%1.txt").arg(orxBw);
+    const QString txName = QString("tx_%1.txt").arg(txBw);
+    QString generalTxt, orxTxt, txTxt;
+    if (!readSection(generalName, generalTxt) ||
+        !readSection(orxName, orxTxt) ||
+        !readSection(txName, txTxt)) {
+        QMessageBox::warning(this, tr("Profile"),
+            tr("ADR-V9009 profile section file missing:\n%1\n(in %2)")
+                .arg(generalName + ", " + orxName + ", " + txName, sectionDir));
+        return false;
     }
+
+    // general + orx + tx + </profile>
+    const QString composed = generalTxt + QLatin1Char('\n') + orxTxt +
+                             QLatin1Char('\n') + txTxt + "</profile>\n";
+    const QString composedPath = QDir::cleanPath(sectionDir + "/../composed_profile.txt");
+    {
+        QFile out(composedPath);
+        if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            QMessageBox::warning(this, tr("Profile"),
+                tr("Cannot write the composed profile file:\n%1").arg(composedPath));
+            return false;
+        }
+        out.write(composed.toUtf8());
+        out.close();
+    }
+    qInfo() << "Profile" << txBw << "+ ORx" << orxBw << "composed from"
+            << sectionDir << "->" << composedPath;
+
+    syncProfileUi(txBw);
+
+    // Disable the plot while the profile write to the board runs.
+    if (frqDomainPlot)
+        frqDomainPlot->setEnabled(false);
 
     // Phase 5 fix: the profile loader ends by changing the working
     // directory to the profile folder (existing behavior). The exciter
@@ -2478,14 +2511,14 @@ bool ReceiverMain::applyProfileBw(int bw)
     // it afterwards or "spot/spot{N}mhz_{P}.txt" would not be found.
     const QString workDir = QDir::currentPath();
     if (oscMain && oscMain->_adrv9009) {
-        oscMain->_adrv9009->on_profile_config_clicked(profilePath);
+        oscMain->_adrv9009->on_profile_config_clicked(composedPath);
     } else {
         qWarning() << "Receiver: ADRV9009 plugin not ready; profile not loaded:"
-                   << profilePath;
+                   << composedPath;
     }
     QDir::setCurrent(workDir);
 
-    QTimer::singleShot(10000, this, [this, bw, profileFsMhz]{
+    QTimer::singleShot(10000, this, [this, txBw]{
         if (!frqDomainPlot)
             return;
         frqDomainPlot->setEnabled(true);
@@ -2499,12 +2532,12 @@ bool ReceiverMain::applyProfileBw(int bw)
         if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
             defaultParameters();
 
-        frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
+        // re-apply the freq +/- Fs/2 axis window
+        frqDomainPlot->setActiveBandwidth(txBw * 122.88 / 100.0);
     });
 
     return true;
 }
-
 void ReceiverMain::on_btnProfileSet_clicked()
 {
     int bw = 100;

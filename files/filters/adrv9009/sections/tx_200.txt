@@ -1,0 +1,36 @@
+ <tx name=Tx 200.00MHz, InputRate 245.76MHz, TotalInterpolation 8>
+  <dacDiv=1>
+  <txFirInterpolation=1>
+  <thb1Interpolation=2>
+  <thb2Interpolation=2>
+  <thb3Interpolation=2>
+  <txInt5Interpolation=1>
+  <txInputRate_kHz=245760>
+  <primarySigBandwidth_Hz=75000000>
+  <rfBandwidth_Hz=200000000>
+  <txDac3dBCorner_kHz=200000>
+  <txBbf3dBCorner_kHz=100000>
+
+  <filter FIR gain_dB=0 numFirCoefs=20>
+  33
+  -77
+  123
+  -158
+  171
+  -112
+  -155
+  1040
+  -3011
+  20121
+  -3011
+  1040
+  -155
+  -112
+  171
+  -158
+  123
+  -77
+  33
+  0
+  </filter>
+ </tx>

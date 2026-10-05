@@ -211,6 +211,15 @@ public:
     // the startup assertion from the first-start IP form both use this).
     // Returns false when nothing was written (serial rule / missing file).
     bool applyProfileBw(int bw);
+    // Compose the Talise profile from the section files
+    // (files/filters/adrv9009/sections/general_<TX>.txt + orx_<ORx>.txt +
+    // tx_<TX>.txt + "</profile>") and write it to the board.  The first-start
+    // IP form provides both the TX and the ORx choice; the Profile tab Set
+    // button uses the diagonal (ORx == TX).
+    bool applyComposedProfile(int txBw, int orxBw);
+    // Sync the software UI (Profile tab radios, exciter profile, spectrum
+    // window) to the given TX profile without writing to the board.
+    void syncProfileUi(int bw);
     void changingPlotMode(int);
     QTimer dataTimer;
 
@@ -239,9 +248,11 @@ public:
     bool pwIsOn{};
 
     const QString fileAddress{"/home/seraj3/Downloads/iio-oscilloscope/filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"};
-    // Profile (100/200/400) the user chose in the first-start IP form;
-    // asserted on the board once at first startup.
-    int startupProfileBw{200};
+    // TX and ORx bandwidths the user chose in the first-start IP form;
+    // asserted on the board once at first startup (the board itself boots
+    // at profile 100 = TX100 + ORx100).
+    int startupTxBw{200};
+    int startupOrxBw{100};
 
     //    QMap
     std::unordered_map<double, double> frqMap;

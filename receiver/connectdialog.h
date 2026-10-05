@@ -8,16 +8,10 @@
 #include <glib-object.h>
 #include <iio.h>
 #include <receiver/settings.h>
-#include <QFuture>
-#include <QThread>
 
 namespace Ui {
 class connectDialog;
 }
-
-#define NO_DEVICES "No Devices"
-static gchar *usb_pids[128];
-static int active_pid = -1;
 
 class connectDialog : public QDialog
 {
@@ -25,36 +19,30 @@ class connectDialog : public QDialog
 
 public:
     explicit connectDialog(QDialog *parent = nullptr);
-    ~connectDialog();    
+    ~connectDialog();
 
     bool Initialize();
 
-    // Profile (100/200/400) selected in the first-start form; asserted
-    // on the board after the connection is up.
-    int selectedProfileBw() const;
+    // TX bandwidth (100/200/400) and ORx bandwidth selected in the
+    // first-start form.  The startup profile assertion composes the
+    // Talise profile from these two choices (general + orx + tx + </profile>).
+    int selectedTxBw() const;
+    int selectedOrxBw() const;
 
 private slots:
 
-    void rad_scan_toggled(bool checked);
-    void rad_manual_toggled(bool checked);
     void btn_cancel_clicked();
-    void btn_refresh_clicked();
     void btn_connect_clicked();
-    void filter_ip_toggled(bool checked);
-    void filter_usb_toggled(bool checked);
-    void on_cmb_connect_usbd_currentIndexChanged(int index);
+    void txBwToggled(bool checked);
 
 private:
-    Ui::connectDialog *ui;        
-    gint ret;
-    const gchar *ip_addr;
+    Ui::connectDialog *ui;
 
     Settings setting;
 
-    void RefreshScanMode();
-    void ClearDialog();
-    struct iio_context * GetContext();
-    bool ReloadConnectDialog();
+    // Keep the ORx choices consistent with the TX choice:
+    // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
+    void syncOrxChoices();
 
 signals:
     void connectSignal();
