@@ -12,6 +12,8 @@ connectDialog::connectDialog(QDialog *parent) :
 
     QObject::connect(ui->btn_cancel,  &QPushButton::clicked,
                      this, &connectDialog::btn_cancel_clicked, Qt::UniqueConnection);
+    QObject::connect(ui->btn_refresh, &QPushButton::clicked,
+                     this, &connectDialog::btn_refresh_clicked, Qt::UniqueConnection);
     QObject::connect(ui->btn_connect, &QPushButton::clicked,
                      this, &connectDialog::btn_connect_clicked, Qt::UniqueConnection);
     QObject::connect(ui->radTx100, &QRadioButton::toggled,
@@ -32,7 +34,7 @@ connectDialog::~connectDialog()
 bool connectDialog::Initialize()
 {
     /* Do not create an IIO context while the dialog is being initialized:
-     * a context is created exclusively after the user presses Connect.
+     * a context is created only after the user presses Refresh or Connect.
      * Populate the manual IP field only.
      */
     setting.ReadSettingFile();
@@ -133,6 +135,15 @@ void connectDialog::btn_cancel_clicked()
 }
 
 /**
+ * @brief connectDialog::btn_refresh_clicked
+ * Refresh the IIO Context Information panels from the entered IP address.
+ */
+void connectDialog::btn_refresh_clicked()
+{
+    ReloadConnectDialog();
+}
+
+/**
  * @brief connectDialog::btn_connect_clicked
  */
 void connectDialog::btn_connect_clicked()
@@ -141,7 +152,7 @@ void connectDialog::btn_connect_clicked()
     QString uri = ui->txt_uri->text().trimmed();
     if (uri.isEmpty())
     {
-        ui->lblStatus->setText("Please enter the board IP address.");
+        ui->txt_context_description->setText("Please enter the board IP address.");
         return;
     }
 
@@ -150,13 +161,14 @@ void connectDialog::btn_connect_clicked()
 
     ui->txt_uri->setText(uri);
 
-    /* Always create the context from the value currently shown in the dialog. */
-    struct iio_context *ctx = iio_create_context_from_uri(uri.toLocal8Bit().constData());
+    /* Always create the context from the value currently shown in the dialog.
+     * Do not silently reuse an address created during dialog initialization. */
+    struct iio_context *ctx = GetContext();
     if (!ctx)
     {
         char errbuf[256] = {0};
         iio_strerror(errno, errbuf, sizeof(errbuf));
-        ui->lblStatus->setText(
+        ui->txt_context_description->setText(
                     QString("Connection failed: %1").arg(QString::fromLocal8Bit(errbuf)));
         qCritical() << "IIO connection failed for" << uri << ":" << errbuf;
         return;
@@ -166,10 +178,11 @@ void connectDialog::btn_connect_clicked()
     // Keep the dialog open when the entered IP points to another IIO target.
     if (!iio_context_find_device(ctx, "adrv9009-phy"))
     {
-        ui->lblStatus->setText(
+        ui->txt_context_description->setText(
                     "IIO connection succeeded, but adrv9009-phy was not found on this target.");
         qCritical() << "Connected IIO target does not expose adrv9009-phy:" << uri;
-        iio_context_destroy(ctx);
+        if (ctx != globals::ctx)
+            iio_context_destroy(ctx);
         return;
     }
 
@@ -186,6 +199,107 @@ void connectDialog::btn_connect_clicked()
 
     qInfo() << "User confirmed IIO URI:" << uri;
     accept();
+}
+
+#pragma endregion }
+
+#pragma region Operations {
+
+/**
+ * @brief connectDialog::GetContext
+ * @return the IIO context for the URI in the form (manual entry only)
+ */
+iio_context *connectDialog::GetContext()
+{
+    QByteArray uri = ui->txt_uri->text().trimmed().toLocal8Bit();
+    char *hostname = uri.data();
+
+    if (!g_str_has_prefix(hostname, "ip:")) {
+        QByteArray withPrefix = QByteArray("ip:") + uri;
+        uri = withPrefix;
+        hostname = uri.data();
+    }
+
+    iio_context *ctx = globals::ctx;
+
+    if (ctx && !g_strcmp0(hostname, iio_context_get_attr_value(ctx, "uri")))
+        return ctx;
+
+    return iio_create_context_from_uri(hostname);
+}
+
+/**
+ * @brief refresh connect dialog attributes
+ * @return true if context found
+ */
+bool connectDialog::ReloadConnectDialog()
+{
+    QString text;
+    size_t i;
+    iio_context *ctx;
+    QString desc;
+
+    ctx = GetContext();
+
+    if (!ctx) {
+        char errbuf[256] = {0};
+        const int errorNumber = errno;
+        iio_strerror(errorNumber, errbuf, sizeof(errbuf));
+        desc = QString::fromLocal8Bit(errbuf);
+        qCritical() << "IIO context creation failed:" << desc
+                    << "errno:" << errorNumber;
+    } else {
+        desc = iio_context_get_description(ctx);
+        qInfo() << "IIO context ready:" << desc
+                << "devices:" << iio_context_get_devices_count(ctx);
+    }
+
+    ui->txt_context_description->setText(desc);
+
+    text="";
+    if (ctx) {
+        for (i = 0; i < iio_context_get_devices_count(ctx); i++) {
+            iio_device *dev = iio_context_get_device(ctx, i);
+            const char *name = iio_device_get_name(dev);
+            if (!name)
+                name = iio_device_get_id(dev);
+            text += tr("%1\n").arg(QString::fromLocal8Bit(name));
+        }
+    } else {
+        text="No context, No iio devices found\n";
+    }
+
+    ui->txt_iio_devices->setText(text);
+
+    text="";
+    if (ctx) {
+        for (i = 0; i < iio_context_get_attrs_count(ctx); i++) {
+            const char *key, *value;
+            ssize_t ret;
+            ret = iio_context_get_attr(ctx, i, &key, &value);
+            if (!ret) {
+                text+=tr("%1 = %2\n").arg(key).arg(value);
+            }
+        }
+    } else {
+        text="No context attributes\n";
+    }
+    ui->txt_context_attributes->setText(text);
+
+    // TODO: FRU files
+
+    if(ctx)
+    {
+        ui->btn_connect->setFocus();
+        if(ctx!=globals::ctx)
+        {
+            if (globals::ctx)
+                iio_context_destroy(globals::ctx);
+            globals::ctx=ctx;
+        }
+    }
+
+    return ctx;
 }
 
 #pragma endregion }

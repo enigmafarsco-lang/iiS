@@ -178,20 +178,13 @@
               <item>
                <widget class="QGroupBox" name="grpProfileBw">
                 <property name="title">
-                 <string>ADR-V9009 TX Profile</string>
+                 <string>ADR-V9009 Profile: TX / ORx</string>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayoutProfileBw">
                  <item>
                   <widget class="QRadioButton" name="rdoProfile100">
                    <property name="text">
-                    <string>100 MHz BW</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="rdoProfile200">
-                   <property name="text">
-                    <string>200 MHz BW</string>
+                    <string>TX 100 MHz BW</string>
                    </property>
                    <property name="checked">
                     <bool>true</bool>
@@ -199,9 +192,47 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QRadioButton" name="rdoProfile200">
+                   <property name="text">
+                    <string>TX 200 MHz BW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QRadioButton" name="rdoProfile400">
                    <property name="text">
-                    <string>400 MHz BW</string>
+                    <string>TX 400 MHz BW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="lblOrxProfile">
+                   <property name="text">
+                    <string>ORx Bandwidth</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rdoOrxProfile100">
+                   <property name="text">
+                    <string>ORx 100 MHz BW</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rdoOrxProfile200">
+                   <property name="text">
+                    <string>ORx 200 MHz BW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rdoOrxProfile400">
+                   <property name="text">
+                    <string>ORx 400 MHz BW</string>
                    </property>
                   </widget>
                  </item>

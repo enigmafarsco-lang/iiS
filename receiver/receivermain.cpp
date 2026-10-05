@@ -2242,7 +2242,7 @@ void ReceiverMain::defaultSettings()
     // written to the board.  SN001 boards get the "profile under
     // construction ..." message and no change (400 TX profile rule).
     if (startupTxBw == 100 && startupOrxBw == 100) {
-        syncProfileUi(100);
+        syncProfileUi(100, 100);
         defaultParameters();
     } else if (!applyComposedProfile(startupTxBw, startupOrxBw)) {
         defaultParameters();
@@ -2375,27 +2375,89 @@ bool ReceiverMain::applyProfileBw(int bw)
     return applyComposedProfile(bw, bw);
 }
 
-// Sync the software UI (Profile tab radios, exciter profile, spectrum
-// window) to the given TX profile without writing to the board.
-void ReceiverMain::syncProfileUi(int bw)
+// Sync the software UI (Profile tab TX/ORx radios, exciter profile,
+// spectrum window) to the given profile without writing to the board.
+void ReceiverMain::syncProfileUi(int txBw, int orxBw)
 {
     // Keep the Profile tab radios in sync with the applied profile (the
     // startup assertion is not started from them).
-    if (bw == 400)
+    if (txBw == 400)
         ui->rdoProfile400->setChecked(true);
-    else if (bw == 200)
+    else if (txBw == 200)
         ui->rdoProfile200->setChecked(true);
     else
         ui->rdoProfile100->setChecked(true);
 
+    syncProfileOrxChoices();
+
+    if (orxBw == 400)
+        ui->rdoOrxProfile400->setChecked(true);
+    else if (orxBw == 200)
+        ui->rdoOrxProfile200->setChecked(true);
+    else
+        ui->rdoOrxProfile100->setChecked(true);
+
     // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
-    emit profileBandwidthChanged(bw);
+    emit profileBandwidthChanged(txBw);
 
     // Snap the spectrum window to the profile's sample rate
     // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
     // profiles) around the frequency.
     if (frqDomainPlot)
-        frqDomainPlot->setActiveBandwidth(bw * 122.88 / 100.0);
+        frqDomainPlot->setActiveBandwidth(txBw * 122.88 / 100.0);
+}
+
+// Keep the Profile tab ORx choices consistent with the TX choice:
+//   TX 100 -> ORx 100 only
+//   TX 200 -> ORx 100 / 200
+//   TX 400 -> ORx 200 / 400
+// If the currently checked ORx is not allowed any more, fall back to the
+// first allowed choice (ORx 100 for TX 100/200, ORx 200 for TX 400).
+void ReceiverMain::syncProfileOrxChoices()
+{
+    int tx = 100;
+    if (ui->rdoProfile400->isChecked())
+        tx = 400;
+    else if (ui->rdoProfile200->isChecked())
+        tx = 200;
+
+    if (tx == 100) {
+        ui->rdoOrxProfile100->setEnabled(true);
+        ui->rdoOrxProfile200->setEnabled(false);
+        ui->rdoOrxProfile400->setEnabled(false);
+        if (!ui->rdoOrxProfile100->isChecked())
+            ui->rdoOrxProfile100->setChecked(true);
+    } else if (tx == 200) {
+        ui->rdoOrxProfile100->setEnabled(true);
+        ui->rdoOrxProfile200->setEnabled(true);
+        ui->rdoOrxProfile400->setEnabled(false);
+        if (!ui->rdoOrxProfile100->isChecked() && !ui->rdoOrxProfile200->isChecked())
+            ui->rdoOrxProfile100->setChecked(true);
+    } else {
+        ui->rdoOrxProfile100->setEnabled(false);
+        ui->rdoOrxProfile200->setEnabled(true);
+        ui->rdoOrxProfile400->setEnabled(true);
+        if (!ui->rdoOrxProfile200->isChecked() && !ui->rdoOrxProfile400->isChecked())
+            ui->rdoOrxProfile200->setChecked(true);
+    }
+}
+
+void ReceiverMain::on_rdoProfile100_toggled(bool checked)
+{
+    if (checked)
+        syncProfileOrxChoices();
+}
+
+void ReceiverMain::on_rdoProfile200_toggled(bool checked)
+{
+    if (checked)
+        syncProfileOrxChoices();
+}
+
+void ReceiverMain::on_rdoProfile400_toggled(bool checked)
+{
+    if (checked)
+        syncProfileOrxChoices();
 }
 
 // Compose the Talise profile from the section files and write it to the
@@ -2499,7 +2561,7 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
     qInfo() << "Profile" << txBw << "+ ORx" << orxBw << "composed from"
             << sectionDir << "->" << composedPath;
 
-    syncProfileUi(txBw);
+    syncProfileUi(txBw, orxBw);
 
     // Disable the plot while the profile write to the board runs.
     if (frqDomainPlot)
@@ -2540,12 +2602,18 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
 }
 void ReceiverMain::on_btnProfileSet_clicked()
 {
-    int bw = 100;
+    // The Profile tab selects the TX and ORx bandwidths of the composed
+    // profile (general_<TX> + orx_<ORx> + tx_<TX> + </profile>).
+    int txBw = 100, orxBw = 100;
     if (ui->rdoProfile400->isChecked())
-        bw = 400;
+        txBw = 400;
     else if (ui->rdoProfile200->isChecked())
-        bw = 200;
-    applyProfileBw(bw);
+        txBw = 200;
+    if (ui->rdoOrxProfile400->isChecked())
+        orxBw = 400;
+    else if (ui->rdoOrxProfile200->isChecked())
+        orxBw = 200;
+    applyComposedProfile(txBw, orxBw);
 }
 
 

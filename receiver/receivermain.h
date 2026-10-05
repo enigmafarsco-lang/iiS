@@ -116,6 +116,9 @@ private slots:
 
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
+    void on_rdoProfile100_toggled(bool checked);
+    void on_rdoProfile200_toggled(bool checked);
+    void on_rdoProfile400_toggled(bool checked);
     void on_btnSave_clicked();
     void on_btnSetDefault_clicked();
     void on_btnReset_clicked();
@@ -217,9 +220,12 @@ public:
     // IP form provides both the TX and the ORx choice; the Profile tab Set
     // button uses the diagonal (ORx == TX).
     bool applyComposedProfile(int txBw, int orxBw);
-    // Sync the software UI (Profile tab radios, exciter profile, spectrum
-    // window) to the given TX profile without writing to the board.
-    void syncProfileUi(int bw);
+    // Sync the software UI (Profile tab TX/ORx radios, exciter profile,
+    // spectrum window) to the given profile without writing to the board.
+    void syncProfileUi(int txBw, int orxBw);
+    // Keep the Profile tab ORx choices consistent with the TX choice:
+    // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
+    void syncProfileOrxChoices();
     void changingPlotMode(int);
     QTimer dataTimer;
 
