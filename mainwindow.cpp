@@ -422,7 +422,7 @@ void MainWindow::connections()
         //                connect(receiverWindow,&Exciter::exciterModeFileSignal,this,[&](QString path, double sc,QString mode)
         //                {
         //                    QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc,
-                ui->exiter->voltage01Selected(), ui->exiter->voltage23Selected());
+        //                ui->exiter->voltage01Selected(), ui->exiter->voltage23Selected());
         //                    emit dacMsgSignal(msg,mode);
         //                });
 
