@@ -207,6 +207,10 @@ public:
     void defaultParameters();
     void updateSerialNumber();
     QString boardSerialNumber();
+    // Apply a Talise profile to the board (the Profile tab Set button and
+    // the startup assertion from the first-start IP form both use this).
+    // Returns false when nothing was written (serial rule / missing file).
+    bool applyProfileBw(int bw);
     void changingPlotMode(int);
     QTimer dataTimer;
 
@@ -235,6 +239,9 @@ public:
     bool pwIsOn{};
 
     const QString fileAddress{"/home/seraj3/Downloads/iio-oscilloscope/filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"};
+    // Profile (100/200/400) the user chose in the first-start IP form;
+    // asserted on the board once at first startup.
+    int startupProfileBw{200};
 
     //    QMap
     std::unordered_map<double, double> frqMap;

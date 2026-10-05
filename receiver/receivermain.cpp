@@ -1893,6 +1893,11 @@ void ReceiverMain::init()
 
             if(connectionReady)
             {
+                // The profile the user selected in the first-start form
+                // is asserted after connect (see defaultSettings()).
+                startupProfileBw = connect_dialog->selectedProfileBw();
+                qInfo() << "Startup: profile selected in IP form:" << startupProfileBw;
+
                 if(!globals::ctx)
                 {
                     qCritical() << "Receiver initialization aborted: IIO context is null";
@@ -1920,11 +1925,11 @@ void ReceiverMain::init()
                 vLayfrqDomainPlot->addWidget(frqDomainPlot)          ;
                 ui->wigFrqDomain->setLayout(vLayfrqDomainPlot)       ;
 
-                // Default profile is 200 MHz BW, so the spectrum window
-                // spans its sample rate 122.88 x 2 = 245.76 MHz from the
-                // start.  Only the axis window is set here - the startup
-                // must NOT change the frequency.
-                frqDomainPlot->setActiveBandwidth(245.76);
+                // The spectrum window spans the selected profile's
+                // sample rate (122.88 x P/100 = 122.88/245.76/491.52 MHz
+                // for the 100/200/400 profiles).  Only the axis window is
+                // set here - the startup must NOT change the frequency.
+                frqDomainPlot->setActiveBandwidth(122.88 * startupProfileBw / 100.0);
 
 
                 //time domain plot (first plot)
@@ -2226,31 +2231,12 @@ void ReceiverMain::defaultSettings()
     // The original project contains an absolute /home/seraj3/... profile path.
     // Do not start profile loading with a non-existent file: that path used to
     // enter an asynchronous UI update path and could abort the Qt application.
-    if (rfBandlbl->text().split(" ").value(0).toDouble() != 400)
-    {
-        if (QFileInfo::exists(fileAddress))
-        {
-            frqDomainPlot->setEnabled(false);
-            oscMain->_adrv9009->on_profile_config_clicked(fileAddress);
-
-            QTimer::singleShot(10000, this, [this]{
-                if (!frqDomainPlot)
-                    return;
-                frqDomainPlot->setEnabled(true);
-                defaultParameters();
-            });
-        }
-        else
-        {
-            qWarning() << "Receiver: startup ADRV9009 profile does not exist; skipping profile load:"
-                       << fileAddress;
-            defaultParameters();
-        }
-    }
-    else
-    {
+    // Assert the profile the user selected in the first-start IP form
+    // (once at first startup only - never on a timer): the same rules as
+    // the Profile tab Set button - SN001 gets the "profile under
+    // construction ..." message and no change, SN003 loads the _03 file.
+    if (!applyProfileBw(startupProfileBw))
         defaultParameters();
-    }
     // TX1 is OFF whenever defaults are applied at start (safe default).
     if (power_TX1_DownChk)
     {
@@ -2372,15 +2358,12 @@ void ReceiverMain::on_btnDefaultIioOsc_clicked()
     qInfo() << "default iio-osc: file applied over the LAN:" << iniPath;
 }
 
-void ReceiverMain::on_btnProfileSet_clicked()
+bool ReceiverMain::applyProfileBw(int bw)
 {
-    int bw = 100;
     int idx = 0;
-    if (ui->rdoProfile400->isChecked()) {
-        bw = 400;
+    if (bw == 400) {
         idx = 2;
-    } else if (ui->rdoProfile200->isChecked()) {
-        bw = 200;
+    } else if (bw == 200) {
         idx = 1;
     }
 
@@ -2404,7 +2387,7 @@ void ReceiverMain::on_btnProfileSet_clicked()
             snUp.endsWith(QLatin1String("001"))) {
             QMessageBox::information(this, tr("Profile"),
                                      tr("profile under construction ..."));
-            return;
+            return false;
         }
         if (snUp.endsWith(QLatin1String("SN003")) ||
             snUp.endsWith(QLatin1String("003")))
@@ -2463,8 +2446,17 @@ void ReceiverMain::on_btnProfileSet_clicked()
         QMessageBox::warning(this, tr("Profile"),
             tr("ADR-V9009 profile file not found:\n%1\n\nLooked in:\n%2")
                 .arg(profileName, dirs.join("\n")));
-        return;
+        return false;
     }
+
+    // Keep the Profile tab radios in sync with the applied profile (the
+    // startup assertion is not started from them).
+    if (bw == 400)
+        ui->rdoProfile400->setChecked(true);
+    else if (bw == 200)
+        ui->rdoProfile200->setChecked(true);
+    else
+        ui->rdoProfile100->setChecked(true);
 
     // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
     emit profileBandwidthChanged(bw);
@@ -2509,6 +2501,18 @@ void ReceiverMain::on_btnProfileSet_clicked()
 
         frqDomainPlot->setActiveBandwidth(profileFsMhz); // re-apply the freq +/- Fs/2 axis window
     });
+
+    return true;
+}
+
+void ReceiverMain::on_btnProfileSet_clicked()
+{
+    int bw = 100;
+    if (ui->rdoProfile400->isChecked())
+        bw = 400;
+    else if (ui->rdoProfile200->isChecked())
+        bw = 200;
+    applyProfileBw(bw);
 }
 
 

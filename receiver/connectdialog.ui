@@ -414,6 +414,39 @@ hr { height: 1px; border-width: 0; }
         </spacer>
        </item>
        <item>
+        <widget class="QGroupBox" name="grpProfile">
+         <property name="title">
+          <string>Profile</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayoutProfile">
+          <item>
+           <widget class="QRadioButton" name="radProfile100">
+            <property name="text">
+             <string>100 MHz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radProfile200">
+            <property name="text">
+             <string>200 MHz</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radProfile400">
+            <property name="text">
+             <string>400 MHz</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QPushButton" name="btn_refresh">

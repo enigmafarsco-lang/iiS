@@ -557,3 +557,11 @@ bool connectDialog::ReloadConnectDialog()
 }
 
 #pragma endregion }
+int connectDialog::selectedProfileBw() const
+{
+    if (ui->radProfile400 && ui->radProfile400->isChecked())
+        return 400;
+    if (ui->radProfile200 && ui->radProfile200->isChecked())
+        return 200;
+    return 100;
+}

@@ -29,6 +29,10 @@ public:
 
     bool Initialize();
 
+    // Profile (100/200/400) selected in the first-start form; asserted
+    // on the board after the connection is up.
+    int selectedProfileBw() const;
+
 private slots:
 
     void rad_scan_toggled(bool checked);
