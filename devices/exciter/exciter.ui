@@ -80,14 +80,55 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="lblDacMsg">
-     <property name="styleSheet">
-      <string notr="true">color:yellow</string>
-     </property>
-     <property name="text">
-      <string>Status: ---</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayoutDacCh">
+     <item>
+      <widget class="QLabel" name="lblDacMsg">
+       <property name="styleSheet">
+        <string notr="true">color:yellow</string>
+       </property>
+       <property name="text">
+        <string>Status: ---</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacerDacCh">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblDacCh">
+       <property name="text">
+        <string>DAC TX channels:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="chbVoltage01">
+       <property name="text">
+        <string>Voltage 0/1</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="chbVoltage23">
+       <property name="text">
+        <string>Voltage 2/3</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">

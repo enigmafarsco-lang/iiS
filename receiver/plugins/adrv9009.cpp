@@ -2369,19 +2369,30 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 
 
 
-QString adrv9009::setFile(QString fileName,double scale)
+QString adrv9009::setFile(QString fileName,double scale,bool pair01,bool pair23)
 {
+        if (!pair01 && !pair23)
+            return QStringLiteral("Select Voltage 0/1 or Voltage 2/3 first.");
+
         changingDac("");
-        // Put every TX pair into "DAC Buffer Output" mode, not just TX1,
-// so the loaded waveform drives all four channels voltage0..3.
+        // Put every TX pair into "DAC Buffer Output" mode; the waveform is
+// loaded only into the checked pairs (voltage0/1 and/or voltage2/3),
+// like the channel checkboxes in iio-oscilloscope.
 for (guint i = 0; i < dac_tx_manager->dac1.tx_count; i++)
     dac_tx_manager->dac1.txs[i].dds_mode_widget->setCurrentIndex(4);
 for (guint i = 0; i < dac_tx_manager->dac2.tx_count; i++)
     dac_tx_manager->dac2.txs[i].dds_mode_widget->setCurrentIndex(4);
         dac_tx_manager->dac_buffer_module.scale->setValue(scale);
         QTreeWidget *treeview =dac_tx_manager->dac_buffer_module.tx_channels_view;
+        // One tree item per scan-element channel: voltage0, voltage1,
+        // voltage2, voltage3 in order - items 0/1 are the voltage0/1
+        // pair, items 2/3 the voltage2/3 pair.
         for(int i=0;i<treeview->topLevelItemCount();i++)
-            treeview->topLevelItem(i)->setCheckState(0,Qt::CheckState::Checked);
+        {
+            const bool on = (i < 2) ? pair01 : pair23;
+            treeview->topLevelItem(i)->setCheckState(0,on ? Qt::CheckState::Checked
+                                                          : Qt::CheckState::Unchecked);
+        }
 
         dac_data_manager_instance->dac_buffer_config_file_set_cb(fileName,dac_tx_manager->dac_buffer_module);
         dac_data_manager_instance->waveform_load_button_clicked_cb(&dac_tx_manager->dac_buffer_module);

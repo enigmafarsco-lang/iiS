@@ -192,6 +192,10 @@ public slots:
     // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz), set from
     // the receiver Profile tab. Selects spot{N}mhz_{P}.txt in the Spot tab.
     void setProfileBw(int bwMHz);
+    // DAC-buffer channel pair selection (the Voltage 0/1 and Voltage 2/3
+    // checkboxes): true when that pair should transmit the loaded file.
+    bool voltage01Selected() const;
+    bool voltage23Selected() const;
     //    void receiveIpAddressSlot(bool);
     void connectToDevice();
     void initConnection(bool);

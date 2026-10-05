@@ -688,6 +688,16 @@ QString Exciter::resolveFileInAppFolders(const QString &relPath)
     return QString();
 }
 
+bool Exciter::voltage01Selected() const
+{
+    return ui->chbVoltage01 && ui->chbVoltage01->isChecked();
+}
+
+bool Exciter::voltage23Selected() const
+{
+    return ui->chbVoltage23 && ui->chbVoltage23->isChecked();
+}
+
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.

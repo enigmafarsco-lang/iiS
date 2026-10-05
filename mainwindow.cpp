@@ -358,7 +358,8 @@ void MainWindow::connections()
             receiverWindow->att_TX1_Spn->setValue(0);
             receiverWindow->power_TX1_DownChk->stateChanged(0);
             receiverWindow->power_TX1_DownChk->setChecked(false);
-            QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc);
+            QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc,
+                ui->exiter->voltage01Selected(), ui->exiter->voltage23Selected());
             emit dacMsgSignal(msg,mode);
         });
 
@@ -410,7 +411,8 @@ void MainWindow::connections()
             receiverWindow->att_TX1_Spn->setValue(0);
             receiverWindow->power_TX1_DownChk->stateChanged(0);
             receiverWindow->power_TX1_DownChk->setChecked(false);
-            QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc);
+            QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc,
+                ui->exiter->voltage01Selected(), ui->exiter->voltage23Selected());
             emit dacMsgSignal(msg,mode);
         });
 
@@ -419,7 +421,8 @@ void MainWindow::connections()
         //        //sending time data to card
         //                connect(receiverWindow,&Exciter::exciterModeFileSignal,this,[&](QString path, double sc,QString mode)
         //                {
-        //                    QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc);
+        //                    QString msg = receiverWindow->oscMain->_adrv9009->setFile(path, sc,
+                ui->exiter->voltage01Selected(), ui->exiter->voltage23Selected());
         //                    emit dacMsgSignal(msg,mode);
         //                });
 
