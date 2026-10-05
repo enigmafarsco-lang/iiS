@@ -41,6 +41,19 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     ui->setupUi(this);
     setupDrfmControlTab();
 
+    // The Profile tab has two radio families (TX and ORx) inside one group
+    // box.  Keep them in separate exclusive QButtonGroups - plain radios
+    // sharing one parent widget would all be mutually exclusive (clicking
+    // an ORx radio would uncheck the TX radio and the other way round).
+    QButtonGroup *txProfileGroup = new QButtonGroup(this);
+    txProfileGroup->addButton(ui->rdoProfile100);
+    txProfileGroup->addButton(ui->rdoProfile200);
+    txProfileGroup->addButton(ui->rdoProfile400);
+    QButtonGroup *orxProfileGroup = new QButtonGroup(this);
+    orxProfileGroup->addButton(ui->rdoOrxProfile100);
+    orxProfileGroup->addButton(ui->rdoOrxProfile200);
+    orxProfileGroup->addButton(ui->rdoOrxProfile400);
+
     vec.setX(0);
     vec.setY(0);
     a.addPoints(vec);
