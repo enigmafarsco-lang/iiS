@@ -85,7 +85,6 @@ class ReceiverMain : public QWidget
 
 
     void hiddenUiElements(bool);
-    void addExciterTab(QWidget *exciter);
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
     void checkFrqInColibr();
@@ -95,6 +94,8 @@ class ReceiverMain : public QWidget
 public:
     explicit ReceiverMain(QWidget *parent = nullptr);
     void init();
+    // Called by MainWindow to place the exciter widget in the receiver tabs.
+    void addExciterTab(QWidget *exciter);
     QString timeDomain{""};
     QString frqDomain{};
     bool isConnect{false};
