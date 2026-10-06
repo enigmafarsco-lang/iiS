@@ -112,7 +112,7 @@
    <item>
     <widget class="QLabel" name="lblHelp">
      <property name="text">
-      <string>TX 100: ORx 100. TX 200: ORx 100/200. TX 400: ORx 200/400. The board boots at TX100 + ORx100 (profile 100) - no profile change is needed for that choice.</string>
+      <string>TX 100: ORx 100. TX 200: ORx 100/200. TX 400: ORx 200/400. The board boots at TX100 + ORx100 (profile 100) - no profile change is needed for that choice. Refresh reads the board serial: SN001 boards have no ORx 400 (100/200 only).</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -126,13 +126,30 @@
      </property>
      <layout class="QGridLayout" name="gridLayoutInfo">
       <item row="0" column="0">
+       <widget class="QLabel" name="lblBoardSerial">
+        <property name="text">
+         <string>Board Serial</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="txt_board_serial">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>(unknown - press Refresh)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="lblContextDescription">
         <property name="text">
          <string>Context Description</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QTextEdit" name="txt_context_description">
         <property name="maximumSize">
          <size>
@@ -142,14 +159,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="lblFruInfo">
         <property name="text">
          <string>FRU Info</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QTextEdit" name="txt_fru_info">
         <property name="maximumSize">
          <size>
@@ -159,14 +176,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="lblIioDevices">
         <property name="text">
          <string>IIO Devices</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QTextEdit" name="txt_iio_devices">
         <property name="maximumSize">
          <size>
@@ -176,14 +193,14 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="lblContextAttributes">
         <property name="text">
          <string>Context Attributes</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QTextEdit" name="txt_context_attributes">
         <property name="maximumSize">
          <size>

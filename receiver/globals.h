@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QWidget>
+#include <QString>
 
 struct w_info {
     QWidget * widget;
@@ -38,6 +39,15 @@ public:
     static double peakValueDb;
     static double temp7291;
     static double temp9009;
+
+    // Board serial number ("hw_serial" context attribute, with an ssh
+    // EEPROM read fallback).  Shared by the first-start form and the
+    // Profile tab serial rules: SN001 boards have no ORx 400 (the forms
+    // disable the option), SN003 uses the ORx 400 section without the
+    // orxMergeFilter (orx_400_03.txt), every other board is normal.
+    static QString boardSerialNumber();
+    static bool serialIsSn001(const QString &sn);
+    static bool serialIsSn003(const QString &sn);
 
     static void osc_destroy_context();
     static int connect_widgets(QWidget *builder);

@@ -2428,6 +2428,12 @@ void ReceiverMain::syncProfileUi(int txBw, int orxBw)
 // first allowed choice (ORx 100 for TX 100/200, ORx 200 for TX 400).
 void ReceiverMain::syncProfileOrxChoices()
 {
+    // SN001 boards have no ORx 400: keep the option disabled (100/200
+    // only) instead of showing any message.
+    if (boardSerialCache.isEmpty() && globals::ctx)
+        boardSerialCache = boardSerialNumber();
+    const bool orx400Ok = !globals::serialIsSn001(boardSerialCache);
+
     int tx = 100;
     if (ui->rdoProfile400->isChecked())
         tx = 400;
@@ -2449,8 +2455,9 @@ void ReceiverMain::syncProfileOrxChoices()
     } else {
         ui->rdoOrxProfile100->setEnabled(false);
         ui->rdoOrxProfile200->setEnabled(true);
-        ui->rdoOrxProfile400->setEnabled(true);
-        if (!ui->rdoOrxProfile200->isChecked() && !ui->rdoOrxProfile400->isChecked())
+        ui->rdoOrxProfile400->setEnabled(orx400Ok);
+        const bool ok400 = orx400Ok && ui->rdoOrxProfile400->isChecked();
+        if (!ui->rdoOrxProfile200->isChecked() && !ok400)
             ui->rdoOrxProfile200->setChecked(true);
     }
 }
@@ -2480,22 +2487,23 @@ void ReceiverMain::on_rdoProfile400_toggled(bool checked)
 // (no orxMergeFilter) - the profile the SN003 boards use.
 bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
 {
-    // The 400 TX profile depends on the board serial number: a serial
-    // ending to 1 has no 400 profile yet ("profile under construction ...",
-    // nothing is set on the board).  SN002 is a normal board.  SN003 loads
-    // the _03 variant, which is exactly what the composed 400 sections
-    // produce.
-    if (txBw == 400) {
+    // The ORx 400 section depends on the board serial number: SN001
+    // boards have no ORx 400 at all (the forms disable the option; nothing
+    // is set on the board and no message is shown), SN003 uses the _03
+    // variant (orx_400_03.txt - the ORx 400 section without the
+    // orxMergeFilter) and every other board (SN002 and unknown) is normal
+    // (orx_400.txt with the orxMergeFilter).
+    QString serialSuffix;
+    if (orxBw == 400) {
         const QString sn = boardSerialNumber();
-        qInfo() << "Profile 400: board serial number"
+        qInfo() << "ORx 400: board serial number"
                 << (sn.isEmpty() ? "(not found)" : sn);
-        const QString snUp = sn.trimmed().toUpper();
-        if (snUp.endsWith(QLatin1String("SN001")) ||
-            snUp.endsWith(QLatin1String("001"))) {
-            QMessageBox::information(this, tr("Profile"),
-                                     tr("profile under construction ..."));
+        if (globals::serialIsSn001(sn)) {
+            qWarning() << "ORx 400 is not available on SN001 boards - nothing set";
             return false;
         }
+        if (globals::serialIsSn003(sn))
+            serialSuffix = QStringLiteral("_03");
     }
 
     // Before a profile change the frequency must be 1800 MHz: check it
@@ -2545,7 +2553,7 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
         return true;
     };
     const QString generalName = QString("general_%1.txt").arg(txBw);
-    const QString orxName = QString("orx_%1.txt").arg(orxBw);
+    const QString orxName = QString("orx_%1%2.txt").arg(orxBw).arg(serialSuffix);
     const QString txName = QString("tx_%1.txt").arg(txBw);
     QString generalTxt, orxTxt, txTxt;
     if (!readSection(generalName, generalTxt) ||
@@ -2637,47 +2645,14 @@ void ReceiverMain::on_btnProfileSet_clicked()
 // ssh exec (BatchMode: never prompts for a password).
 QString ReceiverMain::boardSerialNumber()
 {
-    QString sn;
-
-    if (globals::ctx) {
-        const char *v = iio_context_get_attr_value(globals::ctx, "hw_serial");
-        if (v && *v)
-            sn = QString::fromUtf8(v).trimmed();
-    }
-
-    if (sn.isEmpty() && globals::ctx) {
-        QString host;
-        const char *uri = iio_context_get_attr_value(globals::ctx, "uri");
-        if (uri)
-            host = QString::fromUtf8(uri);
-        host.remove(QLatin1String("ip:"));
-        host = host.section(QLatin1Char(':'), 0, 0);
-
-        if (!host.isEmpty()) {
-            QProcess proc;
-            proc.start(QStringLiteral("ssh"),
-                       QStringList() << QStringLiteral("-o") << QStringLiteral("BatchMode=yes")
-                       << QStringLiteral("-o") << QStringLiteral("ConnectTimeout=2")
-                       << (QStringLiteral("root@") + host)
-                       << QStringLiteral("head -c 16 /sys/bus/i2c/devices/0-0050/eeprom"));
-            if (proc.waitForFinished(3500) && proc.exitCode() == 0) {
-                const QByteArray raw = proc.readAllStandardOutput();
-                for (unsigned char c : raw) {
-                    if (c < 0x20 || c > 0x7e)
-                        break;
-                    sn.append(QChar(c));
-                }
-                sn = sn.trimmed();
-            }
-        }
-    }
-
-    return sn;
+    // Shared implementation (also used by the first-start form).
+    return globals::boardSerialNumber();
 }
 
 void ReceiverMain::updateSerialNumber()
 {
     const QString sn = boardSerialNumber();
+    boardSerialCache = sn;
     if (ui->lblSN)
         ui->lblSN->setText(sn.isEmpty() ? QStringLiteral("-") : sn);
     qInfo() << "Board serial number:" << (sn.isEmpty() ? "(not found)" : sn);

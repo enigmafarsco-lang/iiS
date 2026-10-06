@@ -260,6 +260,10 @@ public:
     int startupTxBw{200};
     int startupOrxBw{100};
 
+    // Board serial number cache (SN001 gates the ORx 400 option in the
+    // Profile tab); filled once the IIO context is up.
+    QString boardSerialCache;
+
     //    QMap
     std::unordered_map<double, double> frqMap;
     std::unordered_map<double, double> pwMap;

@@ -41,6 +41,9 @@ private:
 
     Settings setting;
 
+    // Board serial number read from the target (empty until known).
+    QString boardSerial;
+
     // Keep the ORx choices consistent with the TX choice:
     // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
     void syncOrxChoices();
@@ -49,9 +52,14 @@ private:
     // (manual entry only - the discover/scan section was removed).
     struct iio_context * GetContext();
 
-    // Refresh the IIO Context Information panels (Context Description,
-    // FRU Info, IIO Devices, Context Attributes) from the entered URI.
+    // Refresh the IIO Context Information panels (Board Serial, Context
+    // Description, FRU Info, IIO Devices, Context Attributes) from the
+    // entered URI.
     bool ReloadConnectDialog();
+
+    // Read the board serial number into the form (it gates the ORx 400
+    // option: SN001 boards have ORx 100/200 only).
+    void updateBoardSerial();
 
 signals:
     void connectSignal();

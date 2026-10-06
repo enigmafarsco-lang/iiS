@@ -1,5 +1,7 @@
 #include "globals.h"
 
+#include <QProcess>
+
 iio_context * globals::ctx=nullptr;
 bool globals::status=false;
 QList<w_info*> * globals::attrs=nullptr;
@@ -160,4 +162,65 @@ int globals::__connect_widget(struct iio_device *dev, const char *attr,
 int globals::connect_widgets(QWidget *builder)
 {
     return iio_device_debug_attr_read_all(dev, __connect_widget, builder);
+}
+
+/**
+ * @brief globals::boardSerialNumber
+ * Read the board serial number over LAN: preferred source is the iiod
+ * context attribute "hw_serial", otherwise read the production EEPROM
+ * (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated ssh exec
+ * (BatchMode: never prompts for a password).
+ */
+QString globals::boardSerialNumber()
+{
+    QString sn;
+
+    if (globals::ctx) {
+        const char *v = iio_context_get_attr_value(globals::ctx, "hw_serial");
+        if (v && *v)
+            sn = QString::fromUtf8(v).trimmed();
+    }
+
+    if (sn.isEmpty() && globals::ctx) {
+        QString host;
+        const char *uri = iio_context_get_attr_value(globals::ctx, "uri");
+        if (uri)
+            host = QString::fromUtf8(uri);
+        host.remove(QLatin1String("ip:"));
+        host = host.section(QLatin1Char(':'), 0, 0);
+
+        if (!host.isEmpty()) {
+            QProcess proc;
+            proc.start(QStringLiteral("ssh"),
+                       QStringList() << QStringLiteral("-o") << QStringLiteral("BatchMode=yes")
+                       << QStringLiteral("-o") << QStringLiteral("ConnectTimeout=2")
+                       << (QStringLiteral("root@") + host)
+                       << QStringLiteral("head -c 16 /sys/bus/i2c/devices/0-0050/eeprom"));
+            if (proc.waitForFinished(3500) && proc.exitCode() == 0) {
+                const QByteArray raw = proc.readAllStandardOutput();
+                for (unsigned char c : raw) {
+                    if (c < 0x20 || c > 0x7e)
+                        break;
+                    sn.append(QChar(c));
+                }
+                sn = sn.trimmed();
+            }
+        }
+    }
+
+    return sn;
+}
+
+bool globals::serialIsSn001(const QString &sn)
+{
+    const QString snUp = sn.trimmed().toUpper();
+    return snUp.endsWith(QLatin1String("SN001")) ||
+           snUp.endsWith(QLatin1String("001"));
+}
+
+bool globals::serialIsSn003(const QString &sn)
+{
+    const QString snUp = sn.trimmed().toUpper();
+    return snUp.endsWith(QLatin1String("SN003")) ||
+           snUp.endsWith(QLatin1String("003"));
 }

@@ -99,6 +99,10 @@ void connectDialog::txBwToggled(bool checked)
  */
 void connectDialog::syncOrxChoices()
 {
+    // SN001 boards have no ORx 400: keep the option disabled (100/200
+    // only) instead of showing any message.
+    const bool orx400Ok = !globals::serialIsSn001(boardSerial);
+
     const int tx = selectedTxBw();
 
     if (tx == 100) {
@@ -116,10 +120,26 @@ void connectDialog::syncOrxChoices()
     } else {
         ui->radOrx100->setEnabled(false);
         ui->radOrx200->setEnabled(true);
-        ui->radOrx400->setEnabled(true);
-        if (!ui->radOrx200->isChecked() && !ui->radOrx400->isChecked())
+        ui->radOrx400->setEnabled(orx400Ok);
+        const bool ok400 = orx400Ok && ui->radOrx400->isChecked();
+        if (!ui->radOrx200->isChecked() && !ok400)
             ui->radOrx200->setChecked(true);
     }
+}
+
+/**
+ * Read the board serial number into the form and re-gate the ORx 400
+ * option (SN001 boards get ORx 100/200 only).
+ */
+void connectDialog::updateBoardSerial()
+{
+    boardSerial = globals::boardSerialNumber();
+    ui->txt_board_serial->setText(boardSerial.isEmpty()
+                                  ? QStringLiteral("(unknown - press Refresh)")
+                                  : boardSerial);
+    if (!boardSerial.isEmpty())
+        qInfo() << "Form: board serial number" << boardSerial;
+    syncOrxChoices();
 }
 
 #pragma endregion }
@@ -196,6 +216,11 @@ void connectDialog::btn_connect_clicked()
         ip.remove(0, 3);
     setting.setIp(ip);
     setting.SaveToFile();
+
+    // Check the board serial number and write it in the form before the
+    // dialog closes - the startup profile assertion uses the (possibly
+    // fallback-adjusted) TX/ORx selection.
+    updateBoardSerial();
 
     qInfo() << "User confirmed IIO URI:" << uri;
     accept();
@@ -298,6 +323,10 @@ bool connectDialog::ReloadConnectDialog()
             globals::ctx=ctx;
         }
     }
+
+    // Check the board serial number and write it in the form; it gates
+    // the ORx 400 option (SN001 boards have ORx 100/200 only).
+    updateBoardSerial();
 
     return ctx;
 }
