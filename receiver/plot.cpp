@@ -1,5 +1,6 @@
 #include "ui_plot.h"
 #include "plot.h"
+#include <receiver/datafiles.h>
 #include <QDateTime>
 #include <QString>
 #include <receiver/oscmain.h>
@@ -7575,7 +7576,11 @@ void Plot::on_btnSaveTableData_clicked()
     //    if (!fileName.isEmpty()) {
     ui->btnSaveTableData->setText("saving...");
     if(userName.isEmpty()) userName = "Unknown";
-    saveToCSVInThread(ui->timeDataTable, "/home/seraj3/Log/"+userName+"_LOG.csv");
+    // User measurement logs go to the project files/Log folder (the old
+    // build hard-coded /home/seraj3/Log which exists on no other machine).
+    const QString logPath = dataFilePath(QStringLiteral("Log/") + userName + QStringLiteral("_LOG.csv"));
+    QDir().mkpath(QFileInfo(logPath).absolutePath());
+    saveToCSVInThread(ui->timeDataTable, logPath);
     //    }
 
 }
