@@ -4,6 +4,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
 
+# Keep debug information (symbols) in the binary.  Without this the
+# default qmake build is a plain release build and the debugger warns:
+# "This does not seem to be a Debug build. Setting breakpoints by file
+# name and line number may fail" (all .debug_* sections missing).
+# force_debug_info adds -g (or /Zi on MSVC) even to release builds.
+# For the smoothest stepping experience also select the Debug build
+# configuration in Qt Creator (Projects -> Build -> Build configuration)
+# or run: qmake CONFIG+=debug CONFIG-=release && make clean && make
+CONFIG += force_debug_info
+
 
 QMAKE_CXXFLAGS += -liio
 DEFINES += QT_DEPRECATED_WARNINGS
