@@ -1,10 +1,10 @@
-# Convenience top-level Makefile for this qmake project (seraj3.pro), so
+# Convenience top-level Makefile for this qmake project (eLynxSDR.pro), so
 # a plain `make` at the repository root works. It runs qmake in a shadow
 # build directory (the same one Qt Creator uses) and delegates to the
 # generated Makefile there; qmake output never overwrites this file.
 
 BUILD_DIR ?= build/Desktop-Debug
-PRO       := $(CURDIR)/seraj3.pro
+PRO       := $(CURDIR)/eLynxSDR.pro
 
 QMAKE ?= $(shell command -v qmake6 2>/dev/null || command -v qmake 2>/dev/null || \
 	ls /usr/lib/qt6/bin/qmake /usr/lib/qt5/bin/qmake \
