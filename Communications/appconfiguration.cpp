@@ -1,4 +1,5 @@
 #include "appconfiguration.h"
+#include <receiver/datafiles.h>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -8,7 +9,7 @@
 
 AppConfiguration::AppConfiguration()
 {
-    m_settingFilename = "Appsetting.json";
+    m_settingFilename = dataFilePath(QStringLiteral("Appsetting.json"));
     m_setting = new AppSettings;
     defaultSetting();
     readSettingFromFile();

@@ -1,4 +1,5 @@
 #include "settings.h"
+#include <receiver/datafiles.h>
 #include <qfile.h>
 #include<qfiledialog.h>
 #include<qtextstream.h>
@@ -13,7 +14,7 @@ Settings::Settings()
 void Settings::ReadSettingFile()
 {
     //Read the settings file
-    QFile file("settings.txt");
+    QFile file(dataFilePath(QStringLiteral("settings.txt")));
 
     //Open the file
     if (!file.open(QIODevice::ReadOnly|QIODevice::Text))
@@ -54,7 +55,7 @@ void Settings::SaveToFile()
     QString strJson(doc.toJson(QJsonDocument::Compact));
 
     //Read text file
-    QFile file("settings.txt");
+    QFile file(dataFilePath(QStringLiteral("settings.txt")));
 
     //Open the file in write-only
     if(file.open(QIODevice::WriteOnly|QIODevice::Text))

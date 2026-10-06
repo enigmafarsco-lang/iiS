@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <receiver/oscmain.h>
+#include <receiver/datafiles.h>
 #include <unordered_map>
 #include "components/GLChart/QGLchart.h"
 #include <QSystemTrayIcon>
@@ -71,7 +72,7 @@ class ReceiverMain : public QWidget
     bool lengthChecker(QString inputVal);
     bool userInputChecker(QString val1, QString val2);
     bool writeToFile(QString,QString, QString,QString);
-    QString const fileAuth{"upf"};
+    QString const fileAuth{dataFilePath(QStringLiteral("upf"))};
     QString superUser{"superadmin"};
     QString passSuper{"sadefa@1402"};
     bool isUserLoggedin{false};
@@ -85,7 +86,7 @@ class ReceiverMain : public QWidget
 
     void hiddenUiElements(bool);
     void saveCalibrToFile();
-    QString const calibFile{"Calibration.txt"};
+    QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
     void checkFrqInColibr();
     void calibManagment();
     void calibInitial();

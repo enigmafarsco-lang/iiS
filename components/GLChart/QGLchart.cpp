@@ -1,4 +1,5 @@
 #include "QGLchart.h"
+#include <receiver/datafiles.h>
 #include <iostream>
 #include <QOpenGLDebugMessage>
 #include <QMouseEvent>
@@ -3222,7 +3223,7 @@ void QGLchart::initializeTextProgram()
 
 #ifdef LINUX
 
-    QString pth = QDir::currentPath()+"/font/arial.ttf";
+    QString pth = dataFilePath(QStringLiteral("font/arial.ttf"));
     QByteArray ba = pth.toLocal8Bit();
     const char *dirPath = ba.data();
 

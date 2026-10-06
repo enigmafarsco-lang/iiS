@@ -2,6 +2,7 @@
 #define SATTARUTILS_H
 
 #include <QObject>
+#include <receiver/datafiles.h>
 #include <QMessageBox>
 #include <QVector>
 #include <QJsonObject>
@@ -71,7 +72,7 @@ public:
 
     const int maxNormal{48800};
     const QString matlabRunTimePath = "/usr/local/MATLAB/MATLAB_Runtime/v99";
-    const QString program = QDir::currentPath() + "/signal/run_Executable_Generator_DoubleChannel.sh";
+    const QString program = dataFilePath(QStringLiteral("signal/run_Executable_Generator_DoubleChannel.sh"));
     //==========================================================================================================
 
 
