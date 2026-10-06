@@ -1941,11 +1941,11 @@ void ReceiverMain::init()
                 vLayfrqDomainPlot->addWidget(frqDomainPlot)          ;
                 ui->wigFrqDomain->setLayout(vLayfrqDomainPlot)       ;
 
-                // The spectrum window spans the selected profile's
-                // sample rate (122.88 x P/100 = 122.88/245.76/491.52 MHz
-                // for the 100/200/400 profiles).  Only the axis window is
-                // set here - the startup must NOT change the frequency.
-                frqDomainPlot->setActiveBandwidth(122.88 * startupTxBw / 100.0);
+                // The spectrum window spans the ORx profile's sample
+                // rate (122.88 x P/100 = 122.88/245.76/491.52 MHz for the
+                // ORx 100/200/400 profiles).  Only the axis window is set
+                // here - the startup must NOT change the frequency.
+                frqDomainPlot->setActiveBandwidth(122.88 * startupOrxBw / 100.0);
 
 
                 //time domain plot (first plot)
@@ -2413,11 +2413,12 @@ void ReceiverMain::syncProfileUi(int txBw, int orxBw)
     // Tell the exciter which profile is active (it picks spot{N}mhz_{P}.txt).
     emit profileBandwidthChanged(txBw);
 
-    // Snap the spectrum window to the profile's sample rate
-    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
-    // profiles) around the frequency.
+    // Snap the spectrum window to the ORx profile's sample rate
+    // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the ORx
+    // 100/200/400 profiles) around the frequency.  The exciter follows
+    // the TX profile only (profileBandwidthChanged above).
     if (frqDomainPlot)
-        frqDomainPlot->setActiveBandwidth(txBw * 122.88 / 100.0);
+        frqDomainPlot->setActiveBandwidth(orxBw * 122.88 / 100.0);
 }
 
 // Keep the Profile tab ORx choices consistent with the TX choice:
@@ -2601,7 +2602,7 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
     }
     QDir::setCurrent(workDir);
 
-    QTimer::singleShot(10000, this, [this, txBw]{
+    QTimer::singleShot(10000, this, [this, orxBw]{
         if (!frqDomainPlot)
             return;
         frqDomainPlot->setEnabled(true);
@@ -2615,8 +2616,8 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
         if (receiverIsConnected && oscMain && oscMain->_adrv9009 && rfBandlbl)
             defaultParameters();
 
-        // re-apply the freq +/- Fs/2 axis window
-        frqDomainPlot->setActiveBandwidth(txBw * 122.88 / 100.0);
+        // re-apply the freq +/- Fs/2 axis window (ORx sample rate)
+        frqDomainPlot->setActiveBandwidth(orxBw * 122.88 / 100.0);
     });
 
     return true;
