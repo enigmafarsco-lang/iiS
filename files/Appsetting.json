@@ -1,0 +1,66 @@
+{
+    "cooling_configuration": {
+        "coolingCompConst": 9600,
+        "coolingCriticalTempreture": 70,
+        "coolingFanConst": 5000,
+        "coolingManualTempretureOffset": 0,
+        "coolingMaxNormalCompCurrent": 8,
+        "coolingMaxNormalFanCurrent": 1.2,
+        "coolingMaxNormalMotorCurrent": 5.5,
+        "coolingMinNormalCompCurrent": 3.5,
+        "coolingMinNormalFanCurrent": 0.4,
+        "coolingMinNormalMotorCurrent": 2,
+        "coolingMotorCosnt": 9500
+    },
+    "gis_configuration": {
+        "gisLAt": 32.7,
+        "gisLong": 54.45,
+        "gisRadarLat": 30,
+        "gisRadarLong": 51,
+        "gis_azimuth": 0,
+        "gis_azimuth_range": 20,
+        "gis_elevation": 0,
+        "gis_elevation_range": 20,
+        "gis_emit_state": 0
+    },
+    "network_configuration": {
+        "RffCommunicationType": "tcp",
+        "RffIpAddress": "192.168.1.7",
+        "RffLoggingFormat": "hex",
+        "RffPort": 33000,
+        "ServoCommunicationType": "tcp",
+        "ServoIpAddress": "192.168.1.8",
+        "ServoLoggingFormat": "string",
+        "ServoPort": 4002,
+        "SolidCommunicationType": "udp",
+        "SolidIpAddress": "192.168.1.10",
+        "SolidLoggingFormat": "string",
+        "SolidPort": 8700,
+        "calibrationIpAddress": "192.168.124.55",
+        "calibrationPort": 5025,
+        "coolingCommunicationType": "tcp",
+        "coolingIpAddress": "192.168.1.111",
+        "coolingLoggingFormat": "string",
+        "coolingPort": 5000,
+        "joshanIpAddress": "5.190.48.246",
+        "joshanPort": 23,
+        "pBoardIpAddress": "192.168.1.20",
+        "tunerCommunicationType": "tcp",
+        "tunerIpAddress": "192.168.1.9",
+        "tunerLoggingFormat": "hex",
+        "tunerPort": 23
+    },
+    "outernode_configuration": {
+        "includeRadar": "yes"
+    },
+    "rff_configuration": {
+        "compassPanOffset": 0,
+        "compassPitchOffset": 0
+    },
+    "servo_configuration": {
+        "Servo_PanThreshold": 0,
+        "Servo_TiltThreshold": 0,
+        "panTiltStopEarlier": "",
+        "servoPanTiltMechanicalOffset": 0
+    }
+}
