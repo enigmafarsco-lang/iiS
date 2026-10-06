@@ -616,7 +616,7 @@ void Exciter::isUserLoggedInSlot(double state)
 //}
 
 // The exciter reads and writes its waveform txt files ONLY in the
-// project's files/ folder (PROJECT_FILES_DIR defined by seraj3.pro =
+// project's files/ folder (PROJECT_FILES_DIR defined by eLynxSDR.pro =
 // <project>/files, e.g. /home/joshua/Documents/NIMA_USB/
 // iiS-arena-01a0e308-iis/files).  No other folder is searched - a
 // waveform can never come from another directory or another checkout.

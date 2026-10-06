@@ -41,6 +41,19 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
     ui->setupUi(this);
     setupDrfmControlTab();
 
+    // --- eLynxSDR v0.0.2 GUI policy -------------------------------------
+    // The "Plots" tab is deleted from the receiver form (its widgets stay
+    // alive in the software).  The vertical tabs listed below are removed
+    // from the receiver GUI the same way: removeTab() only takes them off
+    // the tab bar - the panels, their widgets and all their behavior
+    // remain in the software and keep working.
+    ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->tab_12));
+    for (QWidget *hiddenTab : { ui->tabHopping, ui->tabHopping_2, ui->tabAtt,
+                                ui->unitTab, ui->tabTHCW, ui->tabSmartNoise,
+                                ui->tabScan })
+        ui->tabWidgetSetting->removeTab(
+                    ui->tabWidgetSetting->indexOf(hiddenTab));
+
     // The Profile tab has two radio families (TX and ORx) inside one group
     // box.  Keep them in separate exclusive QButtonGroups - plain radios
     // sharing one parent widget would all be mutually exclusive (clicking
@@ -1865,6 +1878,17 @@ void ReceiverMain::fillHistoramArray(int type, QCustomPlot * plot, double * val,
 }
 
 
+void ReceiverMain::addExciterTab(QWidget *exciter)
+{
+    if (!exciter)
+        return;
+    // The exciter (with all its sub-tabs) becomes a top level tab right
+    // beside "Receiver".  insertTab() reparents the widget; every signal
+    // connection attached to it stays valid (Qt connections are between
+    // objects and ignore the widget parent).
+    ui->tabWidget->insertTab(1, exciter, tr("Exciter"));
+}
+
 void ReceiverMain::init()
 {
 
@@ -1879,6 +1903,19 @@ void ReceiverMain::init()
     globals::ctx=NULL;
     oscMain=new OSCMain();
     ui->tabWidget->addTab(oscMain,"configs");
+    // Every text in the configs tab came out dark on the dark theme -
+    // force white on the whole subtree.  A widget level stylesheet takes
+    // precedence over the application QSS.
+    oscMain->setStyleSheet(
+        "QWidget { color: #ffffff; }"
+        "QTabBar::tab { color: #ffffff; }"
+        "QHeaderView::section { color: #ffffff; }"
+        "QLabel, QCheckBox, QRadioButton, QGroupBox, QPushButton, QToolButton,"
+        " QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QSpinBox,"
+        " QDoubleSpinBox, QMenu, QListWidget, QTreeView, QTableView {"
+        "     color: #ffffff; }"
+        "QListWidget::item, QTreeView::item, QTableView::item {"
+        "     color: #ffffff; }");
 
     //saeid raziani
     //    oscMain->show();
@@ -2275,7 +2312,7 @@ void ReceiverMain::defaultSettings()
 // for the build dir and the user's local checkout), then snaps the
 // spectrum x-axis window to freq +/- bw/2 around the selected frequency.
 // The default settings file in the MAIN PROJECT files folder
-// (PROJECT_FILES_DIR = <project>/files, compiled in by seraj3.pro).
+// (PROJECT_FILES_DIR = <project>/files, compiled in by eLynxSDR.pro).
 QString ReceiverMain::settingsIniPath(const QString &fileName)
 {
     QStringList dirs;
