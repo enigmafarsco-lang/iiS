@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     init();
     connections();
-    this->setWindowTitle("eLynxSDR v0.0.2");
+    this->setWindowTitle("Transmitter");
 
 
     this->setFixedWidth(1270);
@@ -50,10 +50,6 @@ void MainWindow::init()
 
     //creating and showing /*receiver widget
     receiverWindow = new ReceiverMain;
-    // The exciter (with all its sub-tabs) lives in the receiver form now,
-    // as a tab beside "Receiver".  All signal connections below keep
-    // working - they are object-to-object and ignore the widget parent.
-    receiverWindow->addExciterTab(ui->exiter);
     receiverWindow->show();
     //    receiverWindow->show();
 

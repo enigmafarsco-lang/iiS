@@ -85,7 +85,6 @@ class ReceiverMain : public QWidget
 
 
     void hiddenUiElements(bool);
-    void addExciterTab(QWidget *exciter);
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
     void checkFrqInColibr();

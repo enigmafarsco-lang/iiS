@@ -1,10 +1,5 @@
 QT       += core gui printsupport openglextensions opengl network concurrent
 
-# Product name and revision (was seraj3).
-TARGET = eLynxSDR
-VERSION = 0.0.2
-DEFINES += APP_REVISION=\\\"v0.0.2\\\"
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11

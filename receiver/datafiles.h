@@ -8,7 +8,7 @@
 #include <QCoreApplication>
 
 // Resolve a data/config file to the project files/ folder (the canonical
-// location - PROJECT_FILES_DIR, compiled in by eLynxSDR.pro), then to the
+// location - PROJECT_FILES_DIR, compiled in by seraj3.pro), then to the
 // legacy locations (working-dir files/, application files/, working dir).
 // The files the app uses at runtime live in files/: Appsetting.json,
 // settings.txt, Calibration.txt, upf, font/arial.ttf and the signal/

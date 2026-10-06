@@ -40,7 +40,7 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>eLynxSDR</string>
+        <string>Seraj</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
