@@ -223,7 +223,7 @@ private:
     QFuture<void> hoppingFuture;
 
     //saeid raziani
-    const QString fileAddress{dataFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
+    const QString fileAddress{resourceFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
 
 
     bool hopping=false;

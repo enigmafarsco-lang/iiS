@@ -256,7 +256,7 @@ public:
     bool state{false};
     bool pwIsOn{};
 
-    const QString fileAddress{dataFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
+    const QString fileAddress{resourceFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
     // TX and ORx bandwidths the user chose in the first-start IP form;
     // asserted on the board once at first startup (the board itself boots
     // at profile 100 = TX100 + ORx100).

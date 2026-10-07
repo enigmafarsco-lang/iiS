@@ -1,0 +1,4 @@
+/build/
+/offline-bundle/
+/vendor/*
+!/vendor/README.md

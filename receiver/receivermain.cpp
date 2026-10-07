@@ -2306,28 +2306,11 @@ void ReceiverMain::defaultSettings()
 }
 
 
-// Phase 5: Profile tab "Set" button.
-// Loads the selected ADRV9009 TX profile (100/200/400 MHz) from the
-// files/filters/adrv9009 folder shipped with the project (with fallbacks
-// for the build dir and the user's local checkout), then snaps the
-// spectrum x-axis window to freq +/- bw/2 around the selected frequency.
-// The default settings file in the MAIN PROJECT files folder
-// (PROJECT_FILES_DIR = <project>/files, compiled in by eLynxSDR.pro).
+// Return a writable per-user copy of a shipped INI file. Save/Set Default
+// must work when the application is installed under /opt.
 QString ReceiverMain::settingsIniPath(const QString &fileName)
 {
-    QStringList dirs;
-#ifdef PROJECT_FILES_DIR
-    dirs << QStringLiteral(PROJECT_FILES_DIR);
-#endif
-    dirs << QDir::currentPath() + "/files"
-         << QCoreApplication::applicationDirPath() + "/files";
-
-    for (const QString &d : dirs) {
-        const QString pth = QDir(d).absoluteFilePath(fileName);
-        if (QFileInfo::exists(pth))
-            return pth;
-    }
-    return QDir(dirs.first()).absoluteFilePath(fileName);
+    return dataFilePath(fileName);
 }
 
 // "Save": save all settings of the software to the default file.
@@ -2408,7 +2391,7 @@ void ReceiverMain::on_btnDefaultIioOsc_clicked()
         qWarning() << "Receiver: default iio-osc skipped because the board is not connected";
         return;
     }
-    const QString iniPath = settingsIniPath("default_iio_osc.ini");
+    const QString iniPath = resourceFilePath(QStringLiteral("default_iio_osc.ini"));
     if (!QFileInfo::exists(iniPath)) {
         QMessageBox::warning(this, tr("default iio-osc"),
             tr("No iio-oscilloscope settings file:\n%1").arg(iniPath));
@@ -2557,46 +2540,28 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
         }
     }
 
-    // Section search order: project tree from the working dir, project tree
-    // from the executable dir, then the user's local checkout and the
-    // compiled-in PROJECT_FILES_DIR.
-    const QStringList sectionDirs = {
-        QDir::currentPath() + "/files/filters/adrv9009/sections",
-        QCoreApplication::applicationDirPath() + "/files/filters/adrv9009/sections",
-        "/home/joshua/Documents/NIMA_USB/iiS-arena-01a0d367-iis/files/filters/adrv9009/sections",
-#ifdef PROJECT_FILES_DIR
-        QStringLiteral(PROJECT_FILES_DIR) + "/filters/adrv9009/sections",
-#endif
-    };
+    const QString generalName = QString("general_%1.txt").arg(txBw);
+    const QString orxName = QString("orx_%1%2.txt").arg(orxBw).arg(serialSuffix);
+    const QString txName = QString("tx_%1.txt").arg(txBw);
+    const QString generalPath = resourceFilePath(
+        QStringLiteral("filters/adrv9009/sections/") + generalName);
+    const QString orxPath = resourceFilePath(
+        QStringLiteral("filters/adrv9009/sections/") + orxName);
+    const QString txPath = resourceFilePath(
+        QStringLiteral("filters/adrv9009/sections/") + txName);
+    const QString sectionDir = QFileInfo(generalPath).absolutePath();
 
-    QString sectionDir;
-    for (const QString &dir : sectionDirs) {
-        if (QFileInfo::exists(dir + QString("/general_%1.txt").arg(txBw))) {
-            sectionDir = dir;
-            break;
-        }
-    }
-    if (sectionDir.isEmpty()) {
-        QMessageBox::warning(this, tr("Profile"),
-            tr("ADR-V9009 profile sections not found (general_%1.txt):\n%2")
-                .arg(txBw).arg(sectionDirs.join("\n")));
-        return false;
-    }
-
-    auto readSection = [&sectionDir](const QString &name, QString &out) {
-        QFile f(sectionDir + QLatin1Char('/') + name);
+    auto readSection = [](const QString &path, QString &out) {
+        QFile f(path);
         if (!f.open(QIODevice::ReadOnly))
             return false;
         out = QString::fromUtf8(f.readAll());
         return true;
     };
-    const QString generalName = QString("general_%1.txt").arg(txBw);
-    const QString orxName = QString("orx_%1%2.txt").arg(orxBw).arg(serialSuffix);
-    const QString txName = QString("tx_%1.txt").arg(txBw);
     QString generalTxt, orxTxt, txTxt;
-    if (!readSection(generalName, generalTxt) ||
-        !readSection(orxName, orxTxt) ||
-        !readSection(txName, txTxt)) {
+    if (!readSection(generalPath, generalTxt) ||
+        !readSection(orxPath, orxTxt) ||
+        !readSection(txPath, txTxt)) {
         QMessageBox::warning(this, tr("Profile"),
             tr("ADR-V9009 profile section file missing:\n%1\n(in %2)")
                 .arg(generalName + ", " + orxName + ", " + txName, sectionDir));
@@ -2606,7 +2571,8 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
     // general + orx + tx + </profile>
     const QString composed = generalTxt + QLatin1Char('\n') + orxTxt +
                              QLatin1Char('\n') + txTxt + "</profile>\n";
-    const QString composedPath = QDir::cleanPath(sectionDir + "/../composed_profile.txt");
+    const QString composedPath = dataFilePath(
+        QStringLiteral("filters/adrv9009/composed_profile.txt"));
     {
         QFile out(composedPath);
         if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {

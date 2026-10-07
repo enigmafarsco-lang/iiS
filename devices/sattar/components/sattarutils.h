@@ -71,8 +71,9 @@ public:
     static int N ;
 
     const int maxNormal{48800};
-    const QString matlabRunTimePath = "/usr/local/MATLAB/MATLAB_Runtime/v99";
-    const QString program = dataFilePath(QStringLiteral("signal/run_Executable_Generator_DoubleChannel.sh"));
+    const QString matlabRunTimePath = qEnvironmentVariable(
+        "ELYNXSDR_MCR_ROOT", "/usr/local/MATLAB/MATLAB_Runtime/v99");
+    const QString program = resourceFilePath(QStringLiteral("signal/run_Executable_Generator_DoubleChannel.sh"));
     //==========================================================================================================
 
 

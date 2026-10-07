@@ -2,6 +2,7 @@
 #include "exciter.h"
 #include "ui_exciter.h"
 #include "constants/tx_calibration.h"
+#include "receiver/datafiles.h"
 #include <QLineEdit>
 #include <QRegularExpression>
 #include <QCheckBox>
@@ -615,18 +616,16 @@ void Exciter::isUserLoggedInSlot(double state)
 //    maxFrqLimit = maxFrq;
 //}
 
-// The exciter reads and writes its waveform txt files ONLY in the
-// project's files/ folder (PROJECT_FILES_DIR defined by eLynxSDR.pro =
-// <project>/files, e.g. /home/joshua/Documents/NIMA_USB/
-// iiS-arena-01a0e308-iis/files).  No other folder is searched - a
-// waveform can never come from another directory or another checkout.
+// Developer builds keep using their source-tree files/ directory. Packaged
+// builds use a writable per-user location, never the read-only /opt tree.
 static QString projectFilesDir()
 {
-#ifdef PROJECT_FILES_DIR
+#ifndef ELYNXSDR_PACKAGED
+#  ifdef PROJECT_FILES_DIR
     return QStringLiteral(PROJECT_FILES_DIR);
-#else
-    return QCoreApplication::applicationDirPath() + QStringLiteral("/files");
+#  endif
 #endif
+    return userFilesDirectory();
 }
 
 bool Exciter::returnfilePath(QString &fileName)
@@ -642,7 +641,7 @@ bool Exciter::returnfilePath(QString &fileName)
     }
 
     // Hand the resolved absolute path back to the caller so the DAC
-    // loader gets the full path into the project files/ folder.
+    // loader gets the full path into the runtime waveform directory.
     fileName = fullPath;
 
     // The one folder the exciter plays waveform files from.
@@ -679,9 +678,8 @@ bool Exciter::existsFile (const std::string& name)
 
 QString Exciter::resolveFileInAppFolders(const QString &relPath)
 {
-    // ONLY the project's files/ folder is searched (see
-    // projectFilesDir() above) - nothing else, so a waveform file can
-    // never be picked up from another folder or another checkout.
+    // Only the runtime waveform directory selected by projectFilesDir() is
+    // searched, so waveforms cannot leak between checkouts or other folders.
     const QString full = QDir(projectFilesDir()).absoluteFilePath(relPath);
     if (existsFile(full.toStdString()))
         return full;
@@ -826,17 +824,23 @@ void Exciter::setDataSlot()
         if (spotFull.isEmpty())
         {
             QMessageBox msgBox;
+            const QString spotOutputDir = QDir(projectFilesDir()).filePath(QStringLiteral("spot"));
+            const QString generator = resourceFilePath(QStringLiteral("spot/generate.py"));
+            const QString bwArg = spotBwMhz > 0.0
+                ? QString::number(qRound(spotBwMhz)) : QStringLiteral("N");
+            const QString command = QStringLiteral(
+                "python3 \"%1\" --profiles %2 --bw %3 --out \"%4\"")
+                    .arg(generator).arg(profileBw).arg(bwArg).arg(spotOutputDir);
             msgBox.setText(tr("Spot noise file not found:\n%1\n\n"
                               "The file name is spot<N>mhz_<P>.txt: <N> is "
-                              "the spot bandwidth in MHz (the box on this "
-                              "tab), <P> is the ACTIVE profile bandwidth "
-                              "(now %2). <P> changes only when Set is "
-                              "pressed in the Profile tab.\n\n"
-                              "Generate the file with files/spot/generate.py "
-                              "(run in the files/spot folder), e.g.\n"
-                              "  python3 generate.py --profiles %2 --bw <N>")
+                              "the selected spot bandwidth in MHz, and <P> "
+                              "is the active profile bandwidth (%2). If the "
+                              "command contains a literal N, replace it with "
+                              "the numeric spot bandwidth.\n\n"
+                              "Generate it with:\n  %3")
                                .arg(QDir(projectFilesDir()).filePath(fileName))
-                               .arg(profileBw));
+                               .arg(profileBw)
+                               .arg(command));
             msgBox.exec();
             return;
         }
@@ -970,16 +974,19 @@ void Exciter::setDataSlot()
         if (wbFull.isEmpty())
         {
             QMessageBox msgBox;
+            const QString spotDir = QDir(projectFilesDir()).filePath(QStringLiteral("spot"));
+            const QString source = QDir(spotDir).filePath(
+                QStringLiteral("spot%1mhz_%1.txt").arg(profileBw));
+            const QString command = QStringLiteral("cp \"%1\" \"%2\"")
+                                        .arg(source)
+                                        .arg(QDir(spotDir).filePath(QStringLiteral("widebandnoise.txt")));
             msgBox.setText(tr("Wideband noise file not found:\n%1\n\n"
-                              "This tab plays the fixed file "
-                              "files/spot/widebandnoise.txt - the generator "
-                              "does not create it. Copy the full-band spot "
-                              "file of your profile over it, e.g. for the "
-                              "current profile (%2):\n"
-                              "  cp files/spot/spot%2mhz_%2.txt "
-                              "files/spot/widebandnoise.txt")
+                              "This tab plays files/spot/widebandnoise.txt. "
+                              "Copy the full-band spot file for the current "
+                              "profile (%2) to that name:\n  %3")
                                .arg(QDir(projectFilesDir()).filePath(fileName))
-                               .arg(profileBw));
+                               .arg(profileBw)
+                               .arg(command));
             msgBox.exec();
             return;
         }
@@ -1000,13 +1007,19 @@ void Exciter::setDataSlot()
         if (bridgeFull.isEmpty())
         {
             QMessageBox msgBox;
+            const QString bridgeOutputDir = QDir(projectFilesDir()).filePath(QStringLiteral("bridge"));
+            const QString generator = resourceFilePath(QStringLiteral("bridge/generate_bridge.py"));
+            const QString command = QStringLiteral(
+                "python3 \"%1\" --profiles %2 --bw %3 --out \"%4\"")
+                    .arg(generator)
+                    .arg(profileBw)
+                    .arg(bridgeN)
+                    .arg(bridgeOutputDir);
             msgBox.setText(tr("Bridge noise file not found:\n%1\n\n"
-                              "The exciter looks only in the project "
-                              "files/ folder. Run files/bridge/generate_bridge.py "
-                              "with '--out bridge' in the files/ folder of the "
-                              "main project folder (next to the spot/ "
-                              "folder), then press Set again.")
-                               .arg(QDir(projectFilesDir()).filePath(fileName)));
+                              "Generate the files with:\n  %2\n"
+                              "Then press Set again.")
+                               .arg(QDir(projectFilesDir()).filePath(fileName))
+                               .arg(command));
             msgBox.exec();
             return;
         }
@@ -1317,12 +1330,19 @@ bool Exciter::buildMultiTargetWaveform()
                 : QString("spot/spot%1mhz_%2.txt").arg(n).arg(profileBw);
             const QString path = resolveFileInAppFolders(f);
             const QString what = isBridge ? tr("Bridge noise") : tr("Spot");
-            const QString genHint = isBridge
-                ? tr("Run files/bridge/generate_bridge.py first.")
-                : tr("Run files/spot/generate.py first.");
-            const QString regenHint = isBridge
-                ? tr("Regenerate it with files/bridge/generate_bridge.py.")
-                : tr("Regenerate it with files/spot/generate.py.");
+            const QString generator = resourceFilePath(isBridge
+                ? QStringLiteral("bridge/generate_bridge.py")
+                : QStringLiteral("spot/generate.py"));
+            const QString outputDir = QDir(projectFilesDir()).filePath(
+                isBridge ? QStringLiteral("bridge") : QStringLiteral("spot"));
+            const QString command = QStringLiteral(
+                "python3 \"%1\" --profiles %2 --bw %3 --out \"%4\"")
+                    .arg(generator)
+                    .arg(profileBw)
+                    .arg(n)
+                    .arg(outputDir);
+            const QString genHint = tr("Generate it with:\n  %1").arg(command);
+            const QString regenHint = tr("Regenerate it with:\n  %1").arg(command);
             if (path.isEmpty())
             {
                 QMessageBox msgBox;

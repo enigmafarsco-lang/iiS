@@ -23,10 +23,14 @@ CONFIG += force_debug_info
 QMAKE_CXXFLAGS += -liio
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# Source tree's files/ folder (bridge/spot waveforms) compiled in, so the
-# app finds files/bridge/... even when it runs from a Qt Creator shadow
-# build directory outside the project folder.
-DEFINES += PROJECT_FILES_DIR=\\\"$$PWD/files\\\"
+# Developer builds use the source-tree files/ directory for Qt Creator
+# shadow builds. Packaged builds resolve shipped files relative to the
+# installed executable and keep mutable copies in the user's data directory.
+contains(CONFIG, packaged) {
+    DEFINES += ELYNXSDR_PACKAGED
+} else {
+    DEFINES += PROJECT_FILES_DIR=\\\"$$PWD/files\\\"
+}
 
 INCLUDEPATH += /usr/include/freetype2
 

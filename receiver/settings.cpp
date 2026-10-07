@@ -1,6 +1,7 @@
 #include "settings.h"
 #include <receiver/datafiles.h>
 #include <qfile.h>
+#include <QFileInfo>
 #include<qfiledialog.h>
 #include<qtextstream.h>
 #include<QMessageBox>
@@ -36,7 +37,10 @@ void Settings::ReadSettingFile()
     setMode(jsonData["Mode"].toString());
     setIp(jsonData["Ip"].toString());
     setPort(jsonData["Port"].toString());
-    setLastFilter(jsonData["LastFilter"].toString());
+    QString lastFilter = jsonData["LastFilter"].toString();
+    if (!lastFilter.isEmpty() && !QFileInfo::exists(lastFilter))
+        lastFilter.clear();
+    setLastFilter(lastFilter);
 
 }
 

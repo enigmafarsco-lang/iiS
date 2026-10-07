@@ -1,0 +1,135 @@
+# Build eLynxSDR as an Ubuntu 24.04 amd64 .deb and download its complete
+# APT dependency closure into an offline USB-ready bundle.
+# Run from this directory: make -f Makefile.download bundle
+
+SHELL := /bin/bash
+.ONESHELL:
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := bundle
+
+ROOT := $(abspath ../..)
+BUILD_DIR ?= $(CURDIR)/build/release
+STAGE_DIR := $(BUILD_DIR)/package-root
+OUTPUT_DIR ?= $(CURDIR)/offline-bundle
+VERSION ?= 0.0.2
+MAINTAINER ?= eLynxSDR maintainers <319502444+enigmafarsco-lang@users.noreply.github.com>
+APP_DEB := $(OUTPUT_DIR)/eLynxSDR_$(VERSION)_amd64.deb
+APT_CACHE := $(BUILD_DIR)/apt-cache/archives
+JOBS ?= $(shell nproc 2>/dev/null || echo 2)
+QMAKE ?= $(shell command -v qmake6 2>/dev/null || command -v qmake 2>/dev/null || \
+	ls /usr/lib/qt5/bin/qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake 2>/dev/null | head -n1)
+
+RUNTIME_DEPENDS := libqt5core5t64, libqt5gui5t64, libqt5widgets5t64, libqt5network5t64, libqt5printsupport5t64, libqt5concurrent5t64, libqt5opengl5t64, libiio0, libfftw3-double3, libmatio11, libfreetype6, libglib2.0-0t64, python3
+
+.PHONY: check-host install-build-deps build package download-deps download-iiod include-mcr bundle bundle-with-iiod
+
+check-host:
+	if [ ! -r /etc/os-release ]; then echo "error: /etc/os-release not found" >&2; exit 1; fi
+	. /etc/os-release
+	if [ "$${ID:-}" != ubuntu ] || [ "$${VERSION_ID:-}" != 24.04 ]; then \
+		echo "error: build/download must run on Ubuntu 24.04 (Noble), not $${PRETTY_NAME:-unknown}" >&2; exit 1; fi
+	if [ "$$(dpkg --print-architecture)" != amd64 ]; then \
+		echo "error: this bundle is for amd64/x86_64 only" >&2; exit 1; fi
+
+# One-time build-machine packages; these are not installed on end-user PCs.
+install-build-deps: check-host
+	sudo apt-get update
+	sudo apt-get install -y build-essential qt5-qmake qtbase5-dev libqt5opengl5-dev \
+		libiio-dev libfftw3-dev libmatio-dev libfreetype6-dev libglib2.0-dev pkg-config
+
+build: check-host
+	if [ -z "$(QMAKE)" ]; then \
+		echo "error: qmake not found; run 'make -f Makefile.download install-build-deps' first" >&2; exit 1; fi
+	rm -rf "$(BUILD_DIR)"
+	mkdir -p "$(BUILD_DIR)"
+	cd "$(BUILD_DIR)"
+	"$(QMAKE)" "$(ROOT)/eLynxSDR.pro" CONFIG+=release CONFIG-=debug CONFIG+=packaged
+	$(MAKE) -j"$(JOBS)"
+	test -x "$(BUILD_DIR)/eLynxSDR"
+
+package: build
+	set -eu
+	rm -f "$(OUTPUT_DIR)"/eLynxSDR_*.deb
+	rm -rf "$(STAGE_DIR)"
+	mkdir -p "$(STAGE_DIR)/DEBIAN" \
+		"$(STAGE_DIR)/opt/eLynxSDR/bin" \
+		"$(STAGE_DIR)/opt/eLynxSDR/files" \
+		"$(STAGE_DIR)/usr/bin" \
+		"$(STAGE_DIR)/usr/share/applications" \
+		"$(STAGE_DIR)/usr/share/doc/elynxsdr" \
+		"$(STAGE_DIR)/usr/share/icons/hicolor/256x256/apps" \
+		"$(OUTPUT_DIR)/dependencies" "$(OUTPUT_DIR)/optional-iiod"
+	install -m 0755 "$(BUILD_DIR)/eLynxSDR" "$(STAGE_DIR)/opt/eLynxSDR/bin/eLynxSDR"
+	strip --strip-unneeded "$(STAGE_DIR)/opt/eLynxSDR/bin/eLynxSDR"
+	while IFS= read -r -d '' rel; do \
+		mkdir -p "$(STAGE_DIR)/opt/eLynxSDR/$$(dirname "$$rel")"; \
+		cp -a "$(ROOT)/$$rel" "$(STAGE_DIR)/opt/eLynxSDR/$$rel"; \
+	done < <(git -C "$(ROOT)" ls-files -z -- files)
+	install -m 0755 "$(CURDIR)/eLynxSDR-launcher" "$(STAGE_DIR)/usr/bin/eLynxSDR"
+	install -m 0644 "$(CURDIR)/eLynxSDR.desktop" "$(STAGE_DIR)/usr/share/applications/eLynxSDR.desktop"
+	install -m 0644 "$(CURDIR)/README.md" "$(STAGE_DIR)/usr/share/doc/elynxsdr/README.md"
+	install -m 0644 "$(ROOT)/resources/icons/logo.png" \
+		"$(STAGE_DIR)/usr/share/icons/hicolor/256x256/apps/eLynxSDR.png"
+	cat > "$(STAGE_DIR)/DEBIAN/control" <<-EOF
+	Package: elynxsdr
+	Version: $(VERSION)
+	Section: electronics
+	Priority: optional
+	Architecture: amd64
+	Maintainer: $(MAINTAINER)
+	Depends: $(RUNTIME_DEPENDS)
+	Description: eLynxSDR ADRV9009 receiver and exciter application
+	EOF
+	dpkg-deb --build --root-owner-group "$(STAGE_DIR)" "$(APP_DEB)"
+
+# Run this on an Internet-connected Ubuntu 24.04 amd64 machine. A temporary
+# empty dpkg status file makes APT fetch the full dependency closure even when
+# the build machine already has Qt and the other libraries installed.
+download-deps: check-host package
+	set -eu
+	rm -rf "$(APT_CACHE)" "$(OUTPUT_DIR)/dependencies" "$(OUTPUT_DIR)/optional-iiod"
+	mkdir -p "$(APT_CACHE)/partial" "$(OUTPUT_DIR)/dependencies"
+	if getent passwd _apt >/dev/null 2>&1; then sudo chown _apt:root "$(APT_CACHE)/partial"; fi
+	sudo apt-get update
+	sudo apt-get -o Dir::State::status=/dev/null \
+		-o Dir::Cache::archives="$(APT_CACHE)" \
+		--download-only --yes install "$(APP_DEB)"
+	mapfile -t debs < <(find "$(APT_CACHE)" -maxdepth 1 -type f -name '*.deb' -print)
+	if [ "$${#debs[@]}" -eq 0 ]; then echo "error: APT downloaded no dependency packages" >&2; exit 1; fi
+	cp -f "$${debs[@]}" "$(OUTPUT_DIR)/dependencies/"
+	cp -f "$(CURDIR)/Makefile.install" "$(CURDIR)/install.sh" "$(CURDIR)/README.md" "$(OUTPUT_DIR)/"
+	printf '\nOffline bundle ready: %s\n' "$(OUTPUT_DIR)"
+	printf 'Mandatory .deb dependencies: %s\n' "$$(find "$(OUTPUT_DIR)/dependencies" -maxdepth 1 -name '*.deb' | wc -l)"
+
+# Optional server package. The application is an IIO network client; most
+# users do not need to run iiod on the Ubuntu desktop itself.
+download-iiod: check-host
+	set -eu
+	rm -rf "$(BUILD_DIR)/apt-cache-iiod/archives" "$(OUTPUT_DIR)/optional-iiod"
+	mkdir -p "$(BUILD_DIR)/apt-cache-iiod/archives/partial" "$(OUTPUT_DIR)/optional-iiod"
+	if getent passwd _apt >/dev/null 2>&1; then sudo chown _apt:root "$(BUILD_DIR)/apt-cache-iiod/archives/partial"; fi
+	sudo apt-get update
+	sudo apt-get -o Dir::State::status=/dev/null \
+		-o Dir::Cache::archives="$(BUILD_DIR)/apt-cache-iiod/archives" \
+		--download-only --yes install iiod
+	mapfile -t debs < <(find "$(BUILD_DIR)/apt-cache-iiod/archives" -maxdepth 1 -type f -name '*.deb' -print)
+	if [ "$${#debs[@]}" -eq 0 ]; then echo "error: APT downloaded no iiod packages" >&2; exit 1; fi
+	cp -f "$${debs[@]}" "$(OUTPUT_DIR)/optional-iiod/"
+	cp -f "$(CURDIR)/Makefile.install" "$(CURDIR)/install.sh" "$(CURDIR)/README.md" "$(OUTPUT_DIR)/"
+	printf 'Optional iiod packages ready in %s/optional-iiod\n' "$(OUTPUT_DIR)"
+
+# MATLAB Runtime is a separate MathWorks installer, not an Ubuntu APT package.
+# Provide it manually after obtaining the matching official archive.
+include-mcr:
+	if [ -z "$(MCR_ARCHIVE)" ] || [ ! -f "$(MCR_ARCHIVE)" ]; then \
+		echo "error: pass MCR_ARCHIVE=/path/to/the/official/R2020b/Linux/runtime.zip" >&2; exit 1; fi
+	mkdir -p "$(OUTPUT_DIR)/vendor"
+	cp -f "$(MCR_ARCHIVE)" "$(OUTPUT_DIR)/vendor/"
+	printf 'Copied MATLAB Runtime archive into %s/vendor (not an APT dependency).\n' "$(OUTPUT_DIR)"
+
+bundle: download-deps
+
+bundle-with-iiod: download-deps
+	$(MAKE) download-iiod
+	cp -f "$(CURDIR)/Makefile.install" "$(CURDIR)/install.sh" "$(CURDIR)/README.md" "$(OUTPUT_DIR)/"
+	printf 'Bundle with optional iiod ready: %s\n' "$(OUTPUT_DIR)"

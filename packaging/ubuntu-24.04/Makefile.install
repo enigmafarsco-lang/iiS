@@ -1,0 +1,45 @@
+# Offline installer. Copy this Makefile into the generated offline-bundle
+# directory and run `make -f Makefile.install` there, or use install.sh.
+
+SHELL := /bin/bash
+.ONESHELL:
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := install
+
+APP_DEBS := $(sort $(wildcard ./eLynxSDR_*.deb))
+RUNTIME_DEBS := $(sort $(wildcard ./dependencies/*.deb))
+IIOD_DEBS := $(sort $(wildcard ./optional-iiod/*.deb))
+
+.PHONY: check-platform install install-iiod check-mcr
+
+check-platform:
+	if [ ! -r /etc/os-release ]; then echo "error: /etc/os-release not found" >&2; exit 1; fi
+	. /etc/os-release
+	if [ "$${ID:-}" != ubuntu ] || [ "$${VERSION_ID:-}" != 24.04 ]; then \
+		echo "error: this offline installer is for Ubuntu 24.04 (Noble) only" >&2; exit 1; fi
+	if [ "$$(dpkg --print-architecture)" != amd64 ]; then \
+		echo "error: this package is for amd64/x86_64 only" >&2; exit 1; fi
+
+install: check-platform
+	if [ "$(words $(APP_DEBS))" -ne 1 ]; then echo "error: expected exactly one eLynxSDR_*.deb in this folder" >&2; exit 1; fi
+	if [ -z "$(RUNTIME_DEBS)" ]; then echo "error: dependencies/*.deb is empty" >&2; exit 1; fi
+	echo "Installing eLynxSDR and its bundled Ubuntu 24.04 dependencies (no network download)..."
+	sudo apt-get --no-download --yes install $(RUNTIME_DEBS) $(APP_DEBS)
+	if [ ! -e "$${ELYNXSDR_MCR_ROOT:-/usr/local/MATLAB/MATLAB_Runtime/v99}/runtime/glnxa64/libmwlaunchermain.so" ]; then \
+		echo "NOTE: MATLAB Runtime 9.9 is not installed; the Sattar MATLAB-generated IQ tool will not run until it is installed."; fi
+	echo "Done. Launch eLynxSDR from the Applications menu."
+
+# Optional: install the IIO network daemon on this Ubuntu PC. Normally iiod
+# runs on the radio/embedded target instead, so this target is not automatic.
+install-iiod: check-platform
+	if [ -z "$(IIOD_DEBS)" ]; then echo "error: optional-iiod/*.deb is empty" >&2; exit 1; fi
+	echo "Installing the optional IIO network server daemon..."
+	sudo apt-get --no-download --yes install $(IIOD_DEBS)
+
+check-mcr:
+	root="$${ELYNXSDR_MCR_ROOT:-/usr/local/MATLAB/MATLAB_Runtime/v99}"
+	if [ -e "$$root/runtime/glnxa64/libmwlaunchermain.so" ]; then \
+		echo "MATLAB Runtime found at $$root"; \
+	else \
+		echo "MATLAB Runtime 9.9 not found at $$root"; exit 1; \
+	fi

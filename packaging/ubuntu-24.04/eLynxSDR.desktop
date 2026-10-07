@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=eLynxSDR
+Comment=ADRV9009 receiver and exciter application
+Exec=/usr/bin/eLynxSDR
+Icon=eLynxSDR
+Terminal=false
+Categories=Science;Electronics;
