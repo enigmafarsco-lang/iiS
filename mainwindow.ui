@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>544</width>
-    <height>500</height>
+    <width>1270</width>
+    <height>980</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,12 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="maximumSize">
-   <size>
-    <width>1920</width>
-    <height>500</height>
-   </size>
-  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -29,12 +23,6 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
-      <property name="maximumSize">
-       <size>
-        <width>1200</width>
-        <height>16777215</height>
-       </size>
-      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>

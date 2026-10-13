@@ -494,8 +494,8 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
 
     //    this->setFixedSize(targetWidth, targetHeight);
 
-    this->setFixedWidth(1270);
-    this->setFixedHeight(980);
+    this->setMinimumSize(1024, 700);
+    this->resize(1270, 980);
     connection();
 
 

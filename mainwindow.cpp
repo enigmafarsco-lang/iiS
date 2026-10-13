@@ -10,9 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     connections();
     this->setWindowTitle("eLynxSDR v0.0.2");
 
-
-    this->setFixedWidth(1270);
-    this->setFixedHeight(980);
+    this->setMinimumSize(1024, 700);
+    this->resize(1270, 980);
 
     if(receiverIsConnected) emit exciterConnectionStatus(receiverWindow->isConnect);
     //    isAdrvConnect = receiverWindow->isConnect;
