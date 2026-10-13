@@ -319,6 +319,7 @@ static gdouble freqStep;
 static gdouble baseFreq;
 static gdouble RFBandwidth;
 static gdouble RFBandwidthOBS;
+static gdouble activeBandwidthMHz = 0.0;
 static bool selectTimeChart=false,selectFFTChart=false;
 static int sections=1;
 //static int currentSections=-1;
@@ -439,10 +440,6 @@ public:
     QCPItemText *txtLbl;
     double selectedFreqValue{0};
     bool   selectedFreqValid{false};
-
-    // Phase 5: spectrum x-axis window forced to the active ADRV9009
-    // profile bandwidth (0 = not forced).
-    double activeBandwidthMHz{0.0};
 
     QVector<double> *cwFrqValue;
     QVector<double> *cwPowerValue;
