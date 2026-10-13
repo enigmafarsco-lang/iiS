@@ -801,15 +801,13 @@ bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
     // tcl07020.tcl:
     // led_count_ip_0/DACseleso -> MUXDACS_ip_0/DacSel.
     // MUXDACS_ip.v final mux: DacSel=1 => DRFM/processed path,
-    // DacSel=0 => DMA path used by the noise waveform.
+    // DacSel=0 => DMA path used by the noise/exciter waveform.
     const quint32 value = enabled ? 1u : 0u;
     writeItemValues["dacselect"] = value;
     const bool ok = writeRegisterToHw(REG_DRFM_SELECT, value,
                                       enabled ? QStringLiteral("DRFM ON / DACSEL=1")
                                               : QStringLiteral("NOISE / DACSEL=0"),
                                       details);
-    if (ok)
-        emit sendFileToDacSignal(); // noise/DRFM set: CW tone -> DAC buffer
     return ok;
 }
 
