@@ -1677,7 +1677,7 @@ void Plot::DrawFFTPlot()
             // 100/200 MHz profiles.  1 tick = 1 real MHz again.
             const int nAxisPts = transform->x_axis->size();
             const double axisSpanMhz =
-                (transform->fs_mhz > 0.0) ? transform->fs_mhz : 491.52;
+                (transform->fs_mhz > 0.0) ? transform->fs_mhz : ((activeBandwidthMHz > 0.0) ? activeBandwidthMHz : 122.88);
             const double axisStepMhz = (nAxisPts > 0)
                 ? axisSpanMhz / nAxisPts : 0.0;
             for(int i{}; i < nAxisPts; i++)
@@ -4945,6 +4945,20 @@ bool Plot::fft_transform_function(Transform *tr, gboolean init_transform)
             }
         }
 
+        double sampling_freq = 0.0;
+        if (iio_chn && iio_channel_attr_read_double(iio_chn, "sampling_frequency", &sampling_freq) == 0 && sampling_freq > 0.0) {
+            tr->fs_mhz = sampling_freq / 1000000.0;
+        } else if (activeBandwidthMHz > 0.0) {
+            tr->fs_mhz = activeBandwidthMHz;
+        } else if (dev_info && dev_info->adc_freq > 0.0) {
+            tr->fs_mhz = dev_info->adc_freq * prefix2scale(dev_info->adc_scale) / 1000000.0;
+        } else {
+            tr->fs_mhz = 122.88;
+        }
+
+        const double axisSpan = (tr->fs_mhz > 0.0) ? tr->fs_mhz : ((activeBandwidthMHz > 0.0) ? activeBandwidthMHz : 122.88);
+        const double axisStep = (axis_length > 0) ? (axisSpan / axis_length) : 0.0;
+
         if (settings->fft_alg_data.num_active_channels == 2)
             corr = dev_info->adc_freq / 2.0;
         else
@@ -4952,7 +4966,7 @@ bool Plot::fft_transform_function(Transform *tr, gboolean init_transform)
         step=dev_info->adc_freq / num_samples;
 
         for (i = 0; i < axis_length; i++) {
-            (*tr->x_axis)[i]= baseFreq - 245.759999 + i*0.029999 ;
+            (*tr->x_axis)[i]= baseFreq - axisSpan / 2.0 + i * axisStep;
             (*tr->y_axis)[i]= FLT_MAX;
         }
 
@@ -5177,6 +5191,9 @@ Transform* Plot::add_transform_to_list( int tr_type, GSList *channels)
         fprintf(stderr, "Invalid transform\n");
         return NULL;
     }
+
+    if (activeBandwidthMHz > 0.0)
+        transform->fs_mhz = activeBandwidthMHz;
 
     dataType.TrList_add_transform(priv->transform_list, transform);
     update_transform_settings(transform);
@@ -6966,6 +6983,12 @@ void Plot::setActiveBandwidth(double bwMHz)
     // (122.88 x P/100 = 122.88/245.76/491.52 MHz for the 100/200/400
     // profiles), so the window always shows the full sampled span.
     activeBandwidthMHz = bwMHz;
+    if (priv && priv->transform_list) {
+        for (Transform *tr : *priv->transform_list) {
+            if (tr)
+                tr->fs_mhz = bwMHz;
+        }
+    }
     applyBandwidthWindow();
 }
 
