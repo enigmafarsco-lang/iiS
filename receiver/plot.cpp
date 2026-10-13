@@ -4418,29 +4418,26 @@ void Plot::do_fft(Transform *tr)
         }
         else{
 
-            // Fill seek fft items
-            //            seekIndex=i+(fftSize*(seekSection));
-            //            if(seekIndex<tr->y_axis->length())
-            //            {
-            //            qInfo() <<"----->" << (*tr->y_axis)[i];
-
-            //dorafshan
-            if(i<3413)
+            // For profile 100 or 200, keep data untouched so noise floor is a flat/straight line.
+            // Only apply edge rolloff compensation for profile 400 (bandwidth >= 400 MHz).
+            const double curFs = (tr->fs_mhz > 0.0) ? tr->fs_mhz : activeBandwidthMHz;
+            if (curFs >= 400.0)
             {
-                if(i<760 and (*tr->y_axis)[i]<(-55)) (*tr->y_axis)[i]=(*tr->y_axis)[i]+0.0088*i-32 - 0.0105*i + 7+5;
-                else if ((*tr->y_axis)[i]<(-60))
+                //dorafshan
+                if(i<3413)
                 {
-                    (*tr->y_axis)[i]=(*tr->y_axis)[i]+0.0088*i-34+5;}
+                    if(i<760 and (*tr->y_axis)[i]<(-55)) (*tr->y_axis)[i]=(*tr->y_axis)[i]+0.0088*i-32 - 0.0105*i + 7+5;
+                    else if ((*tr->y_axis)[i]<(-60))
+                    {
+                        (*tr->y_axis)[i]=(*tr->y_axis)[i]+0.0088*i-34+5;
+                    }
+                }
+                else if( i>13068)
+                {
+                    if(i<=15748 and (*tr->y_axis)[i]<(-60)) (*tr->y_axis)[i]=(*tr->y_axis)[i]-0.0088*(i-13067)-7+5;
+                    else if((*tr->y_axis)[i]<(-55)) (*tr->y_axis)[i]=(*tr->y_axis)[i]-0.0088*(i-13067)-7  + 0.0105*(i-15748)+5;
+                }
             }
-
-            else if( i>13068)
-            {
-                if(i<=15748 and (*tr->y_axis)[i]<(-60)) (*tr->y_axis)[i]=(*tr->y_axis)[i]-0.0088*(i-13067)-7+5;
-                else if((*tr->y_axis)[i]<(-55)) (*tr->y_axis)[i]=(*tr->y_axis)[i]-0.0088*(i-13067)-7  + 0.0105*(i-15748)+5;
-            }
-
-            else (*tr->y_axis)[i]=(*tr->y_axis)[i];
-            //            }
         }
     }
 
