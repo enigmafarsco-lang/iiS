@@ -5,6 +5,7 @@
 #include <QString>
 #include <receiver/oscmain.h>
 #include "qtconcurrentrun.h"
+#include <cmath>
 
 
 

@@ -13,6 +13,8 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <cmath>
+#include <algorithm>
 #include <limits>
 #include <QButtonGroup>
 #include <QCheckBox>

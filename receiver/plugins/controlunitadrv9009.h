@@ -1,6 +1,9 @@
 #ifndef CONTROLUNITADRV9009_H
 #define CONTROLUNITADRV9009_H
 
+#include <cmath>
+#include <algorithm>
+#include <limits>
 #include <QWidget>
 #include <QPushButton>
 #include <QtGlobal>

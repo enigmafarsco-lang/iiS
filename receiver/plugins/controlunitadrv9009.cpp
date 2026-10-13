@@ -175,6 +175,9 @@
 
 #include "controlunitadrv9009.h"
 #include "ui_controlunitadrv9009.h"
+#include <cmath>
+#include <algorithm>
+#include <limits>
 
 #pragma region Constructor {
 
