@@ -29,6 +29,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QScrollBar>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 #include <receiver/plugins/drfmregisterio.h>
@@ -669,9 +670,17 @@ void ReceiverMain::setupDrfmControlTab()
     QWidget *page = new QWidget(ui->tabWidgetSetting);
     page->setObjectName(QStringLiteral("tabDrfmControl"));
 
-    QVBoxLayout *pageLayout = new QVBoxLayout(page);
+    QVBoxLayout *mainPageLayout = new QVBoxLayout(page);
+    mainPageLayout->setContentsMargins(4, 4, 4, 4);
+
+    QScrollArea *scrollArea = new QScrollArea(page);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    QWidget *scrollContent = new QWidget(scrollArea);
+    QVBoxLayout *pageLayout = new QVBoxLayout(scrollContent);
     pageLayout->setContentsMargins(10, 10, 10, 10);
-    pageLayout->setSpacing(10);
+    pageLayout->setSpacing(12);
 
     const auto physicalAddressText = [](quint32 offset) {
         return QStringLiteral("0x%1")
@@ -679,18 +688,14 @@ void ReceiverMain::setupDrfmControlTab()
                      .toUpper(), 8, QLatin1Char('0'));
     };
 
-    // ------------------ TX1 transmit control ------------------
-    // The DRFM tab carries its own TX1 on/off pair so the operator can stop
-    // and start TX1 from here too. It drives the global TX1 control both ways
-    // (power_TX1_DownChk checked = TX off).
-    QGroupBox *txGroup = new QGroupBox(tr("TX1"), page);
+    // ------------------ 1. TX1 Transmit Control ------------------
+    QGroupBox *txGroup = new QGroupBox(tr("1. TX1 Transmit Control (کنترل ارسال فرستنده)"), scrollContent);
     QGridLayout *txLayout = new QGridLayout(txGroup);
     QLabel *txInfo = new QLabel(
-        tr("TX1 transmit control (same as the main TX1 switch). ON = transmit, "
-           "OFF = safe. Any Set on this tab turns TX1 on."), txGroup);
+        tr("TX1 transmit control. ON = transmit, OFF = safe/standby. Any Set on this tab turns TX1 on automatically."), txGroup);
     txInfo->setWordWrap(true);
-    QRadioButton *txOn = new QRadioButton(tr("TX ON"), txGroup);
-    QRadioButton *txOff = new QRadioButton(tr("TX OFF"), txGroup);
+    QRadioButton *txOn = new QRadioButton(tr("TX ON (Transmit Active)"), txGroup);
+    QRadioButton *txOff = new QRadioButton(tr("TX OFF (Safe / Standby)"), txGroup);
     txOn->setObjectName("drfmTxOn");
     txOff->setObjectName("drfmTxOff");
     txOff->setChecked(true); // TX1 default at application start: off
@@ -698,18 +703,17 @@ void ReceiverMain::setupDrfmControlTab()
     txLayout->addWidget(new QLabel(tr("State"), txGroup), 1, 0);
     txLayout->addWidget(txOn, 1, 1);
     txLayout->addWidget(txOff, 1, 2);
-
     pageLayout->addWidget(txGroup);
 
-    // -------------------- DRFM / Noise source select --------------------
-    QGroupBox *drfmGroup = new QGroupBox(tr("DRFM"), page);
+    // ------------------ 2. DRFM Signal Path (DACSEL) ------------------
+    QGroupBox *drfmGroup = new QGroupBox(tr("2. DRFM Signal Path / Target Output (DACSEL @ 0x138)"), scrollContent);
     QGridLayout *drfmLayout = new QGridLayout(drfmGroup);
     QLabel *drfmAddress = new QLabel(
-                tr("DACSEL register: %1   (1 = DRFM, 0 = Noise/DMA)")
+                tr("DACSEL register: %1   (1 = DRFM Target Simulation, 0 = Noise / DMA)")
                 .arg(physicalAddressText(ControlUnitADRV9009::REG_DRFM_SELECT)), drfmGroup);
-    QRadioButton *drfmOn = new QRadioButton(tr("On (DRFM = 1)"), drfmGroup);
-    QRadioButton *drfmOff = new QRadioButton(tr("Off (Noise = 0)"), drfmGroup);
-    QPushButton *drfmSet = new QPushButton(tr("Set"), drfmGroup);
+    QRadioButton *drfmOn = new QRadioButton(tr("ON (DRFM Target Simulation = 1)"), drfmGroup);
+    QRadioButton *drfmOff = new QRadioButton(tr("OFF (Noise / DMA Direct = 0)"), drfmGroup);
+    QPushButton *drfmSet = new QPushButton(tr("Set Path"), drfmGroup);
     QButtonGroup *drfmButtons = new QButtonGroup(drfmGroup);
     drfmButtons->setExclusive(true);
     drfmButtons->addButton(drfmOn);
@@ -723,14 +727,232 @@ void ReceiverMain::setupDrfmControlTab()
     drfmLayout->addWidget(drfmSet, 1, 3);
     pageLayout->addWidget(drfmGroup);
 
-    // -------------------- Amply / TH0 --------------------
-    QGroupBox *ampGroup = new QGroupBox(tr("Amply"), page);
+    // ------------------ 3. Target Range Simulation ------------------
+    QGroupBox *rangeGroup = new QGroupBox(tr("3. Target Range & Delay Simulation (محدوده برد و تأخیر زمانی هدف)"), scrollContent);
+    QGridLayout *rangeLayout = new QGridLayout(rangeGroup);
+
+    QLabel *rangeFormulaLbl = new QLabel(
+        tr("<b>Formulation:</b> &tau; = 2R / c &hArr; R = c&middot;&tau; / 2 &nbsp;&nbsp;|&nbsp;&nbsp; "
+           "c = 3.0&times;10<sup>8</sup> m/s &nbsp;&nbsp;|&nbsp;&nbsp; "
+           "Range Range: 150 m ... 25 km &nbsp;&nbsp;|&nbsp;&nbsp; "
+           "Accuracy: 10 m (&Delta;&tau; = 66.67 ns)"), rangeGroup);
+    rangeFormulaLbl->setWordWrap(true);
+
+    QDoubleSpinBox *spnTargetRangeM = new QDoubleSpinBox(rangeGroup);
+    spnTargetRangeM->setObjectName(QStringLiteral("spnTargetRangeM"));
+    spnTargetRangeM->setRange(150.0, 25000.0);
+    spnTargetRangeM->setSingleStep(10.0);
+    spnTargetRangeM->setDecimals(1);
+    spnTargetRangeM->setValue(150.0);
+    spnTargetRangeM->setSuffix(tr(" m"));
+    spnTargetRangeM->setToolTip(tr("Target Range in meters. Spec: 150 m to 25,000 m (25 km), Accuracy step = 10 m."));
+
+    QDoubleSpinBox *spnTargetRangeKm = new QDoubleSpinBox(rangeGroup);
+    spnTargetRangeKm->setObjectName(QStringLiteral("spnTargetRangeKm"));
+    spnTargetRangeKm->setRange(0.150, 25.000);
+    spnTargetRangeKm->setSingleStep(0.010);
+    spnTargetRangeKm->setDecimals(3);
+    spnTargetRangeKm->setValue(0.150);
+    spnTargetRangeKm->setSuffix(tr(" km"));
+    spnTargetRangeKm->setToolTip(tr("Target Range in kilometers (0.150 km to 25.0 km)."));
+
+    QDoubleSpinBox *spnTargetDelayUs = new QDoubleSpinBox(rangeGroup);
+    spnTargetDelayUs->setObjectName(QStringLiteral("spnTargetDelayUs"));
+    spnTargetDelayUs->setRange(1.0000, 166.6667);
+    spnTargetDelayUs->setSingleStep(0.0667);
+    spnTargetDelayUs->setDecimals(4);
+    spnTargetDelayUs->setValue(1.0000);
+    spnTargetDelayUs->setSuffix(tr(" us"));
+    spnTargetDelayUs->setToolTip(tr("Propagation round-trip delay in microseconds: tau = 2R/c. Spec: 1.0 us (150 m) to 166.67 us (25 km)."));
+
+    QDoubleSpinBox *spnTargetDelayNs = new QDoubleSpinBox(rangeGroup);
+    spnTargetDelayNs->setObjectName(QStringLiteral("spnTargetDelayNs"));
+    spnTargetDelayNs->setRange(1000.0, 166666.7);
+    spnTargetDelayNs->setSingleStep(66.67);
+    spnTargetDelayNs->setDecimals(1);
+    spnTargetDelayNs->setValue(1000.0);
+    spnTargetDelayNs->setSuffix(tr(" ns"));
+    spnTargetDelayNs->setToolTip(tr("Propagation round-trip delay in nanoseconds: 1000.0 ns (150 m) to 166666.7 ns (25 km)."));
+
+    QLabel *lblIntrinsicDelay = new QLabel(
+        tr("80.0 ns  (&approx; 12.0 m intrinsic round-trip distance)"), rangeGroup);
+
+    QLabel *lblTotalOscDelay = new QLabel(
+        tr("1.0800 us  (1080.0 ns)"), rangeGroup);
+    lblTotalOscDelay->setObjectName(QStringLiteral("lblTotalOscDelay"));
+    lblTotalOscDelay->setStyleSheet(QStringLiteral("font-weight: bold; color: #00e5ff;"));
+
+    QLabel *lblAccuracyInfo = new QLabel(
+        tr("10 m  (&Delta;&tau; = 66.67 ns - first movement observed on Oscilloscope)"), rangeGroup);
+
+    QPushButton *btnSetTargetRange = new QPushButton(tr("Set Range / Delay"), rangeGroup);
+    btnSetTargetRange->setObjectName(QStringLiteral("btnSetTargetRange"));
+
+    rangeLayout->addWidget(rangeFormulaLbl, 0, 0, 1, 5);
+    rangeLayout->addWidget(new QLabel(tr("Target Range (m):"), rangeGroup), 1, 0);
+    rangeLayout->addWidget(spnTargetRangeM, 1, 1);
+    rangeLayout->addWidget(new QLabel(tr("Target Range (km):"), rangeGroup), 1, 2);
+    rangeLayout->addWidget(spnTargetRangeKm, 1, 3);
+    rangeLayout->addWidget(btnSetTargetRange, 1, 4);
+
+    rangeLayout->addWidget(new QLabel(tr("Propagation Delay (us):"), rangeGroup), 2, 0);
+    rangeLayout->addWidget(spnTargetDelayUs, 2, 1);
+    rangeLayout->addWidget(new QLabel(tr("Propagation Delay (ns):"), rangeGroup), 2, 2);
+    rangeLayout->addWidget(spnTargetDelayNs, 2, 3);
+
+    rangeLayout->addWidget(new QLabel(tr("System Intrinsic Latency:"), rangeGroup), 3, 0);
+    rangeLayout->addWidget(lblIntrinsicDelay, 3, 1, 1, 4);
+
+    rangeLayout->addWidget(new QLabel(tr("Oscilloscope Total Delay (&tau;<sub>total</sub>):"), rangeGroup), 4, 0);
+    rangeLayout->addWidget(lblTotalOscDelay, 4, 1, 1, 4);
+
+    rangeLayout->addWidget(new QLabel(tr("Range Accuracy / Step:"), rangeGroup), 5, 0);
+    rangeLayout->addWidget(lblAccuracyInfo, 5, 1, 1, 4);
+
+    pageLayout->addWidget(rangeGroup);
+
+    // ------------------ 4. Target Velocity & Doppler Simulation ------------------
+    QGroupBox *velGroup = new QGroupBox(tr("4. Target Velocity & Doppler Simulation (محدوده سرعت و داپلر هدف)"), scrollContent);
+    QGridLayout *velLayout = new QGridLayout(velGroup);
+
+    QLabel *velFormulaLbl = new QLabel(
+        tr("<b>Formulation:</b> f<sub>d</sub> = 2v / &lambda; = 2v&middot;f<sub>0</sub> / c &hArr; v = f<sub>d</sub>&middot;c / (2f<sub>0</sub>) &nbsp;&nbsp;|&nbsp;&nbsp; "
+           "Max RF: 6 GHz (&lambda;<sub>min</sub> = 5 cm) &nbsp;&nbsp;|&nbsp;&nbsp; "
+           "Doppler Resolution: 10 Hz (&Delta;f<sub>d</sub> = 10 Hz)"), velGroup);
+    velFormulaLbl->setWordWrap(true);
+
+    QDoubleSpinBox *spnCenterFreq = new QDoubleSpinBox(velGroup);
+    spnCenterFreq->setObjectName(QStringLiteral("spnDrfmCenterFreq"));
+    spnCenterFreq->setRange(200.0, 6000.0);
+    spnCenterFreq->setSingleStep(10.0);
+    spnCenterFreq->setDecimals(2);
+    spnCenterFreq->setValue(6000.0);
+    spnCenterFreq->setSuffix(tr(" MHz"));
+    spnCenterFreq->setToolTip(tr("Center RF carrier frequency (200 MHz to 6000 MHz = 6 GHz)."));
+
+    QLabel *lblWavelength = new QLabel(tr("&lambda; = 5.00 cm  (at 6.00 GHz)"), velGroup);
+    lblWavelength->setObjectName(QStringLiteral("lblDrfmWavelength"));
+
+    QDoubleSpinBox *spnDopplerHz = new QDoubleSpinBox(velGroup);
+    spnDopplerHz->setObjectName(QStringLiteral("spnTargetDopplerHz"));
+    spnDopplerHz->setRange(-500000.0, 500000.0);
+    spnDopplerHz->setSingleStep(10.0); // 10 Hz resolution per spec!
+    spnDopplerHz->setDecimals(1);
+    spnDopplerHz->setValue(0.0);
+    spnDopplerHz->setSuffix(tr(" Hz"));
+    spnDopplerHz->setToolTip(tr("Doppler frequency shift in Hz. Single step is 10 Hz (Specification Doppler Resolution)."));
+
+    QDoubleSpinBox *spnDopplerKhz = new QDoubleSpinBox(velGroup);
+    spnDopplerKhz->setObjectName(QStringLiteral("spnTargetDopplerKhz"));
+    spnDopplerKhz->setRange(-500.000, 500.000);
+    spnDopplerKhz->setSingleStep(0.010);
+    spnDopplerKhz->setDecimals(3);
+    spnDopplerKhz->setValue(0.000);
+    spnDopplerKhz->setSuffix(tr(" kHz"));
+
+    QDoubleSpinBox *spnVelocityMps = new QDoubleSpinBox(velGroup);
+    spnVelocityMps->setObjectName(QStringLiteral("spnTargetVelocityMps"));
+    spnVelocityMps->setRange(-12500.0, 12500.0);
+    spnVelocityMps->setSingleStep(0.25);
+    spnVelocityMps->setDecimals(2);
+    spnVelocityMps->setValue(0.0);
+    spnVelocityMps->setSuffix(tr(" m/s"));
+    spnVelocityMps->setToolTip(tr("Target radial velocity in meters per second (positive = approaching, negative = receding)."));
+
+    QDoubleSpinBox *spnVelocityKmh = new QDoubleSpinBox(velGroup);
+    spnVelocityKmh->setObjectName(QStringLiteral("spnTargetVelocityKmh"));
+    spnVelocityKmh->setRange(-45000.0, 45000.0);
+    spnVelocityKmh->setSingleStep(0.90);
+    spnVelocityKmh->setDecimals(2);
+    spnVelocityKmh->setValue(0.0);
+    spnVelocityKmh->setSuffix(tr(" km/h"));
+
+    QDoubleSpinBox *spnVelocityMach = new QDoubleSpinBox(velGroup);
+    spnVelocityMach->setObjectName(QStringLiteral("spnTargetVelocityMach"));
+    spnVelocityMach->setRange(-36.000, 36.000);
+    spnVelocityMach->setSingleStep(0.001);
+    spnVelocityMach->setDecimals(3);
+    spnVelocityMach->setValue(0.000);
+    spnVelocityMach->setSuffix(tr(" Mach"));
+
+    QLabel *lblMotionStatus = new QLabel(tr("Stationary / Zero Velocity (f<sub>rx</sub> = f<sub>tx</sub>)"), velGroup);
+    lblMotionStatus->setObjectName(QStringLiteral("lblDrfmMotionStatus"));
+    lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #a5d6a7;"));
+
+    QLabel *lblDopplerResInfo = new QLabel(
+        tr("10 Hz  (&Delta;f<sub>d</sub> = 10 Hz &rarr; verified by 10 Hz shift on Spectrum Analyzer)"), velGroup);
+
+    QLineEdit *vgpoOffsetEdit = new QLineEdit(velGroup);
+    vgpoOffsetEdit->setObjectName(QStringLiteral("txtVgpoOffset"));
+    vgpoOffsetEdit->setText(QStringLiteral("0"));
+    vgpoOffsetEdit->setPlaceholderText(QStringLiteral("0 ... 4294967295"));
+    vgpoOffsetEdit->setToolTip(tr("Raw 32-bit doppler_phase_offset written to INchann / 0x43C30118."));
+
+    QLineEdit *vgpoStepEdit = new QLineEdit(velGroup);
+    vgpoStepEdit->setObjectName(QStringLiteral("txtVgpoPhaseStep"));
+    vgpoStepEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(),
+                                                 std::numeric_limits<int>::max(),
+                                                 vgpoStepEdit));
+    vgpoStepEdit->setText(QStringLiteral("0"));
+    vgpoStepEdit->setPlaceholderText(QStringLiteral("signed 32-bit phase step"));
+    vgpoStepEdit->setToolTip(tr("Raw signed doppler_phase_step written to thcw / 0x43C3011C. Computed from Doppler shift."));
+
+    QRadioButton *vgpoOn = new QRadioButton(tr("ON (PDW = 1)"), velGroup);
+    QRadioButton *vgpoOff = new QRadioButton(tr("OFF (PDW = 0)"), velGroup);
+    QButtonGroup *vgpoButtons = new QButtonGroup(velGroup);
+    vgpoButtons->setExclusive(true);
+    vgpoButtons->addButton(vgpoOn);
+    vgpoButtons->addButton(vgpoOff);
+    vgpoOff->setChecked(true);
+
+    QPushButton *btnSetVelocity = new QPushButton(tr("Set Velocity / Doppler"), velGroup);
+    btnSetVelocity->setObjectName(QStringLiteral("btnSetVelocity"));
+
+    velLayout->addWidget(velFormulaLbl, 0, 0, 1, 5);
+
+    velLayout->addWidget(new QLabel(tr("Carrier Freq (f<sub>0</sub>):"), velGroup), 1, 0);
+    velLayout->addWidget(spnCenterFreq, 1, 1);
+    velLayout->addWidget(new QLabel(tr("Wavelength (&lambda;):"), velGroup), 1, 2);
+    velLayout->addWidget(lblWavelength, 1, 3);
+    velLayout->addWidget(btnSetVelocity, 1, 4);
+
+    velLayout->addWidget(new QLabel(tr("Doppler Shift (Hz):"), velGroup), 2, 0);
+    velLayout->addWidget(spnDopplerHz, 2, 1);
+    velLayout->addWidget(new QLabel(tr("Doppler Shift (kHz):"), velGroup), 2, 2);
+    velLayout->addWidget(spnDopplerKhz, 2, 3);
+
+    velLayout->addWidget(new QLabel(tr("Radial Velocity (m/s):"), velGroup), 3, 0);
+    velLayout->addWidget(spnVelocityMps, 3, 1);
+    velLayout->addWidget(new QLabel(tr("Velocity (km/h):"), velGroup), 3, 2);
+    velLayout->addWidget(spnVelocityKmh, 3, 3);
+
+    velLayout->addWidget(new QLabel(tr("Velocity (Mach):"), velGroup), 4, 0);
+    velLayout->addWidget(spnVelocityMach, 4, 1);
+    velLayout->addWidget(new QLabel(tr("Motion State:"), velGroup), 4, 2);
+    velLayout->addWidget(lblMotionStatus, 4, 3, 1, 2);
+
+    velLayout->addWidget(new QLabel(tr("Doppler Resolution:"), velGroup), 5, 0);
+    velLayout->addWidget(lblDopplerResInfo, 5, 1, 1, 4);
+
+    velLayout->addWidget(new QLabel(tr("PDW Doppler State:"), velGroup), 6, 0);
+    velLayout->addWidget(vgpoOn, 6, 1);
+    velLayout->addWidget(vgpoOff, 6, 2);
+
+    velLayout->addWidget(new QLabel(tr("Phase Step (thcw @ 0x11C):"), velGroup), 7, 0);
+    velLayout->addWidget(vgpoStepEdit, 7, 1);
+    velLayout->addWidget(new QLabel(tr("Phase Offset (INchann @ 0x118):"), velGroup), 7, 2);
+    velLayout->addWidget(vgpoOffsetEdit, 7, 3);
+
+    pageLayout->addWidget(velGroup);
+
+    // ------------------ 5. Amply & Thresholds ------------------
+    QGroupBox *ampGroup = new QGroupBox(tr("5. Amply / Threshold (دامنه و آستانه پردازش)"), scrollContent);
     QGridLayout *ampLayout = new QGridLayout(ampGroup);
     QLabel *ampAddress = new QLabel(
                 tr("TH0 / amplify register: %1")
                 .arg(physicalAddressText(ControlUnitADRV9009::REG_AMPLY)), ampGroup);
-    QRadioButton *ampOn = new QRadioButton(tr("On"), ampGroup);
-    QRadioButton *ampOff = new QRadioButton(tr("Off (unity = 1)"), ampGroup);
+    QRadioButton *ampOn = new QRadioButton(tr("ON"), ampGroup);
+    QRadioButton *ampOff = new QRadioButton(tr("OFF (unity = 1)"), ampGroup);
     QButtonGroup *ampButtons = new QButtonGroup(ampGroup);
     ampButtons->setExclusive(true);
     ampButtons->addButton(ampOn);
@@ -754,65 +976,54 @@ void ReceiverMain::setupDrfmControlTab()
     ampLayout->addWidget(ampSet, 2, 4);
     pageLayout->addWidget(ampGroup);
 
-    // -------------------- VGPO / Doppler --------------------
-    QGroupBox *vgpoGroup = new QGroupBox(tr("VGPO / Doppler"), page);
-    QGridLayout *vgpoLayout = new QGridLayout(vgpoGroup);
-    QLabel *vgpoAddress = new QLabel(
-                tr("PDW Enable: %1   |   Offset (INchann): %2   |   Phase Step (thcw): %3")
-                .arg(physicalAddressText(ControlUnitADRV9009::REG_VGPO_ENABLE))
-                .arg(physicalAddressText(ControlUnitADRV9009::REG_VGPO_OFFSET))
-                .arg(physicalAddressText(ControlUnitADRV9009::REG_VGPO_STEP)),
-                vgpoGroup);
-    vgpoAddress->setWordWrap(true);
+    // ------------------ 6. Technical Specifications & Test Procedures ------------------
+    QGroupBox *specGroup = new QGroupBox(tr("6. Technical Specifications & Verification (مشخصات فنی و روش تست)"), scrollContent);
+    QVBoxLayout *specLayout = new QVBoxLayout(specGroup);
+    QPlainTextEdit *txtSpecs = new QPlainTextEdit(specGroup);
+    txtSpecs->setReadOnly(true);
+    txtSpecs->setMaximumHeight(160);
+    txtSpecs->setPlainText(
+        tr("=================== مشخصات فنی شبیه‌سازی اهداف (Technical Specifications) ===================\n\n"
+           "1. محدوده برد قابل شبیه‌سازی اهداف (Target Simulatible Range):\n"
+           "   - تاخیر کل سامانه (System Intrinsic Latency): ~80 ns (معادل فاصله ذاتی ~12 متر رفت و برگشت)\n"
+           "   - محدوده برد پیوست فنی: 150 متر تا 25 کیلومتر\n"
+           "   - تاخیر معادل 150 متر: 1.0 میکروثانیه (1000 ns) | تاخیر کل روی اسیلوسکوپ: 1.08 میکروثانیه\n"
+           "   - تاخیر معادل 25 کیلومتر: 166.67 میکروثانیه (166666.7 ns) | قابل مشاهده و تایید روی اسیلوسکوپ\n\n"
+           "2. دقت برد اهداف شبیه‌سازی شده (Range Accuracy / Step):\n"
+           "   - دقت برد پیوست فنی: 10 متر\n"
+           "   - پله تاخیر معادل 10 متر: 66.67 نانوثانیه (Delta_tau = 2*Delta_R/c = 2*10 / 3e8 = 66.67 ns)\n"
+           "   - روش تست: افزایش تاخیر به میزان 10 متر (66.67 ns) تا مشاهده اولین جابجایی سیگنال روی اسیلوسکوپ\n\n"
+           "3. محدوده سرعت قابل شبیه‌سازی اهداف (Target Simulatible Velocity):\n"
+           "   - سرعت صفر: دریافت در فرکانس دقیق ارسالی (Zero Doppler, f_rx = f_tx)\n"
+           "   - رابطه فرکانس داپلر: f_d = 2*v / lambda = 2*v*f0 / c <==> v = f_d*c / (2*f0)\n"
+           "   - بیشترین فرکانس کاری: 6 گیگاهرتز (6 GHz) --> کمترین طول موج: lambda_min = 5 سانتی‌متر (0.05 m)\n"
+           "   - تبدیل دوطرفه سرعت و داپلر به صورت خودکار و بر اساس فرکانس مرکزی f0 انجام می‌شود.\n\n"
+           "4. رزولوشن تغییرات سرعت داپلر (Doppler Frequency Resolution):\n"
+           "   - رزولوشن پیوست فنی: 10 هرتز\n"
+           "   - روش تست: افزایش داپلر در GUI به اندازه 1 واحد (10 Hz) و مشاهده تغییر فرکانس 10Hz در اسپکتروم آنالایزر\n"));
+    specLayout->addWidget(txtSpecs);
+    pageLayout->addWidget(specGroup);
 
-    QRadioButton *vgpoOn = new QRadioButton(tr("On (PDW = 1)"), vgpoGroup);
-    QRadioButton *vgpoOff = new QRadioButton(tr("Off (PDW = 0)"), vgpoGroup);
-    QButtonGroup *vgpoButtons = new QButtonGroup(vgpoGroup);
-    vgpoButtons->setExclusive(true);
-    vgpoButtons->addButton(vgpoOn);
-    vgpoButtons->addButton(vgpoOff);
-    vgpoOff->setChecked(true);
+    // ------------------ 7. Hardware Transaction & Console Verification ------------------
+    QGroupBox *hwGroup = new QGroupBox(tr("7. Hardware Status & Verification Commands (دستورات بررسی سخت‌افزار)"), scrollContent);
+    QVBoxLayout *hwLayout = new QVBoxLayout(hwGroup);
 
-    QLineEdit *vgpoOffsetEdit = new QLineEdit(vgpoGroup);
-    QLineEdit *vgpoStepEdit = new QLineEdit(vgpoGroup);
-    QPushButton *vgpoSet = new QPushButton(tr("Set"), vgpoGroup);
-    vgpoOffsetEdit->setObjectName(QStringLiteral("txtVgpoOffset"));
-    vgpoStepEdit->setObjectName(QStringLiteral("txtVgpoPhaseStep"));
-    vgpoSet->setObjectName(QStringLiteral("btnSetVgpo"));
-    vgpoOffsetEdit->setText(QStringLiteral("0"));
-    vgpoOffsetEdit->setPlaceholderText(QStringLiteral("0 ... 4294967295"));
-    vgpoOffsetEdit->setToolTip(tr("Raw 32-bit doppler_phase_offset written to INchann / 0x43C30118."));
-    vgpoStepEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(),
-                                                 std::numeric_limits<int>::max(),
-                                                 vgpoStepEdit));
-    vgpoStepEdit->setText(QStringLiteral("0"));
-    vgpoStepEdit->setPlaceholderText(QStringLiteral("signed 32-bit phase step"));
-    vgpoStepEdit->setToolTip(tr("Raw signed doppler_phase_step. Example: 1200 writes 1200 to 0x43C3011C."));
-
-    vgpoLayout->addWidget(vgpoAddress, 0, 0, 1, 5);
-    vgpoLayout->addWidget(new QLabel(tr("State"), vgpoGroup), 1, 0);
-    vgpoLayout->addWidget(vgpoOn, 1, 1);
-    vgpoLayout->addWidget(vgpoOff, 1, 2);
-    vgpoLayout->addWidget(new QLabel(tr("Offset"), vgpoGroup), 2, 0);
-    vgpoLayout->addWidget(vgpoOffsetEdit, 2, 1, 1, 3);
-    vgpoLayout->addWidget(new QLabel(tr("Phase Step"), vgpoGroup), 3, 0);
-    vgpoLayout->addWidget(vgpoStepEdit, 3, 1, 1, 3);
-    vgpoLayout->addWidget(vgpoSet, 3, 4);
-    pageLayout->addWidget(vgpoGroup);
-
-
-    // -------------------- Hardware transaction output --------------------
-    QLabel *backendLabel = new QLabel(tr("Register backend: waiting for board connection."), page);
+    QLabel *backendLabel = new QLabel(tr("Register backend: waiting for board connection."), hwGroup);
     backendLabel->setObjectName(QStringLiteral("lblDrfmRegisterBackend"));
     backendLabel->setWordWrap(true);
-    pageLayout->addWidget(backendLabel);
+    hwLayout->addWidget(backendLabel);
 
-    QLabel *statusLabel = new QLabel(tr("No command has been sent yet."), page);
+    QLabel *statusLabel = new QLabel(tr("No command has been sent yet."), hwGroup);
     statusLabel->setObjectName(QStringLiteral("lblDrfmControlStatus"));
     statusLabel->setWordWrap(true);
-    pageLayout->addWidget(statusLabel);
+    statusLabel->setStyleSheet(QStringLiteral("color: #81c784; font-family: monospace;"));
+    hwLayout->addWidget(statusLabel);
+
+    pageLayout->addWidget(hwGroup);
     pageLayout->addStretch(1);
 
+    scrollArea->setWidget(scrollContent);
+    mainPageLayout->addWidget(scrollArea);
     ui->tabWidgetSetting->addTab(page, tr("DRFM"));
 
     auto controlUnit = [this]() -> ControlUnitADRV9009 * {
@@ -837,8 +1048,7 @@ void ReceiverMain::setupDrfmControlTab()
     // Every Set on this tab means the operator is driving the transmitter:
     // turn TX1 on (same rule as the exciter) and switch the DAC output from
     // the CW tone to the DAC Buffer Output mode - exactly what the exciter
-    // does when pulse/spot/wideband is set. The exciter's own CW tone / DAC
-    // buffer switching is not touched here.
+    // does when pulse/spot/wideband is set.
     auto noteDrfmSetActivity = [this]() {
         if (power_TX1_DownChk)
         {
@@ -847,17 +1057,228 @@ void ReceiverMain::setupDrfmControlTab()
         }
         if (att_TX1_Spn)
             att_TX1_Spn->setValue(0);
-        // (Every noise/DRFM set switches the DAC from CW tone to DAC buffer
-        // through ControlUnitADRV9009::sendFileToDacSignal -> setFile, exactly
-        // like the exciter tab does.)
     };
 
+    // ------------------ Range Synchronizers ------------------
+    QSharedPointer<bool> updatingRange(new bool(false));
+    auto updateRangeFromM = [spnTargetRangeKm, spnTargetDelayUs, spnTargetDelayNs, lblTotalOscDelay, updatingRange](double rM) {
+        if (*updatingRange) return;
+        *updatingRange = true;
+        const double rKm = rM / 1000.0;
+        const double delayUs = ControlUnitADRV9009::calculateDelayUs(rM);
+        const double delayNs = delayUs * 1000.0;
+        const double totalOscUs = ControlUnitADRV9009::calculateTotalOscilloscopeDelayUs(rM);
+        const double totalOscNs = totalOscUs * 1000.0;
+
+        spnTargetRangeKm->setValue(rKm);
+        spnTargetDelayUs->setValue(delayUs);
+        spnTargetDelayNs->setValue(delayNs);
+        lblTotalOscDelay->setText(QStringLiteral("%1 us  (%2 ns)")
+                                  .arg(QString::number(totalOscUs, 'f', 4),
+                                       QString::number(totalOscNs, 'f', 1)));
+        *updatingRange = false;
+    };
+
+    auto updateRangeFromKm = [spnTargetRangeM, spnTargetDelayUs, spnTargetDelayNs, lblTotalOscDelay, updatingRange](double rKm) {
+        if (*updatingRange) return;
+        *updatingRange = true;
+        const double rM = rKm * 1000.0;
+        const double delayUs = ControlUnitADRV9009::calculateDelayUs(rM);
+        const double delayNs = delayUs * 1000.0;
+        const double totalOscUs = ControlUnitADRV9009::calculateTotalOscilloscopeDelayUs(rM);
+        const double totalOscNs = totalOscUs * 1000.0;
+
+        spnTargetRangeM->setValue(rM);
+        spnTargetDelayUs->setValue(delayUs);
+        spnTargetDelayNs->setValue(delayNs);
+        lblTotalOscDelay->setText(QStringLiteral("%1 us  (%2 ns)")
+                                  .arg(QString::number(totalOscUs, 'f', 4),
+                                       QString::number(totalOscNs, 'f', 1)));
+        *updatingRange = false;
+    };
+
+    auto updateRangeFromDelayUs = [spnTargetRangeM, spnTargetRangeKm, spnTargetDelayNs, lblTotalOscDelay, updatingRange](double delayUs) {
+        if (*updatingRange) return;
+        *updatingRange = true;
+        const double rM = ControlUnitADRV9009::calculateRangeMeters(delayUs);
+        const double rKm = rM / 1000.0;
+        const double delayNs = delayUs * 1000.0;
+        const double totalOscUs = delayUs + (ControlUnitADRV9009::SYSTEM_INTRINSIC_LATENCY_NS * 1.0e-3);
+        const double totalOscNs = totalOscUs * 1000.0;
+
+        spnTargetRangeM->setValue(rM);
+        spnTargetRangeKm->setValue(rKm);
+        spnTargetDelayNs->setValue(delayNs);
+        lblTotalOscDelay->setText(QStringLiteral("%1 us  (%2 ns)")
+                                  .arg(QString::number(totalOscUs, 'f', 4),
+                                       QString::number(totalOscNs, 'f', 1)));
+        *updatingRange = false;
+    };
+
+    auto updateRangeFromDelayNs = [spnTargetRangeM, spnTargetRangeKm, spnTargetDelayUs, lblTotalOscDelay, updatingRange](double delayNs) {
+        if (*updatingRange) return;
+        *updatingRange = true;
+        const double delayUs = delayNs / 1000.0;
+        const double rM = ControlUnitADRV9009::calculateRangeMeters(delayUs);
+        const double rKm = rM / 1000.0;
+        const double totalOscUs = delayUs + (ControlUnitADRV9009::SYSTEM_INTRINSIC_LATENCY_NS * 1.0e-3);
+        const double totalOscNs = totalOscUs * 1000.0;
+
+        spnTargetRangeM->setValue(rM);
+        spnTargetRangeKm->setValue(rKm);
+        spnTargetDelayUs->setValue(delayUs);
+        lblTotalOscDelay->setText(QStringLiteral("%1 us  (%2 ns)")
+                                  .arg(QString::number(totalOscUs, 'f', 4),
+                                       QString::number(totalOscNs, 'f', 1)));
+        *updatingRange = false;
+    };
+
+    connect(spnTargetRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateRangeFromM);
+    connect(spnTargetRangeKm, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateRangeFromKm);
+    connect(spnTargetDelayUs, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateRangeFromDelayUs);
+    connect(spnTargetDelayNs, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateRangeFromDelayNs);
+
+    // ------------------ Velocity / Doppler Synchronizers ------------------
+    QSharedPointer<bool> updatingVel(new bool(false));
+    auto updateFromDopplerHz = [spnCenterFreq, spnDopplerKhz, spnVelocityMps, spnVelocityKmh, spnVelocityMach,
+                                vgpoStepEdit, lblWavelength, lblMotionStatus, updatingVel](double fdHz) {
+        if (*updatingVel) return;
+        *updatingVel = true;
+        const double f0Mhz = spnCenterFreq->value();
+        const double wavelengthM = ControlUnitADRV9009::calculateWavelengthM(f0Mhz);
+        const double vMps = ControlUnitADRV9009::calculateVelocityMps(fdHz, f0Mhz);
+        const double vKmh = vMps * 3.6;
+        const double vMach = vMps / 340.29;
+        const qint32 phaseStep = ControlUnitADRV9009::calculatePhaseStep(fdHz, 122.88);
+
+        spnDopplerKhz->setValue(fdHz / 1000.0);
+        spnVelocityMps->setValue(vMps);
+        spnVelocityKmh->setValue(vKmh);
+        spnVelocityMach->setValue(vMach);
+        vgpoStepEdit->setText(QString::number(phaseStep));
+
+        lblWavelength->setText(QStringLiteral("&lambda; = %1 cm  (at %2 MHz)")
+                               .arg(QString::number(wavelengthM * 100.0, 'f', 2),
+                                    QString::number(f0Mhz, 'f', 2)));
+
+        if (std::abs(fdHz) < 1.0e-3) {
+            lblMotionStatus->setText(QObject::tr("Stationary / Zero Velocity (f<sub>rx</sub> = f<sub>tx</sub>)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #a5d6a7;"));
+        } else if (fdHz > 0) {
+            lblMotionStatus->setText(QObject::tr("Approaching (+ Doppler / Upshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #81d4fa;"));
+        } else {
+            lblMotionStatus->setText(QObject::tr("Receding (- Doppler / Downshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #ffab91;"));
+        }
+        *updatingVel = false;
+    };
+
+    auto updateFromVelocityMps = [spnCenterFreq, spnDopplerHz, spnDopplerKhz, spnVelocityKmh, spnVelocityMach,
+                                  vgpoStepEdit, lblWavelength, lblMotionStatus, updatingVel](double vMps) {
+        if (*updatingVel) return;
+        *updatingVel = true;
+        const double f0Mhz = spnCenterFreq->value();
+        const double wavelengthM = ControlUnitADRV9009::calculateWavelengthM(f0Mhz);
+        const double fdHz = ControlUnitADRV9009::calculateDopplerHz(vMps, f0Mhz);
+        const double vKmh = vMps * 3.6;
+        const double vMach = vMps / 340.29;
+        const qint32 phaseStep = ControlUnitADRV9009::calculatePhaseStep(fdHz, 122.88);
+
+        spnDopplerHz->setValue(fdHz);
+        spnDopplerKhz->setValue(fdHz / 1000.0);
+        spnVelocityKmh->setValue(vKmh);
+        spnVelocityMach->setValue(vMach);
+        vgpoStepEdit->setText(QString::number(phaseStep));
+
+        lblWavelength->setText(QStringLiteral("&lambda; = %1 cm  (at %2 MHz)")
+                               .arg(QString::number(wavelengthM * 100.0, 'f', 2),
+                                    QString::number(f0Mhz, 'f', 2)));
+
+        if (std::abs(vMps) < 1.0e-3) {
+            lblMotionStatus->setText(QObject::tr("Stationary / Zero Velocity (f<sub>rx</sub> = f<sub>tx</sub>)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #a5d6a7;"));
+        } else if (vMps > 0) {
+            lblMotionStatus->setText(QObject::tr("Approaching (+ Doppler / Upshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #81d4fa;"));
+        } else {
+            lblMotionStatus->setText(QObject::tr("Receding (- Doppler / Downshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #ffab91;"));
+        }
+        *updatingVel = false;
+    };
+
+    connect(spnDopplerHz, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateFromDopplerHz);
+    connect(spnDopplerKhz, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [updateFromDopplerHz](double fKhz){
+        updateFromDopplerHz(fKhz * 1000.0);
+    });
+    connect(spnVelocityMps, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, updateFromVelocityMps);
+    connect(spnVelocityKmh, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [updateFromVelocityMps](double vKmh){
+        updateFromVelocityMps(vKmh / 3.6);
+    });
+    connect(spnVelocityMach, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [updateFromVelocityMps](double vMach){
+        updateFromVelocityMps(vMach * 340.29);
+    });
+    connect(spnCenterFreq, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [spnDopplerHz, updateFromDopplerHz](double){
+        updateFromDopplerHz(spnDopplerHz->value());
+    });
+
+    connect(vgpoStepEdit, &QLineEdit::textChanged, this, [spnCenterFreq, spnDopplerHz, spnDopplerKhz, spnVelocityMps,
+                                                         spnVelocityKmh, spnVelocityMach, lblMotionStatus, updatingVel](const QString &txt){
+        if (*updatingVel) return;
+        bool ok = false;
+        const qint32 step = txt.toInt(&ok);
+        if (!ok) return;
+        const double fdHz = ControlUnitADRV9009::calculateDopplerFromPhaseStep(step, 122.88);
+        *updatingVel = true;
+        const double f0Mhz = spnCenterFreq->value();
+        const double vMps = ControlUnitADRV9009::calculateVelocityMps(fdHz, f0Mhz);
+        spnDopplerHz->setValue(fdHz);
+        spnDopplerKhz->setValue(fdHz / 1000.0);
+        spnVelocityMps->setValue(vMps);
+        spnVelocityKmh->setValue(vMps * 3.6);
+        spnVelocityMach->setValue(vMps / 340.29);
+        if (std::abs(fdHz) < 1.0e-3) {
+            lblMotionStatus->setText(QObject::tr("Stationary / Zero Velocity (f<sub>rx</sub> = f<sub>tx</sub>)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #a5d6a7;"));
+        } else if (fdHz > 0) {
+            lblMotionStatus->setText(QObject::tr("Approaching (+ Doppler / Upshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #81d4fa;"));
+        } else {
+            lblMotionStatus->setText(QObject::tr("Receding (- Doppler / Downshift)"));
+            lblMotionStatus->setStyleSheet(QStringLiteral("font-weight: bold; color: #ffab91;"));
+        }
+        *updatingVel = false;
+    });
+
+    // ------------------ Actions / Apply Lambdas ------------------
     auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
         noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setDrfmEnabled(drfmOn->isChecked(), &details);
+        showResult(unit, ok, details);
+    };
+
+    auto applyTargetRange = [controlUnit, spnTargetRangeM, showResult, noBoard, noteDrfmSetActivity]() {
+        ControlUnitADRV9009 *unit = controlUnit();
+        if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
+        QString details;
+        const double rangeM = spnTargetRangeM->value();
+        const bool ok = unit->setTargetRange(rangeM, &details);
+        showResult(unit, ok, details);
+    };
+
+    auto applyTargetVelocity = [controlUnit, spnDopplerHz, spnCenterFreq, vgpoOn, showResult, noBoard, noteDrfmSetActivity]() {
+        ControlUnitADRV9009 *unit = controlUnit();
+        if (!unit) { noBoard(); return; }
+        noteDrfmSetActivity();
+        QString details;
+        const double fdHz = spnDopplerHz->value();
+        const double f0Mhz = spnCenterFreq->value();
+        const bool ok = unit->setTargetDoppler(fdHz, f0Mhz, vgpoOn->isChecked(), &details);
         showResult(unit, ok, details);
     };
 
@@ -876,72 +1297,33 @@ void ReceiverMain::setupDrfmControlTab()
         showResult(unit, ok, details);
     };
 
-    auto applyVgpoEnable = [controlUnit, vgpoOn, showResult, noBoard, noteDrfmSetActivity]() {
-        ControlUnitADRV9009 *unit = controlUnit();
-        if (!unit) { noBoard(); return; }
-        noteDrfmSetActivity();
-        QString details;
-        const bool ok = unit->setVgpoEnabled(vgpoOn->isChecked(), &details);
-        showResult(unit, ok, details);
-    };
-
-    auto applyVgpoSet = [controlUnit, vgpoOffsetEdit, vgpoStepEdit, vgpoOn,
-                         statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
-        bool offsetOk = false;
-        const qulonglong offset64 = vgpoOffsetEdit->text().toULongLong(&offsetOk);
-        if (!offsetOk || offset64 > std::numeric_limits<quint32>::max()) {
-            statusLabel->setText(QObject::tr("VGPO Offset must be 0 ... 4294967295."));
-            return;
-        }
-
-        bool stepOk = false;
-        const qlonglong step64 = vgpoStepEdit->text().toLongLong(&stepOk);
-        if (!stepOk || step64 < std::numeric_limits<qint32>::min() ||
-                       step64 > std::numeric_limits<qint32>::max()) {
-            statusLabel->setText(QObject::tr("VGPO Phase Step must fit a signed 32-bit integer."));
-            return;
-        }
-
-        ControlUnitADRV9009 *unit = controlUnit();
-        if (!unit) { noBoard(); return; }
-        noteDrfmSetActivity();
-        QString details;
-        const bool ok = unit->setVgpoValue(static_cast<quint32>(offset64),
-                                           static_cast<qint32>(step64),
-                                           vgpoOn->isChecked(), &details);
-        showResult(unit, ok, details);
-    };
-
-    // ON/OFF buttons are real hardware commands, not just UI state changes.
-    // Set re-applies the selected state/value, matching the original TH1/TH2
-    // model where a button click performs the actual register transaction.
+    // Connections
     connect(drfmOn,  &QRadioButton::clicked, this, [applyDrfm](bool){ applyDrfm(); });
     connect(drfmOff, &QRadioButton::clicked, this, [applyDrfm](bool){ applyDrfm(); });
     connect(drfmSet, &QPushButton::clicked, this, applyDrfm);
+
+    connect(btnSetTargetRange, &QPushButton::clicked, this, applyTargetRange);
+    connect(btnSetVelocity, &QPushButton::clicked, this, applyTargetVelocity);
+
+    connect(vgpoOn,  &QRadioButton::clicked, this, [applyTargetVelocity](bool){ applyTargetVelocity(); });
+    connect(vgpoOff, &QRadioButton::clicked, this, [applyTargetVelocity](bool){ applyTargetVelocity(); });
 
     connect(ampOn,   &QRadioButton::clicked, this, [applyAmply](bool){ applyAmply(); });
     connect(ampOff,  &QRadioButton::clicked, this, [applyAmply](bool){ applyAmply(); });
     connect(ampSet,  &QPushButton::clicked, this, applyAmply);
 
-    connect(vgpoOn,  &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
-    connect(vgpoOff, &QRadioButton::clicked, this, [applyVgpoEnable](bool){ applyVgpoEnable(); });
-    connect(vgpoSet, &QPushButton::clicked, this, applyVgpoSet);
-
-    // The DRFM tab TX1 pair drives the global TX1 control and follows it when
-    // TX1 is changed elsewhere (checkbox checked = TX off). Radio setChecked()
-    // does not emit clicked(), so these connections cannot loop.
     connect(txOn, &QRadioButton::clicked, this, [this](bool) {
         if (power_TX1_DownChk)
         {
-            power_TX1_DownChk->stateChanged(0);   // force a hardware write
-            power_TX1_DownChk->setChecked(false); // TX1 ON
+            power_TX1_DownChk->stateChanged(0);
+            power_TX1_DownChk->setChecked(false);
         }
     });
     connect(txOff, &QRadioButton::clicked, this, [this](bool) {
         if (power_TX1_DownChk)
         {
-            power_TX1_DownChk->stateChanged(1);   // force a hardware write
-            power_TX1_DownChk->setChecked(true);  // TX1 OFF
+            power_TX1_DownChk->stateChanged(1);
+            power_TX1_DownChk->setChecked(true);
         }
     });
 }

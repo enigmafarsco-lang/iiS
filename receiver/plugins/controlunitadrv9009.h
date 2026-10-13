@@ -81,6 +81,68 @@ private:
     DrfmRegisterIO registerIo;
 
 public:
+    // Technical Specification Constants
+    static constexpr double SPEED_OF_LIGHT                = 3.0e8;      // m/s (approx 3.0e8 m/s)
+    static constexpr double SYSTEM_INTRINSIC_LATENCY_NS   = 80.0;       // ns (~12 m round-trip)
+    static constexpr double SYSTEM_INTRINSIC_RANGE_M      = 12.0;       // m
+    static constexpr double MIN_TARGET_RANGE_M            = 150.0;      // 150 m
+    static constexpr double MAX_TARGET_RANGE_M            = 25000.0;    // 25 km
+    static constexpr double RANGE_RESOLUTION_M            = 10.0;       // 10 m
+    static constexpr double DOPPLER_RESOLUTION_HZ         = 10.0;       // 10 Hz
+    static constexpr double MAX_RF_FREQUENCY_MHZ          = 6000.0;     // 6 GHz
+    static constexpr double MIN_WAVELENGTH_M              = 0.05;       // 5 cm (at 6 GHz)
+
+    // Mathematical Formulations for Radar Target Simulation
+    static double calculateDelayUs(double rangeMeters, double c = SPEED_OF_LIGHT)
+    {
+        return (2.0 * rangeMeters / c) * 1.0e6; // delay in microseconds (us)
+    }
+
+    static double calculateRangeMeters(double delayUs, double c = SPEED_OF_LIGHT)
+    {
+        return (c * (delayUs * 1.0e-6)) / 2.0; // range in meters (m)
+    }
+
+    static double calculateTotalOscilloscopeDelayUs(double rangeMeters,
+                                                    double intrinsicNs = SYSTEM_INTRINSIC_LATENCY_NS,
+                                                    double c = SPEED_OF_LIGHT)
+    {
+        return calculateDelayUs(rangeMeters, c) + (intrinsicNs * 1.0e-3);
+    }
+
+    static double calculateWavelengthM(double centerFreqMhz, double c = SPEED_OF_LIGHT)
+    {
+        if (centerFreqMhz <= 0.0) return 0.0;
+        return c / (centerFreqMhz * 1.0e6);
+    }
+
+    static double calculateDopplerHz(double velocityMps, double centerFreqMhz, double c = SPEED_OF_LIGHT)
+    {
+        // fd = 2 * v * f0 / c = 2 * v / lambda
+        return (2.0 * velocityMps * (centerFreqMhz * 1.0e6)) / c;
+    }
+
+    static double calculateVelocityMps(double dopplerHz, double centerFreqMhz, double c = SPEED_OF_LIGHT)
+    {
+        if (centerFreqMhz <= 0.0) return 0.0;
+        // v = fd * c / (2 * f0) = fd * lambda / 2
+        return (dopplerHz * c) / (2.0 * (centerFreqMhz * 1.0e6));
+    }
+
+    static qint32 calculatePhaseStep(double dopplerHz, double sampleRateMhz = 122.88)
+    {
+        // thcw = round(fd * 2^32 / Fs)
+        const double fs = sampleRateMhz * 1.0e6;
+        if (fs <= 0.0) return 0;
+        return static_cast<qint32>(std::round(dopplerHz * (4294967296.0 / fs)));
+    }
+
+    static double calculateDopplerFromPhaseStep(qint32 phaseStep, double sampleRateMhz = 122.88)
+    {
+        const double fs = sampleRateMhz * 1.0e6;
+        return (static_cast<double>(phaseStep) * fs) / 4294967296.0;
+    }
+
     // Hardware map confirmed from the supplied tcl07020.tcl,
     // AddressSegments.csv, led_count_ip_addr_decoder.v and MUXDACS_ip.v:
     // led_count_ip_0 AXI4-Lite base             = 0x43C30000
@@ -108,6 +170,14 @@ public:
     // Compatibility overload: phase offset defaults to zero.
     bool setVgpoValue(qint32 phaseStep, bool enabled = true, QString *details = nullptr)
     { return setVgpoValue(0u, phaseStep, enabled, details); }
+
+    // Set Target Range & Propagation Delay
+    bool setTargetRange(double rangeMeters, QString *details = nullptr);
+    bool setTargetDelay(double delayUs, QString *details = nullptr);
+
+    // Set Target Radial Velocity & Doppler Shift
+    bool setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
+    bool setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
 
     // Scan report: every led-count IIO debug attribute (name = value) and the
     // register it represents (th0/dacsel/...).  Pure IIO - no UART.

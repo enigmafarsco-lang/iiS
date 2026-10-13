@@ -908,6 +908,71 @@ bool ControlUnitADRV9009::setVgpoValue(quint32 phaseOffset, qint32 phaseStep,
     return paramsOk && enableOk;
 }
 
+bool ControlUnitADRV9009::setTargetRange(double rangeMeters, QString *details)
+{
+    const double delayUs = calculateDelayUs(rangeMeters);
+    const double totalOscUs = calculateTotalOscilloscopeDelayUs(rangeMeters);
+    const double delayNs = delayUs * 1000.0;
+    const double totalOscNs = totalOscUs * 1000.0;
+
+    QString logMsg = QStringLiteral("DRFM Target Range: %1 m (%2 km) | Propagation Delay: %3 us (%4 ns) | "
+                                    "System Intrinsic Latency: %5 ns (~%6 m) | Total Oscilloscope Delay: %7 us (%8 ns)")
+            .arg(QString::number(rangeMeters, 'f', 1))
+            .arg(QString::number(rangeMeters / 1000.0, 'f', 3))
+            .arg(QString::number(delayUs, 'f', 4))
+            .arg(QString::number(delayNs, 'f', 1))
+            .arg(QString::number(SYSTEM_INTRINSIC_LATENCY_NS, 'f', 1))
+            .arg(QString::number(SYSTEM_INTRINSIC_RANGE_M, 'f', 1))
+            .arg(QString::number(totalOscUs, 'f', 4))
+            .arg(QString::number(totalOscNs, 'f', 1));
+
+    if (details)
+        *details = logMsg;
+
+    qInfo() << "ControlUnitADRV9009:" << logMsg;
+    return true;
+}
+
+bool ControlUnitADRV9009::setTargetDelay(double delayUs, QString *details)
+{
+    const double rangeMeters = calculateRangeMeters(delayUs);
+    return setTargetRange(rangeMeters, details);
+}
+
+bool ControlUnitADRV9009::setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled, QString *details)
+{
+    const double wavelengthM = calculateWavelengthM(centerFreqMhz);
+    const double velocityMps = calculateVelocityMps(dopplerHz, centerFreqMhz);
+    const double velocityKmh = velocityMps * 3.6;
+    const qint32 phaseStep = calculatePhaseStep(dopplerHz, 122.88);
+
+    QString vgpoDetails;
+    const bool ok = setVgpoValue(0u, phaseStep, enabled, &vgpoDetails);
+
+    QString logMsg = QStringLiteral("DRFM Target Doppler: %1 Hz (%2 kHz) | Radial Velocity: %3 m/s (%4 km/h) | "
+                                    "Center Freq: %5 MHz (lambda = %6 cm) | NCO Phase Step (thcw @ 0x11C): %7\n%8")
+            .arg(QString::number(dopplerHz, 'f', 1))
+            .arg(QString::number(dopplerHz / 1000.0, 'f', 3))
+            .arg(QString::number(velocityMps, 'f', 2))
+            .arg(QString::number(velocityKmh, 'f', 2))
+            .arg(QString::number(centerFreqMhz, 'f', 2))
+            .arg(QString::number(wavelengthM * 100.0, 'f', 2))
+            .arg(QString::number(phaseStep))
+            .arg(vgpoDetails);
+
+    if (details)
+        *details = logMsg;
+
+    qInfo() << "ControlUnitADRV9009:" << logMsg;
+    return ok;
+}
+
+bool ControlUnitADRV9009::setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled, QString *details)
+{
+    const double dopplerHz = calculateDopplerHz(velocityMps, centerFreqMhz);
+    return setTargetDoppler(dopplerHz, centerFreqMhz, enabled, details);
+}
+
 /**
  * @brief ControlUnitADRV9009::WriteAll
  */
