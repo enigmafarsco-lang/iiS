@@ -496,6 +496,9 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
 
     this->setMinimumSize(1024, 700);
     this->resize(1270, 980);
+    ui->gridLayout_19->setColumnStretch(0, 2);
+    ui->gridLayout_19->setColumnStretch(1, 3);
+    ui->gridLayout_19->setColumnMinimumWidth(0, 480);
     connection();
 
 
@@ -1059,6 +1062,26 @@ void ReceiverMain::setupDrfmControlTab()
         }
         if (att_TX1_Spn)
             att_TX1_Spn->setValue(0);
+
+        QRadioButton *txOn = findChild<QRadioButton *>("drfmTxOn");
+        if (txOn) txOn->setChecked(true);
+
+        // Ensure Voltage 0/1 and Voltage 2/3 channels are active
+        QCheckBox *v01 = findChild<QCheckBox *>("chbVoltage01");
+        QCheckBox *v23 = findChild<QCheckBox *>("chbVoltage23");
+        if (v01) v01->setChecked(true);
+        if (v23) v23->setChecked(true);
+    };
+
+    auto ensureDacBufferRunning = [this]() {
+        if (oscMain && oscMain->_adrv9009) {
+            QString noiseFile = spotPath;
+            if (QFileInfo::exists(dataFilePath(noiseFile)))
+                noiseFile = dataFilePath(noiseFile);
+            else if (QFileInfo::exists(resourceFilePath(noiseFile)))
+                noiseFile = resourceFilePath(noiseFile);
+            oscMain->_adrv9009->setFile(noiseFile, 0, true, true);
+        }
     };
 
     // ------------------ Range Synchronizers ------------------
@@ -1254,26 +1277,29 @@ void ReceiverMain::setupDrfmControlTab()
     });
 
     // ------------------ Actions / Apply Lambdas ------------------
-    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
+    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity, ensureDacBufferRunning]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
         noteDrfmSetActivity();
         QString details;
-        const bool ok = unit->setDrfmEnabled(drfmOn->isChecked(), &details);
+        const bool isDrfm = drfmOn->isChecked();
+        const bool ok = unit->setDrfmEnabled(isDrfm, &details);
+        ensureDacBufferRunning();
         showResult(unit, ok, details);
     };
 
-    auto applyTargetRange = [controlUnit, spnTargetRangeM, showResult, noBoard, noteDrfmSetActivity]() {
+    auto applyTargetRange = [controlUnit, spnTargetRangeM, showResult, noBoard, noteDrfmSetActivity, ensureDacBufferRunning]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
         noteDrfmSetActivity();
         QString details;
         const double rangeM = spnTargetRangeM->value();
         const bool ok = unit->setTargetRange(rangeM, &details);
+        ensureDacBufferRunning();
         showResult(unit, ok, details);
     };
 
-    auto applyTargetVelocity = [controlUnit, spnDopplerHz, spnCenterFreq, vgpoOn, showResult, noBoard, noteDrfmSetActivity]() {
+    auto applyTargetVelocity = [controlUnit, spnDopplerHz, spnCenterFreq, vgpoOn, showResult, noBoard, noteDrfmSetActivity, ensureDacBufferRunning]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
         noteDrfmSetActivity();
@@ -1281,10 +1307,11 @@ void ReceiverMain::setupDrfmControlTab()
         const double fdHz = spnDopplerHz->value();
         const double f0Mhz = spnCenterFreq->value();
         const bool ok = unit->setTargetDoppler(fdHz, f0Mhz, vgpoOn->isChecked(), &details);
+        ensureDacBufferRunning();
         showResult(unit, ok, details);
     };
 
-    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard, noteDrfmSetActivity]() {
+    auto applyAmply = [controlUnit, ampEdit, ampOn, statusLabel, showResult, noBoard, noteDrfmSetActivity, ensureDacBufferRunning]() {
         bool valueOk = false;
         const uint value = ampEdit->text().toUInt(&valueOk);
         if (!valueOk || value > 65535u) {
@@ -1296,6 +1323,7 @@ void ReceiverMain::setupDrfmControlTab()
         noteDrfmSetActivity();
         QString details;
         const bool ok = unit->setAmplifyValue(static_cast<quint16>(value), ampOn->isChecked(), &details);
+        ensureDacBufferRunning();
         showResult(unit, ok, details);
     };
 
@@ -2522,8 +2550,14 @@ void ReceiverMain::init()
                 {
                     connect(oscMain->_adrv9009controlUnit, &ControlUnitADRV9009::sendFileToDacSignal,
                             this, [this]() {
-                        if (oscMain && oscMain->_adrv9009)
-                            oscMain->_adrv9009->setFile(spotPath, 0);
+                        if (oscMain && oscMain->_adrv9009) {
+                            QString noiseFile = spotPath;
+                            if (QFileInfo::exists(dataFilePath(noiseFile)))
+                                noiseFile = dataFilePath(noiseFile);
+                            else if (QFileInfo::exists(resourceFilePath(noiseFile)))
+                                noiseFile = resourceFilePath(noiseFile);
+                            oscMain->_adrv9009->setFile(noiseFile, 0, true, true);
+                        }
                     });
                 }
                 gridTX1->addWidget(rfBandlbl          , 5 , 1)         ;

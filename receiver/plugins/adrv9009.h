@@ -176,7 +176,7 @@ public:
     QWidget *fpga_rx_frequency_available;
     QWidget *fpga_tx_frequency_available;
     struct iio_widget fpga_widgets[2];
-    QString setFile(QString fileName,double scale, bool pair01 = true, bool pair23 = false);
+    QString setFile(QString fileName,double scale, bool pair01 = true, bool pair23 = true);
     QString changingDac(QString);
     // TX1 LO-leakage + quadrature tracking: forced enabled + checked
     // (and locked) - must hold in ALL settings, re-applied after every

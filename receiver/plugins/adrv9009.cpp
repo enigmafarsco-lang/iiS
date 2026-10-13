@@ -2372,7 +2372,10 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 QString adrv9009::setFile(QString fileName,double scale,bool pair01,bool pair23)
 {
         if (!pair01 && !pair23)
-            return QStringLiteral("Select Voltage 0/1 or Voltage 2/3 first.");
+        {
+            pair01 = true;
+            pair23 = true;
+        }
 
         changingDac("");
         // Put every TX pair into "DAC Buffer Output" mode; the waveform is
