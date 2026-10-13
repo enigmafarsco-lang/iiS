@@ -91,6 +91,8 @@ class ReceiverMain : public QWidget
     void calibManagment();
     void calibInitial();
     void setupDrfmControlTab();
+    QString ensureZeroDacBufferFile();
+    void ensureDrfmDacBufferRunning();
 public:
     explicit ReceiverMain(QWidget *parent = nullptr);
     void init();

@@ -192,6 +192,7 @@ public:
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);
     QString changeDacToBuffer(); // CW tone -> DAC Buffer Output (DRFM tab)
+    bool isDacBufferRunning() const;
 
 
 //    struct iio_device *dds;

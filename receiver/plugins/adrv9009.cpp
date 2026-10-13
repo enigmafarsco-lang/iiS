@@ -2515,3 +2515,8 @@ QString adrv9009::changeDacToBuffer()
 
         return "DAC output changed from CW tone to DAC Buffer Output.";
 }
+
+bool adrv9009::isDacBufferRunning() const
+{
+    return dac_tx_manager != nullptr && dac_tx_manager->dds_buffer != nullptr;
+}

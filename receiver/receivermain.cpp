@@ -649,6 +649,50 @@ void ReceiverMain::calibInitial()
 
 
 
+QString ReceiverMain::ensureZeroDacBufferFile()
+{
+    QString zeroPath = dataFilePath(QStringLiteral("drfm_zero.txt"));
+    if (!QFileInfo::exists(zeroPath))
+    {
+        if (QFileInfo::exists(resourceFilePath(QStringLiteral("drfm_zero.txt"))))
+            zeroPath = resourceFilePath(QStringLiteral("drfm_zero.txt"));
+    }
+
+    QFile file(zeroPath);
+    if (!file.exists() || file.size() < 100)
+    {
+        zeroPath = dataFilePath(QStringLiteral("drfm_zero.txt"));
+        QFile outFile(zeroPath);
+        if (outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&outFile);
+            out << "TEXT\n";
+            for (int i = 0; i < 1024; i++)
+            {
+                out << "0, 0, 0, 0\n";
+            }
+            outFile.close();
+        }
+    }
+    return zeroPath;
+}
+
+void ReceiverMain::ensureDrfmDacBufferRunning()
+{
+    if (!oscMain || !oscMain->_adrv9009)
+        return;
+
+    // If DAC buffer DMA is already running (e.g. exciter has already sent an LFM or other waveform file),
+    // DMA is already active - do NOT reload or send anything to DMA.
+    if (oscMain->_adrv9009->isDacBufferRunning())
+        return;
+
+    // At software start before any exciter file is loaded, load zero IQ data into DAC buffer
+    // to initialize and start the DAC buffer cyclic DMA engine.
+    const QString zeroFile = ensureZeroDacBufferFile();
+    oscMain->_adrv9009->setFile(zeroFile, 0, true, true);
+}
+
 void ReceiverMain::setupDrfmControlTab()
 {
     // Hardware mapping is taken from the supplied Vivado/HDL sources:
@@ -1260,12 +1304,15 @@ void ReceiverMain::setupDrfmControlTab()
     });
 
     // ------------------ Actions / Apply Lambdas ------------------
-    auto applyDrfm = [controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
+    auto applyDrfm = [this, controlUnit, drfmOn, showResult, noBoard, noteDrfmSetActivity]() {
         ControlUnitADRV9009 *unit = controlUnit();
         if (!unit) { noBoard(); return; }
         noteDrfmSetActivity();
-        QString details;
         const bool isDrfm = drfmOn->isChecked();
+        if (isDrfm) {
+            ensureDrfmDacBufferRunning();
+        }
+        QString details;
         const bool ok = unit->setDrfmEnabled(isDrfm, &details);
         showResult(unit, ok, details);
     };
