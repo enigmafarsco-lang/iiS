@@ -1,0 +1,236 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+/*
+ * libiio - Library for interfacing industrial I/O (IIO) devices
+ *
+ * Copyright (C) 2021 Analog Devices, Inc.
+ * Author: Paul Cercueil
+ */
+
+#include <errno.h>
+#include <iio/iio-debug.h>
+#include <iio/iio-lock.h>
+#include <ws2tcpip.h>
+
+#include "network.h"
+#include "utils-windows.h"
+
+#define close(s) closesocket(s)
+
+struct iiod_client_pdata_os {
+	struct iio_mutex *event_lock;
+	int read_waiters;
+	int write_waiters;
+};
+
+int set_blocking_mode(int s, bool blocking)
+{
+	unsigned long nonblock;
+	int ret;
+
+	nonblock = blocking ? 0 : 1;
+
+	ret = ioctlsocket(s, FIONBIO, &nonblock);
+	if (ret == SOCKET_ERROR) {
+		return network_get_error();
+	}
+
+	return 0;
+}
+
+int setup_cancel(struct iiod_client_pdata *io_ctx)
+{
+	io_ctx->events[0] = WSACreateEvent();
+	if (io_ctx->events[0] == WSA_INVALID_EVENT)
+		return -ENOMEM; /* Pretty much the only error that can happen */
+
+	io_ctx->events[1] = WSACreateEvent();
+	if (io_ctx->events[1] == WSA_INVALID_EVENT) {
+		WSACloseEvent(io_ctx->events[0]);
+		return -ENOMEM;
+	}
+
+	struct iiod_client_pdata_os *os_priv = malloc(sizeof(*os_priv));
+	if (!os_priv)
+		goto err_close_events;
+
+	os_priv->event_lock = iio_mutex_create();
+	if (!os_priv->event_lock)
+		goto err_free_os_priv;
+
+	os_priv->read_waiters = 0;
+	os_priv->write_waiters = 0;
+	io_ctx->os_priv = os_priv;
+
+	return 0;
+err_free_os_priv:
+	free(os_priv);
+err_close_events:
+	WSACloseEvent(io_ctx->events[0]);
+	WSACloseEvent(io_ctx->events[1]);
+	io_ctx->events[0] = NULL;
+	io_ctx->events[1] = NULL;
+	return -ENOMEM;
+}
+
+void cleanup_cancel(struct iiod_client_pdata *io_ctx)
+{
+	iio_mutex_destroy(io_ctx->os_priv->event_lock);
+	free(io_ctx->os_priv);
+	WSACloseEvent(io_ctx->events[0]);
+	WSACloseEvent(io_ctx->events[1]);
+}
+
+void do_cancel(struct iiod_client_pdata *io_ctx)
+{
+	WSASetEvent(io_ctx->events[1]);
+}
+
+int wait_cancellable(struct iiod_client_pdata *io_ctx, bool read, int timeout_ms)
+{
+	struct iio_mutex *lock = io_ctx->os_priv->event_lock;
+	long wsa_events = FD_CLOSE;
+	DWORD ret, timeout;
+
+	if (timeout_ms < 0)
+		timeout = WSA_INFINITE;
+	else
+		timeout = (DWORD)timeout_ms;
+
+	iio_mutex_lock(lock);
+	if (read)
+		io_ctx->os_priv->read_waiters++;
+	else
+		io_ctx->os_priv->write_waiters++;
+
+	if (io_ctx->os_priv->read_waiters > 0)
+		wsa_events |= FD_READ;
+	if (io_ctx->os_priv->write_waiters > 0)
+		wsa_events |= FD_WRITE;
+
+	WSAEventSelect(io_ctx->fd, NULL, 0);
+	WSAResetEvent(io_ctx->events[0]);
+	WSAEventSelect(io_ctx->fd, io_ctx->events[0], wsa_events);
+
+	iio_mutex_unlock(lock);
+
+	ret = WSAWaitForMultipleEvents(2, io_ctx->events, FALSE, timeout, FALSE);
+
+	iio_mutex_lock(lock);
+	if (read)
+		io_ctx->os_priv->read_waiters--;
+	else
+		io_ctx->os_priv->write_waiters--;
+	iio_mutex_unlock(lock);
+
+	if (ret == WSA_WAIT_TIMEOUT)
+		return -ETIMEDOUT;
+
+	if (ret == WSA_WAIT_EVENT_0 + 1)
+		return -EBADF;
+
+	return 0;
+}
+
+int network_get_error(void)
+{
+	return translate_wsa_error_to_posix(WSAGetLastError());
+}
+
+bool network_should_retry(int err)
+{
+	return err == -EAGAIN || err == -ETIMEDOUT;
+}
+
+bool network_is_interrupted(int err)
+{
+	return false;
+}
+
+bool network_connect_in_progress(int err)
+{
+	return err == -EAGAIN;
+}
+
+int network_translate_so_error(int so_error)
+{
+	return translate_wsa_error_to_posix(so_error);
+}
+
+int network_normalize_gai_error(int ret)
+{
+	if (ret == 0)
+		return 0;
+	if (ret >= 10000)
+		return translate_wsa_error_to_posix(ret);
+	return network_map_eai_code(ret);
+}
+
+/* Use it if available */
+#ifndef WSA_FLAG_NO_HANDLE_INHERIT
+#define WSA_FLAG_NO_HANDLE_INHERIT 0
+#endif
+
+int do_create_socket(const struct addrinfo *addrinfo)
+{
+	SOCKET s;
+
+	s = WSASocketW(addrinfo->ai_family, addrinfo->ai_socktype, 0, NULL, 0,
+			WSA_FLAG_NO_HANDLE_INHERIT | WSA_FLAG_OVERLAPPED);
+	if (s == INVALID_SOCKET)
+		return network_get_error();
+
+	return (int)s;
+}
+
+int do_select(int fd, int timeout)
+{
+	struct timeval tv;
+	struct timeval *ptv;
+	fd_set set;
+	int ret;
+
+#ifdef _MSC_BUILD
+	/*
+	 * This is so stupid, but studio emits a signed/unsigned mismatch
+	 * on their own FD_ZERO macro, so turn the warning off/on
+	 */
+#pragma warning(disable : 4389)
+#endif
+	FD_ZERO(&set);
+	FD_SET(fd, &set);
+#ifdef _MSC_BUILD
+#pragma warning(default : 4389)
+#endif
+
+	if (timeout >= 0) {
+		tv.tv_sec = timeout / 1000;
+		tv.tv_usec = (timeout % 1000) * 1000;
+		ptv = &tv;
+	} else {
+		ptv = NULL;
+	}
+
+	ret = select(fd + 1, NULL, &set, &set, ptv);
+	if (ret < 0)
+		return network_get_error();
+
+	if (ret == 0)
+		return -ETIMEDOUT;
+
+	return 0;
+}
+
+int network_platform_init(const struct iio_context_params *params)
+{
+	WSADATA wsaData;
+	WORD versionWanted = MAKEWORD(2, 2);
+	int ret;
+
+	ret = WSAStartup(versionWanted, &wsaData);
+	if (ret) {
+		prm_err(params, "Failed to initialize WinSock\n");
+		return translate_wsa_error_to_posix(ret);
+	}
+
+	return 0;
+}

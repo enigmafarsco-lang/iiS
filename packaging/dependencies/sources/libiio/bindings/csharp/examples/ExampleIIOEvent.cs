@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: MIT
+/*
+ * libiio - Library for interfacing industrial I/O (IIO) devices
+ *
+ * Copyright (C) 2024 Analog Devices, Inc.
+ * Author: Alexandra Trifan <Alexandra.Trifan@analog.com>
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using iio;
+
+namespace IIOCSharp
+{
+    class ExampleIIOEvent
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                if (args.Length == 0)
+                {
+                    Console.WriteLine("Scanning for available contexts...");
+                    Scan scan = new Scan();
+                    if (scan.nb_results > 0) {
+                        Console.WriteLine("* Scanned contexts: " + scan.nb_results);
+                    }
+                    foreach (var entry in scan.results) {
+                        Console.WriteLine("\t" + entry.Key + " " + entry.Value);
+                    }
+                    scan.Dispose();
+                    Console.WriteLine();
+                }
+
+                Console.WriteLine("Please provide the context URI and IIO device.\n");
+                Console.WriteLine("Usage: ExampleIIOEvent <uri> <device>");
+                Console.WriteLine("Example: ExampleIIOEvent ip:192.168.2.1 iio:device0\n");
+                return;
+            }
+
+            string uri = args[0];
+            string ev_device = args[1];
+            Context ctx;
+            try
+            {
+                ctx = new Context(uri);
+            } catch (IIOException e)
+            {
+                Console.WriteLine(e.ToString());
+                return;
+            }
+
+            Console.WriteLine("* IIO context created: " + ctx.name);
+            Console.WriteLine("* IIO context description: " + ctx.description);
+
+            Console.WriteLine("* IIO context has " + ctx.devices.Count + " devices:");
+            foreach (Device dev in ctx.devices) {
+                Console.WriteLine("\t" + dev.id + ": " + dev.name);
+                if (dev.name == ev_device)
+                {
+                    EventStream event_stream = new EventStream(dev);
+                    while (true)
+                    {
+                        try 
+                        {
+                            IIOEvent ev = event_stream.read_event(false);
+                            string timestamp = ev.timestamp.ToString();
+                            string print_ev = "Event: time: " + timestamp;
+                            if (ev.chn != null)
+                            {
+                                print_ev += ", channel(s): " + ev.chn.id.ToString();
+                            }
+                            if (ev.chn_diff != null)
+                            {
+                                print_ev += " - " + ev.chn_diff.id;
+                            }
+                            print_ev += ", evtype: " + ev.type;
+                            print_ev += ", direction: " + ev.direction;
+                            Console.WriteLine(print_ev);
+                        }
+                        catch (IIOException e)
+                        {
+                            Console.WriteLine("Error: " + e.ToString());
+                            event_stream.Dispose();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

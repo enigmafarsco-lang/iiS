@@ -1,0 +1,90 @@
+# libiio
+
+Library for interfacing with Linux IIO devices
+
+libiio is used to interface to the Linux Industrial Input/Output (IIO) Subsystem. The Linux IIO subsystem is intended to provide support for devices that in some sense are analog to digital or digital to analog converters (ADCs, DACs). This includes, but is not limited to ADCs, Accelerometers, Gyros, IMUs, Capacitance to Digital Converters (CDCs), Pressure Sensors, Color, Light and Proximity Sensors, Temperature Sensors, Magnetometers, DACs, DDS (Direct Digital Synthesis), PLLs (Phase Locked Loops), Variable/Programmable Gain Amplifiers (VGA, PGA), and RF transceivers. You can use libiio natively on an embedded Linux target (local mode), or use libiio to communicate remotely to that same target from a host Linux, Windows or MAC over USB or Ethernet or Serial.
+
+Although libiio was primarily developed by Analog Devices Inc., it is an active open source library, which many people have contributed to. The library is released under the GNU Lesser General Public License (LGPL), version 2.1 or (at your option) any later version, this open-source license allows anyone to use the library, on any vendors processor/FPGA/SoC, which may be controlling any vendors peripheral device (ADC, DAC, etc) either locally or remotely. This includes closed or open-source, commercial or non-commercial applications (subject to the LGPL license freedoms, obligations and restrictions). The examples and test applications (sometimes referred to as the iio-utils) are released separately under the GNU General Public License (GPL) version 2.0 (at your option) any later version.
+
+Library License : [![Library License](https://img.shields.io/badge/license-LGPL2+-blue.svg)](https://github.com/analogdevicesinc/libiio/blob/main/COPYING.txt)
+Utils/Examples License : [![Application License](https://img.shields.io/badge/license-GPL2+-blue.svg)](https://github.com/analogdevicesinc/libiio/blob/main/COPYING_GPL.txt)
+Certain Files License : [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/analogdevicesinc/libiio/blob/main/COPYING_MIT.txt)
+Latest Release : [![GitHub release](https://img.shields.io/github/release/analogdevicesinc/libiio.svg)](https://github.com/analogdevicesinc/libiio/releases/latest)
+Downloads :  [![Github All Releases](https://img.shields.io/github/downloads/analogdevicesinc/libiio/total.svg)](https://github.com/analogdevicesinc/libiio/releases/latest)
+
+Build : [![Build and Deploy](https://github.com/analogdevicesinc/libiio/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/analogdevicesinc/libiio/actions/workflows/build.yml)
+Scans : [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/4796.svg)](https://scan.coverity.com/projects/analogdevicesinc-libiio)
+Release docs: [![Documentation](https://codedocs.xyz/analogdevicesinc/libiio.svg)](http://analogdevicesinc.github.io/libiio/)
+Issues : [![open bugs](https://img.shields.io/github/issues/analogdevicesinc/libiio.svg)](https://github.com/analogdevicesinc/libiio/issues)
+[![closed bugs](https://img.shields.io/github/issues-closed/analogdevicesinc/libiio.svg)](https://github.com/analogdevicesinc/libiio/issues?q=is%3Aissue+is%3Aclosed)
+
+Support:<br>
+If you have a question about libiio and an Analog Devices IIO kernel driver please ask on : [![EngineerZone](https://img.shields.io/badge/chat-on%20EngineerZone-blue.svg)](https://ez.analog.com/linux-device-drivers/linux-software-drivers). If you have a question about a non-ADI devices, please ask it on [github](https://github.com/analogdevicesinc/libiio/issues).
+
+As with many open source packages, we use [GitHub](https://github.com/analogdevicesinc/libiio) to do develop and maintain the source, and [GitHub Actions](https://github.com/analogdevicesinc/libiio/actions) for continuous integration.
+  - If you want to just use libiio, we suggest using the [latest release](https://github.com/analogdevicesinc/libiio/releases/latest).
+  - If you think you have found a bug in the release, or need a feature which isn't in the release, try the [latest **untested** binaries](README_DEVELOPERS.md) from the main branch and check out the [documentation](https://codedocs.xyz/analogdevicesinc/libiio/) based on the main branch. We provide builds for a few operating systems. If you need something else, we can most likely add that -- just ask.
+
+## Important note (2026-09-22)
+
+Since September 22nd 2026, libiio v1.0.0 has been released.
+It features a brand new API, which is incompatible with libiio v0.26 and older.
+Have a look at [the migration guide](https://analogdevicesinc.github.io/libiio/main/migration/) for a description of the API changes.
+
+The old v0.x API can still be found in the [libiio-v0](https://github.com/analogdevicesinc/libiio/tree/libiio-v0) branch.
+Libiio v0.x is now considered legacy, and as such, only important bug fixes will be accepted into this branch.
+
+Old programs compiled against libiio v0.x will still be able to run with libiio v1.0 and newer, as it provides a compatibility layer.
+
+## Latest Release
+
+### [![](https://img.shields.io/badge/Libiio%20Release-v1.0.0-green)](https://github.com/analogdevicesinc/libiio/releases/tag/v1.0.0)
+
+| Operating System | Version | Installer Package |
+|:----------------:|:-------:|:-----------------:|
+| Windows | Windows-64 | [![Windows-64](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/win_box.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-setup.exe) |
+| MacOS | macOS 15 (x64) | [![macOS 15 (x64)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/osx_box.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-macOS-15-x64.pkg) |
+| | macOS 14 (x64) | [![macOS 14 (x64)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/osx_box.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-macOS-14-x64.pkg) |
+| | macOS Ventura (v13 arm64) | [![macOS Ventura (v13 arm64)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/osx_box.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-macOS-13-arm64.pkg) |
+| Linux | Ubuntu (v 26.04)<sup>1</sup> | [![Ubuntu (v 26.04)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Ubuntu-26.04.deb) |
+| | Ubuntu (v 24.04)<sup>1</sup> | [![Ubuntu (v 24.04)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Ubuntu-24.04.deb) |
+| | Ubuntu Jammy Jellyfish (v 22.04)<sup>1</sup> | [![Ubuntu Jammy Jellyfish (v 22.04)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Ubuntu-22.04.deb) |
+| | Ubuntu Focal Fossa (v 20.04)<sup>1</sup> | [![Ubuntu Focal Fossa (v 20.04)<sup>1</sup>](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Ubuntu-20.04.deb) |
+| | Fedora 34 | [![Fedora 34](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/rpm.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Fedora-34.rpm) |
+| | Fedora 28 | [![Fedora 28](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/rpm.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Fedora-28.rpm) |
+| | Debian Bookworm (12) | [![Debian Bookworm (12)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Debian-12.deb) |
+| | Debian Bullseye (11) | [![Debian Bullseye (11)](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.g9a92966-Linux-Debian-11.deb) |
+| ARM | Ubuntu-ppc64le | [![Ubuntu-ppc64le](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.gv1.0.0-Ubuntu-ppc64le.deb) |
+| | Ubuntu-x390x | [![Ubuntu-x390x](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.gv1.0.0-Ubuntu-x390x.deb) |
+| | Ubuntu-arm64v8 | [![Ubuntu-arm64v8](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.gv1.0.0-Ubuntu-arm64v8.deb) |
+| | Ubuntu-arm32v7 | [![Ubuntu-arm32v7](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.gv1.0.0-Ubuntu-arm32v7.deb) |
+| | Debian12-arm | [![Debian12-arm](https://raw.githubusercontent.com/wiki/analogdevicesinc/libiio/img/deb.png)](https://github.com/analogdevicesinc/libiio/releases/download/v1.0.0/libiio-1.0.0.gv1.0.0-Debian12-arm.deb) |
+
+See all releases [here](https://github.com/analogdevicesinc/libiio/releases).
+
+## Language Bindings
+
+In addition to the core C library, libiio provides bindings for a few other languages:
+
+  * **Python** : published on PyPI as [`pylibiio`](https://pypi.org/project/pylibiio/) (`pip install pylibiio`). See [bindings/python](bindings/python) for details.
+  * **C++** : a header-only wrapper. See [bindings/cpp](bindings/cpp).
+  * **C#** : See [bindings/csharp](bindings/csharp).
+
+## Feedback
+
+If you use it, and like it - please let us know. If you use it, and hate it - please let us know that too. The goal of the project is to try to make Linux IIO devices easier to use on a variety of platforms. If we aren't doing that - we will try to make it better.
+
+Feedback is appreciated (in order of preference):
+
+  * [Github trackers](https://github.com/analogdevicesinc/libiio/issues) for bugs, improvements, or feature requests
+  * [Analog Devices web forums](https://ez.analog.com/community/linux-device-drivers/linux-software-drivers) for general help on libiio and/or ADI Linux IIO drivers
+  * [The IIO mailing list](http://vger.kernel.org/vger-lists.html#linux-iio) for questions about other Linux IIO drivers, or kernel-specific IIO questions
+
+Weblinks:
+  * About IIO: https://wiki.analog.com/software/linux/docs/iio/iio
+  * API Documentation: http://analogdevicesinc.github.io/libiio/
+  * Libiio : http://wiki.analog.com/resources/tools-software/linux-software/libiio
+  * Libiio internals : https://analogdevicesinc.github.io/libiio/main/theory
+
+1. The Ubuntu packages are known to work on their Debian counterpart releases.
+

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- The newest framework the installed SDK supports, unless CMake
+         passes LibiioSharpTfm (see CSHARP_DOTNET_TFM). A global
+         TargetFramework would be ignored by restore, hence the indirection. -->
+    <LibiioSharpTfm Condition="'$(LibiioSharpTfm)' == ''">net$(BundledNETCoreAppTargetFrameworkVersion)</LibiioSharpTfm>
+    <TargetFramework>$(LibiioSharpTfm)</TargetFramework>
+    <LangVersion>9</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="ExampleProgram.cs" />
+  </ItemGroup>
+
+  <!-- CMake passes the already-built DLL; a plain `dotnet build` builds
+       the bindings project itself instead. -->
+  <ItemGroup Condition="'$(LibiioSharpDll)' != ''">
+    <Reference Include="libiio-sharp">
+      <HintPath>$(LibiioSharpDll)</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(LibiioSharpDll)' == ''">
+    <ProjectReference Include="../libiio-sharp-net.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: MIT
+/*
+ * libiio - Library for interfacing industrial I/O (IIO) devices
+ *
+ * Copyright (C) 2023 Analog Devices, Inc.
+ * Author: Paul Cercueil <paul.cercueil@analog.com>
+ */
+
+#include <iio-config.h>
+
+#include "iio-private.h"
+
+iio_get_ticks_us platform_get_ticks_us = NULL;
+uint64_t library_startup_time_us;
+
+static void libiio_init(void)
+{
+	library_startup_time_us = iio_read_counter_us();
+}
+
+static void libiio_exit(void)
+{
+	if (WITH_XML_BACKEND)
+		libiio_cleanup_xml_backend();
+	if (WITH_EMU_BACKEND && !WITH_EMU_BACKEND_DYNAMIC)
+		libiio_cleanup_emu_backend();
+}
+
+void iio_register_get_ticks_us_cb(iio_get_ticks_us cb)
+{
+	if (platform_get_ticks_us != cb) {
+		platform_get_ticks_us = cb;
+
+		/* Log timestamps are reported relative to library_startup_time_us,
+		* which was read from the built-in clock when the library was loaded.
+		* Re-base it onto the time source that is now in effect, otherwise
+		* every timestamp would be the difference between two unrelated
+		* clocks. */
+		library_startup_time_us = iio_read_counter_us();
+	}
+}
+
+#if defined(_MSC_BUILD)
+#pragma section(".CRT$XCU", read)
+#define __CONSTRUCTOR(f, p) \
+	static void f(void); \
+	__declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f; \
+	__pragma(comment(linker, "/include:" p #f "_")) static void f(void)
+#ifdef _WIN64
+#define _CONSTRUCTOR(f) __CONSTRUCTOR(f, "")
+#else
+#define _CONSTRUCTOR(f) __CONSTRUCTOR(f, "_")
+#endif
+#elif defined(__GNUC__)
+#define _CONSTRUCTOR(f) static void __attribute__((constructor)) f(void)
+#else
+#define _CONSTRUCTOR(f) static void f(void)
+#endif
+
+_CONSTRUCTOR(initialize)
+{
+	libiio_init();
+
+	/*
+	 * When the library loads, register our destructor.
+	 * Do it here and not in the context creation function,
+	 * as it could otherwise end up registering the destructor
+	 * many times.
+	 */
+	atexit(libiio_exit);
+}
+#undef _CONSTRUCTOR

@@ -1,0 +1,172 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# SPDX-License-Identifier: MIT
+
+menuconfig LIBIIO_IIOD_NETWORK
+	bool "Network iiod server"
+	imply LIBIIO_MULTITHREADING
+	help
+	  Enable the iiod server over a network interface.
+
+if LIBIIO_IIOD_NETWORK
+
+config LIBIIO_IIOD_NETWORK_PORT
+	int "Port number"
+	default 30431
+	help
+	  Port number
+
+config LIBIIO_IIOD_NETWORK_SERVER_THREAD_PRIORITY
+	int "Server thread priority"
+	default 10
+	help
+	  Priority of the thread running the iiod server.
+
+config LIBIIO_IIOD_NETWORK_SERVER_THREAD_STACK_SIZE
+	int "Server thread stack size"
+	default 4096
+	help
+	  Stack size of the thread running the iiod server.
+
+config LIBIIO_IIOD_NETWORK_CLIENT_THREAD_PRIORITY
+	int "Client thread priority"
+	default 5
+	help
+	  Priority of the thread running the network client.
+
+config LIBIIO_IIOD_NETWORK_CLIENT_THREAD_STACK_SIZE
+	int "Client thread stack size"
+	default 4096
+	help
+	  Stack size of the thread running the network client.
+
+config LIBIIO_IIOD_NETWORK_CLIENT_MAX
+	int "Maximum number of clients"
+	default 6
+	help
+	  Maximum number of network clients.
+
+endif # LIBIIO_IIOD_NETWORK
+
+menuconfig LIBIIO_IIOD_UART
+	bool "UART iiod server"
+	help
+	  Enable the iiod server over a UART interface.
+
+if LIBIIO_IIOD_UART
+
+config LIBIIO_IIOD_UART_THREAD_PRIORITY
+	int "Thread priority"
+	default 10
+	help
+	  Priority of the thread running the iiod server.
+
+config LIBIIO_IIOD_UART_THREAD_STACK_SIZE
+	int "Thread stack size"
+	default 4096
+	help
+	  Stack size of the thread running the iiod server.
+
+config LIBIIO_IIOD_UART_RX_BUF_SIZE
+	int "RX buffer size"
+	default 256
+	help
+	  Size of the ring buffer for storing data received from the UART
+	  device before it can be processed by the iiod server. Must be
+	  large enough to hold a full command and its payload data that
+	  may arrive in a single burst (e.g. write_attr sends an 8-byte
+	  header + 8-byte length + attribute value).
+
+config LIBIIO_IIOD_UART_TX_BUF_SIZE
+	int "TX buffer size"
+	default 16
+	help
+	  Size of the ring buffer for storing data written by the iiod server
+	  before it can be transmitted by the UART device.
+
+endif # LIBIIO_IIOD_UART
+
+menuconfig LIBIIO_IIOD_USB
+	bool "USB iiod server"
+	imply LIBIIO_MULTITHREADING
+	depends on USB_DEVICE_STACK_NEXT
+	depends on DT_HAS_ADI_IIO_USB_ENABLED
+	help
+	  Enable the iiod server over a USB interface.
+
+if LIBIIO_IIOD_USB
+
+config LIBIIO_IIOD_USB_THREAD_PRIORITY
+	int "Thread priority"
+	default 10
+	help
+	  Priority of the thread running the iiod server.
+
+config LIBIIO_IIOD_USB_THREAD_STACK_SIZE
+	int "Thread stack size"
+	default 4096
+	help
+	  Stack size of the thread running the iiod server.
+
+config LIBIIO_IIOD_USB_PIPE_THREAD_STACK_SIZE
+	int "Pipe thread stack size"
+	default 4096
+	help
+	  Stack size of threads running the iiod interpreter on data pipes.
+
+config LIBIIO_IIOD_USB_INIT
+	bool "Initialize the USB device stack"
+	default y
+	help
+	  Define and initialize a USB device with the IIO class as its only
+	  interface. Disable this in an application that provides its own USB
+	  device, such as a composite device with additional USB classes; the
+	  IIO class is registered with whichever device the application
+	  defines.
+
+if LIBIIO_IIOD_USB_INIT
+
+config LIBIIO_IIOD_USB_MANUFACTURER
+	string "USB device manufacturer string"
+	default "Analog Devices Inc"
+	help
+	  USB device manufacturer string.
+
+config LIBIIO_IIOD_USB_PRODUCT
+	string "USB device product string"
+	default "IIO USB Device"
+	help
+	  USB device product string.
+
+config LIBIIO_IIOD_USB_VID
+	hex "USB Vendor ID"
+	default 0x0456
+	help
+	  USB Vendor ID.
+
+config LIBIIO_IIOD_USB_PID
+	hex "USB Product ID"
+	default 0xB673
+	help
+	  USB Product ID.
+
+config LIBIIO_IIOD_USB_SELF_POWERED
+	bool "Self-powered attribute"
+	default y
+	help
+	  Set the Self-powered attribute in the USB configuration.
+
+config LIBIIO_IIOD_USB_REMOTE_WAKEUP
+	bool "Remote Wakeup attribute"
+	help
+	  Set the Remote Wakeup attribute in the USB configuration.
+
+config LIBIIO_IIOD_USB_MAX_POWER
+	int "bMaxPower value"
+	default 125
+	range 0 250
+	help
+	  bMaxPower value in the USB configuration in 2 mA units.
+
+endif # LIBIIO_IIOD_USB_INIT
+
+endif # LIBIIO_IIOD_USB

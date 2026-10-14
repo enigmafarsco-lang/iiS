@@ -1,0 +1,466 @@
+.. zephyr:code-sample:: iiod server
+   :name: iiod server
+
+   Enable the iiod server with ADC/DAC(iio_channels) and sensor devices
+
+Overview
+********
+
+A sample that enables the iiod server and exposes one or more IIO devices —
+including ADC channels and sensors — to a host PC over serial, USB CDC ACM,
+native USB, or network interfaces. Clients can interact with the devices using
+the libiio command-line utilities, `Scopy`_, or `pyadi-iio`_.
+
+The following configurations are supported:
+
+Hardware
+========
+
+1. Several Arduino Uno compatible sensor shields:
+
+  * ST X-Nucleo-IKS4A1
+  * Analog Devices EVAL-ADXL362-ARDZ
+
+  With the following boards:
+
+  * APARD32690
+  * FRDM-MCXN236
+  * Nucleo H723ZG
+  * nRF52840DK
+
+2. Several Adafruit STEMMA sensor boards:
+
+  * Adafruit aht20
+  * Adafruit ism330dhcx
+  * Adafruit lis3dh
+  * Adafruitveml7700
+
+  With the following boards:
+
+  * Adafruit Qt PY RP2040
+  * Adafruit Metro RP2040
+
+3. The Analog Devices Low-Speed Mixed Signal Playground (LSMSPG) shield, with:
+
+  * MAX32655FTHR
+  * MAX32666FTHR
+  * Cygnet
+
+4. Digilent PMOD ACL shield, with:
+
+  * APARD32690
+
+Many of the shields listed above can be used with other controllers supporting
+corresponding connection (e.g. PMOD, Arduino Uno R3, etc) but will need to be
+built passing an explicit snippet to enable an IIOD server backend/transport.
+
+Emulated
+========
+
+The following emulated sensor/ADC configurations can be used on hardware or running 
+- **ADC emulator** (``CONFIG_LIBIIO_IIOD_ADC_EMUL``): two-channel ADC exposed
+  via a Zephyr software emulator; no real hardware required.
+- **Sensor emulator** (``CONFIG_LIBIIO_IIOD_SENSOR_EMUL``): emulated ADLTC2990
+  voltage/current/temperature monitor exposed via a Zephyr I2C emulator.
+
+Requirements
+************
+
+Configure West Workspace
+========================
+
+To pull in libiio as a Zephyr module, either add it as a West project in the
+``west.yaml`` file or pull it in by adding a submanifest (e.g.
+``zephyr/submanifests/libiio.yaml``) file with the following content and run
+``west update``:
+
+.. code-block:: yaml
+
+   manifest:
+     remotes:
+       - name: analogdevicesinc
+         url-base: https://github.com/analogdevicesinc
+
+     projects:
+       - name: libiio
+         remote: analogdevicesinc
+         revision: main
+         path: modules/lib/libiio
+
+Build IIO Client Utilities
+==========================
+
+This sample requires iio client utilities, `iio_info`_ and `iio_attr`_, that
+run on your host PC and communicate with a Zephyr application over a serial or
+network interface. To build them on a Linux host, navigate to the libiio module
+directory in your west workspace (e.g.,
+``~/zephyrproject/modules/lib/libiio``):
+
+.. code-block:: console
+
+    mkdir build_x86_64
+    cd build_x86_64
+    cmake -DWITH_SERIAL_BACKEND=ON ../
+    make -j $(nproc)
+
+Building and Running
+********************
+
+Use the `snippet-iiod-console`_ to build the Zephyr application with the iiod
+server enabled on the console UART. Note that the console and iiod are directed
+to the same UART device and the iiod server effectively takes over the console
+UART, however this is the simplest configuration to use when getting started
+because nearly all boards already support a console UART.
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/iiod
+   :board: apard32690/max32690/m4
+   :shield: eval_ad4052_ardz
+   :snippets: iiod-console
+   :goals: build flash
+   :compact:
+
+ADXL345 Accelerometer
+======================
+
+Use ``CONFIG_LIBIIO_IIOD_SENSOR_ADXL345=y`` to build with a real ADXL345
+3-axis accelerometer connected via I2C. The device exposes three acceleration
+channels (``accel_x``, ``accel_y``, ``accel_z``) in the IIO context.
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/iiod
+   :board: apard32690/max32690/m4
+   :snippets: iiod-console
+   :gen-args: -DCONFIG_LIBIIO_IIOD_SENSOR_ADXL345=y
+   :goals: build flash
+   :compact:
+
+USB CDC ACM
+===========
+
+Use the `snippet-iiod-cdc-acm`_ to build the Zephyr application with the iiod
+server enabled on a USB CDC ACM UART. Unlike the console snippet, the console
+and iiod server are directed to separate UART devices and both can be used
+simultaneously, but the board requires USB support.
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/iiod
+   :board: adi_sdp_k1
+   :snippets: iiod-cdc-acm
+   :goals: build flash
+   :compact:
+
+USB
+===
+
+Use the `snippet-iiod-usb`_ to build the Zephyr application with the iiod server
+enabled on a native USB interface. The device exposes a vendor-specific
+interface that libiio reaches through the ``usb:`` URI, without the serial
+framing the CDC ACM transport carries. The board requires USB device support.
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/iiod
+   :board: apard32690/max32690/m4
+   :snippets: iiod-usb
+   :goals: build flash
+   :compact:
+
+On :zephyr:board:`native_sim <native_sim>` the snippet substitutes a virtual USB
+controller and exports it over USB/IP, so the transport can be exercised without
+hardware. Attach the exported device to the host kernel before connecting to it:
+
+.. code-block:: console
+
+   west build -p -b native_sim samples/iiod/ -S iiod-usb
+   ./build/zephyr/zephyr.exe &
+
+   sudo modprobe vhci-hcd
+   sudo usbip attach -r 127.0.0.1 -b 1-1
+   iio_info -u usb:
+
+Either way, the libiio C library must be built with the USB backend enabled
+(``-DWITH_USB_BACKEND=ON``) for the ``usb:`` URI to be available.
+
+Network
+=======
+
+Use the `snippet-iiod-network`_ to build the Zephyr application with the iiod
+server enabled on a network interface.
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/iiod
+   :board: native_sim
+   :snippets: iiod-network
+   :goals: build run
+   :compact:
+
+See `networking_with_native_sim_` for details about how to set up virtual
+network between a Linux host and a Zephyr application running on a
+:zephyr:board:`native_sim <native_sim>` board.
+
+Sample Output
+=============
+
+Use the client utilities, `iio_info`_ and `iio_attr`_, from a console on your
+host PC to communicate with the Zephyr application. The following examples
+demonstrate using the UART interface; to use a network interface instead,
+replace the command line argument ``-u serial:/dev/ttyACM0`` with ``-u ip:192.0.2.1``.
+
+ADC Device
+----------
+
+Emulated ADC
+----------------------
+
+When building with the ADC emulator:
+
+.. code-block:: console
+
+    iio_info version: 1.0 (git tag:2e0aa556)
+    Libiio version: 1.0 (git tag: 2e0aa556) backends: local ip serial usb xml
+    IIO context created with serial backend.
+    Backend version: 4.3 (git tag: v4.3.0)
+    Backend description string: Zephyr v4.3.0 Feb  2 2026 14:19:53
+    IIO context has 3 attributes:
+            attr  0: serial,description value: DAPLink CMSIS-DAP - 040917024c99038500000000000000000000000097969906
+            attr  1: serial,port value: /dev/ttyACM0
+            attr  2: uri value: serial:/dev/ttyACM0,115200,8n1n
+    IIO context has 1 devices:
+            iio:device0: iio-device@1
+                    2 channels found:
+                            voltage0:  (input)
+                            2 channel-specific attributes found:
+                                    attr  0: raw value: 1
+                                    attr  1: scale value: 1
+                            voltage1:  (input)
+                            2 channel-specific attributes found:
+                                    attr  0: raw value: 1
+                                    attr  1: scale value: 1
+                    No trigger assigned to device
+
+To read the scale attribute from an ADC device channel:
+
+.. code-block:: console
+
+   iio_attr -u serial:/dev/ttyACM0 -c iio-device@1 voltage0 scale
+   1
+
+Sensor Device
+----------
+
+ADXL345 Accelerometer
+----------------------
+
+When building the ``pmod_acl`` and ``iio_pmod_acl`` sample shields, the IIO
+context contains a sensor device with three acceleration channels:
+
+.. code-block:: console
+
+    IIO context has 1 devices:
+            iio:device0: iio-device@1
+                    3 channels found:
+                           accel_x:  (input, index: 1, format: le:S16/16>>0)
+                           2 channel-specific attributes found:
+                                attr  0: raw value: 0
+                                attr  1: scale value: 0.001
+                           accel_y:  (input, index: 1, format: le:S16/16>>0)
+                           2 channel-specific attributes found:
+                                attr  0: raw value: 5975
+                                attr  1: scale value: 0.001
+                           accel_z:  (input, index: 2, format: le:S16/16>>0)
+                           2 channel-specific attributes found:
+                                attr  0: raw value: 7048
+                                attr  1: scale value: 0.001
+                    No trigger assigned to device
+
+Using with Scopy
+================
+
+`Scopy`_ is a multi-functional, cross-platform software oscilloscope and signal
+analysis tool from Analog Devices with built-in support for IIO-based devices.
+
+Scopy ships with its own bundled copy of ``libiio``. To communicate with a
+Zephyr iiod server you must replace it with a build from the
+``libiio`` branch of the ADI libiio official git.
+This is done to support v1 of libiio.
+
+Build libiio on Windows (MinGW64)
+----------------------------------
+
+#. Clone or copy the libiio ``libiio`` branch into a local directory,
+   for example ``C:\libiio``.
+
+#. Open a **MinGW64** shell, navigate to the repository root, and build:
+
+   .. code-block:: console
+
+      cd /c/libiio
+      mkdir build-host
+      cd build-host
+      cmake .. -G "MinGW Makefiles" \
+          -DLIBIIO_COMPAT=ON \
+          -DWITH_SERIAL_BACKEND=ON \
+          -DWITH_NETWORK_BACKEND=ON \
+          -DWITH_USB_BACKEND=ON
+      cmake --build .
+
+   After a successful build, ``build-host`` will contain ``libiio.dll`` and
+   ``libiio1.dll``.
+
+   Optionally, install system-wide:
+
+   .. code-block:: console
+
+      cmake --build . --target install
+
+   .. note::
+
+      A Windows system install requires additional steps (updating ``PATH``,
+      registering the DLL, etc.) that are outside the scope of this guide.
+
+Replace Scopy's bundled libiio
+-------------------------------
+
+Before overwriting, back up the original files from the Scopy installation
+directory (e.g. ``C:\Analog Devices\Scopy``):
+
+.. code-block:: console
+
+   copy "C:\Analog Devices\Scopy\libiio.dll"  libiio.dll.bak
+   copy "C:\Analog Devices\Scopy\iio1.dll"    iio1.dll.bak
+
+Then replace them with the freshly built DLLs:
+
+#. Copy ``build-host\libiio.dll`` to ``C:\Analog Devices\Scopy\``, replacing
+   the existing file.
+#. Copy ``build-host\libiio1.dll`` to ``C:\Analog Devices\Scopy\`` and rename
+   it to ``iio1.dll``, replacing the existing file.
+
+Connect Scopy to the Zephyr iiod server
+----------------------------------------
+
+#. Launch Scopy and click **Add Device**.
+#. Enter the URI for your connection:
+
+   - Serial: ``serial:COM3,115200,8n1n`` (replace ``COM3`` with your port)
+   - Network: ``ip:192.0.2.1``
+
+#. Click **Connect**. Scopy discovers the IIO context and enumerates all
+   devices and channels automatically.
+#. Use the **IIO Oscilloscope** instrument to plot channel data in real time.
+
+Using with pyadi-iio
+====================
+
+`pyadi-iio`_ is an ADI Python library that wraps libiio. The device-specific
+classes (e.g. ``adi.adxl345``) locate devices by their Linux IIO driver name
+(``"adxl345"``), but the Zephyr IIOD server assigns generic names like
+``"iio-device@1"``. Use the underlying ``iio`` module directly instead, which
+is the same library pyadi-iio wraps.
+
+.. note::
+
+   ``pip install pyadi-iio`` installs a pre-built libiio that is typically
+   v0.x. Build the Python bindings from the libiio source tree instead (see
+   `Build IIO Client Utilities`_) so that the v1.0 binary protocol is used.
+   .. code-block:: console
+
+   sudo apt-get install -y libxml2-dev socat
+
+   # From the libiio module root (e.g. ~/zephyrproject/modules/lib/libiio)
+   mkdir build && cd build
+   cmake -DWITH_USB_BACKEND=OFF -DHAVE_DNS_SD=OFF -DWITH_AIO=OFF ..
+   make -j$(nproc)
+   sudo make install
+   sudo ldconfig
+   cd ..
+
+   pip install bindings/python
+
+The following example reads all channels from the first ADC device:
+
+.. code-block:: python
+
+   import iio
+
+   # Connect over the network (native_sim) or replace with the serial URI for
+   # real hardware: "serial:/dev/ttyACM0,115200,8n1n"
+   ctx = iio.Context("ip:192.0.2.1")
+
+   # pyadi-iio device classes find devices by their Linux IIO driver name
+   # (e.g. "adxl345"). The Zephyr IIOD server uses devicetree node names
+   # ("iio-device@1"), so we search by the io-name property set in the overlay
+   # instead of using adi.adxl345 directly.
+   adc = next(d for d in ctx.devices if d.name == "adc-emul")
+
+   for ch in adc.channels:
+       if not ch.output:
+           raw = ch.attrs["raw"].value
+           scale = ch.attrs["scale"].value
+           print(f"{ch.id}: raw={raw}  scale={scale}")
+
+Using with Pytest Integration Tests Locally
+=========================================
+
+The sample ships with a pytest suite (``pytest/``) that exercises the IIOD
+server end-to-end via the libiio Python bindings. The tests run on Linux using
+the ``native_sim`` board — no real hardware required.
+
+Prerequisites
+-------------
+
+Install system packages and build the libiio C library with the network
+backend, then install the Python bindings:
+
+.. code-block:: console
+
+   sudo apt-get install -y libxml2-dev socat
+
+   # From the libiio module root (e.g. ~/zephyrproject/modules/lib/libiio)
+   mkdir build && cd build
+   cmake -DWITH_USB_BACKEND=OFF -DHAVE_DNS_SD=OFF -DWITH_AIO=OFF ..
+   make -j$(nproc)
+   sudo make install
+   sudo ldconfig
+   cd ..
+
+   pip install bindings/python
+
+Network Transport
+-----------------
+
+Use ``west twister`` to build the ``native_sim`` binary, start the IIOD server,
+run the pytest suite, and tear everything down automatically:
+
+.. code-block:: console
+
+   # From the libiio zephyr/ directory
+   west twister -p native_sim --integration -T samples/iiod/ \
+       --inline-logs --test sample.iiod.network.pytest
+
+On success you will see five passing tests:
+
+.. code-block:: console
+
+   PASSED  test_iiod.py::test_context_has_devices
+   PASSED  test_iiod.py::test_adc_emul_device_present
+   PASSED  test_iiod.py::test_adc_emul_channels
+   PASSED  test_iiod.py::test_sensor_emul_device_present
+   PASSED  test_iiod.py::test_adc_channel_raw_readable
+
+UART Transport
+--------------
+
+The UART variant relays the native_sim PTY through ``socat`` so that libiio
+can connect over TCP:
+
+.. code-block:: console
+
+   west twister -p native_sim --integration -T samples/iiod/ \
+       --inline-logs --test sample.iiod.uart.pytest
+
+.. _iio_info: https://wiki.analog.com/resources/tools-software/linux-software/libiio/iio_info
+.. _iio_attr: https://wiki.analog.com/resources/tools-software/linux-software/libiio/iio_attr
+.. _Scopy: https://github.com/analogdevicesinc/scopy
+.. _Scopy releases page: https://github.com/analogdevicesinc/scopy/releases
+.. _pyadi-iio: https://github.com/analogdevicesinc/pyadi-iio

@@ -9,13 +9,17 @@ SHELL := /bin/bash
 
 SCRIPT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: all install check help
+.PHONY: all install build-sources check help
 
 all: install
 
 install:
-	@chmod +x "$(SCRIPT_DIR)/install.sh"
+	@chmod +x "$(SCRIPT_DIR)/install.sh" "$(SCRIPT_DIR)/build_and_install.sh"
 	@"$(SCRIPT_DIR)/install.sh"
+
+build-sources:
+	@chmod +x "$(SCRIPT_DIR)/build_and_install.sh"
+	@"$(SCRIPT_DIR)/build_and_install.sh"
 
 check:
 	@echo "Checking system build and library dependencies..."
@@ -35,5 +39,6 @@ check:
 help:
 	@echo "eLynxSDR Dependency Management"
 	@echo "Usage:"
-	@echo "  make install   Install all required system packages via APT (sudo ./install.sh)"
-	@echo "  make check     Check status of compilers, Qt tools and linked libraries"
+	@echo "  make install         Install all packages and compile offline sources"
+	@echo "  make build-sources   Build and install bundled source packages from sources/"
+	@echo "  make check           Check status of compilers, Qt tools and linked libraries"

@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# eLynxSDR / iiS - Automated Dependency Installer for Ubuntu / Debian
+# eLynxSDR / iiS - Complete Dependency & Source Installer
 # ==============================================================================
 # Installs all required compilers, Qt5 libraries, DSP math libraries (FFTW3,
 # MatIO), FreeType font engines, OpenGL/GLChart packages, and IIO tools (libiio,
 # iiod, iio-oscilloscope) needed to build and run this software from source.
+#
+# Supports both:
+#   1. Automatic APT package installation (when APT/network is available)
+#   2. Offline compilation & installation from bundled source trees in sources/
 #
 # Usage:
 #   sudo ./install.sh
@@ -28,7 +32,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "===================================================================="
-echo " eLynxSDR / iiS - Installing Dependencies for Fresh Ubuntu Install"
+echo " eLynxSDR / iiS - Installing Dependencies & Offline Sources"
 echo "===================================================================="
 
 # Check OS distribution
@@ -38,105 +42,76 @@ if [[ -r /etc/os-release ]]; then
     echo "Detected OS: ${PRETTY_NAME:-$ID $VERSION_ID} ($(dpkg --print-architecture 2>/dev/null || uname -m))"
 fi
 
-echo ""
-echo "[1/5] Updating APT package repositories..."
-$SUDO apt-get update -y
+# Step 1: Install system packages via APT if available
+if command -v apt-get >/dev/null 2>&1; then
+    echo ""
+    echo "[1/4] Installing system build tools & Qt5 frameworks..."
+    $SUDO apt-get update -y || true
 
-echo ""
-echo "[2/5] Installing core build tools & compilers..."
-CORE_PACKAGES=(
-    build-essential
-    g++
-    gcc
-    make
-    cmake
-    pkg-config
-    git
-    curl
-    ca-certificates
-)
-$SUDO apt-get install --no-install-recommends --yes "${CORE_PACKAGES[@]}"
+    SYSTEM_PACKAGES=(
+        build-essential
+        g++
+        gcc
+        make
+        cmake
+        pkg-config
+        git
+        curl
+        ca-certificates
+        qt5-qmake
+        qtbase5-dev
+        qtbase5-dev-tools
+        libqt5opengl5-dev
+        libqt5network5
+        libqt5concurrent5
+        libqt5printsupport5
+        libqt5gui5
+        libqt5widgets5
+        libgl1-mesa-dev
+        libglu1-mesa-dev
+        mesa-common-dev
+        libglew-dev
+        libglib2.0-dev
+        fonts-freefont-ttf
+        fonts-dejavu-core
+        python3
+        python3-pip
+        python3-numpy
+    )
 
-echo ""
-echo "[3/5] Installing Qt5 frameworks & development packages..."
-QT_PACKAGES=(
-    qt5-qmake
-    qtbase5-dev
-    qtbase5-dev-tools
-    libqt5opengl5-dev
-    libqt5network5
-    libqt5concurrent5
-    libqt5printsupport5
-    libqt5gui5
-    libqt5widgets5
-    libqt5core5a
-)
-
-# Attempt installation of Qt5 packages (falling back gracefully for distro-specific t64 trans-packages)
-for pkg in "${QT_PACKAGES[@]}"; do
-    if apt-cache show "$pkg" >/dev/null 2>&1; then
-        $SUDO apt-get install --no-install-recommends --yes "$pkg" || true
-    fi
-done
-# Ensure base Qt development package is present
-$SUDO apt-get install --no-install-recommends --yes qtbase5-dev qt5-qmake libqt5opengl5-dev || true
-
-echo ""
-echo "[4/5] Installing Graphics, DSP, FreeType & IIO Libraries..."
-DEPENDENCY_PACKAGES=(
-    # FreeType font engine & fonts
-    libfreetype6-dev
-    libfreetype6
-    fonts-freefont-ttf
-    fonts-dejavu-core
-
-    # OpenGL & 3D GLChart rendering
-    libgl1-mesa-dev
-    libglu1-mesa-dev
-    mesa-common-dev
-    libglew-dev
-
-    # DSP & Mathematics
-    libfftw3-dev
-    libfftw3-double3
-    libfftw3-single3
-    libmatio-dev
-
-    # GLib
-    libglib2.0-dev
-    libglib2.0-0
-
-    # Industrial I/O (IIO) & ADI components
-    libiio-dev
-    libiio-utils
-    iiod
-
-    # Python utilities
-    python3
-    python3-pip
-    python3-numpy
-)
-
-for pkg in "${DEPENDENCY_PACKAGES[@]}"; do
-    if apt-cache show "$pkg" >/dev/null 2>&1; then
-        $SUDO apt-get install --no-install-recommends --yes "$pkg" || true
-    fi
-done
-
-# Try installing iio-oscilloscope if available from repository
-if apt-cache show iio-oscilloscope >/dev/null 2>&1; then
-    echo "Installing iio-oscilloscope package..."
-    $SUDO apt-get install --no-install-recommends --yes iio-oscilloscope || true
+    for pkg in "${SYSTEM_PACKAGES[@]}"; do
+        if apt-cache show "$pkg" >/dev/null 2>&1; then
+            $SUDO apt-get install --no-install-recommends --yes "$pkg" || true
+        fi
+    done
 fi
 
+# Step 2: Build & Install all bundled offline sources
 echo ""
-echo "[5/5] Verifying installed dependencies & headers..."
+echo "[2/4] Building & installing offline source dependencies (FreeType, libiio, iiod, FFTW3, MatIO, IIO-Oscilloscope)..."
+if [[ -x "${SCRIPT_DIR}/build_and_install.sh" ]]; then
+    "${SCRIPT_DIR}/build_and_install.sh"
+fi
+
+# Step 3: Ensure header search paths and ldconfig
+echo ""
+echo "[3/4] Configuring runtime linker and library paths..."
+$SUDO ldconfig || true
+
+# Symlink FreeType include directory if needed
+if [[ -d "/usr/local/include/freetype2" && ! -d "/usr/include/freetype2" ]]; then
+    $SUDO ln -sf "/usr/local/include/freetype2" "/usr/include/freetype2" || true
+fi
+
+# Step 4: Verification
+echo ""
+echo "[4/4] Verifying installed dependencies & headers..."
 
 MISSING=0
 check_header() {
     local header="$1"
     local desc="$2"
-    if [[ -f "$header" ]] || find /usr/include -name "$(basename "$header")" 2>/dev/null | grep -q .; then
+    if [[ -f "$header" ]] || find /usr/include /usr/local/include -name "$(basename "$header")" 2>/dev/null | grep -q .; then
         printf "  [OK] %-30s (%s)\n" "$desc" "$header"
     else
         printf "  [WARN] %-30s not found at %s\n" "$desc" "$header"
@@ -147,8 +122,8 @@ check_header() {
 check_binary() {
     local bin="$1"
     local desc="$2"
-    if command -v "$bin" >/dev/null 2>&1; then
-        printf "  [OK] %-30s (%s)\n" "$desc" "$(command -v "$bin")"
+    if command -v "$bin" >/dev/null 2>&1 || [[ -x "/usr/local/bin/$bin" || -x "/usr/bin/$bin" ]]; then
+        printf "  [OK] %-30s (%s)\n" "$desc" "$(command -v "$bin" 2>/dev/null || echo "/usr/local/bin/$bin")"
     else
         printf "  [WARN] %-30s not found in PATH\n" "$desc"
     fi

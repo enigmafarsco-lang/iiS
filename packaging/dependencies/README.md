@@ -1,10 +1,10 @@
-# eLynxSDR / iiS - Automated Dependency Installer
+# eLynxSDR / iiS - Offline Dependencies & Source Trees
 
-This directory provides automated installation scripts for setting up all build-time and runtime dependencies required by **eLynxSDR** on a clean installation of **Ubuntu** (20.04, 22.04, 24.04) or Debian-based systems.
+This directory contains the complete source trees and automated installer scripts for all external libraries and tools required by **eLynxSDR**. When you clone or download this Git repository, all necessary dependency sources are included locally so that you can compile and install them **offline** on a fresh Ubuntu or Debian machine without needing an internet connection.
 
 ---
 
-## Quick Start (One Command)
+## One-Command Installation
 
 From the root of the repository, run:
 
@@ -12,7 +12,7 @@ From the root of the repository, run:
 make dependencies
 ```
 
-Or run the installer directly:
+Or run the installer directly inside this directory:
 
 ```bash
 cd packaging/dependencies
@@ -21,45 +21,36 @@ sudo ./install.sh
 
 ---
 
-## Installed Packages and Components
+## Bundled Source Trees (`packaging/dependencies/sources/`)
 
-The installer automatically installs all required packages from Ubuntu repositories:
+The following source packages are included directly in the repository under `sources/`:
 
-### 1. Build Tools & Compilers
-- `build-essential` (gcc, g++, make, libc-dev)
-- `cmake`, `pkg-config`, `git`, `curl`
+| Component | Source Path | Description |
+|---|---|---|
+| **FreeType** | `sources/freetype/` | FreeType font rendering engine (`libfreetype6` / headers in `/usr/include/freetype2`) |
+| **libiio & iiod** | `sources/libiio/` | Analog Devices Industrial I/O client library, utilities, and `iiod` network server daemon |
+| **IIO-Oscilloscope** | `sources/iio-oscilloscope/` | Analog Devices IIO Oscilloscope (`adi-osc` application, plugins, and XML definitions) |
+| **FFTW3** | `sources/fftw3/` | High-performance Fast Fourier Transform (FFT) library (`libfftw3`) |
+| **MatIO** | `sources/matio/` | MATLAB MAT file I/O library for waveform and dataset parsing |
 
-### 2. Qt5 Framework & Extensions
-- `qt5-qmake`, `qtbase5-dev`, `qtbase5-dev-tools`
-- `libqt5opengl5-dev` (OpenGL integration)
-- `libqt5network5`, `libqt5concurrent5`, `libqt5printsupport5`, `libqt5widgets5`
+---
 
-### 3. Font Engine & FreeType
-- `libfreetype6-dev`, `libfreetype6` (FreeType2 header & library `/usr/include/freetype2`)
-- `fonts-freefont-ttf`, `fonts-dejavu-core`
+## Building Dependencies Offline
 
-### 4. 3D Graphics & OpenGL (GLChart)
-- `libgl1-mesa-dev`, `libglu1-mesa-dev`, `mesa-common-dev`
-- `libglew-dev`
+If you are on an offline system without access to APT packages, you can build and install all bundled dependencies directly from source:
 
-### 5. DSP & Signal Processing Mathematics
-- `libfftw3-dev`, `libfftw3-double3`, `libfftw3-single3` (Fast Fourier Transform library)
-- `libmatio-dev` (MATLAB MAT file I/O library)
+```bash
+cd packaging/dependencies
+sudo ./build_and_install.sh
+```
 
-### 6. Industrial I/O (IIO) & ADI Drivers
-- `libiio-dev`, `libiio-utils` (Analog Devices IIO client library & utilities)
-- `iiod` (IIO network daemon for local/remote SDR connection)
-- `iio-oscilloscope` (ADI IIO Oscilloscope)
-
-### 7. Core Libraries & Python
-- `libglib2.0-dev`, `libglib2.0-0`
-- `python3`, `python3-pip`, `python3-numpy`
+This compiles each library and installs its headers, shared libraries, and binaries into `/usr/local` (or your configured `INSTALL_PREFIX`).
 
 ---
 
 ## Verifying Dependencies
 
-You can check whether all required compilers, headers, and libraries are present on the system by running:
+Check if all compilers, Qt tools, headers, and libraries are available on the system:
 
 ```bash
 make -C packaging/dependencies check
@@ -67,7 +58,7 @@ make -C packaging/dependencies check
 
 ---
 
-## Building the Software
+## Building the Main Application
 
 Once dependencies are installed, you can build eLynxSDR from the repository root:
 
@@ -75,4 +66,4 @@ Once dependencies are installed, you can build eLynxSDR from the repository root
 make
 ```
 
-Or open `eLynxSDR.pro` directly in **Qt Creator** and build.
+Or open `eLynxSDR.pro` in **Qt Creator** and click **Build**.

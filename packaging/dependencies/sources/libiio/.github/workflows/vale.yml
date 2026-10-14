@@ -1,0 +1,18 @@
+name: reviewdog
+on: [pull_request,push]
+
+permissions:
+  contents: read
+
+jobs:
+  vale:
+    name: runner / vale
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Docutils
+        run: pip install docutils
+      - uses: errata-ai/vale-action@reviewdog
+        with:
+          files: doc/source
+          vale_flags: "--minAlertLevel=error"

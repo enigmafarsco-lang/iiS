@@ -1,0 +1,120 @@
+/**
+@mainpage
+
+@tableofcontents
+
+<a href="../index.html">Back to libIIO</a> 
+
+@section license License
+The C# bindings for libiio are released under the terms of the MIT License.
+This open-source license allows anyone to use the library in proprietary or open-source applications,
+commercial or non-commercial, with minimal restrictions.
+
+The full terms of the license can be found at: https://opensource.org/licenses/MIT
+
+@section code_model Code Model
+The basic building blocks of the C# bindings are the core classes organized within the iio namespace:
+
+- **iio.Context** - Represents a libiio context for accessing IIO devices
+- **iio.Device** - Represents an IIO device with its channels and attributes
+- **iio.Channel** - Represents an input or output channel of a device
+- **iio.Trigger** - Represents a trigger device for synchronized data capture
+- **iio.IOBuffer** - Provides buffered I/O operations for device channels
+- **iio.Attr** - Represents device and channel attributes (parameters)
+- **iio.Block** - Represents a memory block for efficient data transfers
+- **iio.Stream** - Provides streaming data access for continuous acquisition
+- **iio.EventStream** - Handles asynchronous event notifications from devices
+- **iio.Scan** - Discovers available IIO contexts on the network
+
+![libiio C# bindings class diagram](doc/codemodel.svg)
+
+@section creating_context Creating a Context
+
+A context is the entry point for accessing IIO devices. You can create contexts for different backends:
+
+~~~{.cs}
+// Local context (uses the local IIO devices)
+Context ctx = new Context();
+
+// Network context (connect to a remote iiod server)
+Context ctx = new Context("ip:192.168.1.10");
+
+// USB context (connect via USB)
+Context ctx = new Context("usb:1.2.3");
+
+// Serial context
+Context ctx = new Context("serial:/dev/ttyUSB0,115200");
+~~~
+
+@subsection navigation Navigation
+@subsubsection device_obj Device objects
+
+~~~{.cs}
+   foreach (Device dev in ctx.devices)
+   {
+      Console.WriteLine("\t" + dev.id + ": " + dev.name);
+   }
+~~~
+
+@subsubsection channel_obj Channel Objects
+
+Each iio.Channel can be either an input or output channel. This information can be retrieved using the
+iio.Channel.output property. Like Device objects, Channel objects have an ID (accessible via iio.Channel.id)
+and optionally a name (accessible via iio.Channel.name).
+
+**Important**: Two channels can have the same ID as long as one is an input and the other is an output channel.
+
+~~~{.cs}
+    foreach (Channel chn in dev.channels)
+    {
+        string type = "input";
+        if (chn.output)
+            type = "output";
+        Console.WriteLine("\t\t\t" + chn.id + ": " + chn.name + " (" + type + ")");
+    }
+~~~
+
+@subsection list_params Attributes
+
+IIO devices and channels expose various parameters through attributes. There are two main types:
+- **Device attributes**: Parameters that apply to an entire device (accessible via iio.Device.attrs)
+- **Channel attributes**: Parameters specific to individual channels (accessible via iio.Channel.attrs)
+
+**Channel Attributes Example:**
+
+~~~{.cs}
+// Iterate through all channel attributes
+foreach (var kvp in chn.attrs)
+{
+    Console.WriteLine("Attribute: " + kvp.Key);
+    Console.WriteLine("  Value: " + kvp.Value.read());
+}
+
+// Access a specific attribute by name
+if (chn.attrs.ContainsKey("frequency"))
+{
+    string value = chn.attrs["frequency"].read();
+    Console.WriteLine("Frequency: " + value);
+}
+~~~
+
+**Device Attributes Example:**
+
+~~~{.cs}
+// Iterate through all device attributes
+foreach (var kvp in dev.attrs)
+{
+    Console.WriteLine("Device attribute: " + kvp.Key);
+    Console.WriteLine("  Value: " + kvp.Value.read());
+}
+
+// Access a specific attribute directly
+if (dev.attrs.ContainsKey("sampling_frequency"))
+{
+    dev.attrs["sampling_frequency"].write("1000000");
+}
+~~~
+
+
+\example ExampleProgram.cs Small example program
+*/

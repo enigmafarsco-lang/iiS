@@ -1,0 +1,19 @@
+/**
+ * Copyright 2012-2013(c) Analog Devices, Inc.
+ *
+ * Licensed under the GPL-2.
+ *
+ **/
+
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+# define OSC_GLADE_FILE_PATH "@CMAKE_INSTALL_FULL_DATADIR@/osc/glade/"
+# define OSC_PLUGIN_PATH "@CMAKE_INSTALL_FULL_LIBDIR@/osc/"
+# define OSC_XML_PATH "@CMAKE_INSTALL_FULL_LIBDIR@/osc/xmls"
+# define OSC_FILTER_FILE_PATH "@CMAKE_INSTALL_FULL_LIBDIR@/osc/filters"
+# define OSC_WAVEFORM_FILE_PATH "@CMAKE_INSTALL_FULL_LIBDIR@/osc/waveforms"
+# define OSC_PROFILES_FILE_PATH "@CMAKE_INSTALL_FULL_LIBDIR@/osc/profiles"
+# define OSC_STYLE_FILE_PATH "@CMAKE_INSTALL_FULL_DATADIR@/osc/"
+
+#endif

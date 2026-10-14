@@ -1,0 +1,578 @@
+// SPDX-License-Identifier: MIT
+/*
+ * libiio - Library for interfacing industrial I/O (IIO) devices
+ *
+ * Copyright (C) 2014 Analog Devices, Inc.
+ * Author: Paul Cercueil <paul.cercueil@analog.com>
+ */
+
+#include <errno.h>
+#include <iio/iio-debug.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "attr.h"
+#include "iio-private.h"
+#include "sort.h"
+
+static const char *const xml_attr_prefix[] = {
+	"",
+	"debug-",
+	"event-",
+	"buffer-",
+};
+
+static ssize_t iio_snprintf_xml_attr(
+		const struct iio_attr *attr, const char *value, char *buf, ssize_t len)
+{
+	ssize_t ret, alen = 0;
+
+	switch (attr->type) {
+	case IIO_ATTR_TYPE_DEVICE:
+	case IIO_ATTR_TYPE_DEBUG:
+	case IIO_ATTR_TYPE_DEVICE_EVENT:
+	case IIO_ATTR_TYPE_BUFFER:
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	ret = iio_snprintf(buf, len, "<%sattribute name=\"%s\"", xml_attr_prefix[attr->type],
+			attr->name);
+	if (ret < 0)
+		return ret;
+	iio_update_xml_indexes(ret, &buf, &len, &alen);
+
+	if (value) {
+		ret = iio_xml_print_and_sanitized_param(buf, len, " value=\"", value, "\"");
+		if (ret < 0)
+			return ret;
+		iio_update_xml_indexes(ret, &buf, &len, &alen);
+	}
+
+	ret = iio_snprintf(buf, len, " />");
+	if (ret < 0)
+		return ret;
+
+	return alen + ret;
+}
+
+ssize_t iio_snprintf_device_xml(char *ptr, ssize_t len, const struct iio_device *dev)
+{
+	const struct iio_attr *attrs;
+	ssize_t ret, alen = 0;
+	unsigned int i;
+	enum iio_attr_type type;
+	bool include_values = dev->ctx->params.flags & IIO_CTX_XML_INCLUDE_VALUES;
+
+	ret = iio_snprintf(ptr, len, "<device id=\"%s\"", dev->id);
+	if (ret < 0)
+		return ret;
+
+	iio_update_xml_indexes(ret, &ptr, &len, &alen);
+	if (dev->name) {
+		ret = iio_snprintf(ptr, len, " name=\"%s\"", dev->name);
+		if (ret < 0)
+			return ret;
+
+		iio_update_xml_indexes(ret, &ptr, &len, &alen);
+	}
+
+	if (dev->label) {
+		ret = iio_snprintf(ptr, len, " label=\"%s\"", dev->label);
+		if (ret < 0)
+			return ret;
+
+		iio_update_xml_indexes(ret, &ptr, &len, &alen);
+	}
+
+	ret = iio_snprintf(ptr, len, " >");
+	if (ret < 0)
+		return ret;
+
+	iio_update_xml_indexes(ret, &ptr, &len, &alen);
+
+	for (i = 0; i < dev->nb_channels; i++) {
+		ret = iio_snprintf_channel_xml(ptr, len, dev->channels[i]);
+		if (ret < 0)
+			return ret;
+
+		iio_update_xml_indexes(ret, &ptr, &len, &alen);
+	}
+
+	for (i = 0; i < dev->nb_buffers; i++) {
+		const struct iio_buffer *buf = dev->buffers[i];
+		unsigned int j;
+
+		if (buf->direction == IIO_BUFFER_DIRECTION_INPUT)
+			ret = iio_snprintf(ptr, len, "<buffer index=\"%u\" direction=\"in\" >",
+					buf->idx);
+		else if (buf->direction == IIO_BUFFER_DIRECTION_OUTPUT)
+			ret = iio_snprintf(ptr, len, "<buffer index=\"%u\" direction=\"out\" >",
+					buf->idx);
+		else
+			ret = iio_snprintf(ptr, len, "<buffer index=\"%u\" >", buf->idx);
+		if (ret < 0)
+			return ret;
+
+		iio_update_xml_indexes(ret, &ptr, &len, &alen);
+
+		for (j = 0; j < buf->attrlist.num; j++) {
+			const char *val = NULL;
+
+			if (include_values && buf->values)
+				val = buf->values[j];
+
+			ret = iio_snprintf(ptr, len, "<attribute name=\"%s\"",
+					buf->attrlist.attrs[j].name);
+			if (ret < 0)
+				return ret;
+			iio_update_xml_indexes(ret, &ptr, &len, &alen);
+
+			if (val) {
+				ret = iio_xml_print_and_sanitized_param(
+						ptr, len, " value=\"", val, "\"");
+				if (ret < 0)
+					return ret;
+				iio_update_xml_indexes(ret, &ptr, &len, &alen);
+			}
+
+			ret = iio_snprintf(ptr, len, " />");
+			if (ret < 0)
+				return ret;
+
+			iio_update_xml_indexes(ret, &ptr, &len, &alen);
+		}
+
+		for (j = 0; j < buf->nb_scans; j++) {
+			const struct iio_channel *chn = buf->scans[j]->chn;
+
+			ret = iio_snprintf(ptr, len, "<channel id=\"%s\" type=\"%s\" />", chn->id,
+					chn->is_output ? "output" : "input");
+			if (ret < 0)
+				return ret;
+
+			iio_update_xml_indexes(ret, &ptr, &len, &alen);
+		}
+
+		ret = iio_snprintf(ptr, len, "</buffer>");
+		if (ret < 0)
+			return ret;
+
+		iio_update_xml_indexes(ret, &ptr, &len, &alen);
+	}
+
+	for (type = IIO_ATTR_TYPE_DEVICE; type <= IIO_ATTR_TYPE_DEVICE_EVENT; type++) {
+		for (i = 0; i < dev->attrlist[type].num; i++) {
+			const char *val = NULL;
+
+			attrs = dev->attrlist[type].attrs;
+
+			if (include_values && dev->values[type])
+				val = dev->values[type][i];
+
+			ret = iio_snprintf_xml_attr(&attrs[i], val, ptr, len);
+			if (ret < 0)
+				return ret;
+
+			iio_update_xml_indexes(ret, &ptr, &len, &alen);
+		}
+	}
+
+	/* Backward compatibility: To make sure that older clients will still work,
+	 * we also need to create <buffer-attributes> tags. Note that given that
+	 * multi buffer is not still supported (and won't ever be in older versions),
+	 * only the first buffer is considered.
+	 */
+	if (dev->nb_buffers == 1) {
+		const struct iio_buffer *buf = dev->buffers[0];
+		unsigned int j;
+
+		for (j = 0; j < buf->attrlist.num; j++) {
+			ret = iio_snprintf_xml_attr(&buf->attrlist.attrs[j], NULL, ptr, len);
+			if (ret < 0)
+				return ret;
+
+			iio_update_xml_indexes(ret, &ptr, &len, &alen);
+		}
+	}
+
+	ret = iio_snprintf(ptr, len, "</device>");
+	if (ret < 0)
+		return ret;
+
+	return alen + ret;
+}
+
+const char *iio_device_get_id(const struct iio_device *dev)
+{
+	return dev->id;
+}
+
+const char *iio_device_get_name(const struct iio_device *dev)
+{
+	return dev->name;
+}
+
+const char *iio_device_get_label(const struct iio_device *dev)
+{
+	return dev->label;
+}
+
+unsigned int iio_device_get_channels_count(const struct iio_device *dev)
+{
+	return dev->nb_channels;
+}
+
+struct iio_channel *iio_device_get_channel(const struct iio_device *dev, unsigned int index)
+{
+	if (index >= dev->nb_channels)
+		return NULL;
+	else
+		return dev->channels[index];
+}
+
+struct iio_channel *iio_device_find_channel(
+		const struct iio_device *dev, const char *name, bool output)
+{
+	unsigned int i;
+	for (i = 0; i < dev->nb_channels; i++) {
+		struct iio_channel *chn = dev->channels[i];
+		if (iio_channel_is_output(chn) != output)
+			continue;
+
+		if (!strcmp(chn->id, name) || (chn->label && !strcmp(chn->label, name)) ||
+				(chn->name && !strcmp(chn->name, name)))
+			return chn;
+	}
+	return NULL;
+}
+
+unsigned int iio_device_get_buffers_count(const struct iio_device *dev)
+{
+	return dev->nb_buffers;
+}
+
+struct iio_buffer *iio_device_get_buffer(const struct iio_device *dev, unsigned int index)
+{
+	if (index >= dev->nb_buffers)
+		return NULL;
+	return dev->buffers[index];
+}
+
+unsigned int iio_device_get_attrs_count(const struct iio_device *dev)
+{
+	return dev->attrlist[IIO_ATTR_TYPE_DEVICE].num;
+}
+
+const struct iio_attr *iio_device_get_attr(const struct iio_device *dev, unsigned int index)
+{
+	return iio_attr_get(&dev->attrlist[IIO_ATTR_TYPE_DEVICE], index);
+}
+
+const struct iio_attr *iio_device_find_attr(const struct iio_device *dev, const char *name)
+{
+	return iio_attr_find(&dev->attrlist[IIO_ATTR_TYPE_DEVICE], name);
+}
+
+unsigned int iio_device_get_event_attrs_count(const struct iio_device *dev)
+{
+	return dev->attrlist[IIO_ATTR_TYPE_DEVICE_EVENT].num;
+}
+
+const struct iio_attr *iio_device_get_event_attr(const struct iio_device *dev, unsigned int index)
+{
+	return iio_attr_get(&dev->attrlist[IIO_ATTR_TYPE_DEVICE_EVENT], index);
+}
+
+const struct iio_attr *iio_device_find_event_attr(const struct iio_device *dev, const char *name)
+{
+	return iio_attr_find(&dev->attrlist[IIO_ATTR_TYPE_DEVICE_EVENT], name);
+}
+
+unsigned int iio_device_get_debug_attrs_count(const struct iio_device *dev)
+{
+	return dev->attrlist[IIO_ATTR_TYPE_DEBUG].num;
+}
+
+const struct iio_attr *iio_device_get_debug_attr(const struct iio_device *dev, unsigned int index)
+{
+	return iio_attr_get(&dev->attrlist[IIO_ATTR_TYPE_DEBUG], index);
+}
+
+const struct iio_attr *iio_device_find_debug_attr(const struct iio_device *dev, const char *name)
+{
+	return iio_attr_find(&dev->attrlist[IIO_ATTR_TYPE_DEBUG], name);
+}
+
+void iio_device_set_data(struct iio_device *dev, void *data)
+{
+	dev->userdata = data;
+}
+
+void *iio_device_get_data(const struct iio_device *dev)
+{
+	return dev->userdata;
+}
+
+bool iio_device_is_trigger(const struct iio_device *dev)
+{
+	/* A trigger has a name, an id which starts by "trigger",
+	 * and zero channels. */
+
+	unsigned int nb = iio_device_get_channels_count(dev);
+	const char *name = iio_device_get_name(dev), *id = iio_device_get_id(dev);
+	return ((nb == 0) && !!name && !strncmp(id, "trigger", sizeof("trigger") - 1));
+}
+
+const struct iio_device *iio_device_get_trigger(const struct iio_device *dev)
+{
+	if (dev->ctx->ops->get_trigger)
+		return dev->ctx->ops->get_trigger(dev);
+	else
+		return iio_ptr(-ENOSYS);
+}
+
+int iio_device_set_trigger(const struct iio_device *dev, const struct iio_device *trigger)
+{
+	if (trigger && !iio_device_is_trigger(trigger))
+		return -EINVAL;
+	else if (dev->ctx->ops->set_trigger)
+		return dev->ctx->ops->set_trigger(dev, trigger);
+	else
+		return -ENOSYS;
+}
+
+void free_device(struct iio_device *dev)
+{
+	enum iio_attr_type type;
+	unsigned int i;
+
+	for (type = IIO_ATTR_TYPE_DEVICE; type <= IIO_ATTR_TYPE_DEVICE_EVENT; type++)
+		iio_free_attrs(&dev->attrlist[type]);
+
+	for (i = 0; i < dev->nb_buffers; i++)
+		free_buffer(dev->buffers[i]);
+	free(dev->buffers);
+
+	for (i = 0; i < dev->nb_channels; i++)
+		free_channel(dev->channels[i]);
+	free(dev->channels);
+	free(dev->label);
+	free(dev->name);
+	free(dev->id);
+	free(dev);
+}
+
+ssize_t iio_device_get_sample_size(
+		const struct iio_device *dev, const struct iio_channels_mask *mask)
+{
+	ssize_t size = 0;
+	unsigned int i, largest = 1;
+	const struct iio_channel *prev = NULL;
+
+	if (mask->words != (dev->nb_channels + 31) / 32)
+		return -EINVAL;
+
+	for (i = 0; i < dev->nb_channels; i++) {
+		const struct iio_channel *chn = dev->channels[i];
+		unsigned int length = chn->format.length / 8 * chn->format.repeat;
+
+		if (chn->index < 0)
+			break;
+		if (!iio_channels_mask_test_bit(mask, chn->number))
+			continue;
+
+		if (prev && chn->index == prev->index) {
+			prev = chn;
+			continue;
+		}
+
+		if (length > largest)
+			largest = length;
+
+		if (size % length)
+			size += 2 * length - (size % length);
+		else
+			size += length;
+
+		prev = chn;
+	}
+
+	if (size % largest)
+		size += largest - (size % largest);
+
+	return size;
+}
+
+int iio_device_reg_write(struct iio_device *dev, uint32_t address, uint32_t value)
+{
+	const struct iio_attr *attr;
+	const struct iio_backend_ops *ops = dev->ctx->ops;
+
+	/* Use atomic backend operation if available */
+	if (ops && ops->reg_write) {
+		int ret = ops->reg_write(dev, address, value);
+		if (ret != -ENOSYS)
+			return ret;
+	}
+
+	/* Fallback to the original attribute-based implementation.
+	 * NOTE: This has a potential race condition with reg_read operations
+	 * when multiple clients access the same IIOD server. */
+	ssize_t ret;
+	char buf[1024];
+
+	attr = iio_device_find_debug_attr(dev, "direct_reg_access");
+	if (!attr)
+		return -ENOENT;
+
+	iio_snprintf(buf, sizeof(buf), "0x%" PRIx32 " 0x%" PRIx32, address, value);
+
+	ret = iio_attr_write_string(attr, buf);
+
+	return (int)(ret < 0 ? ret : 0);
+}
+
+int iio_device_reg_read(struct iio_device *dev, uint32_t address, uint32_t *value)
+{
+	const struct iio_attr *attr;
+	const struct iio_backend_ops *ops = dev->ctx->ops;
+
+	/* Use atomic backend operation if available */
+	if (ops && ops->reg_read) {
+		int ret = ops->reg_read(dev, address, value);
+		if (ret != -ENOSYS)
+			return ret;
+	}
+
+	/* Fallback to the original attribute-based implementation. */
+	long long val;
+	int ret;
+
+	attr = iio_device_find_debug_attr(dev, "direct_reg_access");
+	if (!attr)
+		return -ENOENT;
+
+	ret = iio_attr_write_longlong(attr, (long long)address);
+	if (ret < 0)
+		return ret;
+
+	ret = iio_attr_read_longlong(attr, &val);
+	if (!ret)
+		*value = (uint32_t)val;
+	return ret;
+}
+
+const struct iio_context *iio_device_get_context(const struct iio_device *dev)
+{
+	return dev->ctx;
+}
+
+struct iio_buffer *iio_device_add_buffer(struct iio_device *dev, unsigned int idx)
+{
+	struct iio_buffer *buf, **bufs;
+
+	buf = zalloc(sizeof(*buf));
+	if (!buf)
+		return NULL;
+
+	buf->dev = dev;
+	buf->idx = idx;
+	buf->direction = -1;
+
+	bufs = realloc(dev->buffers, (dev->nb_buffers + 1) * sizeof(*dev->buffers));
+	if (!bufs) {
+		free(buf);
+		return NULL;
+	}
+
+	bufs[dev->nb_buffers++] = buf;
+	dev->buffers = bufs;
+
+	return buf;
+}
+
+struct iio_device_pdata *iio_device_get_pdata(const struct iio_device *dev)
+{
+	return dev->pdata;
+}
+
+void iio_device_set_pdata(struct iio_device *dev, struct iio_device_pdata *d)
+{
+	dev->pdata = d;
+}
+
+struct iio_channel *iio_device_add_channel(struct iio_device *dev, long index, const char *id,
+		const char *name, const char *label, bool output, bool scan_element,
+		const struct iio_data_format *fmt)
+{
+	struct iio_channel *chn, **chns;
+	char *new_id, *new_name = NULL, *new_label = NULL;
+	unsigned int i;
+
+	chn = zalloc(sizeof(*chn));
+	if (!chn)
+		return NULL;
+
+	new_id = iio_strdup(id);
+	if (!new_id)
+		goto err_free_chn;
+
+	if (name) {
+		new_name = iio_strdup(name);
+		if (!new_name)
+			goto err_free_id;
+	}
+
+	if (label) {
+		new_label = iio_strdup(label);
+		if (!new_label)
+			goto err_free_name;
+	}
+
+	chn->id = new_id;
+	chn->name = new_name;
+	chn->label = new_label;
+	chn->dev = dev;
+	chn->is_output = output;
+	chn->is_scan_element = scan_element;
+	chn->index = index;
+
+	memcpy(&chn->format, fmt, sizeof(*fmt));
+
+	if (!chn->format.repeat)
+		chn->format.repeat = 1;
+
+	chns = realloc(dev->channels, (dev->nb_channels + 1) * sizeof(*chn));
+	if (!chns)
+		goto err_free_label;
+
+	chns[dev->nb_channels++] = chn;
+	dev->channels = chns;
+
+	dev_dbg(dev, "Added channel \'%s\'\n", id);
+
+	iio_channel_init_finalize(chn);
+
+	/* Reorder channels by index unless context is created from xml which
+	 * should provide already sorted channels. */
+	if (strcmp(dev->ctx->name, "xml"))
+		iio_sort_channels(dev);
+
+	for (i = 0; i < dev->nb_channels; i++)
+		dev->channels[i]->number = i;
+
+	return chn;
+
+err_free_label:
+	free(new_label);
+err_free_name:
+	free(new_name);
+err_free_id:
+	free(new_id);
+err_free_chn:
+	free(chn);
+	return NULL;
+}
