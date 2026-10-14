@@ -10,10 +10,18 @@ QMAKE ?= $(shell command -v qmake6 2>/dev/null || command -v qmake 2>/dev/null |
 	ls /usr/lib/qt6/bin/qmake /usr/lib/qt5/bin/qmake \
 	   /usr/lib/x86_64-linux-gnu/qt5/bin/qmake 2>/dev/null | head -n1)
 
-.PHONY: all clean distclean
+.PHONY: all clean distclean dependencies install-dependencies check-dependencies
 
 all: $(BUILD_DIR)/Makefile
 	$(MAKE) -C $(BUILD_DIR)
+
+dependencies:
+	@$(MAKE) -C packaging/dependencies install
+
+install-dependencies: dependencies
+
+check-dependencies:
+	@$(MAKE) -C packaging/dependencies check
 
 $(BUILD_DIR)/Makefile: $(PRO)
 	@if [ -z "$(QMAKE)" ]; then \
