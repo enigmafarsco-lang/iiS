@@ -3,7 +3,7 @@
 ADRV9009 Transceiver Board Maintenance, Troubleshooting & Repair Manual Generator
 Generates a comprehensive bilingual (English and Persian) DOCX and Markdown manual
 documenting preventative maintenance, thermal management, power rail diagnostics,
-BGA rework profiles, BOM spare parts, and troubleshooting flowcharts.
+BGA rework profiles, BOM spare parts, PCB layout check points, and troubleshooting flowcharts.
 """
 
 import os
@@ -65,6 +65,34 @@ def make_bidi_run(run, font_name="Vazirmatn", size_pt=10.5, bold=False, color_rg
     rPr.append(rFonts)
     rPr.append(parse_xml(f'<w:rtl {nsdecls("w")}/>'))
 
+def add_figure(doc, img_path, caption, width_inches=6.0, is_rtl=False):
+    """Insert an engineering figure with centered layout and standardized caption."""
+    if not os.path.exists(img_path):
+        print(f"Warning: Figure image not found: {img_path}")
+        return
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(8)
+    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.keep_with_next = True
+    r = p.add_run()
+    r.add_picture(img_path, width=Inches(width_inches))
+
+    p_cap = doc.add_paragraph()
+    p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_cap.paragraph_format.space_before = Pt(2)
+    p_cap.paragraph_format.space_after = Pt(10)
+    if is_rtl:
+        make_bidi_p(p_cap)
+        r_cap = p_cap.add_run(caption)
+        make_bidi_run(r_cap, font_name="Vazirmatn", size_pt=9.0, bold=True, color_rgb=(80, 90, 100))
+    else:
+        r_cap = p_cap.add_run(caption)
+        r_cap.font.name = "Arial"
+        r_cap.font.size = Pt(9.0)
+        r_cap.font.italic = True
+        r_cap.font.color.rgb = RGBColor(80, 90, 100)
+
 def add_callout(doc, text, title="NOTE", callout_type="info", is_rtl=False):
     """Add a professional styled callout box."""
     colors = {
@@ -120,89 +148,56 @@ def add_callout(doc, text, title="NOTE", callout_type="info", is_rtl=False):
         r_b.font.size = Pt(9.5)
         r_b.font.color.rgb = RGBColor(40, 40, 40)
 
-    p_after = doc.add_paragraph()
-    p_after.paragraph_format.space_before = Pt(0)
-    p_after.paragraph_format.space_after = Pt(4)
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
-def add_code_block(doc, code_text):
+def add_code_block(doc, code_str, is_rtl=False):
     """Add a shaded code block."""
     tbl = doc.add_table(rows=1, cols=1)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     tbl.autofit = False
-
     cell = tbl.rows[0].cells[0]
     cell.width = Inches(6.5)
-    set_cell_background(cell, "1E1E1E")
-    set_cell_margins(cell, top=120, bottom=120, left=180, right=180)
+    set_cell_background(cell, "1E293B")
+    set_cell_margins(cell, top=100, bottom=100, left=140, right=140)
 
     p = cell.paragraphs[0]
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
-    p.paragraph_format.line_spacing = 1.05
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    r = p.add_run(code_str)
+    r.font.name = "Consolas"
+    r.font.size = Pt(8.5)
+    r.font.color.rgb = RGBColor(241, 245, 249)
 
-    for line in code_text.strip().split("\n"):
-        run = p.add_run(line + "\n")
-        run.font.name = "Consolas"
-        run.font.size = Pt(9.0)
-        if line.startswith("#") or line.startswith("//"):
-            run.font.color.rgb = RGBColor(106, 153, 85)
-        elif line.startswith("$") or line.startswith(">") or line.startswith("root@"):
-            run.font.color.rgb = RGBColor(220, 220, 170)
-            run.bold = True
-        else:
-            run.font.color.rgb = RGBColor(220, 220, 220)
-
-    p_after = doc.add_paragraph()
-    p_after.paragraph_format.space_before = Pt(0)
-    p_after.paragraph_format.space_after = Pt(4)
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
 def build_maintenance_guide_document():
     doc = Document()
 
-    # Page setup
-    sections = doc.sections
-    for section in sections:
-        section.top_margin = Inches(0.8)
-        section.bottom_margin = Inches(0.8)
-        section.left_margin = Inches(0.85)
-        section.right_margin = Inches(0.85)
-        section.page_width = Inches(8.5)
-        section.page_height = Inches(11.0)
+    # Configure Margins
+    for s in doc.sections:
+        s.top_margin = Inches(0.75)
+        s.bottom_margin = Inches(0.75)
+        s.left_margin = Inches(0.75)
+        s.right_margin = Inches(0.75)
 
-    # Header and Footer
-    header = sections[0].header
-    hp = header.paragraphs[0]
-    hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    hrun = hp.add_run("ADRV9009 Hardware Maintenance & Repair Manual | eLynxSDR v0.0.2")
-    hrun.font.name = "Arial"
-    hrun.font.size = Pt(8.5)
-    hrun.font.color.rgb = RGBColor(128, 128, 128)
-
-    footer = sections[0].footer
-    fp = footer.paragraphs[0]
-    fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    frun = fp.add_run("Confidential & Proprietary — Hardware Maintenance, Diagnostics & Repair Manual")
-    frun.font.name = "Arial"
-    frun.font.size = Pt(8.5)
-    frun.font.color.rgb = RGBColor(128, 128, 128)
-
-    # Document Title Block
+    # Header / Title
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_title.paragraph_format.space_before = Pt(12)
+    p_title.paragraph_format.space_before = Pt(10)
     p_title.paragraph_format.space_after = Pt(4)
     run_title = p_title.add_run("ADRV9009 RF Transceiver Board\nHardware Maintenance, Troubleshooting & Repair Manual")
     run_title.font.name = "Arial"
-    run_title.font.size = Pt(22)
+    run_title.font.size = Pt(20)
     run_title.bold = True
     run_title.font.color.rgb = RGBColor(0, 51, 102)
 
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_sub.paragraph_format.space_after = Pt(14)
-    run_sub = p_sub.add_run("Preventative Maintenance Schedules, Power Rail Diagnostics, BGA Rework Profiles, and Spare Parts BOM\n[English & Persian Technical Documentation - راهنمای جامع نگهداری، عیب‌یابی و تعمیرات برد]")
+    run_sub = p_sub.add_run("Preventative Maintenance Schedules, Power Rail Diagnostics, BGA Rework Profiles, Schematic Check Points & PCB Layout Maps\n[English & Persian Technical Documentation - راهنمای جامع نگهداری، عیب‌یابی و تعمیرات برد]")
     run_sub.font.name = "Arial"
-    run_sub.font.size = Pt(11)
+    run_sub.font.size = Pt(10.5)
     run_sub.font.color.rgb = RGBColor(90, 100, 110)
 
     # Metadata Table
@@ -238,13 +233,17 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
+    # =============================================================
+    # PART 1: ENGLISH MAINTENANCE & REPAIR MANUAL
+    # =============================================================
+
     # -------------------------------------------------------------
     # SECTION 1: Preventative Maintenance
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("1. Preventative Maintenance Schedules & Visual Inspection")
+    r = h1.add_run("1. Preventative Maintenance Schedules & Visual Inspection Standards")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
@@ -308,13 +307,13 @@ def build_maintenance_guide_document():
     h1 = doc.add_heading(level=1)
     r = h1.add_run("2. DC Power Supply Rail Diagnostics & Test Point Mapping")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     p = doc.add_paragraph(
-        "Power supply failure is the most common cause of board unresponsiveness. Table 2.1 maps all primary DC voltage "
-        "test points, nominal voltages, maximum allowable AC ripple, and diagnostic steps:"
+        "Power supply failure is the primary cause of board unresponsiveness. Table 2.1 maps all primary DC voltage "
+        "test points, nominal voltages, maximum allowable AC ripple, and diagnostic root cause paths:"
     )
     p.runs[0].font.name = "Arial"
     p.runs[0].font.size = Pt(10)
@@ -359,7 +358,22 @@ def build_maintenance_guide_document():
                 run.bold = True
                 run.font.color.rgb = RGBColor(0, 51, 102)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # Insert Figure 1.1: Power Tree Schematic
+    add_figure(doc, "docs/images/adrv9009_power_tree_schematic.png",
+               "Figure 1.1: ADRV9009 Power Tree Architecture & Voltage Check Points Schematic (ADP5054 PMIC, LT3045 LDOs, Fuse F1, and TP1–TP6).",
+               width_inches=6.2)
+
+    # Insert Figure 1.2: PCB Top Layer Map
+    add_figure(doc, "docs/images/adrv9009_pcb_top_layer.png",
+               "Figure 1.2: ADRV9009 Evaluation Board Top Layer Layout & Voltage Test Point Locations (Fuse F1, TVS D1, U1 ADRV9009, U2 HMC7044, Baluns T1–T4, and Check Points TP1–TP6).",
+               width_inches=6.2)
+
+    # Insert Figure 1.3: PCB Bottom Layer Map
+    add_figure(doc, "docs/images/adrv9009_pcb_bottom_layer.png",
+               "Figure 1.3: ADRV9009 Evaluation Board Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and High-Frequency BGA Decoupling Array).",
+               width_inches=6.2)
 
     # -------------------------------------------------------------
     # SECTION 3: Clock Distribution & PLL Troubleshooting
@@ -367,7 +381,7 @@ def build_maintenance_guide_document():
     h1 = doc.add_heading(level=1)
     r = h1.add_run("3. Clock Distribution (HMC7044) & PLL Lock Troubleshooting")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
@@ -405,7 +419,7 @@ def build_maintenance_guide_document():
     h1 = doc.add_heading(level=1)
     r = h1.add_run("4. RF Frontend Component Repair & SMT Replacement Procedures")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
@@ -444,7 +458,7 @@ def build_maintenance_guide_document():
     h1 = doc.add_heading(level=1)
     r = h1.add_run("5. ADRV9009 BGA IC Rework & Reflow Soldering Profile")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
@@ -496,7 +510,12 @@ def build_maintenance_guide_document():
                 run.bold = True
                 run.font.color.rgb = RGBColor(0, 51, 102)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # Insert Figure 1.4: BGA Rework Thermal Profile Chart
+    add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
+               "Figure 1.4: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).",
+               width_inches=6.0)
 
     # -------------------------------------------------------------
     # SECTION 6: BOM & Spare Parts
@@ -504,12 +523,12 @@ def build_maintenance_guide_document():
     h1 = doc.add_heading(level=1)
     r = h1.add_run("6. Bill of Materials (BOM) & Spare Parts Catalog")
     r.font.name = "Arial"
-    r.font.size = Pt(16)
+    r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     p = doc.add_paragraph(
-        "Table 6.1 lists the approved manufacturer part numbers for critical onboard active components:"
+        "Table 6.1 lists the approved manufacturer part numbers for critical onboard active and passive components:"
     )
     p.runs[0].font.name = "Arial"
     p.runs[0].font.size = Pt(10)
@@ -558,8 +577,30 @@ def build_maintenance_guide_document():
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # -------------------------------------------------------------
-    # SECTION 7: Persian Translation Section (بخش فارسی مستندات)
+    # SECTION 7: Troubleshooting Flowchart
     # -------------------------------------------------------------
+    h1 = doc.add_heading(level=1)
+    r = h1.add_run("7. Complete Hardware Troubleshooting & Diagnostic Flowchart")
+    r.font.name = "Arial"
+    r.font.size = Pt(15)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p = doc.add_paragraph(
+        "Figure 1.5 provides the comprehensive step-by-step troubleshooting sequence for field and laboratory repair technicians, "
+        "covering power entry verification, voltage rail testing, clock stability check, and RF transmission path validation:"
+    )
+    p.runs[0].font.name = "Arial"
+    p.runs[0].font.size = Pt(10)
+
+    # Insert Figure 1.5: Hardware Troubleshooting Flowchart
+    add_figure(doc, "docs/images/adrv9009_hardware_troubleshooting_flowchart.png",
+               "Figure 1.5: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.",
+               width_inches=6.2)
+
+    # =============================================================
+    # PART 2: PERSIAN MAINTENANCE & REPAIR MANUAL (بخش فارسی)
+    # =============================================================
     doc.add_page_break()
 
     p_fa_title = doc.add_paragraph()
@@ -574,14 +615,14 @@ def build_maintenance_guide_document():
     make_bidi_p(p_fa_sub)
     p_fa_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_fa_sub.paragraph_format.space_after = Pt(14)
-    r_fa_sub = p_fa_sub.add_run("مستندات استاندارد پایش دوره‌ای، عیب‌یابی خطوط تغذیه، تعویض قطعات SMT/BGA، پروفایل ریفلو و جدول قطعات یدکی")
-    make_bidi_run(r_fa_sub, font_name="Vazirmatn", size_pt=11, color_rgb=(90, 100, 110))
+    r_fa_sub = p_fa_sub.add_run("مستندات استاندارد پایش دوره‌ای، شماتیک نقاط تست، نقشه‌های لایه‌های PCB، پروفایل ریورک BGA و فلوچارت‌های عیب‌یابی")
+    make_bidi_run(r_fa_sub, font_name="Vazirmatn", size_pt=10.5, color_rgb=(90, 100, 110))
 
     # Persian Section 1
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۱. زمان‌بندی نگهداری پیشگیرانه و بازرسی چشمی")
+    r = h1_fa.add_run("۱. زمان‌بندی نگهداری پیشگیرانه و استانداردهای بازرسی چشمی")
     make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
 
     p = doc.add_paragraph()
@@ -636,12 +677,21 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Persian Section 2 - Power Rails
+    # Persian Section 2 - Power Rails & Check Points
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۲. عیب‌یابی خطوط تغذیه DC و جدول نقاط تست ولتاژ")
+    r = h1_fa.add_run("۲. عیب‌یابی خطوط تغذیه DC، شماتیک نقاط تست و نقشه‌های PCB")
     make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+
+    p = doc.add_paragraph()
+    make_bidi_p(p)
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = p.add_run(
+        "خرابی در مدارات تغذیه و نوسان ولتاژهای کاری، شایع‌ترین عامل عدم پاسخ‌دهی یا خرابی برد فرستنده/گیرنده ADRV9009 است. "
+        "جدول زیر مشخصات کامل نقاط تست ولتاژ (TP1 تا TP6)، تلرانس مجاز، حداکثر ریپل AC و منشأ خطاهای احتمالی را تشریح می‌نماید:"
+    )
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
 
     fa_tp_tbl = doc.add_table(rows=1, cols=6)
     fa_tp_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -685,6 +735,19 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
+    # Insert Persian Figures
+    add_figure(doc, "docs/images/adrv9009_power_tree_schematic.png",
+               "شکل ۲.۱: شماتیک معماری مدار توزیع توان (Power Tree) و نقاط تست ولتاژ برد ADRV9009 شامل فیوز F1، رگولاتورهای ADP5054 و LT3045 و نقاط TP1 تا TP6.",
+               width_inches=6.2, is_rtl=True)
+
+    add_figure(doc, "docs/images/adrv9009_pcb_top_layer.png",
+               "شکل ۲.۲: نقشه لایه روی برد (PCB Top Layer) و جانمایی فیوز ورودی F1، دیود محافظ TVS، تراشه‌های ADRV9009 و HMC7044، بالون‌ها و نقاط تست ولتاژ TP1 تا TP6.",
+               width_inches=6.2, is_rtl=True)
+
+    add_figure(doc, "docs/images/adrv9009_pcb_bottom_layer.png",
+               "شکل ۲.۳: نقشه لایه پشت برد (PCB Bottom Layer) و موقعیت آی‌سی مدیریت توان ADP5054، رگولاتورهای فوق‌کم‌نویز LT3045، سلف‌های قدرت و ماتریس خازن‌های دیکوپلینگ BGA.",
+               width_inches=6.2, is_rtl=True)
+
     # Persian Section 3 - BGA Rework
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
@@ -704,6 +767,32 @@ def build_maintenance_guide_document():
         "۴. بازرسی اشعه ایکس (X-Ray): تایید عدم اتصال کوتاه میان پایه‌ها و کنترل حباب‌های هوای داخل قلع به کمتر از ۱۵ درصد."
     )
     make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
+
+    # Insert Figure 2.4: BGA Rework Profile
+    add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
+               "شکل ۲.۴: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.",
+               width_inches=6.0, is_rtl=True)
+
+    # Persian Section 4 - Troubleshooting Flowchart
+    h1_fa = doc.add_heading(level=1)
+    make_bidi_p(h1_fa)
+    h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = h1_fa.add_run("۴. فلوچارت جامع عیب‌یابی و تفکیک خطای سخت‌افزاری برد")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+
+    p = doc.add_paragraph()
+    make_bidi_p(p)
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = p.add_run(
+        "شکل ۲.۵ فلوچارت کامل و گام‌به‌گام تفکیک عیب سخت‌افزاری را از لحظه اتصال ولتاژ ۱۲ ولت ورودی، بررسی سلامت فیوز F1 و دیود TVS، "
+        "تست خطوط ولتاژ TP1 تا TP6، وضعیت قفل کلاک HMC7044 و در نهایت تست انتقال رادیویی RF و حلقه Loopback نمایش می‌دهد:"
+    )
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
+
+    # Insert Figure 2.5: Troubleshooting Flowchart
+    add_figure(doc, "docs/images/adrv9009_hardware_troubleshooting_flowchart.png",
+               "شکل ۲.۵: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.",
+               width_inches=6.2, is_rtl=True)
 
     # Save DOCX
     docx_path = "docs/ADRV9009_Board_Maintenance_and_Repair_Manual.docx"

@@ -4,15 +4,15 @@
 ---
 
 ### Document Overview & Metadata / مشخصات و شناسنامه سند
-- **Hardware Under Maintenance:** ADRV9009 Dual-Channel Wideband RF Transceiver Evaluation & Baseband Board
+- **Hardware Under Maintenance:** ADRV9009 Dual-Channel Wideband RF Transceiver Evaluation & Baseband Carrier Board
 - **Maintenance Standards:** IPC-7711/7721 (Rework & Repair of Electronic Assemblies), IPC-A-610 Class 3
-- **Document Version:** v1.0.0 — October 2026
+- **Document Version:** v1.0.0 — October 2026 | Technical Maintenance Manual for eLynxSDR System Engineers
 
 ---
 
 # Part 1: English Hardware Maintenance & Repair Procedures
 
-## 1. Preventative Maintenance Schedules & Visual Inspection
+## 1. Preventative Maintenance Schedules & Visual Inspection Standards
 
 | Inspection Interval | Target Subsystem / Component | Action Required & Standard | Tools / Materials |
 | :--- | :--- | :--- | :--- |
@@ -22,9 +22,12 @@
 | **Semi-Annually (6 Mo)**| Thermal Interface Material (TIM) | Inspect thermal pad elasticity. Replace dried thermal paste (PTM7950 phase change material). | 99.9% Isopropyl Alcohol (IPA), TIM pad kit |
 | **Annually** | Solder Joints & BGA Underfill | 20x stereo microscope inspection for solder oxidation, tin whiskers, and conformal coating voids. | Stereo Microscope, UV Inspection Lamp |
 
+> **CRITICAL ESD PROTECTION WARNING:**  
+> The ADRV9009 IC contains ultra-sensitive RF GaAs/CMOS structures sensitive to ESD pulses < 250V (HBM Class 1A). Always wear a grounded wrist strap (1 MΩ series resistor) and work on an ESD-dissipative mat.
+
 ---
 
-## 2. DC Power Supply Diagnostics & Voltage Test Point Map
+## 2. DC Power Supply Rail Diagnostics & Test Point Mapping
 
 | Test Point | Power Rail Name | Nominal Voltage | Tolerance | Max AC Ripple | Failure Symptoms & Root Cause |
 | :---: | :--- | :---: | :---: | :---: | :--- |
@@ -34,6 +37,18 @@
 | **TP4** | `VDDA_1P8_CLK` | 1.80 V | $\pm 5\%$ (1.71 – 1.89 V) | $< 8\text{ mV rms}$ | HMC7044 clock jitter excessive, missing SYSREF. Check Buck 3 inductor L4. |
 | **TP5** | `VCC_3P3_SYS` | 3.30 V | $\pm 5\%$ (3.14 – 3.46 V) | $< 15\text{ mV rms}$| I2C/SPI bus failure, EEPROM unreadable, UART disconnected. Check main 3.3V DC-DC. |
 | **TP6** | `VIN_12V0_MAIN` | 12.00 V | $\pm 10\%$ (10.8 – 13.2 V) | $< 50\text{ mV rms}$| Complete board blackout. Check input fuse F1 (5A Fast-blow) & TVS diode D1. |
+
+### Figure 1.1: Power Tree & Voltage Test Points Architecture Schematic
+![ADRV9009 Power Tree Schematic](images/adrv9009_power_tree_schematic.png)
+*Figure 1.1: ADRV9009 Power Tree Architecture & Voltage Check Points Schematic (ADP5054 PMIC, LT3045 LDOs, Fuse F1, and TP1–TP6).*
+
+### Figure 1.2: PCB Top Layer Component & Check Point Map
+![ADRV9009 PCB Top Layer Map](images/adrv9009_pcb_top_layer.png)
+*Figure 1.2: ADRV9009 Evaluation Board Top Layer Layout & Voltage Test Point Locations (Fuse F1, TVS D1, U1 ADRV9009, U2 HMC7044, Baluns T1–T4, and Check Points TP1–TP6).*
+
+### Figure 1.3: PCB Bottom Layer Power ICs & Decoupling Map
+![ADRV9009 PCB Bottom Layer Map](images/adrv9009_pcb_bottom_layer.png)
+*Figure 1.3: ADRV9009 Evaluation Board Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and High-Frequency BGA Decoupling Array).*
 
 ---
 
@@ -51,13 +66,17 @@
 
 ## 4. ADRV9009 BGA IC Rework & Reflow Soldering Profile
 The ADRV9009 is housed in a **196-ball CSP_BGA ($12\text{ mm} \times 12\text{ mm}$, 0.8 mm ball pitch)**.
-- **PCB Baking:** 8 hours at $125^\circ\text{C}$ prior to rework to prevent moisture-induced delamination.
+- **PCB Baking:** 8 hours at $125^\circ\text{C}$ prior to rework to prevent moisture-induced delamination (popcorning).
 - **Preheat Zone:** Ramp at $+1.5^\circ\text{C/s}$ from $150^\circ\text{C}$ to $170^\circ\text{C}$ (80–100s).
 - **Soak / Flux Activation:** $170^\circ\text{C}$ to $200^\circ\text{C}$ for 60–90s.
 - **Liquidus Transition:** $217^\circ\text{C}$ (SAC305 lead-free alloy).
 - **Peak Reflow:** $235^\circ\text{C}$ to $245^\circ\text{C}$ (Time Above Liquidus: 40–60s).
 - **Cooling Rate:** $-2.5^\circ\text{C/s}$ to $-3.0^\circ\text{C/s}$ down to room temperature.
 - **X-Ray Inspection:** Solder voiding must not exceed 15% per ball; zero solder bridges.
+
+### Figure 1.4: BGA Rework Thermal Profile
+![ADRV9009 BGA Rework Thermal Profile](images/adrv9009_bga_rework_thermal_profile.png)
+*Figure 1.4: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).*
 
 ---
 
@@ -75,9 +94,17 @@ The ADRV9009 is housed in a **196-ball CSP_BGA ($12\text{ mm} \times 12\text{ mm
 
 ---
 
+## 6. End-to-End Hardware System Troubleshooting Flowchart
+
+### Figure 1.5: Hardware Troubleshooting & Fault Isolation Flowchart
+![ADRV9009 Troubleshooting Flowchart](images/adrv9009_hardware_troubleshooting_flowchart.png)
+*Figure 1.5: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.*
+
+---
+
 # Part 2: Persian Hardware Maintenance Guide (بخش فارسی)
 
-## ۱. زمان‌بندی نگهداری پیشگیرانه و بازرسی دوره‌ای
+## ۱. زمان‌بندی نگهداری پیشگیرانه و استانداردهای بازرسی چشمی
 
 | دوره بازرسی | زیرسیستم هدف | اقدام و استاندارد بازرسی | ابزارها و مواد مصرفی |
 | :--- | :--- | :--- | :--- |
@@ -89,7 +116,7 @@ The ADRV9009 is housed in a **196-ball CSP_BGA ($12\text{ mm} \times 12\text{ mm
 
 ---
 
-## ۲. جدول نقاط تست ولتاژ و عیب‌یابی خطوط تغذیه
+## ۲. عیب‌یابی خطوط تغذیه DC، شماتیک نقاط تست و نقشه‌های PCB
 
 | نقطه تست | نام خط تغذیه | ولتاژ نامی | تلرانس مجاز | حداکثر ریپل | علائم خرابی و ریشه عیب |
 | :---: | :--- | :---: | :---: | :---: | :--- |
@@ -99,6 +126,18 @@ The ADRV9009 is housed in a **196-ball CSP_BGA ($12\text{ mm} \times 12\text{ mm
 | **TP4** | کلاک (1.8V) | 1.80 V | $\pm 5\%$ | $< 8\text{ mV}$ | جیتر شدید کلاک HMC7044؛ بررسی سلف سوئیچینگ L4. |
 | **TP5** | ولتاژ سیستم (3.3V) | 3.30 V | $\pm 5\%$ | $< 15\text{ mV}$| عدم شناسایی پورت سریال و EEPROM؛ بررسی مبدل DCDC. |
 | **TP6** | ورودی برد (12.0V) | 12.00 V | $\pm 10\%$ | $< 50\text{ mV}$| خاموشی کامل برد؛ بررسی فیوز ورودی F1 (5A) و دیود TVS. |
+
+### شکل ۲.۱: شماتیک مدار توزیع توان و نقاط تست ولتاژ
+![ADRV9009 Power Tree Schematic](images/adrv9009_power_tree_schematic.png)
+*شکل ۲.۱: شماتیک معماری مدار توزیع توان (Power Tree) و نقاط تست ولتاژ برد ADRV9009 شامل فیوز F1، رگولاتورهای ADP5054 و LT3045 و نقاط TP1 تا TP6.*
+
+### شکل ۲.۲: نقشه لایه روی برد (PCB Top Layer)
+![ADRV9009 PCB Top Layer Map](images/adrv9009_pcb_top_layer.png)
+*شکل ۲.۲: نقشه لایه روی برد (PCB Top Layer) و جانمایی فیوز ورودی F1، دیود محافظ TVS، تراشه‌های ADRV9009 و HMC7044، بالون‌ها و نقاط تست ولتاژ TP1 تا TP6.*
+
+### شکل ۲.۳: نقشه لایه پشت برد (PCB Bottom Layer)
+![ADRV9009 PCB Bottom Layer Map](images/adrv9009_pcb_bottom_layer.png)
+*شکل ۲.۳: نقشه لایه پشت برد (PCB Bottom Layer) و موقعیت آی‌سی مدیریت توان ADP5054، رگولاتورهای فوق‌کم‌نویز LT3045، سلف‌های قدرت و ماتریس خازن‌های دیکوپلینگ BGA.*
 
 ---
 
@@ -111,3 +150,15 @@ The ADRV9009 is housed in a **196-ball CSP_BGA ($12\text{ mm} \times 12\text{ mm
    - اوج حرارت مایع‌شدن قلع SAC305 در دمای **۲۳۵ تا ۲۴۵ درجه سانتی‌گراد** به مدت ۴۵ ثانیه.
    - خنک‌کاری کنترل‌شده با نرخ $-2.5^\circ\text{C/s}$ جهت تشکیل پیوند متالورژیکی مرغوب.
 3. **تراز نوری با منشور اسپلیت‌ویژن** و کنترل کیفیت اتصالات با **تصویربرداری اشعه ایکس (X-Ray)** جهت تایید عدم وجود پل قلع و حباب هوای کمتر از ۱۵ درصد.
+
+### شکل ۲.۴: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک BGA
+![ADRV9009 BGA Rework Thermal Profile](images/adrv9009_bga_rework_thermal_profile.png)
+*شکل ۲.۴: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.*
+
+---
+
+## ۴. فلوچارت جامع عیب‌یابی و تفکیک خطای سخت‌افزاری برد
+
+### شکل ۲.۵: فلوچارت گام‌به‌گام عیب‌یابی و تعمیرات سخت‌افزاری
+![ADRV9009 Troubleshooting Flowchart](images/adrv9009_hardware_troubleshooting_flowchart.png)
+*شکل ۲.۵: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.*
