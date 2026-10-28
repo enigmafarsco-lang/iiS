@@ -20,6 +20,8 @@
 #include <QFuture>
 #include <QThread>
 #include <QHBoxLayout>
+#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
 
 #include "receiver/plugins/dacDataManager.h"
 #include "receiver/globals.h"
@@ -37,7 +39,6 @@ class adrv : public QObject
 
 public:
     explicit adrv();
-    ~adrv();
 
     /**
      * @brief Connects to target SDR hardware IP or creates local context.
@@ -100,28 +101,32 @@ public:
      */
     void DisableDac();
 
-    bool hopping=false;
+    bool hopping = false;
 
 private:
     const gdouble mhz_scale = 1000000.0;
     const gdouble inv_scale = -1.0;
     const gdouble scale100 = 100.0;
 
-    struct iio_context *ctx=nullptr;    
-    dac_data_manager *m_dac_data_manager{nullptr};
+    struct iio_context *ctx = nullptr;    
 
-    bool freqChanged=false;
-    double baseFreq=0;
-    double oldFreq=-1;
+    dacDataManager *dac_data_manager;
+
+    bool freqChanged = false;
+    double baseFreq = 0;
+    double oldFreq = -1;
 
     double RFBandwidth;
     double RFBandwidthOBS;
-    double power=0;
+
+    double power = 0;
 
     QFuture<void> future;
+
     iio_context *GetContext(QString ip);
 
-    struct iio_device *dds{nullptr};
+    struct iio_device *dds;
+    struct dac_data_manager *dac_tx_manager;
 
 signals:
     void progress(int);

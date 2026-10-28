@@ -1,19 +1,6 @@
 /**
  * @file exciter.h
  * @brief Multi-Waveform Signal Generation & Exciter Engine for eLynxSDR.
- *
- * Exciter generates complex baseband radar and electronic warfare waveforms:
- * - Continuous Wave (CW) single-tone generator via ADRV9009 internal DDS engine.
- * - Spot Noise: Gaussian band-limited noise for spot jamming.
- * - Frequency Sweep: Stepped or continuous chirp across specified bandwidths.
- * - Impulse / Pulsed RF: Configurable pulse width (Tp) and pulse repetition interval (PRI).
- * - Wideband Noise: High-bandwidth pseudo-random Gaussian noise.
- * - Bridge Noise: Multi-carrier comb noise for wideband channel stimulation.
- * - Multi-Target Simulator: Up to 5 concurrent independent radar target returns.
- * - Linear Frequency Modulated (LFM Chirp): Radar chirp pulses.
- *
- * @author eLynxSDR Development Team
- * @version 0.0.2
  */
 
 #ifndef EXCITER_H
@@ -26,14 +13,13 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QLabel>
-#include <QPushButton>
-#include <QTimer>
 #include <unistd.h>
 #include <iio.h>
 
 #include "components/adrv/ADRV.h"
 #include <QMessageBox>
-#include "QJsonObject"
+#include <QJsonObject>
+#include <QTimer>
 #include <iostream>
 #include <fstream>
 #include "devices/joshan/datastruct.h"
@@ -43,293 +29,198 @@ namespace Ui {
 class exciter;
 }
 
-/**
- * @class Exciter
- * @brief GUI and Signal Synthesis engine for multi-waveform RF transmission.
- */
 class Exciter : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs the Exciter widget and initializes waveform sub-tabs.
-     * @param parent Optional parent QWidget pointer.
-     */
     explicit Exciter(QWidget *parent = nullptr);
-
-    /**
-     * @brief Destructor releasing allocated resources.
-     */
     ~Exciter();
+    QDoubleSpinBox * spnCWPower;
+    QDoubleSpinBox * spnSweepPower;
+    QDoubleSpinBox * spnimpulsePower;
+    QDoubleSpinBox * spnWidePower;
+    QDoubleSpinBox * spnSpotPower;
+    QDoubleSpinBox * spnImpPri;
+    QDoubleSpinBox * spnImpPw;
+    QSpinBox       * spnDelay;
+    QLabel * statusMsg;
 
-    // Public UI controls accessed by MainWindow for bi-directional synchronization
-    QDoubleSpinBox * spnCWPower;       ///< Output attenuation control for CW mode.
-    QDoubleSpinBox * spnSweepPower;    ///< Output attenuation control for Sweep mode.
-    QDoubleSpinBox * spnimpulsePower;  ///< Output attenuation control for Impulse mode.
-    QDoubleSpinBox * spnWidePower;     ///< Output attenuation control for WideBand mode.
-    QDoubleSpinBox * spnSpotPower;     ///< Output attenuation control for Spot noise mode.
-    QDoubleSpinBox * spnImpPri;        ///< Pulse Repetition Interval (PRI) spinbox in us.
-    QDoubleSpinBox * spnImpPw;         ///< Pulse Width (Pw) spinbox in us.
-    QSpinBox       * spnDelay;         ///< Hop / trigger delay spinbox.
-    QLabel         * statusMsg;        ///< Status message label for DMA updates.
-    QDoubleSpinBox * spnWBPower;       ///< WideBand noise power spinbox.
+    QDoubleSpinBox * spnWBPower;
 
-    QDoubleSpinBox * spnCWFrq;         ///< CW center frequency spinbox.
-    QDoubleSpinBox * spnSweepStop;     ///< Sweep stop frequency spinbox.
-    QDoubleSpinBox * spnSweepStart;    ///< Sweep start frequency spinbox.
-    QDoubleSpinBox * spnSweepStep;     ///< Sweep frequency step spinbox.
-    QDoubleSpinBox * spnimpulseFrq;    ///< Impulse center frequency spinbox.
-    QDoubleSpinBox * spnWideFrq;       ///< WideBand noise center frequency spinbox.
-    QDoubleSpinBox * spnSpotFrq;       ///< Spot noise center frequency spinbox.
-    QCheckBox      * powerOn;          ///< Master TX power amplifier enable toggle.
-    QPushButton    * startBtn;         ///< Start hopping trigger button.
-    QPushButton    * stopBtn;          ///< Stop hopping trigger button.
-    QPushButton    * btnDisableSpot;   ///< Disable spot noise button.
-    QPushButton    * btnSetCW;         ///< Enable CW mode button.
-    QPushButton    * btnSetWB;         ///< Enable WideBand noise button.
-    QPushButton    * btnLoadSpot;      ///< Enable Spot noise button.
-    QPushButton    * btnDisableCW;     ///< Disable CW mode button.
-    QPushButton    * btnDisableWB;     ///< Disable WideBand noise button.
-    QPushButton    * btnStopSweep;     ///< Stop sweep button.
-    QPushButton    * btnDisImpulse;    ///< Disable impulse button.
-    QPushButton    * btnStartSweep;    ///< Start sweep button.
-    QPushButton    * btnLoadImpulse;   ///< Enable impulse button.
+    QDoubleSpinBox * spnCWFrq;
+    QDoubleSpinBox * spnSweepStop;
+    QDoubleSpinBox * spnSweepStart;
+    QDoubleSpinBox * spnSweepStep;
+    QDoubleSpinBox * spnimpulseFrq;
+    QDoubleSpinBox * spnWideFrq;
+    QDoubleSpinBox * spnSpotFrq;
+    QCheckBox * powerOn;
+    QPushButton * startBtn;
+    QPushButton * stopBtn;
+    QPushButton * btnDisableSpot;
+    QPushButton * btnSetCW;
+    QPushButton * btnSetWB;
+    QPushButton * btnLoadSpot;
+    QPushButton * btnDisableCW;
+    QPushButton * btnDisableWB;
+    QPushButton * btnStopSweep;
+    QPushButton * btnDisImpulse;
+    QPushButton * btnStartSweep;
+    QPushButton * btnLoadImpulse;
 
-    double minFrqLimit{};              ///< Minimum allowable RF tuning frequency.
-    double maxFrqLimit{};              ///< Maximum allowable RF tuning frequency.
+    double minFrqLimit{};
+    double maxFrqLimit{};
 
 private:
-    Ui::exciter * ui;
+    Ui::exciter *ui;
 
-    adrv * adrvObj;                    ///< Low-level ADRV9009 hardware interface helper.
-    QString ipAddress{};               ///< Target hardware IP address.
-    bool isConnect{false};             ///< Hardware connection status.
-    bool firstRun{true};               ///< First run initialization flag.
-    QString fullPath;                  ///< Full filesystem path of active DAC sample file.
-    QString fileName;                  ///< Filename of active DAC sample file.
+    adrv * adrvObj ;
+    QString ipAddress{};
+    bool isConnect{false};
+    bool firstRun{true};
+    QString fullPath;
+    QString fileName;
 
-    bool isExciterOn{false};           ///< Master exciter active transmission status.
-    QSet<QString> activeModes;         ///< Set of currently active exciter waveform modes.
-
-    /**
-     * @brief Tracks active status for an exciter mode and broadcasts modeActivitySignal.
-     * @param mode Mode name (e.g. "cw", "spot", "lfm").
-     * @param on True if active, false if disabled.
-     */
+    bool isExciterOn{false};
+    QSet<QString> activeModes;
     void setModeActive(const QString &mode, bool on);
 
-    int profileBw{200};                ///< Active ADRV9009 profile bandwidth (100, 200, or 400 MHz).
+    // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz)
+    int profileBw{200};   // default profile: 200 MHz BW (matches ReceiverMain)
 
-    enum tabState { CW, Spot, Sweep, Impulse, WB };
-
-    /**
-     * @brief Synthesizes pulsed RF IQ samples and writes them to a formatted text file.
-     * @param pulseWidth Pulse duration in microseconds.
-     * @param pri Pulse repetition interval in microseconds.
-     * @param filePath Output file destination path.
-     * @param sampleRate Sampling rate in MSPS.
-     */
-    void createImpulseFile(double pulseWidth, double pri, QString &filePath, double sampleRate);
-
-    /**
-     * @brief Checks if a file exists on the local filesystem.
-     * @param name File path string.
-     * @return True if exists.
-     */
-    bool existsFile(const std::string &name);
-
-    /**
-     * @brief Resolves relative file path against application search directories.
-     * @param path In/out path reference.
-     * @return True if resolved.
-     */
-    bool returnfilePath(QString &path);
-
-    /**
-     * @brief Resolves relative file name against standard directories.
-     * @param relativeName Filename to locate.
-     * @return Absolute file path if found, or relativeName if not.
-     */
-    QString resolveDataPath(const QString &relativeName) const;
-
-    // CW Tab DDS Controls
-    QDoubleSpinBox * cwDdsFrqSpn{nullptr};   ///< DDS Tone frequency in MHz.
-    QDoubleSpinBox * cwDdsScaleSpn{nullptr}; ///< DDS Tone scale in dBFS.
-    QDoubleSpinBox * cwDdsPhaseSpn{nullptr}; ///< DDS Tone initial phase in degrees.
-
-    // Bridge Noise Controls
-    QDoubleSpinBox * bridgeSpn{nullptr};     ///< Bridge noise bandwidth spinbox.
-
-    // Multi-Target Simulator Controls (5 concurrent targets)
-    struct MultiTargetRow {
-        QCheckBox      * chkEnable;  ///< Target channel enable checkbox.
-        QComboBox      * cmbWave;    ///< Waveform selector (Spot, CW, LFM).
-        QDoubleSpinBox * spnBw;      ///< Bandwidth in MHz.
-        QDoubleSpinBox * spnShift;   ///< Doppler frequency shift in MHz.
+    enum tabState{
+        CW,Spot,Sweep,Impulse,WB
     };
-    QVector<MultiTargetRow> multiTargetRows; ///< Target rows array.
-    QPushButton * btnGenerateMultiTarget{nullptr};
-    QPushButton * btnDisableMultiTarget{nullptr};
 
-    // LFM Chirp Controls
-    QDoubleSpinBox * lfmStartFrqSpn{nullptr}; ///< LFM chirp start frequency in MHz.
-    QDoubleSpinBox * lfmBwSpn{nullptr};       ///< LFM chirp bandwidth in MHz.
-    QDoubleSpinBox * lfmTSpn{nullptr};        ///< LFM pulse duration in microseconds.
-    QPushButton    * btnSetLfm{nullptr};      ///< Set LFM button.
-    QPushButton    * btnDisableLfm{nullptr};  ///< Disable LFM button.
+    void createImpulseFile(double, double, QString&, double);
+    bool existsFile (const std::string& name);
+    bool returnfilePath(QString&);
 
-    // DAC TX Channel Selection (Voltage 0/1 vs Voltage 2/3)
-    QCheckBox * chkVoltage01{nullptr};        ///< Route to TX1 (Voltage 0/1).
-    QCheckBox * chkVoltage23{nullptr};        ///< Route to TX2 (Voltage 2/3).
+    // Phase 6: search the plausible folders (app start dir, application
+    // binary dir and their parents) for a relative file name and return
+    // the first full path that exists (empty if not found anywhere).
+    QString resolveFileInAppFolders(const QString &relPath);
 
-public:
-    /**
-     * @brief Checks if Voltage 0/1 (TX1) is selected for DAC transmission.
-     * @return True if checked.
-     */
-    bool voltage01Selected() const;
+    // Phase 6: Bridge Noise tab - band-limited noise files
+    // bridge/bridge{N}mhz_{P}.txt (created by
+    // files/bridge/generate_bridge.py, same engine as the spot files).
+    QDoubleSpinBox *bridgeSpn{nullptr};
 
-    /**
-     * @brief Checks if Voltage 2/3 (TX2) is selected for DAC transmission.
-     * @return True if checked.
-     */
-    bool voltage23Selected() const;
+    // Phase 6: Multi Target tab - up to 5 selectable targets, each with its
+    // own modulation (Spot/CW/Impulse/LFM/NLFM/Bridge noise), its own
+    // specification and its own frequency shift (a complex exponential
+    // multiplier).  Every selected target is rendered to its own txt file,
+    // the shifted targets are summed into one I/Q stream (MultiTarget.txt)
+    // which is sent to the DAC buffer.  LFM/NLFM rows carry just the three
+    // LFM/NLFM tab parameters (start frequency / BW / T) and NO frequency
+    // shift - the chirp formula is the exact one of the LFM/NLFM tabs.
+    QCheckBox *mtEnable[5]{};
+    QComboBox *mtType[5]{};
+    QLabel *mtSpecLbl[5][3]{};
+    QDoubleSpinBox *mtSpec[5][3]{};
+    QLabel *mtShiftLbl[5]{};
+    QDoubleSpinBox *mtShift[5]{};
+    void updateMultiTargetRow(int row, bool applyDefaults);
+    bool buildMultiTargetWaveform();
+    // Load a TEXT-header I/Q pair file (files/spot/generate.py and
+    // files/bridge/generate_bridge.py format) into the sample buffers.
+    // Returns the number of samples read (0 = empty or unreadable).
+    int loadIqTextSamples(const QString &path,
+                          QVector<double> &ti, QVector<double> &tq,
+                          int nMax);
 
-signals:
-    /**
-     * @brief Emitted to upload a generated IQ waveform file into the ADRV9009 DAC DMA buffer.
-     * @param filePath Absolute path to sample file.
-     * @param scaleFactor Digital amplitude scaling factor.
-     * @param mode Waveform mode label string.
-     */
-    void sendFileToCardSignal(QString filePath, double scaleFactor, QString mode);
+    // Phase 6: CW tab DDS tone parameters (shown on the CW tab like the
+    // iio-oscilloscope DDS panel): the CW tab drives the on-chip DDS tone
+    // engine on TX1+TX2 ("One CW Tone" mode), not the DAC buffer.
+    QDoubleSpinBox *cwDdsFrqSpn{nullptr};
+    QDoubleSpinBox *cwDdsScaleSpn{nullptr};
+    QDoubleSpinBox *cwDdsPhaseSpn{nullptr};
 
-    /**
-     * @brief Emitted to switch or disable DAC transmission mode.
-     * @param mode Mode string (e.g. "CW", "Spot", "disable").
-     */
-    void changeDacSignal(QString mode);
+    // Phase 6: LFM / NLFM tabs (same flow as the spot tab): start
+    // frequency / bandwidth / pulse duration; Set synthesizes the chirp
+    // at the profile playback rate and sends it to the DAC buffer.
+    QDoubleSpinBox *lfmStartSpn{nullptr};
+    QDoubleSpinBox *lfmBwSpn{nullptr};
+    QDoubleSpinBox *lfmTSpn{nullptr};
+    QDoubleSpinBox *nlfmStartSpn{nullptr};
+    QDoubleSpinBox *nlfmBwSpn{nullptr};
+    QDoubleSpinBox *nlfmTSpn{nullptr};
+    bool buildChirpFile(const QString &fileName, bool nlfm,
+                        double f0Mhz, double bwMhz, double tUs);
+    // Phase 6: the ONE chirp formula shared by the LFM/NLFM tabs and the
+    // Multi Target LFM/NLFM rows: phase(tau) = 2*pi*(f0*tau + B*tau^2/2T)
+    // over a repeating pulse of duration T (us), NLFM adds raised-cosine
+    // amplitude coding.  Fills n samples of I/Q at fsMhz MS/s.
+    void fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
+                          double fsMhz, bool nlfm,
+                          double f0Mhz, double bwMhz, double tUs);
 
-    /**
-     * @brief Emitted when DDS tone parameters change on CW tab.
-     * @param freqMHz DDS tone frequency in MHz.
-     * @param scaleDbfs DDS tone amplitude in dBFS.
-     * @param phaseDeg DDS tone phase in degrees.
-     */
-    void cwDdsParamsSignal(double freqMHz, double scaleDbfs, double phaseDeg);
+    // Phase 6: Sweep tab - stepped-sine I/Q synthesis (like the LFM tab,
+    // in-app sine at baseband, fixed LO): tones at start, start+step, ...
+    // toward stop (e.g. start 0, stop 10, step 2 -> 0/2/4/6/8/10 MHz),
+    // equal dwell per tone inside the looping file (the per-tone time is
+    // not critical), continuous phase across tone changes.
+    bool buildSweepFile(const QString &fileName,
+                        double fStartMhz, double fStopMhz, double fStepMhz);
 
-    /**
-     * @brief Emitted to update transceiver RF carrier frequency.
-     * @param frq Target center frequency in MHz.
-     */
-    void sendFrqDataSignal(double frq);
+    tabState currentTabState;
+    QTimer exciterConnection;
+    bool isUserLoggedIn{};
 
-    /**
-     * @brief Emitted to synchronize output power attenuation with receiver tab.
-     * @param power Power attenuation in dB.
-     */
-    void sendPowerToCart(double power);
-
-    /**
-     * @brief Emitted when any exciter mode starts or all modes stop.
-     * @param anyActive True if at least one waveform mode is currently transmitting.
-     */
-    void modeActivitySignal(bool anyActive);
-
-    /**
-     * @brief Emitted to start frequency hopping mode.
-     */
-    void startHopp();
-
-    /**
-     * @brief Emitted to stop frequency hopping mode.
-     */
-    void stoptHopp();
-
-    /**
-     * @brief Emitted to disable smart noise tracking mode.
-     */
-    void turnOffSmartNoiseSignal();
-
-    /**
-     * @brief Emitted to report functional telemetry to Joshan controller.
-     * @param data Telemetry payload struct.
-     */
-    void sendFuncDataToJoshanSignal(JoshanFuncDataStruct data);
-
-    /**
-     * @brief Emitted to report operational status to Joshan controller.
-     * @param data Status payload struct.
-     */
-    void sendStatusDataToJoshanSignal(JoshanStatusDataStruct data);
-
-public slots:
-    /**
-     * @brief Updates active profile bandwidth (100, 200, 400 MHz) and adapts waveform files.
-     * @param bwMhz Bandwidth in MHz.
-     */
-    void setProfileBw(int bwMhz);
-
-    /**
-     * @brief Updates calibrated TX output power readout on the UI.
-     * @param rfFrqMhz Current RF carrier frequency in MHz.
-     * @param tx1AttenDb TX1 digital attenuation in dB.
-     * @param tx2AttenDb TX2 digital attenuation in dB.
-     */
-    void refreshTxPowerDisplay(double rfFrqMhz, double tx1AttenDb, double tx2AttenDb);
-
-    /**
-     * @brief Handles IP address received from main connection dialog.
-     * @param ip Hardware IP address string.
-     */
-    void receiveIpAddressSlot(QString ip);
-
-    /**
-     * @brief Initializes hardware connection for Exciter.
-     * @param status Connection success flag.
-     */
-    void initConnection(bool status);
-
-    /**
-     * @brief Receives DAC status messages from transceiver plugin.
-     * @param msg Status message string.
-     */
-    void changingDacMsg(QString msg);
-
-    /**
-     * @brief Updates UI controls based on logged-in user permissions.
-     * @param isLoggedIn User authentication state.
-     * @param role User permission role string.
-     */
-    void isUserLoggedInSlot(bool isLoggedIn, QString role);
-
-    /**
-     * @brief Main slot executing waveform generation and DAC upload when a Set button is clicked.
-     */
+private slots:
+    void on_btnDisableSpot_clicked();
+    void on_btnDisImpulse_clicked();
+    void on_btnStopSweep_clicked();
+    void getDataSlot();
     void setDataSlot();
 
-    /**
-     * @brief Receives Joshan control commands for electronic countermeasure modes.
-     * @param data Control payload struct.
-     */
-    void joshanControlDataSlot(JoshanControlDataStruct data);
+    void on_btnDisableCW_clicked(bool checked);
+    void on_btnDisableWB_clicked(bool checked);
 
-    /**
-     * @brief Requests functional data report for Joshan controller.
-     */
+public slots:
     void joshanFuncDataSlot();
-
-    /**
-     * @brief Requests status data report for Joshan controller.
-     */
     void joshanStatusDataSlot();
 
-    /**
-     * @brief Handles smart noise activation state updates.
-     * @param active True if smart noise is active.
-     */
-    void smartNoiseIsActiveSlot(bool active);
+    // Phase 6: refresh the "Current P (attenuation)" readout - it shows
+    // the calibrated TX power (P + TX calibration, see
+    // constants/tx_calibration.h).  Called when the P changes and when
+    // the TX calibration value of the Calibration tab changes.
+    void refreshTxPowerDisplay();
+
+    // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz), set from
+    // the receiver Profile tab. Selects spot{N}mhz_{P}.txt in the Spot tab.
+    void setProfileBw(int bwMHz);
+    // DAC-buffer channel pair selection (the Voltage 0/1 and Voltage 2/3
+    // checkboxes): true when that pair should transmit the loaded file.
+    bool voltage01Selected() const;
+    bool voltage23Selected() const;
+    //    void receiveIpAddressSlot(bool);
+    void connectToDevice();
+    void initConnection(bool);
+    void addingCartElementsToExciter();
+    void changingDacMsg(QString,QString);
+    void joshanControlDataSlot(QJsonObject);
+    void smartNoiseIsActiveSlot();
+    void isUserLoggedInSlot(double);
+
+signals:
+    void connectionStatusSignal(bool);
+    void sendFuncDataToJoshanSignal(QJsonObject);
+    void sendStatusDataToJoshanSignal(QJsonObject);
+    void sendFrqDataSignal(QString);
+    void sendPowerToCart(double);
+    void sendSweepToCart();
+    void sendStartFrqToCart(double);
+    void sendStoptFrqToCart(double);
+    void sendStepFrqToCart(double);
+    void startHopp();
+    void stoptHopp();
+    void sendFileToCardSignal(QString, double,QString);
+    void cwDdsParamsSignal(double freqMhz, double scaleDbfs, double phaseDeg);
+    void changeDacSignal(QString);
+    void modeActivitySignal(bool anyModeActive);
+    void turnOffSmartNoiseSignal();
 };
 
 #endif // EXCITER_H
