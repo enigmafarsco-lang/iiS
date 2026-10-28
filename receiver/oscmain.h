@@ -1,7 +1,7 @@
 // ============================================================================
 // File: oscmain.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for oscmain.h.
+// Description: Subsystem implementation and interface guidance for oscmain.h.
 // ============================================================================
 
 #ifndef OSCMAIN_H

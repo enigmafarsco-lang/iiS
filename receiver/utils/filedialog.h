@@ -1,7 +1,7 @@
 // ============================================================================
 // File: filedialog.h
 // Subsystem: eLynxSDR utils
-// Description: Header definitions and interface declarations for filedialog.h.
+// Description: Subsystem implementation and interface guidance for filedialog.h.
 // ============================================================================
 
 #ifndef FILEDIALOG_H

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: detector.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for detector.h.
+// Description: Subsystem implementation and interface guidance for detector.h.
 // ============================================================================
 
 #ifndef DETECTOR_H

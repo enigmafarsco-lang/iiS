@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pulse.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for pulse.h.
+// Description: Subsystem implementation and interface guidance for pulse.h.
 // ============================================================================
 
 #ifndef PULSE_H

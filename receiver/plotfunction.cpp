@@ -6,14 +6,14 @@
 
 #include "plotfunction.h"
 
-// Constructor: Initializes plotfunction subsystem components, state, and UI bindings.
+// Constructor: Initializes plotfunction subsystem components, default parameters, and state.
 plotfunction::plotfunction(QObject *parent) : QThread(parent)
 {
     this->start();
     moveToThread(this);
 }
 
-// Destructor: Releases plotfunction allocated resources, buffers, and timers.
+// Destructor: Cleans up plotfunction allocated resources, timers, and buffers.
 plotfunction::~plotfunction()
 {
     //    if(isRunning())

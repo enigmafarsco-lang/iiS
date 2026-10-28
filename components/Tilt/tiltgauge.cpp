@@ -10,7 +10,7 @@
 #include <QPainter>
 #include <QFont>
 
-// Constructor: Initializes BTiltGauge subsystem components, state, and UI bindings.
+// Constructor: Initializes BTiltGauge subsystem components, default parameters, and state.
 BTiltGauge::BTiltGauge(QWidget *parent)
     : QWidget(parent)
 {

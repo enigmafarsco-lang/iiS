@@ -6,7 +6,7 @@
 
 #include "QCustomAxis.h"
 
-// Constructor: Initializes QCustomAxis subsystem components, state, and UI bindings.
+// Constructor: Initializes QCustomAxis subsystem components, default parameters, and state.
 QCustomAxis::QCustomAxis(QObject *parent)
     : QObject(parent)
 {
@@ -27,7 +27,7 @@ QCustomAxis::QCustomAxis(QObject *parent)
     m_upperPartialRangeSet = false;
 }
 
-// Destructor: Releases QCustomAxis allocated resources, buffers, and timers.
+// Destructor: Cleans up QCustomAxis allocated resources, timers, and buffers.
 QCustomAxis::~QCustomAxis()
 {
 }

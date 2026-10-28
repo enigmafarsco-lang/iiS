@@ -28,6 +28,7 @@ libini2 libini2;
 #pragma region Constructor {
 
 
+// Constructor: Initializes OSCMain subsystem components, default parameters, and state.
 OSCMain::OSCMain(QApplication *app,QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::OSCMain)
@@ -40,7 +41,7 @@ OSCMain::OSCMain(QApplication *app,QWidget *parent) :
     ClearTabContainer();
 }
 
-// Destructor: Releases OSCMain allocated resources, buffers, and timers.
+// Destructor: Cleans up OSCMain allocated resources, timers, and buffers.
 OSCMain::~OSCMain()
 {
     delete ui;
@@ -767,7 +768,7 @@ bool OSCMain::device_type_get(const iio_device *dev, int type)
     return false;
 }
 
-// Reads, parses, and processes incoming read_sampling_frequency data.
+// Reads, parses, and decodes incoming read_sampling_frequency data.
 double OSCMain::read_sampling_frequency(const iio_device *dev)
 {
     double freq = 400.0;

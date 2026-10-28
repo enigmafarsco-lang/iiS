@@ -15,7 +15,7 @@
 #include FT_FREETYPE_H
 
 
-// Constructor: Initializes QGLchart subsystem components, state, and UI bindings.
+// Constructor: Initializes QGLchart subsystem components, default parameters, and state.
 QGLchart::QGLchart(QWidget *parent)
     : QOpenGLWidget(parent)
 {

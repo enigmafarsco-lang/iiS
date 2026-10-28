@@ -1,7 +1,7 @@
 // ============================================================================
 // File: constants.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for constants.h.
+// Description: Subsystem implementation and interface guidance for constants.h.
 // ============================================================================
 
 #ifndef CONSTANTS_H

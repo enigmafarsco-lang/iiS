@@ -4,7 +4,7 @@
 // Description: Subsystem implementation and interface guidance for plotsignal.cpp.
 // ============================================================================
 
-﻿#include "plotsignal.h"
+#include "plotsignal.h"
 #include "ui_plotsignal.h"
 
 PlotSignal::PlotSignal(QWidget *parent) :
@@ -17,7 +17,7 @@ PlotSignal::PlotSignal(QWidget *parent) :
 
 
 
-// Destructor: Releases PlotSignal allocated resources, buffers, and timers.
+// Destructor: Cleans up PlotSignal allocated resources, timers, and buffers.
 PlotSignal::~PlotSignal()
 {
     delete ui;

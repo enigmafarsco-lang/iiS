@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plotsignal.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for plotsignal.h.
+// Description: Subsystem implementation and interface guidance for plotsignal.h.
 // ============================================================================
 
 #ifndef PLOTSIGNAL_H

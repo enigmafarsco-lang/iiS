@@ -6,7 +6,7 @@
 
 #include "tiltcomponent.h"
 
-// Constructor: Initializes BTiltComponent subsystem components, state, and UI bindings.
+// Constructor: Initializes BTiltComponent subsystem components, default parameters, and state.
 BTiltComponent::BTiltComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();

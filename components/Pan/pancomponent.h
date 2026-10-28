@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pancomponent.h
 // Subsystem: eLynxSDR Pan
-// Description: Header definitions and interface declarations for pancomponent.h.
+// Description: Subsystem implementation and interface guidance for pancomponent.h.
 // ============================================================================
 
 #ifndef PANCOMPONENT_H

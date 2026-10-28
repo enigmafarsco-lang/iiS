@@ -30,7 +30,7 @@
 #include "led.h" 
 
 
-// Constructor: Initializes Led subsystem components, state, and UI bindings.
+// Constructor: Initializes Led subsystem components, default parameters, and state.
 Led::Led(QWidget * parent):WidgetWithBackground(parent)
 {
   m_checked = true; 

@@ -4,7 +4,7 @@
 // Description: Subsystem implementation and interface guidance for radarInfoPage.cpp.
 // ============================================================================
 
-﻿#include "radarInfoPage.h"
+#include "radarInfoPage.h"
 #include "ui_radarInfoPage.h"
 
 RadarInfoPage::RadarInfoPage(QWidget *parent) :
@@ -15,7 +15,7 @@ RadarInfoPage::RadarInfoPage(QWidget *parent) :
     //    init();
 }
 
-// Destructor: Releases RadarInfoPage allocated resources, buffers, and timers.
+// Destructor: Cleans up RadarInfoPage allocated resources, timers, and buffers.
 RadarInfoPage::~RadarInfoPage()
 {
     delete ui;

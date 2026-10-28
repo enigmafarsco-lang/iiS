@@ -199,6 +199,7 @@ static gboolean plugin_detached;
 dacDataManager *dac_data_manager_instance_9371;
 
 
+// Constructor: Initializes AD9371 subsystem components, default parameters, and state.
 AD9371::AD9371(QApplication *app,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AD9371)
@@ -206,7 +207,7 @@ AD9371::AD9371(QApplication *app,QWidget *parent) :
     ui->setupUi(this);
 }
 
-// Destructor: Releases AD9371 allocated resources, buffers, and timers.
+// Destructor: Cleans up AD9371 allocated resources, timers, and buffers.
 AD9371::~AD9371()
 {
     delete ui;

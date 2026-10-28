@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// Constructor: Initializes ini subsystem components, state, and UI bindings.
+// Constructor: Initializes ini subsystem components, default parameters, and state.
 ini::ini()
 {
 

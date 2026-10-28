@@ -1,7 +1,7 @@
 // ============================================================================
 // File: FFT.h
 // Subsystem: eLynxSDR fft
-// Description: Header definitions and interface declarations for FFT.h.
+// Description: Subsystem implementation and interface guidance for FFT.h.
 // ============================================================================
 
 #ifndef FFT_H

@@ -413,7 +413,7 @@ adrv9009_adv::adrv9009_adv(QWidget *parent) :
     //end
 }
 
-// Destructor: Releases adrv9009_adv allocated resources, buffers, and timers.
+// Destructor: Cleans up adrv9009_adv allocated resources, timers, and buffers.
 adrv9009_adv::~adrv9009_adv()
 {
     delete ui;

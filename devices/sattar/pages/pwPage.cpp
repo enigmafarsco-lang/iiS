@@ -4,7 +4,7 @@
 // Description: Subsystem implementation and interface guidance for pwPage.cpp.
 // ============================================================================
 
-﻿#include "pwPage.h"
+#include "pwPage.h"
 #include "ui_pwPage.h"
 
 PWPage::PWPage(QWidget *parent,
@@ -255,7 +255,7 @@ bool PWPage::pwCompare(float&pw)
     return true;
 }
 
-// Destructor: Releases PWPage allocated resources, buffers, and timers.
+// Destructor: Cleans up PWPage allocated resources, timers, and buffers.
 PWPage::~PWPage()
 {
     delete ui;

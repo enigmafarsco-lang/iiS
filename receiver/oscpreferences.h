@@ -1,7 +1,7 @@
 // ============================================================================
 // File: oscpreferences.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for oscpreferences.h.
+// Description: Subsystem implementation and interface guidance for oscpreferences.h.
 // ============================================================================
 
 #ifndef OSCPREFERENCES_H

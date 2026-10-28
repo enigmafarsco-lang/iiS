@@ -171,7 +171,7 @@ void PulsePage::on_btnOk_clicked()
 
 
 
-// Destructor: Releases PulsePage allocated resources, buffers, and timers.
+// Destructor: Cleans up PulsePage allocated resources, timers, and buffers.
 PulsePage::~PulsePage()
 {
     delete  radarData;

@@ -29,14 +29,14 @@
 #include <QtGui>
 #include "widgetwithbackground.h"
 
-// Constructor: Initializes WidgetWithBackground subsystem components, state, and UI bindings.
+// Constructor: Initializes WidgetWithBackground subsystem components, default parameters, and state.
 WidgetWithBackground::WidgetWithBackground(QWidget * parent) : QWidget(parent)
 {
   m_pixmap = new QPixmap(size());
   m_modified = false;
 }
 
-// Destructor: Releases WidgetWithBackground allocated resources, buffers, and timers.
+// Destructor: Cleans up WidgetWithBackground allocated resources, timers, and buffers.
 WidgetWithBackground::~WidgetWithBackground()
 {
    if (m_pixmap)

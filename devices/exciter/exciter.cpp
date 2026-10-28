@@ -325,7 +325,7 @@ Exciter::Exciter(QWidget *parent) :
     refreshTxPowerDisplay();
 }
 
-// Destructor: Releases Exciter allocated resources, buffers, and timers.
+// Destructor: Cleans up Exciter allocated resources, timers, and buffers.
 Exciter::~Exciter()
 {
     delete ui;

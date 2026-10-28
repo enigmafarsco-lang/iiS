@@ -1,7 +1,7 @@
 // ============================================================================
 // File: servo.h
 // Subsystem: eLynxSDR servo
-// Description: Header definitions and interface declarations for servo.h.
+// Description: Subsystem implementation and interface guidance for servo.h.
 // ============================================================================
 
 #ifndef SERVO_H

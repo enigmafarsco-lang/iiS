@@ -4,7 +4,7 @@
 // Description: Subsystem implementation and interface guidance for frqPage.cpp.
 // ============================================================================
 
-﻿#include "frqPage.h"
+#include "frqPage.h"
 #include "ui_frqPage.h"
 
 FrqPage::FrqPage(QWidget *parent,
@@ -342,7 +342,7 @@ bool FrqPage::agileCalc(float &frq)
     return true;
 }
 
-// Destructor: Releases FrqPage allocated resources, buffers, and timers.
+// Destructor: Cleans up FrqPage allocated resources, timers, and buffers.
 FrqPage::~FrqPage()
 {
     delete ui;

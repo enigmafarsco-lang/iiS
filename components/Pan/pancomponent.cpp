@@ -6,7 +6,7 @@
 
 #include "pancomponent.h"
 
-// Constructor: Initializes BPanComponent subsystem components, state, and UI bindings.
+// Constructor: Initializes BPanComponent subsystem components, default parameters, and state.
 BPanComponent::BPanComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();

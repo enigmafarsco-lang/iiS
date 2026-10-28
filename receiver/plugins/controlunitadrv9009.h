@@ -1,7 +1,7 @@
 // ============================================================================
 // File: controlunitadrv9009.h
 // Subsystem: eLynxSDR plugins
-// Description: Header definitions and interface declarations for controlunitadrv9009.h.
+// Description: Subsystem implementation and interface guidance for controlunitadrv9009.h.
 // ============================================================================
 
 #ifndef CONTROLUNITADRV9009_H

@@ -421,7 +421,7 @@ ControlUnitADRV9009::ControlUnitADRV9009(QWidget *parent) :
 
 }
 
-// Destructor: Releases ControlUnitADRV9009 allocated resources, buffers, and timers.
+// Destructor: Cleans up ControlUnitADRV9009 allocated resources, timers, and buffers.
 ControlUnitADRV9009::~ControlUnitADRV9009()
 {
     delete ui;

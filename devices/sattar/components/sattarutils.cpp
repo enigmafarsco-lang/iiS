@@ -13,7 +13,7 @@ QString SattarUtils::filePath{};
 int SattarUtils::N{7000};
 int SattarUtils::normalSample{} ;
 
-// Constructor: Initializes SattarUtils subsystem components, state, and UI bindings.
+// Constructor: Initializes SattarUtils subsystem components, default parameters, and state.
 SattarUtils::SattarUtils(QObject *parent) : QObject(parent)
 {
 

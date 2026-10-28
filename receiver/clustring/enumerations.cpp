@@ -6,7 +6,7 @@
 
 #include "enumerations.h"
 
-// Constructor: Initializes Enumerations subsystem components, state, and UI bindings.
+// Constructor: Initializes Enumerations subsystem components, default parameters, and state.
 Enumerations::Enumerations()
 {
 

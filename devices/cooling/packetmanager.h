@@ -1,7 +1,7 @@
 // ============================================================================
 // File: packetmanager.h
 // Subsystem: eLynxSDR cooling
-// Description: Header definitions and interface declarations for packetmanager.h.
+// Description: Subsystem implementation and interface guidance for packetmanager.h.
 // ============================================================================
 
 #ifndef PACKETMANAGER_H

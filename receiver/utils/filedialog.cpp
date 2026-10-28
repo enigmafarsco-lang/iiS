@@ -7,6 +7,7 @@
 #include "filedialog.h"
 #include "ui_filedialog.h"
 
+// Constructor: Initializes FileDialog subsystem components, default parameters, and state.
 FileDialog::FileDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::FileDialog)
@@ -27,7 +28,7 @@ FileDialog::FileDialog(QWidget *parent) :
     ui->listView->setModel(filemodel);
 }
 
-// Destructor: Releases FileDialog allocated resources, buffers, and timers.
+// Destructor: Cleans up FileDialog allocated resources, timers, and buffers.
 FileDialog::~FileDialog()
 {
     delete ui;

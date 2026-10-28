@@ -1,7 +1,7 @@
 // ============================================================================
 // File: joshan.h
 // Subsystem: eLynxSDR joshan
-// Description: Header definitions and interface declarations for joshan.h.
+// Description: Subsystem implementation and interface guidance for joshan.h.
 // ============================================================================
 
 #ifndef JOSHAN_H

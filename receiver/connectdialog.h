@@ -1,7 +1,7 @@
 // ============================================================================
 // File: connectdialog.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for connectdialog.h.
+// Description: Subsystem implementation and interface guidance for connectdialog.h.
 // ============================================================================
 
 #ifndef CONNECTDIALOG_H

@@ -3018,7 +3018,7 @@ void ReceiverMain::init()
     }
 }
 
-// Destructor: Releases ReceiverMain allocated resources, buffers, and timers.
+// Destructor: Cleans up ReceiverMain allocated resources, timers, and buffers.
 ReceiverMain::~ReceiverMain()
 {
 

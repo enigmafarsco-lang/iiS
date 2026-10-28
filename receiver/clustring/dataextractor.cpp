@@ -6,7 +6,7 @@
 
 #include "dataextractor.h"
 
-// Constructor: Initializes DataExtractor subsystem components, state, and UI bindings.
+// Constructor: Initializes DataExtractor subsystem components, default parameters, and state.
 DataExtractor::DataExtractor()
 {
 

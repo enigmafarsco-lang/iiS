@@ -1,7 +1,7 @@
 // ============================================================================
 // File: dacDataManager.h
 // Subsystem: eLynxSDR plugins
-// Description: Header definitions and interface declarations for dacDataManager.h.
+// Description: Subsystem implementation and interface guidance for dacDataManager.h.
 // ============================================================================
 
 #ifndef DAC_DATA_MANAGER_H

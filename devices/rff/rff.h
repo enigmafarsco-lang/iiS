@@ -1,7 +1,7 @@
 // ============================================================================
 // File: rff.h
 // Subsystem: eLynxSDR rff
-// Description: Header definitions and interface declarations for rff.h.
+// Description: Subsystem implementation and interface guidance for rff.h.
 // ============================================================================
 
 #ifndef RFF_H

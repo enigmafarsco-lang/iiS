@@ -1,7 +1,7 @@
 // ============================================================================
 // File: QCustomAxis.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for QCustomAxis.h.
+// Description: Subsystem implementation and interface guidance for QCustomAxis.h.
 // ============================================================================
 
 #pragma once

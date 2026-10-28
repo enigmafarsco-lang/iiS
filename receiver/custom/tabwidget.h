@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tabwidget.h
 // Subsystem: eLynxSDR custom
-// Description: Header definitions and interface declarations for tabwidget.h.
+// Description: Subsystem implementation and interface guidance for tabwidget.h.
 // ============================================================================
 
 #ifndef TABWIDGET

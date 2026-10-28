@@ -1,7 +1,7 @@
 // ============================================================================
 // File: QGLchart.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for QGLchart.h.
+// Description: Subsystem implementation and interface guidance for QGLchart.h.
 // ============================================================================
 
 #pragma once

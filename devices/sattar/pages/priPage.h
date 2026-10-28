@@ -1,7 +1,7 @@
 // ============================================================================
 // File: priPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for priPage.h.
+// Description: Subsystem implementation and interface guidance for priPage.h.
 // ============================================================================
 
 #ifndef PRIPAGE_H

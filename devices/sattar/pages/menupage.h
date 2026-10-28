@@ -1,7 +1,7 @@
 // ============================================================================
 // File: menupage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for menupage.h.
+// Description: Subsystem implementation and interface guidance for menupage.h.
 // ============================================================================
 
 #ifndef MENUPAGE_H

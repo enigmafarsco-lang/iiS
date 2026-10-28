@@ -1,7 +1,7 @@
 // ============================================================================
 // File: backtrace.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for backtrace.h.
+// Description: Subsystem implementation and interface guidance for backtrace.h.
 // ============================================================================
 
 #ifndef BACKTRACE_H

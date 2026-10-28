@@ -6,7 +6,7 @@
 
 #include "SetUpTheme.h"
 
-// Constructor: Initializes SetUpTheme subsystem components, state, and UI bindings.
+// Constructor: Initializes SetUpTheme subsystem components, default parameters, and state.
 SetUpTheme::SetUpTheme(QWidget *parent) : QWidget(parent)
 {
     initRadioButton();

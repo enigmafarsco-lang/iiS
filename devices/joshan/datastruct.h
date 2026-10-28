@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datastruct.h
 // Subsystem: eLynxSDR joshan
-// Description: Header definitions and interface declarations for datastruct.h.
+// Description: Subsystem implementation and interface guidance for datastruct.h.
 // ============================================================================
 
 #ifndef DATASTRUCT_H

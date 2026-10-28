@@ -588,7 +588,7 @@ double Servo::coordinatorToAngle(double jammerLatitude, double jammerLongtitude,
 
 
 
-// Destructor: Releases Servo allocated resources, buffers, and timers.
+// Destructor: Cleans up Servo allocated resources, timers, and buffers.
 Servo::~Servo()
 {
     delete ui;
@@ -727,7 +727,7 @@ void Servo::sendPanTiltToCommander(double az_val, double el_val)
     }
 }
 
-// Reads, parses, and processes incoming receive command from object slot data.
+// Reads, parses, and decodes incoming receive command from object slot data.
 void Servo::receiveCommandFromObjectSlot(QString response)
 {
     QStringList frame;

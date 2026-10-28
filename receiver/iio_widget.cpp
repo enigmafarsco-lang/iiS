@@ -8,7 +8,7 @@
 
 #include <QTimer>
 
-// Constructor: Initializes IIO_Widget subsystem components, state, and UI bindings.
+// Constructor: Initializes IIO_Widget subsystem components, default parameters, and state.
 IIO_Widget::IIO_Widget()
 {
 }

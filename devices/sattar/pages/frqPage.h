@@ -1,10 +1,10 @@
 // ============================================================================
 // File: frqPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for frqPage.h.
+// Description: Subsystem implementation and interface guidance for frqPage.h.
 // ============================================================================
 
-﻿#ifndef FRQPAGE_H
+#ifndef FRQPAGE_H
 #define FRQPAGE_H
 
 #include <QWidget>

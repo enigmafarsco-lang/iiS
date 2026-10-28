@@ -1,7 +1,7 @@
 // ============================================================================
 // File: newType.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for newType.h.
+// Description: Subsystem implementation and interface guidance for newType.h.
 // ============================================================================
 
 #pragma once

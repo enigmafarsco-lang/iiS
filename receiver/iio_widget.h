@@ -1,7 +1,7 @@
 // ============================================================================
 // File: iio_widget.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for iio_widget.h.
+// Description: Subsystem implementation and interface guidance for iio_widget.h.
 // ============================================================================
 
 #ifndef IIO_WIDGET_H

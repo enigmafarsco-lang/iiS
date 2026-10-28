@@ -47,7 +47,7 @@ void Joshan::joshanIsConnected(bool connected)
 }
 
 
-// Destructor: Releases Joshan allocated resources, buffers, and timers.
+// Destructor: Cleans up Joshan allocated resources, timers, and buffers.
 Joshan::~Joshan()
 {
     delete ui;

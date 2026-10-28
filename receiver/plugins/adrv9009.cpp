@@ -241,7 +241,7 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
 
 }
 
-// Destructor: Releases adrv9009 allocated resources, buffers, and timers.
+// Destructor: Cleans up adrv9009 allocated resources, timers, and buffers.
 adrv9009::~adrv9009()
 {
     if (refreshTimer)

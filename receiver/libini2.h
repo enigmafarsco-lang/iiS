@@ -1,7 +1,7 @@
 // ============================================================================
 // File: libini2.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for libini2.h.
+// Description: Subsystem implementation and interface guidance for libini2.h.
 // ============================================================================
 
 #ifndef LIBINI_H

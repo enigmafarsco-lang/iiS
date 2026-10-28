@@ -1,7 +1,7 @@
 // ============================================================================
 // File: targetdetector.h
 // Subsystem: eLynxSDR targetDetector
-// Description: Header definitions and interface declarations for targetdetector.h.
+// Description: Subsystem implementation and interface guidance for targetdetector.h.
 // ============================================================================
 
 #ifndef TARGETDETECTOR_H

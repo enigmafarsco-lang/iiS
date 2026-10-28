@@ -1,7 +1,7 @@
 // ============================================================================
 // File: enumerations.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for enumerations.h.
+// Description: Subsystem implementation and interface guidance for enumerations.h.
 // ============================================================================
 
 #ifndef ENUMERATIONS_H

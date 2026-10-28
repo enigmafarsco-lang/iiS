@@ -6,7 +6,7 @@
 
 #include "QCustomSeries.h"
 
-// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(QObject *parent)
     : QObject(parent)
 {
@@ -15,7 +15,7 @@ QCustomSeries::QCustomSeries(QObject *parent)
     setVisible(true);
 }
 
-// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
 {
     m_inputSeries = newSeries.m_inputSeries;
@@ -24,7 +24,7 @@ QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
     m_seriesName = newSeries.m_seriesName;
 }
 
-// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(QCustomSeries* newSeries)
 {
     m_inputSeries = newSeries->m_inputSeries;
@@ -38,7 +38,7 @@ QCustomSeries QCustomSeries::operator=(const QCustomSeries& newSeries)
     return QCustomSeries(newSeries);
 }
 
-// Destructor: Releases QCustomSeries allocated resources, buffers, and timers.
+// Destructor: Cleans up QCustomSeries allocated resources, timers, and buffers.
 QCustomSeries::~QCustomSeries()
 {
 }

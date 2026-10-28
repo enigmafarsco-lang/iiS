@@ -1,7 +1,7 @@
 // ============================================================================
 // File: fftcalculator.h
 // Subsystem: eLynxSDR fft
-// Description: Header definitions and interface declarations for fftcalculator.h.
+// Description: Subsystem implementation and interface guidance for fftcalculator.h.
 // ============================================================================
 
 #ifndef FFTCALCULATOR_H

@@ -8,7 +8,7 @@
 #include <QAbstractButton>
 #include <QWidget>
 
-// Constructor: Initializes iio_utils subsystem components, state, and UI bindings.
+// Constructor: Initializes iio_utils subsystem components, default parameters, and state.
 iio_utils::iio_utils()
 {
 

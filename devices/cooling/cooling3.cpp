@@ -38,7 +38,7 @@ Cooling3::Cooling3(QWidget *parent) :
 
 }
 
-// Destructor: Releases Cooling3 allocated resources, buffers, and timers.
+// Destructor: Cleans up Cooling3 allocated resources, timers, and buffers.
 Cooling3::~Cooling3()
 {
     delete ui;

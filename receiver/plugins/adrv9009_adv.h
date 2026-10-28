@@ -1,7 +1,7 @@
 // ============================================================================
 // File: adrv9009_adv.h
 // Subsystem: eLynxSDR plugins
-// Description: Header definitions and interface declarations for adrv9009_adv.h.
+// Description: Subsystem implementation and interface guidance for adrv9009_adv.h.
 // ============================================================================
 
 #ifndef adrv9009_ADV_H

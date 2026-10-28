@@ -1,7 +1,7 @@
 // ============================================================================
 // File: ADRV.h
 // Subsystem: eLynxSDR adrv
-// Description: Header definitions and interface declarations for ADRV.h.
+// Description: Subsystem implementation and interface guidance for ADRV.h.
 // ============================================================================
 
 #ifndef ADRV_H

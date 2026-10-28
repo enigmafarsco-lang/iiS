@@ -48,7 +48,7 @@ int  Parameters::Threshold2X = 30;
 
 #pragma endregion X Band Parameters}
 
-// Constructor: Initializes Parameters subsystem components, state, and UI bindings.
+// Constructor: Initializes Parameters subsystem components, default parameters, and state.
 Parameters::Parameters()
 {
 

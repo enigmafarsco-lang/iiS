@@ -7,6 +7,7 @@
 #include "soliddialog.h"
 #include "ui_soliddialog.h"
 
+// Constructor: Initializes SolidDialog subsystem components, default parameters, and state.
 SolidDialog::SolidDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SolidDialog)
@@ -20,7 +21,7 @@ SolidDialog::SolidDialog(QWidget *parent) :
     connections();
 }
 
-// Destructor: Releases SolidDialog allocated resources, buffers, and timers.
+// Destructor: Cleans up SolidDialog allocated resources, timers, and buffers.
 SolidDialog::~SolidDialog()
 {
     delete ui;
@@ -322,7 +323,7 @@ void SolidDialog::handle_info(QString response)
     }
     ui->pgbSolid->setValue(temp);
 }
-// Reads, parses, and processes incoming receive command from other object slot data.
+// Reads, parses, and decodes incoming receive command from other object slot data.
 void SolidDialog::receiveCommandFromOtherObjectSlot(QString cmd)
 {
     QStringList frame;

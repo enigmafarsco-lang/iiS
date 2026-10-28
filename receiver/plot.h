@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plot.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for plot.h.
+// Description: Subsystem implementation and interface guidance for plot.h.
 // ============================================================================
 
 #ifndef PLOT_H

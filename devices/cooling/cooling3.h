@@ -1,7 +1,7 @@
 // ============================================================================
 // File: cooling3.h
 // Subsystem: eLynxSDR cooling
-// Description: Header definitions and interface declarations for cooling3.h.
+// Description: Subsystem implementation and interface guidance for cooling3.h.
 // ============================================================================
 
 #ifndef COOLING3_H

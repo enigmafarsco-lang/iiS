@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tuner.h
 // Subsystem: eLynxSDR tuner
-// Description: Header definitions and interface declarations for tuner.h.
+// Description: Subsystem implementation and interface guidance for tuner.h.
 // ============================================================================
 
 #ifndef TUNER_H

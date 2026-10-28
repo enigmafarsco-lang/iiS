@@ -1,10 +1,10 @@
 // ============================================================================
 // File: plotfunction.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for plotfunction.h.
+// Description: Subsystem implementation and interface guidance for plotfunction.h.
 // ============================================================================
 
-﻿#ifndef PLOTFUNCTION_H
+#ifndef PLOTFUNCTION_H
 #define PLOTFUNCTION_H
 
 #include <QObject>

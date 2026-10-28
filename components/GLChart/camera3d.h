@@ -1,7 +1,7 @@
 // ============================================================================
 // File: camera3d.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for camera3d.h.
+// Description: Subsystem implementation and interface guidance for camera3d.h.
 // ============================================================================
 
 #ifndef CAMERA3D_H

@@ -70,7 +70,7 @@ QString stripCountPrefix(const QString &identifier)
 
 } // namespace
 
-// Constructor: Initializes DrfmRegisterIO subsystem components, state, and UI bindings.
+// Constructor: Initializes DrfmRegisterIO subsystem components, default parameters, and state.
 DrfmRegisterIO::DrfmRegisterIO()
     : m_ledDev(nullptr)
     , m_legacyDev(nullptr)

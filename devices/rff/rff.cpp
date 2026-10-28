@@ -21,7 +21,7 @@ RFF::RFF(QWidget *parent) :
     ui->groupBox->setVisible(false);
 }
 
-// Destructor: Releases RFF allocated resources, buffers, and timers.
+// Destructor: Cleans up RFF allocated resources, timers, and buffers.
 RFF::~RFF()
 {
     delete ui;

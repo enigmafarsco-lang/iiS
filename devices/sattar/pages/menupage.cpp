@@ -186,7 +186,7 @@ void MenuPage::close()
     std::cout<<" this works" << std::endl;
 }
 
-// Destructor: Releases MenuPage allocated resources, buffers, and timers.
+// Destructor: Cleans up MenuPage allocated resources, timers, and buffers.
 MenuPage::~MenuPage()
 {
     delete ui;

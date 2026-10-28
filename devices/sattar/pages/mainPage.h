@@ -1,7 +1,7 @@
 // ============================================================================
 // File: mainPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for mainPage.h.
+// Description: Subsystem implementation and interface guidance for mainPage.h.
 // ============================================================================
 
 #ifndef MAINPAGE_H

@@ -7,6 +7,7 @@
 #include "solid.h"
 #include "ui_solid.h"
 
+// Constructor: Initializes Solid subsystem components, default parameters, and state.
 Solid::Solid(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Solid)
@@ -31,7 +32,7 @@ Solid::Solid(QWidget *parent) :
     connect(&blinkingTimer, &QTimer::timeout, this, &Solid::timeout);
 }
 
-// Destructor: Releases Solid allocated resources, buffers, and timers.
+// Destructor: Cleans up Solid allocated resources, timers, and buffers.
 Solid::~Solid()
 {
     delete movie;
@@ -66,7 +67,7 @@ void Solid::joshanStatusDataSlot()
 
 
 
-// Reads, parses, and processes incoming receive command from other object slot data.
+// Reads, parses, and decodes incoming receive command from other object slot data.
 void Solid::receiveCommandFromOtherObjectSlot(QString response)
 {
     QStringList frame;

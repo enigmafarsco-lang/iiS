@@ -1,7 +1,7 @@
 // ============================================================================
 // File: spurepage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for spurepage.h.
+// Description: Subsystem implementation and interface guidance for spurepage.h.
 // ============================================================================
 
 #ifndef SPUREPAGE_H

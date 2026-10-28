@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datafiles.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for datafiles.h.
+// Description: Subsystem implementation and interface guidance for datafiles.h.
 // ============================================================================
 
 #ifndef DATAFILES_H

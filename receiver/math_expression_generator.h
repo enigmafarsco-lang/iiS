@@ -1,7 +1,7 @@
 // ============================================================================
 // File: math_expression_generator.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for math_expression_generator.h.
+// Description: Subsystem implementation and interface guidance for math_expression_generator.h.
 // ============================================================================
 
 #ifndef MATH_EXPRESSION_GENERATOR_H

@@ -85,7 +85,7 @@ struct loops_parse_params {
     bool unclosed_loops;
 };
 
-// Constructor: Initializes libini2 subsystem components, state, and UI bindings.
+// Constructor: Initializes libini2 subsystem components, default parameters, and state.
 libini2::libini2()
 {
 
@@ -453,7 +453,7 @@ bool libini2::attr_in_whitelist(const char *attr, const char *dev_name, size_t d
     return false;
 }
 
-// Reads, parses, and processes incoming read_from_ini data.
+// Reads, parses, and decodes incoming read_from_ini data.
 ssize_t libini2::read_from_ini(load_store_params *params, const char *dev_name, size_t name_len, const char *attr, void *buf, size_t len)
 {
     bool found = false;

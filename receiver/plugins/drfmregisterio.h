@@ -1,7 +1,7 @@
 // ============================================================================
 // File: drfmregisterio.h
 // Subsystem: eLynxSDR plugins
-// Description: Header definitions and interface declarations for drfmregisterio.h.
+// Description: Subsystem implementation and interface guidance for drfmregisterio.h.
 // ============================================================================
 
 #ifndef DRFMREGISTERIO_H

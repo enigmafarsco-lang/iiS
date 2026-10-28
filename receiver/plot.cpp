@@ -650,7 +650,7 @@ void Plot::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 
 
 
-// Destructor: Releases Plot allocated resources, buffers, and timers.
+// Destructor: Cleans up Plot allocated resources, timers, and buffers.
 Plot::~Plot()
 {
     delete ui;

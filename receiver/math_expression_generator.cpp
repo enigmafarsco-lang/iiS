@@ -197,7 +197,7 @@ int shared_object_compile(char *base_filename)
 }
 
 
-// Constructor: Initializes math_expression_generator subsystem components, state, and UI bindings.
+// Constructor: Initializes math_expression_generator subsystem components, default parameters, and state.
 math_expression_generator::math_expression_generator()
 {
 }

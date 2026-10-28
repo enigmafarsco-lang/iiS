@@ -1,7 +1,7 @@
 // ============================================================================
 // File: ad9371_adv.h
 // Subsystem: eLynxSDR plugins
-// Description: Header definitions and interface declarations for ad9371_adv.h.
+// Description: Subsystem implementation and interface guidance for ad9371_adv.h.
 // ============================================================================
 
 #ifndef AD9371_ADV_H

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: solid.h
 // Subsystem: eLynxSDR solid
-// Description: Header definitions and interface declarations for solid.h.
+// Description: Subsystem implementation and interface guidance for solid.h.
 // ============================================================================
 
 #ifndef SOLID_H

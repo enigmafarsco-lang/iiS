@@ -11,7 +11,7 @@
 #include <QFont>
 #include "constants/project_constans.h"
 
-// Constructor: Initializes BPanGauge subsystem components, state, and UI bindings.
+// Constructor: Initializes BPanGauge subsystem components, default parameters, and state.
 BPanGauge::BPanGauge(QWidget *parent)
     : QWidget(parent)
 {

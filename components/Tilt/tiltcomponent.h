@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tiltcomponent.h
 // Subsystem: eLynxSDR Tilt
-// Description: Header definitions and interface declarations for tiltcomponent.h.
+// Description: Subsystem implementation and interface guidance for tiltcomponent.h.
 // ============================================================================
 
 #ifndef TILTCOMPONENT_H

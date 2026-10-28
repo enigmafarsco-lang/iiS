@@ -1,7 +1,7 @@
 // ============================================================================
 // File: parameters.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for parameters.h.
+// Description: Subsystem implementation and interface guidance for parameters.h.
 // ============================================================================
 
 #ifndef PARAMETERS_H

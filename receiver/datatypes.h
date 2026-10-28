@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datatypes.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for datatypes.h.
+// Description: Subsystem implementation and interface guidance for datatypes.h.
 // ============================================================================
 
 #ifndef DATATYPES_H

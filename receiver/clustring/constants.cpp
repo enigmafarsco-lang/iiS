@@ -125,7 +125,7 @@
 
 #pragma endregion}
 
-// Constructor: Initializes Constants subsystem components, state, and UI bindings.
+// Constructor: Initializes Constants subsystem components, default parameters, and state.
 Constants::Constants()
 {
 

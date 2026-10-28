@@ -364,6 +364,7 @@ static gboolean plugin_detached;
         "debug.ad9371-phy.adi,vswr-tx2-vswr-switch-delay_us",
         };
 
+// Constructor: Initializes ad9371_adv subsystem components, default parameters, and state.
 ad9371_adv::ad9371_adv(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ad9371_adv)
@@ -373,7 +374,7 @@ ad9371_adv::ad9371_adv(QWidget *parent) :
     ui->mainTabContainer->setTabPosition(QTabWidget::West);
 }
 
-// Destructor: Releases ad9371_adv allocated resources, buffers, and timers.
+// Destructor: Cleans up ad9371_adv allocated resources, timers, and buffers.
 ad9371_adv::~ad9371_adv()
 {
     delete ui;

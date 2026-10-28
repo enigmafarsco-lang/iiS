@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tiltgauge.h
 // Subsystem: eLynxSDR Tilt
-// Description: Header definitions and interface declarations for tiltgauge.h.
+// Description: Subsystem implementation and interface guidance for tiltgauge.h.
 // ============================================================================
 
 #ifndef TILTGAUGE_H

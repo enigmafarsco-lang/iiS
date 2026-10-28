@@ -1,7 +1,7 @@
 // ============================================================================
 // File: transform3d.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for transform3d.h.
+// Description: Subsystem implementation and interface guidance for transform3d.h.
 // ============================================================================
 
 #ifndef TRANSFORM3D_H

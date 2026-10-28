@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pangauge.h
 // Subsystem: eLynxSDR Pan
-// Description: Header definitions and interface declarations for pangauge.h.
+// Description: Subsystem implementation and interface guidance for pangauge.h.
 // ============================================================================
 
 

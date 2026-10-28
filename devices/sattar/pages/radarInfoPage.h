@@ -1,7 +1,7 @@
 // ============================================================================
 // File: radarInfoPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for radarInfoPage.h.
+// Description: Subsystem implementation and interface guidance for radarInfoPage.h.
 // ============================================================================
 
 #ifndef RADARINFOPAGE_H

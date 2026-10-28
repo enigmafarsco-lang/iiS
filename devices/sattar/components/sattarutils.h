@@ -1,7 +1,7 @@
 // ============================================================================
 // File: sattarutils.h
 // Subsystem: eLynxSDR components
-// Description: Header definitions and interface declarations for sattarutils.h.
+// Description: Subsystem implementation and interface guidance for sattarutils.h.
 // ============================================================================
 
 #ifndef SATTARUTILS_H

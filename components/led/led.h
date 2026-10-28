@@ -1,3 +1,9 @@
+// ============================================================================
+// File: led.h
+// Subsystem: eLynxSDR led
+// Description: Subsystem implementation and interface guidance for led.h.
+// ============================================================================
+
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -26,7 +32,7 @@
 #include "widgetwithbackground.h"
 
    /**
-   * Klasa reprezentuj±ca diodê w dowolnym kolorze jako dwustabilny element wskazuj±cy 
+   * Klasa reprezentujca diod w dowolnym kolorze jako dwustabilny element wskazujcy 
    */
    class Led : public WidgetWithBackground
    {
@@ -40,7 +46,7 @@
      Led(QWidget *parent = 0);
      virtual ~Led() {};
      
-     /** Zdarzenie obs³uguj±ce malowanie kontrolki */ 
+     /** Zdarzenie obsugujce malowanie kontrolki */ 
      void paintEvent(QPaintEvent * event);
 	 void mousePressEvent(QMouseEvent *ev);
      bool isChecked () const ; 
@@ -59,12 +65,12 @@
 	 void clicked();
      protected:
      
-     /** Inicjuje uk³ad wspó³rzêdnych paintera */
+     /** Inicjuje ukad wsprzdnych paintera */
      void initCoordinateSystem(QPainter & painter);
      
      /**
-     * Maluje t³o kontrolki w tym przypadku pierwszy plan czyli odblask ¶wiat³a kontrolki
-     * @param painter Przestrzeñ kontrolki 
+     * Maluje to kontrolki w tym przypadku pierwszy plan czyli odblask wiata kontrolki
+     * @param painter Przestrze kontrolki 
      */
      void paintBackground(QPainter & painter);
     

@@ -6,7 +6,7 @@
 
 #include "tcpclient.h"
 #include <QDebug>
-// Constructor: Initializes TCPClient subsystem components, state, and UI bindings.
+// Constructor: Initializes TCPClient subsystem components, default parameters, and state.
 TCPClient::TCPClient(QObject *parent) : QObject(parent)
 {
 //    connect(&socket_tcp,&QTcpSocket::connected,this,&TCPClient::connected);

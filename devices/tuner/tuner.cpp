@@ -431,7 +431,7 @@ void Tuner::updateAutoSend()
 
 
 
-// Destructor: Releases Tuner allocated resources, buffers, and timers.
+// Destructor: Cleans up Tuner allocated resources, timers, and buffers.
 Tuner::~Tuner()
 {
     //    delete vBox1       ;

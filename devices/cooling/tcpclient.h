@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tcpclient.h
 // Subsystem: eLynxSDR cooling
-// Description: Header definitions and interface declarations for tcpclient.h.
+// Description: Subsystem implementation and interface guidance for tcpclient.h.
 // ============================================================================
 
 #ifndef TCPCLIENT_H

@@ -77,7 +77,7 @@ ModulationPage::ModulationPage(QWidget *parent,
 
 }
 
-// Destructor: Releases ModulationPage allocated resources, buffers, and timers.
+// Destructor: Cleans up ModulationPage allocated resources, timers, and buffers.
 ModulationPage::~ModulationPage()
 {
     delete ui;

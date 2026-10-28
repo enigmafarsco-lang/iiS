@@ -1,7 +1,7 @@
 // ============================================================================
 // File: ini.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for ini.h.
+// Description: Subsystem implementation and interface guidance for ini.h.
 // ============================================================================
 
 #ifndef __INI_H

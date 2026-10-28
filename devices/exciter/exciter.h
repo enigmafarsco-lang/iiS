@@ -1,7 +1,7 @@
 // ============================================================================
 // File: exciter.h
 // Subsystem: eLynxSDR exciter
-// Description: Header definitions and interface declarations for exciter.h.
+// Description: Subsystem implementation and interface guidance for exciter.h.
 // ============================================================================
 
 #ifndef EXCITER_H

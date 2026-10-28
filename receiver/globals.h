@@ -1,7 +1,7 @@
 // ============================================================================
 // File: globals.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for globals.h.
+// Description: Subsystem implementation and interface guidance for globals.h.
 // ============================================================================
 
 #ifndef GLOBALS_H

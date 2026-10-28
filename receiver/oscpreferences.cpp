@@ -7,7 +7,7 @@
 #include "oscpreferences.h"
 
 
-// Constructor: Initializes OscPreferences subsystem components, state, and UI bindings.
+// Constructor: Initializes OscPreferences subsystem components, default parameters, and state.
 OscPreferences::OscPreferences()
 {
 

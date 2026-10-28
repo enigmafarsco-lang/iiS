@@ -1,7 +1,7 @@
 // ============================================================================
 // File: soliddialog.h
 // Subsystem: eLynxSDR solid
-// Description: Header definitions and interface declarations for soliddialog.h.
+// Description: Subsystem implementation and interface guidance for soliddialog.h.
 // ============================================================================
 
 #ifndef SOLIDDIALOG_H

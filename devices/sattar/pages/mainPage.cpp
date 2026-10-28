@@ -135,7 +135,7 @@ void MainPage::menuGenerateSlot()
 }
 
 
-// Destructor: Releases MainPage allocated resources, buffers, and timers.
+// Destructor: Cleans up MainPage allocated resources, timers, and buffers.
 MainPage::~MainPage()
 {
 //        delete radarData;

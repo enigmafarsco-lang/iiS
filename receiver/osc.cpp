@@ -8,7 +8,7 @@
 #include <receiver/plot.h>
 #include <receiver/oscmain.h>
 
-// Constructor: Initializes osc subsystem components, state, and UI bindings.
+// Constructor: Initializes osc subsystem components, default parameters, and state.
 osc::osc()
 {
 }

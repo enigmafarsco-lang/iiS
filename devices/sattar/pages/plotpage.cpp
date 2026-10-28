@@ -15,7 +15,7 @@ PlotPage::PlotPage(QWidget *parent) :
     testPlot();
 }
 
-// Destructor: Releases PlotPage allocated resources, buffers, and timers.
+// Destructor: Cleans up PlotPage allocated resources, timers, and buffers.
 PlotPage::~PlotPage()
 {
     delete ui;

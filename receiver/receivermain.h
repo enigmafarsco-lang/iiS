@@ -1,7 +1,7 @@
 // ============================================================================
 // File: receivermain.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for receivermain.h.
+// Description: Subsystem implementation and interface guidance for receivermain.h.
 // ============================================================================
 
 #ifndef RECEIVERMAIN_H

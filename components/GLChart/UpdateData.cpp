@@ -6,7 +6,7 @@
 
 #include "UpdateData.h"
 
-// Constructor: Initializes UpdateData subsystem components, state, and UI bindings.
+// Constructor: Initializes UpdateData subsystem components, default parameters, and state.
 UpdateData::UpdateData(QGLchart *chart)
 {
     this->chart = chart;

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pwPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for pwPage.h.
+// Description: Subsystem implementation and interface guidance for pwPage.h.
 // ============================================================================
 
 #ifndef PWPAGE_H

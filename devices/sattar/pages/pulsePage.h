@@ -1,10 +1,10 @@
 // ============================================================================
 // File: pulsePage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for pulsePage.h.
+// Description: Subsystem implementation and interface guidance for pulsePage.h.
 // ============================================================================
 
-﻿#ifndef PULSEPAGE_H
+#ifndef PULSEPAGE_H
 #define PULSEPAGE_H
 
 #include "../components/sattarutils.h"

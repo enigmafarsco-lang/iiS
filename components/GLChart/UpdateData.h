@@ -1,7 +1,7 @@
 // ============================================================================
 // File: UpdateData.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for UpdateData.h.
+// Description: Subsystem implementation and interface guidance for UpdateData.h.
 // ============================================================================
 
 #ifndef UPDATEDATA_H

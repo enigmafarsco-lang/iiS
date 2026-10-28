@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plotpage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for plotpage.h.
+// Description: Subsystem implementation and interface guidance for plotpage.h.
 // ============================================================================
 
 #ifndef PLOTPAGE_H

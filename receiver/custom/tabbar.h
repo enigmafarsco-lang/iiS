@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tabbar.h
 // Subsystem: eLynxSDR custom
-// Description: Header definitions and interface declarations for tabbar.h.
+// Description: Subsystem implementation and interface guidance for tabbar.h.
 // ============================================================================
 
 #ifndef TABBAR_H

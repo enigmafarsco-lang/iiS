@@ -1,7 +1,7 @@
 // ============================================================================
 // File: modulationPage.h
 // Subsystem: eLynxSDR pages
-// Description: Header definitions and interface declarations for modulationPage.h.
+// Description: Subsystem implementation and interface guidance for modulationPage.h.
 // ============================================================================
 
 #ifndef MODULATIONPAGE_H

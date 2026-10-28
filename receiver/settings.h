@@ -1,7 +1,7 @@
 // ============================================================================
 // File: settings.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for settings.h.
+// Description: Subsystem implementation and interface guidance for settings.h.
 // ============================================================================
 
 #ifndef SETTINGS_H

@@ -4,7 +4,7 @@
 // Description: Subsystem implementation and interface guidance for priPage.cpp.
 // ============================================================================
 
-﻿#include "priPage.h"
+#include "priPage.h"
 #include "ui_priPage.h"
 
 #include <QPropertyAnimation>
@@ -347,7 +347,7 @@ bool PRIPage::priTableValue()
     return  res;
 }
 
-// Destructor: Releases PRIPage allocated resources, buffers, and timers.
+// Destructor: Cleans up PRIPage allocated resources, timers, and buffers.
 PRIPage::~PRIPage()
 {
     delete ui;

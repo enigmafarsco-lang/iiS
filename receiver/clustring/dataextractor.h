@@ -1,7 +1,7 @@
 // ============================================================================
 // File: dataextractor.h
 // Subsystem: eLynxSDR clustring
-// Description: Header definitions and interface declarations for dataextractor.h.
+// Description: Subsystem implementation and interface guidance for dataextractor.h.
 // ============================================================================
 
 #ifndef DATAEXTRACTOR_H

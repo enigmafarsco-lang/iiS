@@ -1,7 +1,7 @@
 // ============================================================================
 // File: osc_plugin.h
 // Subsystem: eLynxSDR receiver
-// Description: Header definitions and interface declarations for osc_plugin.h.
+// Description: Subsystem implementation and interface guidance for osc_plugin.h.
 // ============================================================================
 
 #ifndef OSC_PLUGIN

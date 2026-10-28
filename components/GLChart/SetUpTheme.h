@@ -1,7 +1,7 @@
 // ============================================================================
 // File: SetUpTheme.h
 // Subsystem: eLynxSDR GLChart
-// Description: Header definitions and interface declarations for SetUpTheme.h.
+// Description: Subsystem implementation and interface guidance for SetUpTheme.h.
 // ============================================================================
 
 #ifndef SETUPTHEME_H

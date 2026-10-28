@@ -11,7 +11,7 @@
 uint8_t packetManager::LT[50]={};
 packetManager::CoolingBoard_t packetManager::CoolingBoard={};
 
-// Constructor: Initializes packetManager subsystem components, state, and UI bindings.
+// Constructor: Initializes packetManager subsystem components, default parameters, and state.
 packetManager::packetManager()
 {
 
