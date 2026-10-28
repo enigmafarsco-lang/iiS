@@ -37,27 +37,21 @@
  */
 int main(int argc, char *argv[])
 {
-    // Initialize the Qt GUI Application runtime
     QApplication a(argc, argv);
     a.setApplicationName("eLynxSDR");
     a.setApplicationVersion("v0.0.2");
 
-    // Load and apply the application-wide dark QSS theme
     QFile file(":/resources/QSS-master/aref.qss");
     if (file.open(QFile::ReadOnly)) {
         QString styleSheet = QString::fromLatin1(file.readAll());
         a.setStyleSheet(styleSheet);
         file.close();
-    } else {
-        qWarning() << "[main] Warning: Unable to load UI stylesheet resource :/resources/QSS-master/aref.qss";
     }
 
-    // Instantiate and initialize the main application orchestrator.
-    // The Transmitter / Exciter controls are embedded directly into the ReceiverMain
-    // tabbed interface (see MainWindow::init -> receiverWindow->addExciterTab),
-    // ensuring a clean single-window user experience.
     MainWindow w;
+    // The Transmitter window is not shown: the exciter moved into the
+    // receiver form (see MainWindow::MainWindow -> addExciterTab) and
+    // the form is the only window of eLynxSDR now.
 
-    // Start Qt event processing loop
     return a.exec();
 }

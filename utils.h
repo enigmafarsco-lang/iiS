@@ -24,43 +24,20 @@
 class Utils : public QObject
 {
     Q_OBJECT
-
 public:
     explicit Utils(QObject *parent = nullptr);
 
-    /**
-     * @brief Converts a QByteArray into a bit-level QBitArray representation.
-     * @param bytes Input byte array.
-     * @return Resulting bit array.
-     */
-    static QBitArray convertQByteToQBit(const QByteArray &bytes);
+public:
+    static QBitArray convertQByteToQBit(const QByteArray&);
+    static QByteArray convertQBitToQBYte(const QBitArray&);
+    static char AND_TowBytes(const char &b1,const char &b2);
+//    static int AND_TowBytes_int(const int &b1,const int &b2);
+    static char OR_TowBytes(const char &b1,const char &b2);
+    static char XOR_TowBytes(const char &b1,const char &b2);
+    static bool compare_TowBytes(const char &b1,const char &b2);
 
-    /**
-     * @brief Converts a QBitArray back into a packed QByteArray.
-     * @param bits Input bit array.
-     * @return Resulting byte array.
-     */
-    static QByteArray convertQBitToQBYte(const QBitArray &bits);
+signals:
 
-    /**
-     * @brief Performs bitwise AND operation on two 8-bit bytes.
-     */
-    static char AND_TowBytes(const char &b1, const char &b2);
-
-    /**
-     * @brief Performs bitwise OR operation on two 8-bit bytes.
-     */
-    static char OR_TowBytes(const char &b1, const char &b2);
-
-    /**
-     * @brief Performs bitwise XOR operation on two 8-bit bytes.
-     */
-    static char XOR_TowBytes(const char &b1, const char &b2);
-
-    /**
-     * @brief Compares two bytes for equality.
-     */
-    static bool compare_TowBytes(const char &b1, const char &b2);
 };
 
 #endif // UTILS_H

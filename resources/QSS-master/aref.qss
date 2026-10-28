@@ -159,14 +159,14 @@ QLabel {
 /* A QLabel is a QFrame ... */
 /* A QToolTip is a QLabel ... */
 QToolTip {
-    background:#000000;
+        background:#000000;
     border: 1px solid #0a0;
     padding: 5px;
     border-radius: 3px;
     opacity:210;
-    font-size:7pt;
-    font-weight:bold;
-    color:#FFFFFF;
+        font-size:7pt;
+        font-weight:bold;
+        color:#FFFFFF;
 }
 
 /* =============================================== */
@@ -717,5 +717,4 @@ QTabBar::tab:selected {
     color: #FFFFFF;
     font-weight: bold;
 }
-
 

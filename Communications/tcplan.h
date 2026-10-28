@@ -31,19 +31,18 @@
  */
 class BTcpLan : public QThread
 {
-    enum LoggingFormat { STRING, HEX };
+    enum LoggingFormat {STRING,HEX};
 
     Q_OBJECT
-
 public:
-    QMutex addNewReadDataMutex; ///< Protects raw inbound packet buffers during concurrent access.
+    QMutex  addNewReadDataMutex;
 
     /**
      * @brief Constructs a new BTcpLan worker instance.
      * @param cfg Pointer to global application network configuration.
      * @param _deviceName Target peripheral device identifier name.
      */
-    BTcpLan(AppConfiguration *cfg, QString _deviceName = "TEST");
+    BTcpLan( AppConfiguration *cfg, QString _deviceName = "TEST");
 
     /**
      * @brief Destructor terminating thread execution and cleaning up sockets.
@@ -83,81 +82,37 @@ public:
      * @brief Configures keepalive heartbeat checking interval.
      * @param value Watchdog interval in milliseconds (-1 to disable).
      */
-    void setTimerCheckingInterval(int value = 2000);
+    void setTimerCheckingInterval(int value=2000);
 
 signals:
-    /**
-     * @brief Emitted when a parsed JSON telemetry packet is received.
-     * @param packet JSON raw byte array.
-     */
-    void jsonPacket(QByteArray packet);
-
-    /**
-     * @brief Emitted when socket connection state transitions (connected/disconnected).
-     * @param isConnected True if socket is connected and authenticated.
-     */
-    void connectionStatusSignal(bool isConnected);
-
-    /**
-     * @brief Emitted when raw device response bytes arrive.
-     * @param response Raw byte array response from peripheral hardware.
-     */
-    void DeviceResponseSignal(QByteArray response);
-
-    /**
-     * @brief Emitted to request packet logging to disk.
-     * @param rawPacket Packet content bytes.
-     */
-    void savePacketToFileSignal(QByteArray rawPacket);
+    void jsonPacket(QByteArray);
+    void connectionStatusSignal(bool);
+//    void DeviceResponseSignal(QString);
+    void DeviceResponseSignal(QByteArray);
+    void savePacketToFileSignal(QByteArray);
 
 private slots:
-    /**
-     * @brief Handles successful TCP socket connection event.
-     */
     void newConnection();
-
-    /**
-     * @brief Attempts to connect to target device IP and Port.
-     */
     void openPort();
-
-    /**
-     * @brief Handles socket disconnection, triggers retry timer.
-     */
     void closePort();
-
-    /**
-     * @brief Ingests and processes incoming data from socket readyRead signal.
-     */
     void handelReadyread();
-
-    /**
-     * @brief Watchdog timer slot validating connection liveness.
-     */
     void checkingConnectionAlive();
 
 public slots:
-    /**
-     * @brief Enables or disables connection watchdog timer.
-     * @param enable True to enable, false to stop.
-     */
-    void on_startStopTimerCheckingInterval(bool enable);
+    void on_startStopTimerCheckingInterval(bool);
 
-    /**
-     * @brief Slot receiving commands to transmit to the peripheral device.
-     * @param cmd Byte array command payload.
-     */
-    void on_sendCommandToDeviceSlot(QByteArray cmd);
+public slots:
+    void on_sendCommandToDeviceSlot(QByteArray);
 
 private:
-    QTcpSocket       * m_tcpClient;               ///< Active TCP socket handle.
-    QTimer           * m_connectionTimer;         ///< Periodic connection retry timer.
-    AppConfiguration * m_config;                  ///< Network configuration settings.
-    QTimer           * m_checkingConnectionTimer; ///< Watchdog heartbeat timer.
-    QTime              m_lastReceivePacketTime;   ///< Timestamp of last received packet.
-    int                m_TimeCheckingInterval;    ///< Watchdog timeout threshold in ms.
-    QString            m_deviceName;              ///< Target device identifier name.
-    LoggingFormat      m_loggingFormat;           ///< Packet logging format (STRING or HEX).
+    QTcpSocket *m_tcpClient;
+    QTimer *m_connectionTimer;
+    AppConfiguration *m_config;
+    QTimer *m_checkingConnectionTimer;
+    QTime m_lastReceivePacketTime;
+    int m_TimeCheckingInterval;
+    QString m_deviceName;
+    LoggingFormat m_loggingFormat;
 };
 
 #endif // TCPLAN_H

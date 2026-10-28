@@ -1,9 +1,5 @@
-/**
- * @file ADRV.cpp
- * @brief Implementation of High-Level Transceiver Abstraction Helper.
- */
-
 #include "ADRV.h"
+#include <QtConcurrent>
 
 #pragma region Constructor {
 
@@ -12,6 +8,7 @@
  */
 adrv::adrv()
 {
+
 }
 
 #pragma endregion }
@@ -32,8 +29,9 @@ bool adrv::connect(QString ip)
     return ctx != nullptr;
 }
 
-bool adrv::SetFrequency(double freq)
-{
+
+bool adrv::SetFrequency(double freq){
+
     struct iio_device *dev;
     struct iio_channel *ch1;
     const char *freq_name;
@@ -47,9 +45,9 @@ bool adrv::SetFrequency(double freq)
     else
         freq_name = "RX_LO_frequency";
 
-    freq *= mhz_scale;
+    freq*=mhz_scale;
 
-    iio_channel_attr_write_longlong(ch1, freq_name, (long long) freq);
+    iio_channel_attr_write_longlong(ch1,freq_name, (long long) freq);
 
     return true;
 }
@@ -67,27 +65,31 @@ bool adrv::SetFrequencyHopping(double start, double stop, double step)
     dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
     ch1 = iio_device_find_channel(dev, "altvoltage0", true);
 
-    future = QtConcurrent::run([=] {
-        double next = start;
+    future=QtConcurrent::run([=]{
 
-        while (hopping) {
-            iio_channel_attr_write_bool(ch1, "frequency_hopping_mode_enable", true);
+        double next=start;
 
-            for (int i = 0; i < 2; i++) {
-                iio_channel_attr_write_longlong(ch1, "frequency_hopping_mode", next * mhz_scale);
+        while(hopping){
+
+            iio_channel_attr_write_bool(ch1,"frequency_hopping_mode_enable",true);
+
+            for(int i=0;i<2;i++)
+            {
+                iio_channel_attr_write_longlong(ch1,"frequency_hopping_mode", next*mhz_scale);
             }
 
             emit frequencyChanged();
 
-            if (next <= stop)
-                next += step;
+            if(next<=stop)
+                next+=step;
             else
-                next = start;
+                next=start;
 
             QThread::msleep(1);
 
 //            qInfo()<<GetFrequency()<<" -> "<<next;
         }
+
     });
 
     return true;
@@ -100,7 +102,7 @@ bool adrv::SetFrequencyHopping(double start, double stop, double step)
 double adrv::GetFrequency()
 {
     struct iio_device *dev;
-    struct iio_channel *ch1;
+    struct iio_channel *ch1,*ch2;
     const char *freq_name;
 
     dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
@@ -116,15 +118,16 @@ double adrv::GetFrequency()
     ssize_t ret;
     char buf[0x100];
 
-    if (ch1) ret = iio_channel_attr_read(ch1, freq_name, buf, sizeof(buf));
+    if (ch1) ret = iio_channel_attr_read(ch1,freq_name, buf, sizeof(buf));
 
     char *end;
 
     baseFreq = g_ascii_strtod(buf, &end);
-    baseFreq /= 1000000.0;
+    baseFreq/=1000000.0;
 
     return baseFreq;
 }
+
 
 double adrv::GetPower()
 {
@@ -136,18 +139,18 @@ double adrv::GetPower()
 
     ch1 = iio_device_find_channel(dev, "voltage0", true);
 
-    attr_name = "hardwaregain";
+    attr_name="hardwaregain";
 
     char buf[0x100];
 
     if (ch1)
-        iio_channel_attr_read(ch1, attr_name, buf, sizeof(buf));
+        iio_channel_attr_read(ch1,attr_name, buf, sizeof(buf));
 
     char *end;
 
     power = g_ascii_strtod(buf, &end);
 
-    power *= inv_scale;
+    power*=inv_scale;
 
     return power;
 }
@@ -156,15 +159,15 @@ bool adrv::SetPower(double power)
 {
     struct iio_device *dev;
     struct iio_channel *ch1;
-    const char *attr_name = "hardwaregain";
+    const char *attr_name="hardwaregain";
 
     dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
 
     ch1 = iio_device_find_channel(dev, "voltage0", true);
 
-    power *= inv_scale;
+    power*=inv_scale;
 
-    iio_channel_attr_write_double(ch1, attr_name, power);
+    iio_channel_attr_write_double(ch1,attr_name, power);
 
     return true;
 }
@@ -172,7 +175,7 @@ bool adrv::SetPower(double power)
 QHBoxLayout *adrv::InitializeDacBuffer()
 {
     dds = iio_context_find_device(globals::ctx, DDS_DEVICE);
-    dac_data_manager = new dacDataManager();
+    dac_data_manager=new dacDataManager();
 
     if (dds)
     {
@@ -183,10 +186,12 @@ QHBoxLayout *adrv::InitializeDacBuffer()
     return dac_data_manager->dac_data_manager_get_gui_container(dac_tx_manager);
 }
 
+
 QString adrv::SetFile(QString fileName, double scale)
 {
-    return dac_data_manager->setFile(fileName, scale);
+    return dac_data_manager->setFile(fileName,scale);
 }
+
 
 void adrv::DisableDac()
 {
@@ -196,6 +201,7 @@ void adrv::DisableDac()
 #pragma endregion }
 
 #pragma region Private Functions {
+
 
 iio_context *adrv::GetContext(QString ip)
 {

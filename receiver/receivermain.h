@@ -1,28 +1,23 @@
-/**
- * @file receivermain.h
- * @brief Master Receiver Window, Real-Time Plotting, and DRFM Controller for eLynxSDR.
- */
-
 #ifndef RECEIVERMAIN_H
 #define RECEIVERMAIN_H
-
 #include <QWidget>
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QLabel>
+#include <receiver/oscmain.h>
+#include <receiver/datafiles.h>
+#include <unordered_map>
+#include "components/GLChart/QGLchart.h"
 #include <QSystemTrayIcon>
+#include "plotfunction.h"
+#include <QRandomGenerator>
+#include <QComboBox>
+#include "calculateplotdata.h"
 #include <QProcess>
 #include <QTextStream>
-#include <QTimer>
-#include <unordered_map>
-
-#include "receiver/oscmain.h"
-#include "receiver/datafiles.h"
-#include "components/GLChart/QGLchart.h"
-#include "plotfunction.h"
-#include "calculateplotdata.h"
+//#include <QSs
 
 namespace Ui {
 class ReceiverMain;
@@ -63,6 +58,7 @@ class ReceiverMain : public QWidget
     bool frqChanged{false};
     double frqHold{};
 
+
     void smartTimeDomainNoise();
     void setAutoAmpValue(double ampVal);
     void smartTableNoise();
@@ -87,6 +83,7 @@ class ReceiverMain : public QWidget
     QTimer * cwTableTimer;
     int cntVecCalib{};
 
+
     void hiddenUiElements(bool);
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
@@ -97,7 +94,6 @@ class ReceiverMain : public QWidget
     void setupBitControlTab();
     QString ensureZeroDacBufferFile();
     void ensureDrfmDacBufferRunning();
-
 public:
     explicit ReceiverMain(QWidget *parent = nullptr);
     void init();
@@ -116,8 +112,11 @@ signals:
     void isConnectSignal(bool);
     void inChannelSignal(double);
 
+
+
 private slots:
     void on_btnSet_clicked();
+
     void on_btnSetBandSelect_clicked();
     void realtimeDataSlot();
 
@@ -132,11 +131,23 @@ private slots:
     void on_btnDefaultIioOsc_clicked();
     QString settingsIniPath(const QString &fileName);
 
+    //    QTimer * frqTimer;
+
 public:
     Ui::ReceiverMain *ui;
 
-    QTimer mTimer;
+    //for test
 
+
+    QTimer mTimer;
+    /////////////////////////////////////////
+
+
+
+
+
+
+    // saeid raziani ==> here we define some ui pointer in order to using and showing them in receiver main.
     //--- Global --------------------------------------------------------
     QComboBox* ensmCmb;
     QDoubleSpinBox * frqSpn{};
@@ -205,9 +216,21 @@ public:
     void defaultParameters();
     void updateSerialNumber();
     QString boardSerialNumber();
+    // Apply a Talise profile to the board (the Profile tab Set button and
+    // the startup assertion from the first-start IP form both use this).
+    // Returns false when nothing was written (serial rule / missing file).
     bool applyProfileBw(int bw);
+    // Compose the Talise profile from the section files
+    // (files/filters/adrv9009/sections/general_<TX>.txt + orx_<ORx>.txt +
+    // tx_<TX>.txt + "</profile>") and write it to the board.  The first-start
+    // IP form provides both the TX and the ORx choice; the Profile tab Set
+    // button uses the diagonal (ORx == TX).
     bool applyComposedProfile(int txBw, int orxBw);
+    // Sync the software UI (Profile tab TX/ORx radios, exciter profile,
+    // spectrum window) to the given profile without writing to the board.
     void syncProfileUi(int txBw, int orxBw);
+    // Keep the Profile tab ORx choices consistent with the TX choice:
+    // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
     void syncProfileOrxChoices();
     void changingPlotMode(int);
     QTimer dataTimer;
@@ -216,32 +239,44 @@ public:
     bool isSending{};
     bool isSettingShow{};
 
-    QDoubleSpinBox * spnCWFrq;
-    QDoubleSpinBox * spnCWPower;
-    QDoubleSpinBox * spnSpotFrq;
-    QDoubleSpinBox * spnSpotPower;
-    QDoubleSpinBox * spnSweepStartFrq;
-    QDoubleSpinBox * spnSweepStopFrq;
-    QDoubleSpinBox * spnSweepStep;
-    QDoubleSpinBox * spnSweepPower;
-    QDoubleSpinBox * spnDelay;
-    QDoubleSpinBox * spnImpulseFrq;
-    QDoubleSpinBox * spnImpulsePower;
-    QDoubleSpinBox * spnWBPower;
+
+    //----------
+    QDoubleSpinBox * spnCWFrq;           ;
+    QDoubleSpinBox * spnCWPower;         ;
+    QDoubleSpinBox * spnSpotFrq          ;
+    QDoubleSpinBox * spnSpotPower        ;
+    QDoubleSpinBox * spnSweepStartFrq    ;
+    QDoubleSpinBox * spnSweepStopFrq     ;
+    QDoubleSpinBox * spnSweepStep        ;
+    QDoubleSpinBox * spnSweepPower       ;
+    QDoubleSpinBox * spnDelay            ;
+    QDoubleSpinBox * spnImpulseFrq       ;
+    QDoubleSpinBox * spnImpulsePower     ;
+    QDoubleSpinBox * spnWBPower          ;
+    //---------
+
 
     bool state{false};
     bool pwIsOn{};
 
     const QString fileAddress{resourceFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
+    // TX and ORx bandwidths the user chose in the first-start IP form;
+    // asserted on the board once at first startup (the board itself boots
+    // at profile 100 = TX100 + ORx100).
     int startupTxBw{200};
     int startupOrxBw{100};
 
+    // Board serial number cache (SN001 gates the ORx 400 option in the
+    // Profile tab); filled once the IIO context is up.
     QString boardSerialCache;
 
+    //    QMap
     std::unordered_map<double, double> frqMap;
     std::unordered_map<double, double> pwMap;
     std::unordered_map<double, double> priMap;
     std::unordered_map<double, double> piSumMap;
+
+    //=====================================================================
 
     void settingMinMaxBand();
     void frqAndSeekStopCapturing(bool);
@@ -253,6 +288,8 @@ public:
     void plotHistogram(QCustomPlot *,std::unordered_map<double, double > *);
     void plotInit();
     void defaultSettings();
+    // Phase 6: one-shot ADRV9009 calibration after software start (all
+    // calibration items except lol-ext and fhm), then never again.
     void smartNoise();
 
     double centerFrq{};
@@ -291,6 +328,7 @@ public:
     int arrayCount{};
     bool isExciterOn{false};
     bool receiverIsConnected{false};
+    //    int frqVal{};
 
     int currentTabState;
     QTimer* timer;
@@ -325,8 +363,12 @@ public:
     int holdIndexFrqCalib{};
     int holdIndexTblUser{-10};
     QString userNameInFile{};
+//    int cntFrqCalib{};
+//    int cntPowerCalib{};
     double frqCalibHold{};
 
+
+    //calibration
     void startCalibSending();
     bool isCalibAllowed {false};
 
@@ -339,6 +381,7 @@ public:
     QVector<double> cardPowerInCalibFile;
     double minFrqVal{50000};
 
+
 private slots:
     void on_btnSetTH_clicked();
     void on_btnSetTHCW_clicked();
@@ -346,23 +389,48 @@ private slots:
     void on_btnFrqSeek_clicked();
     void on_label_43_linkActivated(const QString &link);
     void on_cmbTransmit_activated(int index);
+
     void on_chbEn_PATTERN_clicked(bool checked);
+
+    //    void on_tabWidgetSetting_tabBarClicked(int index);
+
     void on_btnReboot_clicked(bool checked);
+
     void on_tableWidget_2_cellClicked(int row, int column);
+
+
     void on_pushButton_clicked();
+
     void on_tblCW_cellClicked(int row, int column);
+
+
     void on_btnNewUser_clicked();
+
     void on_tabWidget_tabBarClicked(int index);
+
     void on_btnLogin_clicked();
+
     void on_btnLogout_clicked(bool checked);
+
     void on_btnRecovery_clicked(bool checked);
+
     void on_btnNewAdmin_clicked(bool checked);
+
     void on_btnSaveLimit_clicked(bool checked);
+
     void on_btnShowUser_clicked(bool checked);
+
     void on_btnCalib_clicked(bool checked);
+
     void on_btnCalibRff_clicked(bool checked);
+
+//    void on_btnLimitation_clicked();
     void checkingCalibResponseInSpectromSlot(double, double);
+
+
     void on_btnStopCalib_clicked();
+
+//    void on_chbCalib_stateChanged(int arg1);
 
 public slots:
     void connection();
@@ -376,6 +444,12 @@ public slots:
     void calculatingCwTableSlot(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
     void on_DeviceResponseSlot(QByteArray);
 
+
+    //    void sendLimitFrqSlot();
+    //    void histoBarPlotSlot (double, double);
+    //    void test(modesConst );
+
+
 signals:
     void createPlotSignal1(QCustomSeries);
     void seekingStatusSignal(QString);
@@ -383,8 +457,14 @@ signals:
     void startExciterSignal();
     void frqPltSignal();
 
+    // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
+    // Routed to the exciter so spot noise files match the active profile.
     void profileBandwidthChanged(int bwMHz);
+
+    // Phase 6: TX calibration (Calibrated mismatch power, dB) of the
+    // Calibration tab changed - refresh every calibrated TX power display.
     void txCalibChangedSignal(double);
+
 
     void frqValues      (QCustomSeries a);
     void frqValueSignal      (double,double);
@@ -396,6 +476,8 @@ signals:
     void toaValueSignal      (double,double);
     void ChannelValueSignal  (double,double);
     void smartNoiseIsActiveSignal  ();
+
+
 
     void hi();
     void cwFrqSignal        (double);
@@ -413,6 +495,7 @@ signals:
     void impPriSignal       (double);
     void wbPowerSignal      (double);
 
+
     void cwOnBtnSignal     ();
     void cwOffBtnSignal    ();
     void spotOnBtnSignal   ();
@@ -426,6 +509,8 @@ signals:
 
     void userLoggedInSignal(double);
     void sendCommandToDeviceSignal(QByteArray);
+    //    void cwTabletoPlotSignal(qvdouble,double,QString);
+
 };
 
 #endif // RECEIVERMAIN_H

@@ -1,23 +1,22 @@
 /**
  * @file udplan.cpp
- * @brief Implementation of the Fast Threaded UDP Communication Worker.
+ * @brief Implementation of the Multi-threaded UDP Datagram Communication Worker.
  */
 
 #include "udplan.h"
 
 /**
- * @brief Constructs a new UdpLan instance, initializes sockets and watchdog timer.
- * @param cfg Pointer to application configuration.
- * @param _deviceName Target hardware device identifier string.
+ * @brief Constructs a new UdpLan worker instance and initializes socket and timer.
+ * @param cfg Pointer to application configuration repository.
+ * @param _deviceName Target hardware device name.
  */
-UdpLan::UdpLan(AppConfiguration *cfg, QString _deviceName)
-    : m_config(cfg)
+UdpLan::UdpLan( AppConfiguration *cfg, QString _deviceName):m_config(cfg)
 {
-    m_udpClient = nullptr;
-    m_checkingConnectionTimer = nullptr;
+    m_udpClient= nullptr;
+    m_checkingConnectionTimer= nullptr;
     m_lastReceivePacketTime = QTime::currentTime();
     m_TimeCheckingInterval = 5000;
-    m_loggingFormat = LoggingFormat::STRING; // default logging Format
+    m_loggingFormat = LoggingFormat::STRING;//default logging Format;
 
     m_deviceName = _deviceName;
     m_udpClient = new QUdpSocket(0);
@@ -34,18 +33,19 @@ UdpLan::UdpLan(AppConfiguration *cfg, QString _deviceName)
 }
 
 /**
- * @brief Destructor terminating thread execution and releasing UDP sockets.
+ * @brief Destructor terminating worker thread execution and cleaning up sockets.
  */
 UdpLan::~UdpLan()
 {
-    if (isRunning()) {
+    if(isRunning())
+    {
         QThread::quit();
         QThread::wait();
     }
 }
 
 /**
- * @brief Worker thread entry point executing the Qt event loop.
+ * @brief Thread execution entry point.
  */
 void UdpLan::run()
 {
@@ -54,19 +54,23 @@ void UdpLan::run()
 }
 
 /**
- * @brief Sends binary datagram payload to target device host and port.
+ * @brief Sends binary datagram to target device.
  * @param data Binary payload byte array.
- * @param loggingFlag Whether to log transmission to file/console.
+ * @param loggingFlag Enable/disable logging to console.
  */
 void UdpLan::sendDataToDevice(QByteArray data, bool loggingFlag)
-{
-    if (m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive) == 0) {
+{    
+    if(m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive)==0)
+    {
         m_hostIp = QHostAddress(m_config->m_setting->solidIpAddress);
         m_hostPort = m_config->m_setting->solidPort;
 
-        if (m_config->m_setting->solidLoggingFormat.compare("string", Qt::CaseInsensitive) == 0) {
+        if(m_config->m_setting->solidLoggingFormat.compare("string",Qt::CaseInsensitive) ==0)
+        {
             m_loggingFormat = LoggingFormat::STRING;
-        } else if (m_config->m_setting->solidLoggingFormat.compare("hex", Qt::CaseInsensitive) == 0) {
+        }
+        else if(m_config->m_setting->solidLoggingFormat.compare("hex",Qt::CaseInsensitive) ==0)
+        {
             m_loggingFormat = LoggingFormat::HEX;
         }
     }
@@ -74,12 +78,16 @@ void UdpLan::sendDataToDevice(QByteArray data, bool loggingFlag)
     qint64 bytesWritten = m_udpClient->writeDatagram(data, m_hostIp, m_hostPort);
     Q_UNUSED(bytesWritten);
 
-    if (loggingFlag) {
+    if(loggingFlag)
+    {
         QString cmd = "";
-        if (m_loggingFormat == LoggingFormat::STRING) {
-            cmd = "Send To " + m_deviceName + ":\t" + QString(data).simplified();
-        } else if (m_loggingFormat == LoggingFormat::HEX) {
-            cmd = "Send To " + m_deviceName + ":\t" + data.toHex(',').simplified();
+        if(m_loggingFormat == LoggingFormat::STRING)
+        {
+            cmd = "Send To " + m_deviceName +":\t" + QString(data).simplified();
+        }
+        else if(m_loggingFormat == LoggingFormat::HEX)
+        {
+            cmd = "Send To " + m_deviceName +":\t" + data.toHex(',').simplified();
         }
 
         QByteArray buffer = cmd.toLatin1();
@@ -101,18 +109,21 @@ void UdpLan::sendDataToDevice(QString data)
  */
 void UdpLan::openPort()
 {
-    if (m_udpClient == nullptr) {
+    if(m_udpClient==nullptr)
+    {
         return;
     }
 
-    quint16 port = 0;
+    quint16 port=0;
     bool connected = false;
-    if (m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive) == 0) {
+    if(m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive)==0)
+    {
         port = m_config->m_setting->solidPort;
     }
 
     connected = m_udpClient->bind(port);
-    if (connected) {
+    if(connected)
+    {
         this->newConnection();
     }
 }
@@ -124,7 +135,8 @@ void UdpLan::newConnection()
 {
     connect(m_udpClient, &QUdpSocket::readyRead, this, &UdpLan::readDatagram);
 
-    if (m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive) == 0) {
+    if(m_deviceName.compare(SOLID_DEVICE_NAME, Qt::CaseInsensitive)==0)
+    {
         sendDataToDevice(QString("@JamSolidStart$").toLatin1(), false);
     }
 }
@@ -151,20 +163,24 @@ void UdpLan::readDatagram()
     m_lastReceivePacketTime = QTime::currentTime();
 
     QByteArray buffer;
-    while (m_udpClient->hasPendingDatagrams()) {
+    while(m_udpClient->hasPendingDatagrams())
+    {
         buffer.resize(m_udpClient->pendingDatagramSize());
         m_udpClient->readDatagram(buffer.data(), buffer.size());
     }
-    buffer.replace("\n", "");
-    buffer.replace("\r", "");
+    buffer.replace("\n","");
+    buffer.replace("\r","");
 
     emit(DeviceResponseSignal(buffer));
 
     QString response = "";
-    if (m_loggingFormat == LoggingFormat::STRING) {
-        response = "Recieve From " + m_deviceName + ":\t" + QString(buffer).simplified();
-    } else if (m_loggingFormat == LoggingFormat::HEX) {
-        response = "Recieve From " + m_deviceName + ":\t" + buffer.toHex(',').simplified();
+    if(m_loggingFormat == LoggingFormat::STRING)
+    {
+        response = "Recieve From " + m_deviceName +":\t" + QString(buffer).simplified();
+    }
+    else if(m_loggingFormat == LoggingFormat::HEX)
+    {
+        response = "Recieve From " + m_deviceName +":\t" + buffer.toHex(',').simplified();
     }
 
     QByteArray b = response.toLatin1();
@@ -177,7 +193,7 @@ void UdpLan::readDatagram()
  */
 void UdpLan::on_sendCommandToDeviceSlot(QByteArray data)
 {
-    this->sendDataToDevice(data, true);
+    this->sendDataToDevice(data,true);
 }
 
 /**
@@ -188,10 +204,13 @@ void UdpLan::checkingConnectionAlive()
     int diff_time = -1;
     diff_time = m_lastReceivePacketTime.msecsTo(QTime::currentTime());
 
-    if (qAbs(diff_time) > m_TimeCheckingInterval) {
+    if(qAbs(diff_time) > m_TimeCheckingInterval)
+    {
         closePort();
         openPort();
-    } else {
+    }
+    else
+    {
         emit(connectionStatusSignal(true));
     }
 }

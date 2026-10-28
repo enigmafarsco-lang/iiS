@@ -1,6 +1,16 @@
 /**
  * @file exciter.h
  * @brief Multi-Waveform Signal Generation & Exciter Engine for eLynxSDR.
+ *
+ * Exciter manages signal synthesis and hardware transmission for:
+ * - Single/Multi-tone Continuous Wave (CW) via direct DDS.
+ * - Spot Noise and WideBand Noise baseband generation.
+ * - Linear Frequency Modulation (LFM) and Non-Linear FM (NLFM) chirps.
+ * - Stepped-frequency sweeps and pulsed RF (PRI/PW).
+ * - Multi-Target radar target synthesis summing up to 5 simultaneous targets.
+ *
+ * @author eLynxSDR Development Team
+ * @version 0.0.2
  */
 
 #ifndef EXCITER_H
@@ -18,12 +28,13 @@
 
 #include "components/adrv/ADRV.h"
 #include <QMessageBox>
-#include <QJsonObject>
+#include "QJsonObject"
 #include <QTimer>
 #include <iostream>
 #include <fstream>
 #include "devices/joshan/datastruct.h"
 #include "constants/project_constans.h"
+
 
 namespace Ui {
 class exciter;
@@ -47,6 +58,8 @@ public:
     QLabel * statusMsg;
 
     QDoubleSpinBox * spnWBPower;
+    //    QDoubleSpinBox * spnCWPower;
+
 
     QDoubleSpinBox * spnCWFrq;
     QDoubleSpinBox * spnSweepStop;
@@ -71,6 +84,7 @@ public:
 
     double minFrqLimit{};
     double maxFrqLimit{};
+
 
 private:
     Ui::exciter *ui;
@@ -168,6 +182,8 @@ private:
     QTimer exciterConnection;
     bool isUserLoggedIn{};
 
+//    QPushButton * btnPtr ;
+
 private slots:
     void on_btnDisableSpot_clicked();
     void on_btnDisImpulse_clicked();
@@ -204,6 +220,8 @@ public slots:
     void smartNoiseIsActiveSlot();
     void isUserLoggedInSlot(double);
 
+
+
 signals:
     void connectionStatusSignal(bool);
     void sendFuncDataToJoshanSignal(QJsonObject);
@@ -222,5 +240,6 @@ signals:
     void modeActivitySignal(bool anyModeActive);
     void turnOffSmartNoiseSignal();
 };
+
 
 #endif // EXCITER_H

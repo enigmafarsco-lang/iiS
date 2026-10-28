@@ -20,13 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
     connections();
     this->setWindowTitle("eLynxSDR v0.0.2");
 
-    // Configure flexible window geometry for multi-monitor workstations
     this->setMinimumSize(1024, 700);
     this->resize(1270, 980);
 
     if(receiverIsConnected) emit exciterConnectionStatus(receiverWindow->isConnect);
+    //    isAdrvConnect = receiverWindow->isConnect;
 
-    // Apply styled borders to status group boxes
     ui->groupBox->setObjectName("1");
     ui->groupBox->setStyleSheet("QGroupBox#1 {border: 2px solid "+QString(GE)+"}");
 
@@ -41,21 +40,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->groupBox_5->setObjectName("5");
     ui->groupBox_5->setStyleSheet("QGroupBox#5 {border: 2px solid "+QString(GE)+"}");
+
+
 }
 
 
-
-/**
- * @class delay
- * @brief Utility class wrapping QThread::msleep for microsecond/millisecond UI delays.
- */
 class delay:public QThread
 {
 public:
-    /**
-     * @brief Pauses execution for a specified duration in milliseconds.
-     * @param msc Duration to sleep in milliseconds.
-     */
     static void msleep(unsigned long msc)
     {
         QThread::msleep(msc);
@@ -64,10 +56,6 @@ public:
 
 /**
  * @brief Initializes peripheral communications, embedded Exciter tab, and hardware clients.
- *
- * Instantiates the ReceiverMain window, moves the Exciter tab inside it to form a unified UI,
- * creates TCP/UDP client workers for peripheral modules (RFF, Calibration, Tuner, Servo,
- * Solid State Amplifier, Cooling, Joshan), and configures watchdog intervals.
  */
 void MainWindow::init()
 {
@@ -129,13 +117,6 @@ void MainWindow::init()
 
 /**
  * @brief Establishes all Signal/Slot connections between UI controls, hardware sockets, and subsystems.
- *
- * Configures:
- * 1. Communication telemetry between peripheral TCP/UDP clients and their UI panels.
- * 2. Cross-module status LED synchronization on the main status bar.
- * 3. Joshan electronic protection commands, functional reports, and status queries.
- * 4. Bi-directional synchronization between Receiver tabs and Exciter parameters (Power, Freq, BW).
- * 5. Waveform generation triggering and cyclic DAC DMA file playback.
  */
 void MainWindow::connections()
 {
