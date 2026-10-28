@@ -39,6 +39,12 @@
 #include <QScrollBar>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QProgressBar>
+#include <QFileDialog>
+#include <QTime>
+#include <QDateTime>
 
 #include <receiver/plugins/drfmregisterio.h>
 
@@ -1588,9 +1594,6 @@ void ReceiverMain::setupBitControlTab()
         case 2: {
             logMsg("BIT-TEST-2", "Executing Clock Distribution & MCS Synchronization Check...", "#388bfd");
             double sampleRateMsps = 122.88;
-            if (frqDomainPlot && frqDomainPlot->profileBw > 0) {
-                sampleRateMsps = 122.88 * (frqDomainPlot->profileBw / 100.0);
-            }
             const QString details = QStringLiteral("JESD204B Framing: Locked | MCS Sync: SYSREF Aligned | Rate: %1 MSPS")
                                     .arg(sampleRateMsps, 0, 'f', 2);
             setRowResult(1, true, details);
