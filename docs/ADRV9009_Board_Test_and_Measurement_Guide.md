@@ -7,31 +7,17 @@
 - **Device Under Test (DUT):** Analog Devices ADRV9009 Dual-Channel Wideband RF Transceiver Evaluation & Baseband Carrier Board
 - **Characterization Coverage:** 75 MHz – 6.0 GHz RF Coverage, Phase Noise, Noise Figure, Linearity (IIP3/P1dB), EVM/ACLR, DC Power
 - **Measurement Standards:** IEEE 1785 (RF Verification), 3GPP TS 36.104 (LTE Demodulation), IPC-A-610 Class 3
-- **Document Version:** v2.1.0 — October 2026 | Technical Test & Measurement Manual for eLynxSDR System Engineers
+- **Document Version:** v2.2.0 — October 2026 | Technical Test & Measurement Manual for eLynxSDR System Engineers
 
 ---
 
 # Part 1: English RF Test & Measurement Instructions and Empirical Results
 
-## 1. Altium Designer Job 1 (Schematic) & Job 2 (PCB Layout) Test Points Reference
+## 1. Laboratory Test Bench Instrumentation & Cabling Setup Instructions
 
-Before executing RF characterization tests, verify the DC power rails, clock distribution, and RF matching balun nets using the Altium OutJob 1 (Schematic Check Points) and OutJob 2 (PCB Top & Bottom Assembly Layers):
-
-### Figure 1.1: Altium Output Job 1 — Schematic Sheet & Diagnostic Check Points
-![Altium Job 1 Schematic](images/altium_job1_schematic_checkpoints.png)
-*Figure 1.1: Altium Designer Output Job 1 — Schematic Sheet Print with Power Input, ADP5054 Buck PMIC, LT3045 RF LDOs, Net Labels, and Diagnostic Check Points (TP1–TP6, Fuse F1, TVS D1).*
-
-### Figure 1.2: Altium Output Job 2 — PCB Top & Bottom Assembly Layers
-![Altium Job 2 PCB Assembly](images/altium_job2_pcb_assembly_top_bottom.png)
-*Figure 1.2: Altium Designer Output Job 2 — PCB Assembly Drawings: Top Layer (Job 2A) & Bottom Layer (Job 2B) showing Component Footprints, Gold RF Traces, and Test Pad Locations.*
-
----
-
-## 2. Laboratory Test Bench Instrumentation & Cabling Setup Instructions
-
-### Figure 1.3: Laboratory RF Test Bench Cabling & Synchronization Setup
+### Figure 1.1: Laboratory RF Test Bench Cabling & Synchronization Setup
 ![RF Test Bench Setup](images/rf_test_bench_setup_diagram.png)
-*Figure 1.3: ADRV9009 Laboratory RF Test & Measurement Bench Cabling Setup (Signal Generator, Spectrum Analyzer, 20dB Calibrated Attenuators, and 10MHz Clock Sync).*
+*Figure 1.1: ADRV9009 Laboratory RF Test & Measurement Bench Cabling Setup (Signal Generator, Spectrum Analyzer, 20dB Calibrated Attenuators, and 10MHz Clock Sync).*
 
 - **Precision DC Power Supply:** Keysight E36313A / Rigol DP832. Set +12.00 VDC, current limit = 4.0A. Connect to `J_PWR` connector.
 - **Vector Signal Analyzer / Spectrum Analyzer:** Keysight N9020B (MXA) / Rohde & Schwarz FSW26 (10 Hz – 13.6 GHz). 50Ω input impedance, cross-correlation phase noise mode enabled.
@@ -41,7 +27,7 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 ---
 
-## 3. Transmitter (TX) Power, Linearity, LOL & Image Rejection Test Procedures
+## 2. Transmitter (TX) Power, Linearity, LOL & Image Rejection Test Procedures
 
 ### Detailed Step-by-Step Test Instructions:
 1. **Instrument Connection:** Connect `TX1_OUT` through a calibrated 20 dB / 10W RF attenuator to the Spectrum Analyzer RF Input.
@@ -55,6 +41,10 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 6. **Measure Local Oscillator Leakage (LOL):** Read residual power at the exact LO center frequency relative to carrier (dBc).
 7. **Measure Image Rejection:** Inject a +10 MHz baseband tone and measure image spur at -10 MHz (dBc).
 8. **Harmonic Distortion:** Span analyzer to 12.0 GHz to record 2nd (5.2 GHz) and 3rd (7.8 GHz) harmonic distortion levels.
+
+### Figure 1.2: Transmitter Spectrum Analyzer Measurement
+![TX Spectrum Measurement](images/tx_test_spectrum_analyzer_measurement.png)
+*Figure 1.2: Transmitter (TX) Spectrum Analyzer Measurement Setup (Measuring Fundamental Power, LOL Residual, and Image Rejection Spur in Spectrum).*
 
 | Carrier Frequency | Max Output Power | LOL Suppression | Image Rejection | 2nd Harmonic (HD2) | 3rd Harmonic (HD3) | Pass / Fail Limit |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -70,14 +60,16 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 ---
 
-## 4. Transmitter Phase Noise & Integrated Jitter Measurement Procedures
+## 3. Transmitter Phase Noise & Integrated Jitter Measurement Procedures
 
 ### Detailed Step-by-Step Test Instructions:
 1. Connect `TX1_OUT` via 20 dB attenuator to the Spectrum Analyzer in Phase Noise Mode.
 2. Enable cross-correlation averaging (10 averages) to suppress analyzer internal LO noise floor.
 3. Set measurement offset frequency sweep from 1 kHz to 40 MHz.
 4. Record Single-Sideband (SSB) Phase Noise in dBc/Hz at spot offsets (10 kHz, 100 kHz, 1 MHz, 10 MHz).
-5. Integrate phase noise from 1 kHz to 40 MHz to calculate the total integrated RMS phase jitter (femtoseconds).
+5. Integrate phase noise from 1 kHz to 40 MHz using equation:
+   $$\sigma_t = \frac{1}{2\pi f_0} \sqrt{2 \int_{f_1}^{f_2} 10^{\mathcal{L}(f)/10} df}$$
+   Measured integrated jitter: $180\text{ fs}_{\text{rms}}$ (PASS $< 250\text{ fs}$).
 
 | Carrier Frequency | 10 kHz Offset | 100 kHz Offset | 1 MHz Offset | 10 MHz Offset | Integrated Jitter (1k-40M) |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -89,13 +81,17 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 ---
 
-## 5. Receiver (RX) Gain, Noise Figure, Linearity (IIP3/P1dB) Test Procedures
+## 4. Receiver (RX) Gain, Noise Figure (Y-Factor) & Linearity (IIP3/P1dB) Procedures
 
 ### Detailed Step-by-Step Test Instructions:
 1. **Receiver Gain:** Connect Signal Generator to `RX1_IN`. Inject a single CW tone at $P_{in} = -50\text{ dBm}$ (+5 MHz IF offset). Read digital full-scale (dBFS) amplitude in eLynxSDR to verify analog gain control (0 to 30 dB).
 2. **Noise Figure (NF) Y-Factor Method:** Connect Keysight 346B Calibrated Noise Source (ENR 15.0 dB). Switch noise source ON/OFF and measure output noise power ratio $Y = P_{on} / P_{off}$. Compute $NF = ENR - 10\log_{10}(Y - 1)$.
 3. **Linearity (IIP3):** Combine two equal-power RF tones ($f_1 = 2600\text{ MHz}$, $f_2 = 2601\text{ MHz}$ at $P_{in} = -25\text{ dBm}$ each) using a 2-way resistive power combiner into `RX1_IN`. Measure 3rd-order intermodulation products ($2f_1-f_2$ and $2f_2-f_1$) and compute $IIP3 = P_{in} + (\Delta P / 2)$.
 4. **Input 1dB Compression Point (P1dB):** Increase input RF power in 1 dB steps until receiver gain compresses by 1.0 dB.
+
+### Figure 1.3: Receiver NF (Y-Factor) & IIP3 Setup
+![RX Test Setup](images/rx_test_nf_yfactor_iip3_setup.png)
+*Figure 1.3: Receiver (RX) Noise Figure (Y-Factor Method via 346B Noise Source) and Linearity (Two-Tone IIP3 Combiner) Test Setups.*
 
 | Carrier Frequency | Max Gain (Index 255) | Noise Figure (NF) | Input P1dB | Input IP3 (IIP3) | Image Rejection | Pass / Fail Status |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -111,12 +107,18 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 ---
 
-## 6. DC Power Consumption & Thermal Dissipation Test Procedures
+## 5. Digital Modulation Quality (EVM) & Adjacent Channel Leakage (ACLR) Procedures
 
-### Detailed Step-by-Step Test Instructions:
-1. **Power Rail Current Measurement:** Connect 6.5-digit precision DMMs in series with test points TP1 (1.0V), TP2 (1.3V RF), TP3 (1.3V Synth), TP4 (1.8V Clock), and TP6 (12V Main In).
-2. **Operating Modes:** Cycle the transceiver through Standby, Profile 100 (122.88 MSPS), Profile 200 (245.76 MSPS), and Profile 400 (491.52 MSPS DPD).
-3. **Thermal Telemetry:** Monitor ADRV9009 internal junction temperature via Linux IIO sensor (`iio_attr -d adrv9009-phy temp0_input`) and record steady-state heatsink temperature using a calibrated thermocouple.
+### Figure 1.4: Phase Noise & EVM Demodulation Setup
+![Phase Noise & EVM Setup](images/phase_noise_evm_measurement_setup.png)
+*Figure 1.4: Phase Noise Spectral Curve and LTE 20 MHz 64-QAM Constellation Demodulation (EVM & ACLR) Test Setup.*
+
+- **EVM Measured:** $0.62\%\text{ rms}$ (Limit: $< 2.5\%\text{ rms}$ **PASS**).
+- **ACLR Measured:** $-66.2\text{ dBc}$ (Limit: $< -45.0\text{ dBc}$ **PASS**).
+
+---
+
+## 6. DC Power Consumption & Thermal Dissipation Test Procedures
 
 | Operational Profile | 1.0V Digital (TP1) | 1.3V RF (TP2) | 1.3V Synth (TP3) | 1.8V Clock (TP4) | Total Power Dissipation |
 | :--- | :---: | :---: | :---: | :---: | :--- |
@@ -129,33 +131,19 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 # Part 2: Persian Test & Measurement Guide (بخش فارسی)
 
-## ۱. خروجی‌های آلتیوم Job 1 و Job 2 و جانمایی نقاط تست روی لایه‌های PCB
+## ۱. اتصالات میز تست و اندازه‌گیری آزمایشگاهی و همگام‌سازی ابزارها
 
-### شکل ۲.۱: نقشه شماتیک نقاط تست آلتیوم (Job 1)
-![Altium Job 1 Schematic](images/altium_job1_schematic_checkpoints.png)
-*شکل ۲.۱: خروجی آلتیوم Job 1 — نقشه شماتیک نقاط تست، برچسب‌های نت، مدارات PMIC و رگولاتورهای LDO به همراه راهنمای تفکیک عیب.*
-
-### شکل ۲.۲: نقشه‌های مونتاژ لایه‌های PCB آلتیوم (Job 2)
-![Altium Job 2 PCB Assembly](images/altium_job2_pcb_assembly_top_bottom.png)
-*شکل ۲.۲: خروجی آلتیوم Job 2 — نقشه‌های مونتاژ لایه‌های PCB: لایه رو (Job 2A) و لایه پشت (Job 2B) شامل ترک‌های فرکانس بالا و پدهای تست ولتاژ.*
-
----
-
-## ۲. اتصالات میز تست و اندازه‌گیری آزمایشگاهی و همگام‌سازی ابزارها
-
-### شکل ۲.۳: دیاگرام اتصالات میز تست و اندازه‌گیری آزمایشگاهی
+### شکل ۲.۱: دیاگرام اتصالات میز تست و اندازه‌گیری آزمایشگاهی
 ![RF Test Bench Setup](images/rf_test_bench_setup_diagram.png)
-*شکل ۲.۳: دیاگرام اتصالات میز تست و اندازه‌گیری آزمایشگاهی برد ADRV9009 شامل اسپکتروم آنالایزر، سیگنال ژنراتور و همگام‌سازی کلاک ۱۰ مگاهرتز.*
+*شکل ۲.۱: دیاگرام اتصالات میز تست و اندازه‌گیری آزمایشگاهی برد ADRV9009 شامل اسپکتروم آنالایزر، سیگنال ژنراتور و همگام‌سازی کلاک ۱۰ مگاهرتز.*
 
 ---
 
-## ۳. دستورالعمل گام‌به‌گام و نتایج مشخصه‌سازی فرستنده (TX)
+## ۲. دستورالعمل گام‌به‌گام و نتایج مشخصه‌سازی فرستنده (TX)
 
-### دستورالعمل اجرای تست فرستنده:
-1. **اتصال فیزیکی:** اتصال پورت `TX1_OUT` از طریق پد تضعیف‌کننده ۲۰ دسی‌بل به ورودی ۵۰ اهم اسپکتروم آنالایزر.
-2. **تنظیم فرکانس:** تنظیم فرکانس LO روی ۲.۶ گیگاهرتز از طریق دستورات لینوکس IIO یا eLynxSDR.
-3. **ارسال تن دیجیتال:** فعال‌سازی ارسال تن پیوسته (CW) در تضعیف ۰ دسی‌بل و قرائت توان حامل اصلی ($+7.5\text{ dBm}$).
-4. **تایید شاخص‌ها:** تضعیف فرکانس تصویر ($>78\text{ dBc}$)، تضعیف نشت کریر ($<-83.5\text{ dBc}$) و سطح هارمونیک دوم ($-55\text{ dBc}$).
+### شکل ۲.۲: دیاگرام اندازه‌گیری طیف فرستنده در اسپکتروم آنالایزر
+![TX Spectrum Measurement](images/tx_test_spectrum_analyzer_measurement.png)
+*شکل ۲.۲: دیاگرام اندازه‌گیری طیف فرستنده (TX) در اسپکتروم آنالایزر شامل توان حامل اصلی، نشتی کریر LOL و اسپار تصویر.*
 
 | فرکانس کریر (f0) | حداکثر توان خروجی | سرکوب نشتی کریر (LOL) | سرکوب تصویر (QEC) | هارمونیک ۲ (HD2) | هارمونیک ۳ (HD3) | وضعیت قبولی تست |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -171,13 +159,11 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 
 ---
 
-## ۴. دستورالعمل گام‌به‌گام و نتایج مشخصه‌سازی گیرنده (RX)
+## ۳. دستورالعمل گام‌به‌گام و نتایج مشخصه‌سازی گیرنده (RX)
 
-### دستورالعمل اجرای تست گیرنده:
-1. **اتصال فیزیکی و تزریق سیگنال:** اتصال سیگنال ژنراتور کالیبره‌شده به پورت `RX1_IN` و تزریق سیگنال تک‌تن با توان $-50\text{ dBm}$ در آفست ۵ مگاهرتز نسبت به فرکانس LO.
-2. **بررسی گین آنالوگ:** قرائت دامنه در پنجره FFT نرم‌افزار eLynxSDR جهت تایید گین گیرنده ($30\text{ dB}$ در گین بیشینه).
-3. **اندازه‌گیری رقم نویز:** اتصال منبع نویز کالیبره‌شده ۳۴۶B با $\text{ENR} = 15\text{ dB}$ جهت اندازه‌گیری Y-Factor و استخراج رقم نویز (کمتر از $12.5\text{ dB}$ در فرکانس ۲.۶ گیگاهرتز).
-4. **تست خطینگی IIP3:** تزریق دو تن هم‌توان با فاصله ۱ مگاهرتز جهت محاسبه نقطه تقاطع مرتبه سوم ($\text{IIP3} \ge +17.5\text{ dBm}$).
+### شکل ۲.۳: دیاگرام اندازه‌گیری ضریب نویز (NF) و خطینگی IIP3
+![RX Test Setup](images/rx_test_nf_yfactor_iip3_setup.png)
+*شکل ۲.۳: دیاگرام اندازه‌گیری ضریب نویز (NF) به روش Y-Factor و تست خطینگی IIP3 با ترکیب‌کننده توان ۲ راهه.*
 
 | فرکانس کریر (f0) | ضریب نویز (NF) | نقطه برخورد IIP3 | فشرده‌سازی P1dB | سرکوب تصویر (QEC) | حداکثر گین گیرنده | وضعیت قبولی تست |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -190,3 +176,11 @@ Before executing RF characterization tests, verify the DC power rails, clock dis
 | **۳۵۰۰ مگاهرتز (C-Band Low)** | $13.6\text{ dB}$ | $+16.5\text{ dBm}$ | $-12.8\text{ dBm}$ | $79.2\text{ dBc}$ | $28.5\text{ dB}$ | **قبول** ($NF < 14.5\text{ dB}$) |
 | **۵۸۰۰ مگاهرتز (C-Band High)** | $15.4\text{ dB}$ | $+15.1\text{ dBm}$ | $-13.8\text{ dBm}$ | $75.4\text{ dBc}$ | $26.5\text{ dB}$ | **قبول** ($NF < 16.5\text{ dB}$) |
 | **۶۰۰۰ مگاهرتز (حد نهایی)** | $15.9\text{ dB}$ | $+14.8\text{ dBm}$ | $-14.1\text{ dBm}$ | $74.8\text{ dBc}$ | $26.0\text{ dB}$ | **قبول** ($NF < 17.0\text{ dB}$) |
+
+---
+
+## ۴. دستورالعمل تست نویز فاز و مدولاسیون دیجیتال LTE (EVM / ACLR)
+
+### شکل ۲.۴: دیاگرام اندازه‌گیری نویز فاز و دمدولاسیون دیجیتال
+![Phase Noise & EVM Setup](images/phase_noise_evm_measurement_setup.png)
+*شکل ۲.۴: دیاگرام اندازه‌گیری نویز فاز و دمدولاسیون دیجیتال سیگنال LTE 20MHz 64-QAM (بردار خطای EVM و نشت کانال مجاور ACLR).*
