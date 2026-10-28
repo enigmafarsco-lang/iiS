@@ -1,7 +1,7 @@
 // ============================================================================
 // File: oscpreferences.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for oscpreferences.h.
+// Description: Header definitions and interface declarations for oscpreferences.h.
 // ============================================================================
 
 #ifndef OSCPREFERENCES_H
@@ -36,23 +36,18 @@ struct iio_device_preferences {
 class OscPreferences
 {
 public:
-    // Constructor: Initializes OscPreferences subsystem components, default parameters, and state.
     OscPreferences();
 
     IioChnPreferences *iio_chn_preferences_new(const char *chn_name);
-    // Executes iio chn preferences free routine.
     void iio_chn_preferences_free(IioChnPreferences *pref);
 
     IioDevPreferences *iio_dev_preferences_new(const char *dev_name);
-    // Executes iio dev preferences free routine.
     void iio_dev_preferences_free(IioDevPreferences *pref);
 
     OscPlotPreferences *osc_plot_preferences_new();
-    // Executes osc plot preferences free routine.
     void osc_plot_preferences_free(OscPlotPreferences *pref);
 
     OscPreferences *osc_preferences_new();
-    // Executes osc preferences delete routine.
     void osc_preferences_delete(OscPreferences *pref);
 
     struct oscplot_preferences *plot_preferences;

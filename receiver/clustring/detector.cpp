@@ -12,7 +12,6 @@
 /**
  * @brief Detector::Detector
  */
-// Constructor: Initializes Detector subsystem components, default parameters, and state.
 Detector::Detector()
 {
     //    dataExtractor=new DataExtractor();
@@ -47,13 +46,12 @@ Detector::Detector()
  * @brief Detector::setTunerFrequency
  * @param newTunerFrequency
  */
-// Sets tuner frequency value and updates internal subsystem configuration.
 void Detector::setTunerFrequency(double newTunerFrequency)
 {
     ft = newTunerFrequency;
 }
 
-// Sets stop value and updates internal subsystem configuration.
+// Sets stop parameter and updates internal configuration.
 void Detector::setStop(bool newStop)
 {
     stop = newStop;
@@ -132,7 +130,6 @@ void Detector::calculatingPRI(Pulse pls)
  * @param pulse
  * @param updateFreqMap
  */
-// Executes check pulse routine.
 bool Detector::CheckPulse(Pulse *pulse,bool updateFreqMap=false)
 {
     //     qInfo()<<"----->4 " << pulse->Freq;
@@ -193,7 +190,6 @@ bool CountLessThan(const Pulse *p1, const Pulse *p2)
 /**
  * @brief Detector::ClearUnusedFreqs
  */
-// Executes clear unused freqs routine.
 void Detector::ClearUnusedFreqs()
 {
     mutex.lock();
@@ -235,7 +231,6 @@ void Detector::ClearUnusedFreqs()
  * @brief Detector::AddToBuffer
  * @param yItems
  */
-// Executes add to queue routine.
 void Detector::AddToQueue(QVector<double> yItems)
 {
     mutex.lock();
@@ -251,7 +246,6 @@ void Detector::AddToQueue(QVector<double> yItems)
  * @param tunerFrequency
  */
 
-// Executes read block data x routine.
 void Detector::ReadBlockDataX(QVector<double> yItems)
 {
     // Hold pattern Items
@@ -690,7 +684,6 @@ void Detector::ReadBlockDataX(QVector<double> yItems)
 /**
  * @brief Thread main function
  */
-// Executes run routine.
 void Detector::run()
 {
     pulseList->clear();

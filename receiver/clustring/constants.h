@@ -1,7 +1,7 @@
 // ============================================================================
 // File: constants.h
 // Subsystem: eLynxSDR clustring
-// Description: Subsystem implementation and interface guidance for constants.h.
+// Description: Header definitions and interface declarations for constants.h.
 // ============================================================================
 
 #ifndef CONSTANTS_H
@@ -12,7 +12,6 @@
 class Constants
 {
 public:
-    // Constructor: Initializes Constants subsystem components, default parameters, and state.
     Constants();
 
     static QString sweepMode ;

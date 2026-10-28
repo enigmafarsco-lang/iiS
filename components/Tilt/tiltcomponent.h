@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tiltcomponent.h
 // Subsystem: eLynxSDR Tilt
-// Description: Subsystem implementation and interface guidance for tiltcomponent.h.
+// Description: Header definitions and interface declarations for tiltcomponent.h.
 // ============================================================================
 
 #ifndef TILTCOMPONENT_H
@@ -20,20 +20,13 @@ class BTiltComponent : public QWidget
 {
     Q_OBJECT
 public:
-    // Constructor: Initializes BTiltComponent subsystem components, default parameters, and state.
     explicit BTiltComponent(QWidget *parent = nullptr);
 
-    // Initializes init labels for BTiltComponent.
     void init_labels();
-    // Initializes init double spin boxes for BTiltComponent.
     void init_doubleSpinBoxes();
-    // Initializes init buttons for BTiltComponent.
     void init_buttons();
-    // Initializes init progress bar for BTiltComponent.
     void init_progressBar();
-    // Initializes init tilt for BTiltComponent.
     void init_tilt();
-    // Sets components_arrangements value and updates internal subsystem configuration.
     void set_components_arrangements();
 
     QGridLayout *grdMainLayout;

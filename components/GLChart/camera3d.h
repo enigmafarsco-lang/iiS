@@ -1,7 +1,7 @@
 // ============================================================================
 // File: camera3d.h
 // Subsystem: eLynxSDR GLChart
-// Description: Subsystem implementation and interface guidance for camera3d.h.
+// Description: Header definitions and interface declarations for camera3d.h.
 // ============================================================================
 
 #ifndef CAMERA3D_H
@@ -11,16 +11,11 @@
 class Camera3D
 {
 public:
-    // Constructor: Initializes Camera3D subsystem components, default parameters, and state.
     Camera3D();
 
-    // Executes to matrix routine.
     const QMatrix4x4& toMatrix();
-    // Executes rotate routine.
     void rotate(const QQuaternion &dr);
-    // Executes rotate routine.
     void rotate(float angle, const QVector3D &axis);
-    // Executes rotate routine.
     void rotate(float angle, float ax, float ay, float az);
 
 private:

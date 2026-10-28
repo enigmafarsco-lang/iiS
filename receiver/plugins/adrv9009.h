@@ -1,7 +1,7 @@
 // ============================================================================
 // File: adrv9009.h
 // Subsystem: eLynxSDR plugins
-// Description: Subsystem implementation and interface guidance for adrv9009.h.
+// Description: Header definitions and interface declarations for adrv9009.h.
 // ============================================================================
 
 #ifndef ADRv9009_H
@@ -112,9 +112,7 @@ class adrv9009 : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes adrv9009 subsystem components, default parameters, and state.
     explicit adrv9009(QApplication *mainApp,QWidget *parent = 0);
-    // Destructor: Cleans up adrv9009 resources, timers, and allocated memory.
     ~adrv9009();
 
     QWidget *init();
@@ -173,7 +171,6 @@ public:
     //----- Load file
     QPushButton * profile_config;
 
-    // Event/Signal handler for tx sample rate changed.
     void tx_sample_rate_changed(const int);
 //    void tx_sample_rate_changed(QDoubleSpinBox *spinbutton);
 
@@ -185,9 +182,7 @@ public:
     QWidget *fpga_rx_frequency_available;
     QWidget *fpga_tx_frequency_available;
     struct iio_widget fpga_widgets[2];
-    // Sets file value and updates internal subsystem configuration.
     QString setFile(QString fileName,double scale, bool pair01 = true, bool pair23 = true);
-    // Executes changing dac routine.
     QString changingDac(QString);
     // TX1 LO-leakage + quadrature tracking: forced enabled + checked
     // (and locked) - must hold in ALL settings, re-applied after every
@@ -195,19 +190,14 @@ public:
     // Re-write TX1/TX2 hardwaregain so the board carries Pb = Pa + Pc
     // with the current P calibration (constants/tx_calibration.h).
     void resaveTxGainWidgets();
-    // Executes save settings to ini routine.
     bool saveSettingsToIni(const QString &fileName);
-    // Executes load settings from ini routine.
     bool loadSettingsFromIni(const QString &fileName);
-    // Executes load iio osc settings routine.
     bool loadIioOscSettings(const QString &fileName);
-    // Executes firmware reset over lan routine.
     void firmwareResetOverLan();
     // Phase 6: CW-tab DDS tone parameters, set from the exciter before
     // changingDac("set-cw") switches TX1/TX2 into the DDS tone mode.
     static void setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg);
     QString changeDacToBuffer(); // CW tone -> DAC Buffer Output (DRFM tab)
-    // Retrieves current ac buffer running state.
     bool isDacBufferRunning() const;
 
 
@@ -215,15 +205,10 @@ public:
 //    struct dac_data_manager *dac_tx_manager;
 
 private slots:
-    // Event/Signal handler for reload button clicked.
     void reload_button_clicked();
-    // Executes glb settings update labels routine.
     void glb_settings_update_labels(void);
-    // Executes save widget value routine.
     void save_widget_value(iio_widget *iio_w);
-    // Executes log value routine.
     void LogValue(QString value);
-    // Event/Signal handler for on btn reload settings clicked.
     void on_btnReloadSettings_clicked();
 
 //    void on_profile_config_clicked();
@@ -231,20 +216,13 @@ private slots:
 
 
 public slots:
-    // Executes start hopping routine.
     void startHopping(bool, double min=0, double max=0, double step=0, int delay=0);
-    // Executes test routine.
     void test(QString);
-// Event/Signal handler for on profile config clicked.
 void on_profile_config_clicked(QString);
 private:
-    // Executes widget value routine.
     double widgetValue(QWidget *w) const;
-    // Executes apply widget value routine.
     void applyWidgetValue(QWidget *w, double v);
-    // Sets tings widget list value and updates internal subsystem configuration.
     QVector<QPair<QString, QWidget *> > settingsWidgetList();
-    // Executes print hello routine.
     void printHello();
     Ui::adrv9009 *ui;
     QSignalMapper *signalMapper;
@@ -260,11 +238,8 @@ private:
     Settings setting;
     QProgressDialog *progress=nullptr;
 
-    // Executes rx freq info update routine.
     void rx_freq_info_update();
-    // Executes rssi update labels routine.
     void rssi_update_labels();
-    // Executes make widget update signal based routine.
     void make_widget_update_signal_based(iio_widget *widgets, unsigned int num_widgets);
 
     QThread *refreshThread = nullptr;
@@ -277,39 +252,25 @@ private:
     bool plugin_single_device_mode = TRUE;
     guint phy_devs_count = 0;
 
-    // Executes profile update routine.
     void profile_update();
-    // Executes rx phase rotation update routine.
     void rx_phase_rotation_update();
-    // Executes rx phase rotation set routine.
     void rx_phase_rotation_set(QDoubleSpinBox *spinbutton, gpointer user_data);
-    // Executes int dec update cb routine.
     void int_dec_update_cb();
-    // Executes int dec freq update routine.
     void int_dec_freq_update();
 
-    // Updates and synchronizes update_widgets data stream.
     void update_widgets();
-    // Updates and synchronizes update_label_from data stream.
     void update_label_from(QLabel *label, iio_device *dev, const char *channel, const char *attribute, bool output, const char *unit, int scale);
     GArray *get_iio_devices_starting_with(iio_context *ctx, const char *sequence);
-    // Executes connect signals routine.
     void ConnectSignals();
 
     QString last_profile="";
-    // Executes load tal profile routine.
     int load_tal_profile(QString file_name);
-    // Updates and synchronizes update_label_with_scale_from data stream.
     void update_label_with_scale_from(QLabel *label, iio_device *dev, const char *channel, const char *attribute,const char *attribute_scale, bool output, const char *unit, int scale);
 
 signals:
-    // Executes change widget routine.
     void change_widget(QWidget*,struct iio_widget *);
-    // Executes frq has focused signal routine.
     void frqHasFocusedSignal(QString);
-    // Executes file load is complete signal routine.
     void fileLoadIsCompleteSignal();
-    // Executes frq value changed signal routine.
     void frqValueChangedSignal(QString);
 
 };

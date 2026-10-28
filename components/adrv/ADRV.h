@@ -1,7 +1,7 @@
 // ============================================================================
 // File: ADRV.h
 // Subsystem: eLynxSDR adrv
-// Description: Subsystem implementation and interface guidance for ADRV.h.
+// Description: Header definitions and interface declarations for ADRV.h.
 // ============================================================================
 
 #ifndef ADRV_H
@@ -13,7 +13,6 @@
 #include <glib-object.h>
 #include <QDebug>
 #include <QFuture>
-#include <QtConcurrent>
 #include "qtconcurrentrun.h"
 #include <QThread>
 #include "receiver/plugins/dacDataManager.h"
@@ -28,28 +27,19 @@ class adrv : public QObject
 
 public:
 
-    // Constructor: Initializes adrv subsystem components, default parameters, and state.
     explicit adrv();
-    // Executes connect routine.
     bool connect(QString ip);
 
-    // Executes get frequency routine.
     double GetFrequency();
-    // Executes set frequency routine.
     bool SetFrequency(double freq);
-    // Executes set frequency hopping routine.
     bool SetFrequencyHopping(double start,double stop,double step);
 
-    // Executes get power routine.
     double GetPower();
-    // Executes set power routine.
     bool SetPower(double freq);
 
     QHBoxLayout *InitializeDacBuffer();
 
-    // Executes set file routine.
     QString SetFile(QString fileName,double scale);
-    // Executes disable dac routine.
     void DisableDac();
 
     bool hopping=false;
@@ -79,9 +69,7 @@ private:
     struct dac_data_manager *dac_tx_manager;
 
 signals:
- // Executes progress routine.
  void progress(int);
- // Executes frequency changed routine.
  void frequencyChanged();
 // void thisIsTest( struct iio_context *x);
 

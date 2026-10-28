@@ -5,14 +5,12 @@
 // ============================================================================
 
 #include "ADRV.h"
-#include <QtConcurrent>
 
 #pragma region Constructor {
 
 /**
  * @brief adrv::adrv
  */
-// Constructor: Initializes adrv subsystem components, default parameters, and state.
 adrv::adrv()
 {
 
@@ -27,7 +25,6 @@ adrv::adrv()
  * @param ip : Board Ip
  * @return true if no problem detect
  */
-// Executes connect routine.
 bool adrv::connect(QString ip)
 {
 //    ctx = GetContext("ip:"+ip);
@@ -65,7 +62,6 @@ bool adrv::SetFrequency(double freq){
  * @param freq
  * @return
  */
-// Executes set frequency hopping routine.
 bool adrv::SetFrequencyHopping(double start, double stop, double step)
 {
     struct iio_device *dev;
@@ -108,7 +104,6 @@ bool adrv::SetFrequencyHopping(double start, double stop, double step)
  * @brief Get current frequency
  * @return frequency Changed status
  */
-// Executes get frequency routine.
 double adrv::GetFrequency()
 {
     struct iio_device *dev;

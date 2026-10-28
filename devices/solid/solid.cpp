@@ -31,14 +31,14 @@ Solid::Solid(QWidget *parent) :
     connect(&blinkingTimer, &QTimer::timeout, this, &Solid::timeout);
 }
 
-// Destructor: Cleans up Solid resources, timers, and allocated memory.
+// Destructor: Releases Solid allocated resources, buffers, and timers.
 Solid::~Solid()
 {
     delete movie;
     delete ui;
 }
 
-// Event/Signal handler for on  device response slot.
+// Signal/Slot handler responding to on  device response slot event.
 void Solid::on_DeviceResponseSlot(QByteArray)
 {
 
@@ -66,7 +66,7 @@ void Solid::joshanStatusDataSlot()
 
 
 
-// Reads and parses incoming receive command from other object slot data.
+// Reads, parses, and processes incoming receive command from other object slot data.
 void Solid::receiveCommandFromOtherObjectSlot(QString response)
 {
     QStringList frame;
@@ -268,7 +268,7 @@ void Solid::receiveCommandFromOtherObjectSlot(QString response)
     }
 }
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void Solid::isDeviceConnectedSlot(bool conncted)
 {
     isDeviceConnected = conncted;
@@ -315,13 +315,13 @@ void Solid::joshanControlDataSlot(QJsonObject val)
     }
 }
 
-// Event/Signal handler for timeout.
+// Signal/Slot handler responding to timeout event.
 void Solid::timeout()
 {
     ui->btnSolidStatus->setChecked( (!ui->btnSolidStatus->isChecked()) );
 }
 
-// Event/Signal handler for on chk alc mode clicked.
+// Signal/Slot handler responding to on chk alc mode clicked event.
 void Solid::on_chkAlcMode_clicked(bool checked)
 {
     if(checked)
@@ -337,7 +337,7 @@ void Solid::on_chkAlcMode_clicked(bool checked)
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on chk err lacth mode clicked.
+// Signal/Slot handler responding to on chk err lacth mode clicked event.
 void Solid::on_chkErrLacthMode_clicked(bool checked)
 {
     if(checked)
@@ -353,7 +353,7 @@ void Solid::on_chkErrLacthMode_clicked(bool checked)
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on btn enable clicked.
+// Signal/Slot handler responding to on btn enable clicked event.
 void Solid::on_btnEnable_clicked()
 {
     //    ui->btnEnable->setChecked(false);
@@ -367,7 +367,7 @@ void Solid::on_btnEnable_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on btn disable clicked.
+// Signal/Slot handler responding to on btn disable clicked event.
 void Solid::on_btnDisable_clicked()
 {
     ui->btnDisable->setChecked(false);
@@ -378,7 +378,7 @@ void Solid::on_btnDisable_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on btn reset clicked.
+// Signal/Slot handler responding to on btn reset clicked event.
 void Solid::on_btnReset_clicked()
 {
     m_commandString = "@JamSolidReset$";
@@ -387,7 +387,7 @@ void Solid::on_btnReset_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on btn solid status clicked.
+// Signal/Slot handler responding to on btn solid status clicked event.
 void Solid::on_btnSolidStatus_clicked()
 {
     ui->btnSolidStatus->setChecked(true);
@@ -396,7 +396,7 @@ void Solid::on_btnSolidStatus_clicked()
     emit(sendCommandToOtherObjectSignal(m_commandString));
 }
 
-// Event/Signal handler for on rdb high clicked.
+// Signal/Slot handler responding to on rdb high clicked event.
 void Solid::on_rdbHigh_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,H$";
@@ -405,7 +405,7 @@ void Solid::on_rdbHigh_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on rdb medium clicked.
+// Signal/Slot handler responding to on rdb medium clicked event.
 void Solid::on_rdbMedium_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,M$";
@@ -414,7 +414,7 @@ void Solid::on_rdbMedium_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-// Event/Signal handler for on rdb low clicked.
+// Signal/Slot handler responding to on rdb low clicked event.
 void Solid::on_rdbLow_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,L$";

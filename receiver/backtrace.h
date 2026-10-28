@@ -1,7 +1,7 @@
 // ============================================================================
 // File: backtrace.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for backtrace.h.
+// Description: Header definitions and interface declarations for backtrace.h.
 // ============================================================================
 
 #ifndef BACKTRACE_H
@@ -86,19 +86,15 @@ void handle_crash_data()
         int total_bytes = 0;
 
         /* Get everything the parent process sends */
-        // Executes close routine.
         close(fd[1]);
 
-        // Executes memset routine.
         memset(readbuffer, 0, sizeof(readbuffer));
 
         while (1) {
             nbytes = read(fd[0], readbuffer + total_bytes,
-                    // Executes sizeof routine.
                     sizeof(readbuffer) - total_bytes);
 
             if (nbytes < 0) {
-                // Executes fprintf routine.
                 fprintf(stderr, "read error\n");
                 break;
             }
@@ -127,7 +123,6 @@ void handle_crash_data()
             return;
         }
         creport = (struct crash_report *)creport_buf;
-        // Executes memcpy routine.
         memcpy(creport_buf, readbuffer, sizeof(struct crash_report));
 
         /* Store the crash report in a file */
@@ -139,9 +134,7 @@ void handle_crash_data()
                 CRASH_REPORT_FILENAME,
                 __FILE__, __func__, __LINE__);
 
-            // Executes free routine.
             free(creport_buf);
-            // Executes g free routine.
             g_free(creport_filename);
             return;
         }
@@ -161,19 +154,14 @@ void handle_crash_data()
             strerror(creport->err_no),
             ctime(&creport->time)
         );
-        // Executes fprintf routine.
         fprintf(fp, "\nIIO-Oscilloscope Backtrace\n");
-        // Executes fprintf routine.
         fprintf(fp, "%s", readbuffer + sizeof(struct crash_report));
         fprintf(stderr, "A crash report file has been created at: %s\n",
                 creport_filename);
 
         /* Free resources */
-        // Executes fclose routine.
         fclose(fp);
-        // Executes free routine.
         free(creport_buf);
-        // Executes g free routine.
         g_free(creport_filename);
 }
 
@@ -200,20 +188,15 @@ void init_signal_handlers()
     stackParserPID = fork();
 
     if (stackParserPID == 0) {
-        // Executes handle crash data routine.
         handle_crash_data();
-        // Executes exit routine.
         _exit(EXIT_SUCCESS);
     }
 
     /* Send a crash report when a crash occurs */
-    // Executes memset routine.
     memset(&osc_backtrace, 0, sizeof(osc_backtrace));
     osc_backtrace.sa_sigaction = obtainBacktrace;
 
-    // Executes sigaction routine.
     sigaction(SIGSEGV, &osc_backtrace, nullptr);
-    // Executes sigaction routine.
     sigaction(SIGABRT, &osc_backtrace, nullptr);
 #endif
 }

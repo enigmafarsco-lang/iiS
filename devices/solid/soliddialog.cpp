@@ -20,13 +20,13 @@ SolidDialog::SolidDialog(QWidget *parent) :
     connections();
 }
 
-// Destructor: Cleans up SolidDialog resources, timers, and allocated memory.
+// Destructor: Releases SolidDialog allocated resources, buffers, and timers.
 SolidDialog::~SolidDialog()
 {
     delete ui;
 }
 
-// Event/Signal handler for on  device response slot.
+// Signal/Slot handler responding to on  device response slot event.
 void SolidDialog::on_DeviceResponseSlot(QByteArray response)
 {
     QString packet;
@@ -322,7 +322,7 @@ void SolidDialog::handle_info(QString response)
     }
     ui->pgbSolid->setValue(temp);
 }
-// Reads and parses incoming receive command from other object slot data.
+// Reads, parses, and processes incoming receive command from other object slot data.
 void SolidDialog::receiveCommandFromOtherObjectSlot(QString cmd)
 {
     QStringList frame;
@@ -366,7 +366,7 @@ void SolidDialog::joshanStatusDataSlot()
 
 }
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void SolidDialog::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;
@@ -374,7 +374,7 @@ void SolidDialog::isDeviceConnectedSlot(bool val)
 
 
 
-// Event/Signal handler for on blinking timer time out.
+// Signal/Slot handler responding to on blinking timer time out event.
 void SolidDialog::on_blinkingTimer_timeOut()
 {
     if(vswr_blinking)
@@ -426,19 +426,19 @@ void SolidDialog::initLedsIcon()
 
 
 
-// Event/Signal handler for on btn start report clicked.
+// Signal/Slot handler responding to on btn start report clicked event.
 void SolidDialog::on_btnStartReport_clicked()
 {
     emit sendToMainSig("SOLID_STOP_REPORT,FALSE");
 }
 
-// Event/Signal handler for on btn stop report clicked.
+// Signal/Slot handler responding to on btn stop report clicked event.
 void SolidDialog::on_btnStopReport_clicked()
 {
     emit sendToMainSig("SOLID_STOP_REPORT,TRUE");
 }
 
-// Event/Signal handler for on  solid dialog finished.
+// Signal/Slot handler responding to on  solid dialog finished event.
 void SolidDialog::on_SolidDialog_finished(int result)
 {
     emit(sendCommandToOtherObjectSignal("SOLID DIALOG IS,"+QString::number(false)));///*this->isVisible()*/

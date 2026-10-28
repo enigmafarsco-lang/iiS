@@ -1,7 +1,7 @@
 // ============================================================================
 // File: enumerations.h
 // Subsystem: eLynxSDR clustring
-// Description: Subsystem implementation and interface guidance for enumerations.h.
+// Description: Header definitions and interface declarations for enumerations.h.
 // ============================================================================
 
 #ifndef ENUMERATIONS_H
@@ -11,7 +11,6 @@ class Enumerations
 {
 
 public:
-    // Constructor: Initializes Enumerations subsystem components, default parameters, and state.
     Enumerations();
     enum class Band{ L, S, X, None} ;
     enum class FunctionMode { Sweep, Spectrum, Scope, SweepFS, SweepHRS, SpectrumFix, SpectrumScan, Fix, NotFix, None}  ;

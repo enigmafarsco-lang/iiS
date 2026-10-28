@@ -1,7 +1,7 @@
 // ============================================================================
 // File: dacDataManager.h
 // Subsystem: eLynxSDR plugins
-// Description: Subsystem implementation and interface guidance for dacDataManager.h.
+// Description: Header definitions and interface declarations for dacDataManager.h.
 // ============================================================================
 
 #ifndef DAC_DATA_MANAGER_H
@@ -226,27 +226,17 @@ private:
     QComboBox *mode = new QComboBox();
 //struct dac_data_manager *manager;
 
-    // Executes dac channels assign routine.
     int dac_channels_assign(struct dds_dac *ddac);
     char *get_tone_name(struct iio_channel *ch);
     char *build_default_channel_name_from_index(guint ch_index);
-    // Executes gui manager create routine.
     void gui_manager_create(struct dac_data_manager *manager);
-    // Executes manager iio setup routine.
     void manager_iio_setup(struct dac_data_manager *manager);
-    // Executes dac data manager free routine.
     void dac_data_manager_free(struct dac_data_manager *manager);
-    // Executes dac buffer init routine.
     void dac_buffer_init(struct dac_data_manager *manager, struct dac_buffer *d_buffer);
-    // Executes device scan elements count routine.
     int device_scan_elements_count(struct iio_device *dev);
-    // Retrieves current iio_tones_count state.
     unsigned get_iio_tones_count(struct iio_device *dev);
-    // Executes dds non iq tx init routine.
     void dds_non_iq_tx_init(struct dds_dac *ddac, struct dds_tx *tx, unsigned dds_index);
-    // Executes dds tx init routine.
     void dds_tx_init(struct dds_dac *ddac, struct dds_tx *tx, unsigned dds_index);
-    // Executes enable dds routine.
     void enable_dds(dac_data_manager *manager, bool on_off);
 
     QGroupBox *gui_dac_create(dds_dac *ddac);
@@ -255,85 +245,52 @@ private:
     QGroupBox *gui_tone_create(dds_tone *tone);
     QFrame *gui_dds_mode_chooser_create(dds_tx *tx);
     QGroupBox *frame_with_table_create(const char *frm_title);
-    // Reads and parses incoming parse_wavefile_line data.
     int parse_wavefile_line(const char *line, double *vals, unsigned int max_num_vals);
-    // Executes analyse wavefile routine.
     int analyse_wavefile(dac_data_manager *manager, const char *file_name, char **buf, int *count, int tx_channels, double full_scale);
-    // Executes dac offset get value routine.
     double dac_offset_get_value(iio_device *dac);
-    // Executes tx channels check valid setup routine.
     bool tx_channels_check_valid_setup(dac_buffer *dbuf);
-    // Executes dma valid selection routine.
     bool dma_valid_selection(const char *device, unsigned int mask, unsigned int channel_count);
     const char *get_adi_part_code(const char *device_name);
-    // Executes tx enabled channels count routine.
     int tx_enabled_channels_count(QTreeWidget *treeview, unsigned int *enabled_mask);
-    // Executes convert routine.
     unsigned short convert(double scale, float val, double offset);
-    // Executes replicate tx data channels routine.
     void replicate_tx_data_channels(_complex_ref *data, int count);
-    // Executes freq spin range update routine.
     void freq_spin_range_update(dds_tone *tone, double tx_sample_rate);
-    // Executes free channel routine.
     void freeChannel(char *ch_name);
 
-    // Executes enable dds channels routine.
     void enable_dds_channels(dac_buffer *db);
-    // Executes db full scale convert routine.
     static double db_full_scale_convert(double value, bool inverse);
-    // Executes compare gain routine.
     static int compare_gain(const char *a, const char *b);
-    // Executes save scale widget value routine.
     static void save_scale_widget_value(void *data);
-    // Executes dds scale set value routine.
     void dds_scale_set_value(QWidget *scale, gdouble value);
-    // Executes dds scale get value routine.
     double dds_scale_get_value(QWidget *scale);
-    // Executes tone setup routine.
     void tone_setup(dds_tone *tone);
-    // Executes dds tone iio widgets update routine.
     void dds_tone_iio_widgets_update(dds_tone *tone);
 public:
 
-    // Constructor: Initializes dacDataManager subsystem components, default parameters, and state.
     explicit dacDataManager(QObject *parent = nullptr);
     struct dac_data_manager *dac_data_manager_new(struct iio_device *dac,
                                                   struct iio_device *second_dac, struct iio_context *ctx);
-    // Executes dac data manager set buffer size alignment routine.
     void dac_data_manager_set_buffer_size_alignment(struct dac_data_manager *manager, unsigned align);
     int dac_manager_init(struct dac_data_manager *manager,
                          struct iio_device *dac, struct iio_device *second_dac, struct iio_context *ctx);
     int dds_dac_init(struct dac_data_manager *manager,
                      struct dds_dac *ddac, struct iio_device *iio_dac);
-    // Executes manager channels assign routine.
     int manager_channels_assign(struct dac_data_manager *manager);
-    // Executes dac data manager update iio widgets routine.
     void dac_data_manager_update_iio_widgets(struct dac_data_manager *manager);
     QHBoxLayout *dac_data_manager_get_gui_container(struct dac_data_manager *manager);
 
-    // Executes manage dds mode routine.
     void manage_dds_mode(QComboBox *box,dds_tx *tx);
-    // Executes dds locked scale cb routine.
     void dds_locked_scale_cb(dds_tx *tx);
-    // Executes dds locked phase cb routine.
     void dds_locked_phase_cb(dds_tx *tx);
-    // Executes dds locked freq cb routine.
     void dds_locked_freq_cb(dds_tx *tx);
-    // Executes scale spin button output cb routine.
     gboolean scale_spin_button_output_cb(QDoubleSpinBox *spin, gpointer data);
     QGroupBox *gui_dac_buffer_create(dac_buffer *d_buffer);
-    // Event/Signal handler for waveform load button clicked cb.
     void waveform_load_button_clicked_cb(dac_buffer *dbuf);
-    // Executes process dac buffer file routine.
     int process_dac_buffer_file(dac_data_manager *manager, const char *file_name, char **stat_msg);
-    // Executes dac buffer config file set cb routine.
     void dac_buffer_config_file_set_cb(QString fileName, dac_buffer &dbuf);
     QScrollArea *gui_dac_channels_tree_create(dac_buffer *d_buffer);
-    // Executes dac data manager freq widgets range update routine.
     void dac_data_manager_freq_widgets_range_update(dac_data_manager *manager, double tx_sample_rate);
-    // Sets file value and updates internal subsystem configuration.
     QString setFile(QString fileName,double scale );
-    // Executes disable dac routine.
     void DisableDac();
 //    dac_data_manager *manager;
     QComboBox * dfdf;
@@ -341,9 +298,7 @@ public:
 //    QPushButton *fchooser_btn;
 
 public slots:
-    // Retrieves current data state.
     void getData(bool);
-    // Retrieves current val state.
     void getVal(QComboBox*, bool);
 
 

@@ -157,7 +157,7 @@ void Tuner::plotInit()
 
 
 
-// Sets q glcharts parameters value and updates internal subsystem configuration.
+// Sets q glcharts parameters parameter and updates internal configuration.
 void Tuner::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
 //    glChart->setMinimumSize(QSize(50, 50));
@@ -229,7 +229,6 @@ void Tuner::removeAllPoints()
 //i have     int plottingValues( const double *, QCustomPlot * , QVector<double> *, QVector<double> *, double min, double max,int);
 // function now i want to make optional QCustomPlot *
 
-// Executes emit to plot routine.
 void Tuner::emitToPlot()
 {
     emit createPlotSignal1(series1);
@@ -337,7 +336,7 @@ void Tuner::fillingPlotVector(QStringList &frame)
     }
 }
 
-// Sets vector to qcustom value and updates internal subsystem configuration.
+// Sets vector to qcustom parameter and updates internal configuration.
 void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int data)
 {
     vec.setX(yAxiosCounter);
@@ -345,7 +344,7 @@ void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int dat
     QCustom.addPoints(vec);
 }
 
-// Event/Signal handler for on  device response slot.
+// Signal/Slot handler responding to on  device response slot event.
 void Tuner::on_DeviceResponseSlot(QByteArray response)
 {
 //    qDebug ()<<"tuner ---> "  <<response;
@@ -382,7 +381,7 @@ void Tuner::on_DeviceResponseSlot(QByteArray response)
     yAxiosCounter++;
 }
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void Tuner::isDeviceConnectedSlot(bool val)
 {
     isConnect = val;
@@ -395,7 +394,7 @@ void Tuner::joshanFuncDataSlot(QString)
 
 }
 
-// Event/Signal handler for on push button 5 clicked.
+// Signal/Slot handler responding to on push button 5 clicked event.
 void Tuner::on_pushButton_5_clicked()
 {
     if(isConnect){
@@ -432,7 +431,7 @@ void Tuner::updateAutoSend()
 
 
 
-// Destructor: Cleans up Tuner resources, timers, and allocated memory.
+// Destructor: Releases Tuner allocated resources, buffers, and timers.
 Tuner::~Tuner()
 {
     //    delete vBox1       ;
@@ -489,7 +488,7 @@ Tuner::~Tuner()
 
 }
 
-// Event/Signal handler for on btn start clicked.
+// Signal/Slot handler responding to on btn start clicked event.
 void Tuner::on_btnStart_clicked()
 {
     if(isConnect){
@@ -500,7 +499,7 @@ void Tuner::on_btnStart_clicked()
     }
 }
 
-// Event/Signal handler for on btn set frq clicked.
+// Signal/Slot handler responding to on btn set frq clicked event.
 void Tuner::on_btnSetFrq_clicked()
 {
 

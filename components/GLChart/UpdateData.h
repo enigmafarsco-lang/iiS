@@ -1,7 +1,7 @@
 // ============================================================================
 // File: UpdateData.h
 // Subsystem: eLynxSDR GLChart
-// Description: Subsystem implementation and interface guidance for UpdateData.h.
+// Description: Header definitions and interface declarations for UpdateData.h.
 // ============================================================================
 
 #ifndef UPDATEDATA_H
@@ -15,9 +15,7 @@ class UpdateData : public QThread
     Q_OBJECT
 
 public:
-    // Constructor: Initializes UpdateData subsystem components, default parameters, and state.
     UpdateData(QGLchart *chart);
-    // Executes run routine.
     void run();
 
     QGLchart *chart;
@@ -33,34 +31,22 @@ public:
     QVector<QVector2D> maskData;
 
     QCustomSeries *maxHoldSeries;
-    // Computes mathematical calculate max hold calculation.
     void calculateMaxHold(QCustomSeries input);
 
-    // Executes spectrum update data routine.
     void spectrumUpdateData();
-    // Executes waterfall update data routine.
     void waterfallUpdateData();
-    // Executes scatter update data routine.
     void scatterUpdateData();
-    // Executes max hold routine.
     void maxHold(bool state);
-    // Executes masking data routine.
     void maskingData(bool state, QVector<QVector2D> range={{0, 0}});
-    // Computes mathematical calculate mask data calculation.
     void calculateMaskData(QVector2D point);
 
 signals:
-    // Updates and synchronizes update data data stream.
     void updateData(QCustomSeries a);
-    // Updates and synchronizes update data data stream.
     void updateData(QCustomSeries *a);
-    // Executes clear data routine.
     void clearData(bool state);
 
 public slots:
-    // Executes clear data slot routine.
     void clearDataSlot(bool state);
-    // Executes pause slot routine.
     void pauseSlot(bool state);
 
 

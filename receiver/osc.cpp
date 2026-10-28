@@ -8,7 +8,7 @@
 #include <receiver/plot.h>
 #include <receiver/oscmain.h>
 
-// Constructor: Initializes osc subsystem components, default parameters, and state.
+// Constructor: Initializes osc subsystem components, state, and UI bindings.
 osc::osc()
 {
 }
@@ -94,7 +94,6 @@ static double read_sampling_frequency(const struct iio_device *dev)
  * @param freq
  * @return
  */
-// Executes rx update device sampling freq routine.
 bool osc::rx_update_device_sampling_freq(const char *device, double freq)
 {
     struct iio_device *dev;
@@ -148,7 +147,6 @@ bool osc::rx_update_device_sampling_freq(const char *device, double freq)
  * @param lo_freq
  * @return
  */
-// Executes rx update channel lo freq routine.
 bool osc::rx_update_channel_lo_freq(const char *device, const char *channel, double lo_freq)
 {
     struct iio_device *dev;

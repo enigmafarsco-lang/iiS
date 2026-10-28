@@ -6,7 +6,7 @@
 
 #include "tiltcomponent.h"
 
-// Constructor: Initializes BTiltComponent subsystem components, default parameters, and state.
+// Constructor: Initializes BTiltComponent subsystem components, state, and UI bindings.
 BTiltComponent::BTiltComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();
@@ -110,7 +110,7 @@ void BTiltComponent::init_tilt()
     tiltGauge->setMinimumSize(240, 240);
 }
 
-// Sets components_arrangements value and updates internal subsystem configuration.
+// Sets components_arrangements parameter and updates internal configuration.
 void BTiltComponent::set_components_arrangements()
 {
     grdMainLayout = new QGridLayout(this);

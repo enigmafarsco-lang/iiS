@@ -21,14 +21,14 @@ RFF::RFF(QWidget *parent) :
     ui->groupBox->setVisible(false);
 }
 
-// Destructor: Cleans up RFF resources, timers, and allocated memory.
+// Destructor: Releases RFF allocated resources, buffers, and timers.
 RFF::~RFF()
 {
     delete ui;
 }
 
 
-// Event/Signal handler for on  btn lna on clicked.
+// Signal/Slot handler responding to on  btn lna on clicked event.
 void RFF::on_BtnLnaOn_clicked()
 {
     QString m_commandString = "<LnaOn:1>";
@@ -37,7 +37,7 @@ void RFF::on_BtnLnaOn_clicked()
     QThread::currentThread()->msleep(50);
 }
 
-// Event/Signal handler for on  btn lna off clicked.
+// Signal/Slot handler responding to on  btn lna off clicked event.
 void RFF::on_BtnLnaOff_clicked()
 {
     QString m_commandString = "<LnaOn:0>";
@@ -48,13 +48,13 @@ void RFF::on_BtnLnaOff_clicked()
 
 
 
-// Event/Signal handler for on  rdb dbm clicked.
+// Signal/Slot handler responding to on  rdb dbm clicked event.
 void RFF::on_RdbDbm_clicked()
 {
     m_powerUnitDbm = true;
 }
 
-// Transmits send start slot command/packet over communication interface.
+// Transmits send start slot command/packet over interface.
 void RFF::sendStartSlot()
 {
     emit sendStartSignal("<BIT:?>");
@@ -81,7 +81,7 @@ void RFF::joshanStatusDataSlot()
     emit sendStatusDataToJoshanSignal(rffData);
 }
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void RFF::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;
@@ -109,7 +109,6 @@ void RFF::joshanControlDataSlot(QJsonObject val)
 //}
 
 
-// Event/Signal handler for on  rdb watt clicked.
 void RFF::on_RdbWatt_clicked()
 {
     m_powerUnitDbm = false;
@@ -119,7 +118,7 @@ void RFF::on_RdbWatt_clicked()
 
 
 
-// Event/Signal handler for on  device response slot.
+// Signal/Slot handler responding to on  device response slot event.
 void RFF::on_DeviceResponseSlot(QByteArray response)
 {
     QString packet;

@@ -30,7 +30,7 @@
 #include "led.h" 
 
 
-// Constructor: Initializes Led subsystem components, default parameters, and state.
+// Constructor: Initializes Led subsystem components, state, and UI bindings.
 Led::Led(QWidget * parent):WidgetWithBackground(parent)
 {
   m_checked = true; 
@@ -39,14 +39,14 @@ Led::Led(QWidget * parent):WidgetWithBackground(parent)
 }
 
 
-// Retrieves current hecked state.
+// Retrieves current hecked value.
 bool Led::isChecked () const 
 {
   return m_checked; 
 }
 
 
-// Sets checked value and updates internal subsystem configuration.
+// Sets checked parameter and updates internal configuration.
 void Led::setChecked(bool i) 
 {
   m_checked = i; 
@@ -62,7 +62,7 @@ QColor Led::color() const
 }
 
 
-// Sets color value and updates internal subsystem configuration.
+// Sets color parameter and updates internal configuration.
 void Led::setColor(QColor i)
 { 
   m_color = i; 
@@ -74,7 +74,7 @@ void Led::paintEvent(QPaintEvent * /* event*/ )
 {
   QPainter painter(this); 
   initCoordinateSystem(painter); 
-  // *** Draw circle
+  // *** Draw circle */ 
   int h,s,v,a; 
   QColor c,back = color(); 
   c=back; 

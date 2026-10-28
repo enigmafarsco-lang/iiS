@@ -11,7 +11,6 @@
 /**
  * @brief Pulse::Pulse
  */
-// Constructor: Initializes Pulse subsystem components, default parameters, and state.
 Pulse::Pulse()
 {
 
@@ -21,7 +20,6 @@ Pulse::Pulse()
  * @brief Pulse::Pulse
  * @param pulseBand
  */
-// Constructor: Initializes Pulse subsystem components, default parameters, and state.
 Pulse::Pulse(Enumerations::Band pulseBand)
 {
     switch (pulseBand)

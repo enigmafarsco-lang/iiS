@@ -1,7 +1,7 @@
 // ============================================================================
 // File: osc.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for osc.h.
+// Description: Header definitions and interface declarations for osc.h.
 // ============================================================================
 
 #ifndef OSC_H
@@ -42,9 +42,7 @@ class osc
 {
 
 public:
-    // Constructor: Initializes osc subsystem components, default parameters, and state.
     osc();
-    // Executes rx update device sampling freq routine.
     bool rx_update_device_sampling_freq(const char *device, double freq);
     bool rx_update_channel_lo_freq(const char *device, const char *channel,
                                    double lo_freq);

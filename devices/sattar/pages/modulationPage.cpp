@@ -77,7 +77,7 @@ ModulationPage::ModulationPage(QWidget *parent,
 
 }
 
-// Destructor: Cleans up ModulationPage resources, timers, and allocated memory.
+// Destructor: Releases ModulationPage allocated resources, buffers, and timers.
 ModulationPage::~ModulationPage()
 {
     delete ui;
@@ -130,7 +130,6 @@ void ModulationPage::modulInfoSlot(modulSpace::modeTypeEnum modultype)
 
 //------------------------xfm----------------------------------
 
-// Executes xfm action routine.
 bool ModulationPage::xfmAction()
 {
     modulData->xfmTargetFrq = ui->xfm_spnFrq->value() - BandA1;
@@ -171,7 +170,6 @@ bool ModulationPage::xfmAction()
 
 //-----------------------fsk-----------------------------------
 
-// Executes fsk action routine.
 bool ModulationPage::fskAction()
 {
     if(ui->fsk_radFskSimple->isChecked())
@@ -395,7 +393,7 @@ QString ModulationPage::barkerModifier()
     return  modifiedBarkerVal;
 }
 
-// Event/Signal handler for on bpsk btn random generate clicked.
+// Signal/Slot handler responding to on bpsk btn random generate clicked event.
 void ModulationPage::on_bpsk_btnRandomGenerate_clicked()
 {
     int count = ui->bpsk_spnCount->value();
@@ -416,7 +414,6 @@ void ModulationPage::on_bpsk_btnRandomGenerate_clicked()
 
 //-----------------------qpsk-----------------------------------
 
-// Executes qpsk action routine.
 void ModulationPage::qpskAction()
 {
     modulData->qpskTB = ui->qpsk_spnTb->value(); // bit duration
@@ -437,7 +434,7 @@ void ModulationPage::qpskAction()
     utils->spureGenerateDate(*spureData, *modulData, *radarData, *frqData, *priData, *pwData);
 }
 
-// Event/Signal handler for on qpsk btn random generate clicked.
+// Signal/Slot handler responding to on qpsk btn random generate clicked event.
 void ModulationPage::on_qpsk_btnRandomGenerate_clicked()
 {
     int count = ui->qpsk_spnCustomCount->value();
@@ -502,7 +499,6 @@ QString  ModulationPage::customCodeModifier()
 
 //------------------------others----------------------------------
 
-// Event/Signal handler for on xfm rad lfm toggled.
 void ModulationPage::on_xfm_radLfm_toggled(bool checked)
 {
     if(checked){
@@ -516,7 +512,7 @@ void ModulationPage::on_xfm_radLfm_toggled(bool checked)
     }
 }
 
-// Event/Signal handler for on bpsk rad barker code toggled.
+// Signal/Slot handler responding to on bpsk rad barker code toggled event.
 void ModulationPage::on_bpsk_radBarkerCode_toggled(bool checked)
 {
     if (checked)
@@ -531,7 +527,7 @@ void ModulationPage::on_bpsk_radBarkerCode_toggled(bool checked)
     }
 }
 
-// Event/Signal handler for on qpsk rad frank toggled.
+// Signal/Slot handler responding to on qpsk rad frank toggled event.
 void ModulationPage::on_qpsk_radFrank_toggled(bool checked)
 {
 
@@ -548,7 +544,7 @@ void ModulationPage::on_qpsk_radFrank_toggled(bool checked)
     }
 }
 
-// Event/Signal handler for on fsk rad fsk simple toggled.
+// Signal/Slot handler responding to on fsk rad fsk simple toggled event.
 void ModulationPage::on_fsk_radFskSimple_toggled(bool checked)
 {
     //    std::cout << checked << std::endl;
@@ -564,7 +560,7 @@ void ModulationPage::on_fsk_radFskSimple_toggled(bool checked)
     }
 }
 
-// Event/Signal handler for on bpsk cmb barker code activated.
+// Signal/Slot handler responding to on bpsk cmb barker code activated event.
 void ModulationPage::on_bpsk_cmbBarkerCode_activated(int index)
 {
     switch (index)
@@ -604,7 +600,7 @@ void ModulationPage::on_bpsk_cmbBarkerCode_activated(int index)
     }
 }
 
-// Event/Signal handler for on btn ok clicked.
+// Signal/Slot handler responding to on btn ok clicked event.
 void ModulationPage::on_btnOk_clicked()
 {
     if(modulData->type == modulSpace::modeTypeEnum::xFM)

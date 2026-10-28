@@ -1,7 +1,7 @@
 // ============================================================================
 // File: Store.h
 // Subsystem: eLynxSDR components
-// Description: Subsystem implementation and interface guidance for Store.h.
+// Description: Header definitions and interface declarations for Store.h.
 // ============================================================================
 
 #ifndef CONSTANTS_H

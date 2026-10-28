@@ -41,7 +41,7 @@ PulsePage::PulsePage(QWidget *parent, radarSpace::radarDataStruct * radarData) :
 
 
 
-// Event/Signal handler for on btn ok clicked.
+// Signal/Slot handler responding to on btn ok clicked event.
 void PulsePage::on_btnOk_clicked()
 {
 
@@ -171,7 +171,7 @@ void PulsePage::on_btnOk_clicked()
 
 
 
-// Destructor: Cleans up PulsePage resources, timers, and allocated memory.
+// Destructor: Releases PulsePage allocated resources, buffers, and timers.
 PulsePage::~PulsePage()
 {
     delete  radarData;

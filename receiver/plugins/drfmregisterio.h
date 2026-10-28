@@ -1,7 +1,7 @@
 // ============================================================================
 // File: drfmregisterio.h
 // Subsystem: eLynxSDR plugins
-// Description: Subsystem implementation and interface guidance for drfmregisterio.h.
+// Description: Header definitions and interface declarations for drfmregisterio.h.
 // ============================================================================
 
 #ifndef DRFMREGISTERIO_H
@@ -58,15 +58,12 @@ struct DrfmRegisterDef
 class DrfmRegisterIO
 {
 public:
-    // Constructor: Initializes DrfmRegisterIO subsystem components, default parameters, and state.
     DrfmRegisterIO();
 
     // Full register table (offset, label, attribute aliases).
     static const QList<DrfmRegisterDef> &registerMap();
     static const DrfmRegisterDef *defForOffset(quint32 offset);
-    // Executes attr names for offset routine.
     static QStringList attrNamesForOffset(quint32 offset);
-    // Executes label for offset routine.
     static QString labelForOffset(quint32 offset);
 
     // Corrected register write (paths 1-4 described above).
@@ -94,7 +91,6 @@ private:
 
     struct iio_device *ledCountDevice();
     struct iio_device *legacyBridgeDevice();
-    // Sets legacy bridge enabled value and updates internal subsystem configuration.
     void setLegacyBridgeEnabled(bool enable);
 
     // Finds the channel raw attribute that represents one of the register
@@ -106,15 +102,12 @@ private:
                          quint32 value, bool isSigned, QString *how,
                          ChannelRawMatch *usedMatch = nullptr);
 
-    // Executes debug attr names routine.
     QStringList debugAttrNames(struct iio_device *dev) const;
     QString matchAttrName(const QStringList &available,
                           const QStringList &wanted) const;
     bool writeDebugAttr(struct iio_device *dev, const QString &name,
                         quint32 value, bool isSigned, QString *how);
-    // Executes value text routine.
     static QString valueText(quint32 value, bool isSigned);
-    // Executes channel name candidates routine.
     static QStringList channelNameCandidates(struct iio_channel *ch);
 
     struct iio_device *m_ledDev;

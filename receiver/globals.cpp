@@ -22,7 +22,6 @@ double globals::temp9009=0;
 /**
  * @brief globals::globals
  */
-// Constructor: Initializes globals subsystem components, default parameters, and state.
 globals::globals()
 {
 }
@@ -30,7 +29,6 @@ globals::globals()
 /**
  * @brief globals::osc_destroy_context
  */
-// Executes osc destroy context routine.
 void globals::osc_destroy_context()
 {
     iio_context_destroy(ctx);
@@ -43,7 +41,6 @@ void globals::osc_destroy_context()
  * @param val
  * @return
  */
-// Sets widget_value value and updates internal subsystem configuration.
 char * globals::set_widget_value(QWidget *widget, struct w_info *item, long long val)
 {
     QString className=widget->metaObject()->className();
@@ -121,7 +118,6 @@ char * globals::set_widget_value(QWidget *widget, struct w_info *item, long long
  * @param item
  * @param val
  */
-// Executes connect widget routine.
 void globals::connect_widget(QWidget *widget, struct w_info *item, long long val)
 {
     set_widget_value(widget, item, val);
@@ -169,7 +165,6 @@ int globals::__connect_widget(struct iio_device *dev, const char *attr,
  * @param builder
  * @return
  */
-// Executes connect widgets routine.
 int globals::connect_widgets(QWidget *builder)
 {
     return iio_device_debug_attr_read_all(dev, __connect_widget, builder);
@@ -182,7 +177,6 @@ int globals::connect_widgets(QWidget *builder)
  * (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated ssh exec
  * (BatchMode: never prompts for a password).
  */
-// Executes board serial number routine.
 QString globals::boardSerialNumber()
 {
     QString sn;

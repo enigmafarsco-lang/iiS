@@ -92,7 +92,7 @@ void PWPage::changeLable()
 
 
 
-// Event/Signal handler for on btn add clicked.
+// Signal/Slot handler responding to on btn add clicked event.
 void PWPage::on_btnAdd_clicked()
 {
     ui->tblPW->insertRow(ui->tblPW->rowCount());
@@ -122,7 +122,7 @@ void PWPage::btnSlot()
     btnRed();
 }
 
-// Event/Signal handler for on btn clear clicked.
+// Signal/Slot handler responding to on btn clear clicked event.
 void PWPage::on_btnClear_clicked()
 {
     row =0;
@@ -132,7 +132,7 @@ void PWPage::on_btnClear_clicked()
     btnRed();
 }
 
-// Event/Signal handler for on btn ok clicked.
+// Signal/Slot handler responding to on btn ok clicked event.
 void PWPage::on_btnOk_clicked()
 {
 
@@ -255,7 +255,7 @@ bool PWPage::pwCompare(float&pw)
     return true;
 }
 
-// Destructor: Cleans up PWPage resources, timers, and allocated memory.
+// Destructor: Releases PWPage allocated resources, buffers, and timers.
 PWPage::~PWPage()
 {
     delete ui;
@@ -265,7 +265,7 @@ PWPage::~PWPage()
 
 }
 
-// Event/Signal handler for on tbl p w cell changed.
+// Signal/Slot handler responding to on tbl p w cell changed event.
 void PWPage::on_tblPW_cellChanged(int row, int column)
 {
 
@@ -298,7 +298,6 @@ void PWPage::btnGreen(){
 
 //====================================================================
 
-// Executes generate p w data routine.
 bool PWPage::generatePWData(pwSpace::pwDataStruct &data )
 {
     if(data.Type == pwSpace::pwTypeEnum::constant)

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: FFT.h
 // Subsystem: eLynxSDR fft
-// Description: Subsystem implementation and interface guidance for FFT.h.
+// Description: Header definitions and interface declarations for FFT.h.
 // ============================================================================
 
 #ifndef FFT_H
@@ -71,13 +71,11 @@ void transform(complex<double>* f, int N) //
     n *= 2;
     a = a / 2;
   }
-  // Executes free routine.
   free(W);
 }
 
 void FFT(complex<double>* f, int N, double d)
 {
-  // Executes transform routine.
   transform(f, N);
   for(int i = 0; i < N; i++)
     f[i] *= d; //multiplying by step

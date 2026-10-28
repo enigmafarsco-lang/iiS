@@ -1,7 +1,7 @@
 // ============================================================================
 // File: spurepage.h
 // Subsystem: eLynxSDR pages
-// Description: Subsystem implementation and interface guidance for spurepage.h.
+// Description: Header definitions and interface declarations for spurepage.h.
 // ============================================================================
 
 #ifndef SPUREPAGE_H
@@ -13,7 +13,6 @@ class SpurePage : public QObject
 {
     Q_OBJECT
 public:
-    // Constructor: Initializes SpurePage subsystem components, default parameters, and state.
     explicit SpurePage(QObject *parent = nullptr);
 
 signals:

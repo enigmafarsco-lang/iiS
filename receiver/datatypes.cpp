@@ -6,7 +6,7 @@
 
 #include "datatypes.h"
 
-// Constructor: Initializes DataTypes subsystem components, default parameters, and state.
+// Constructor: Initializes DataTypes subsystem components, state, and UI bindings.
 DataTypes::DataTypes()
 {
 

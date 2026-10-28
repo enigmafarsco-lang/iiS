@@ -27,13 +27,13 @@ FileDialog::FileDialog(QWidget *parent) :
     ui->listView->setModel(filemodel);
 }
 
-// Destructor: Cleans up FileDialog resources, timers, and allocated memory.
+// Destructor: Releases FileDialog allocated resources, buffers, and timers.
 FileDialog::~FileDialog()
 {
     delete ui;
 }
 
-// Event/Signal handler for on tree view clicked.
+// Signal/Slot handler responding to on tree view clicked event.
 void FileDialog::on_treeView_clicked(const QModelIndex &index)
 {
     QString sPath=dirmodel->fileInfo(index).absoluteFilePath();

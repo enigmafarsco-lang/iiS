@@ -126,7 +126,9 @@
          </item>
          <item>
           <widget class="QLabel" name="lblFan_2">
-
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -174,7 +176,7 @@
             <number>24</number>
            </property>
            <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <set>Qt::AlignBottom|Qt::AlignJustify</set>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>

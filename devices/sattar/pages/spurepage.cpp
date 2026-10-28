@@ -6,7 +6,7 @@
 
 #include "spurepage.h"
 
-// Constructor: Initializes SpurePage subsystem components, default parameters, and state.
+// Constructor: Initializes SpurePage subsystem components, state, and UI bindings.
 SpurePage::SpurePage(QObject *parent) : QObject(parent)
 {
 

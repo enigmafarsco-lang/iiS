@@ -1,7 +1,7 @@
 // ============================================================================
 // File: mainPage.h
 // Subsystem: eLynxSDR pages
-// Description: Subsystem implementation and interface guidance for mainPage.h.
+// Description: Header definitions and interface declarations for mainPage.h.
 // ============================================================================
 
 #ifndef MAINPAGE_H
@@ -31,9 +31,7 @@ class MainPage : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes MainPage subsystem components, default parameters, and state.
     explicit MainPage(QWidget *parent = nullptr);
-    // Destructor: Cleans up MainPage resources, timers, and allocated memory.
     ~MainPage();
     //functions
     SattarUtils * utils;
@@ -62,24 +60,17 @@ private:
     PRIPage * priPage;
     PWPage * pwPage;
 
-    // Initializes init for MainPage.
     void init();
-    // Executes connections routine.
     void connections();
 
 public slots:
 
 
 private slots:
-    // Executes menu generate slot routine.
     void menuGenerateSlot();
-    // Executes show modul tab routine.
     void showModulTab();
-    // Executes show p r i tab routine.
     void ShowPRITab();
-    // Executes show frq tab routine.
     void ShowFrqTab();
-    // Executes show p w tab routine.
     void ShowPWTab();
 
 signals:
@@ -91,9 +82,7 @@ signals:
                         pwSpace::pwDataStruct&,
                         projectDataSpace::projectDataStruct&,
                         int status);
-    // Executes load sattar file signal routine.
     void loadSattarFileSignal(QString, double,QString);
-    // Transmits send frq value to frq page sig command/packet over communication interface.
     void sendFrqValueToFrqPageSig(double);
 
 };

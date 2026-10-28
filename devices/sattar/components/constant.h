@@ -1,7 +1,7 @@
 // ============================================================================
 // File: constant.h
 // Subsystem: eLynxSDR components
-// Description: Subsystem implementation and interface guidance for constant.h.
+// Description: Header definitions and interface declarations for constant.h.
 // ============================================================================
 
 #ifndef CONSTANT_H

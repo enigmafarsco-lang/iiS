@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pulse.h
 // Subsystem: eLynxSDR clustring
-// Description: Subsystem implementation and interface guidance for pulse.h.
+// Description: Header definitions and interface declarations for pulse.h.
 // ============================================================================
 
 #ifndef PULSE_H
@@ -14,9 +14,7 @@ class Pulse
 {
 
 public:
-    // Constructor: Initializes Pulse subsystem components, default parameters, and state.
     Pulse();
-    // Constructor: Initializes Pulse subsystem components, default parameters, and state.
     Pulse(Enumerations::Band pulseBand);
 
     int          MinFrequency=0;
@@ -40,7 +38,6 @@ public:
 
     QList<Pulse*> *Clone(QList<Pulse*>*);
 
-    // Executes update routine.
     void Update(Pulse*);
 
 

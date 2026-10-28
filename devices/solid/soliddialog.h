@@ -1,7 +1,7 @@
 // ============================================================================
 // File: soliddialog.h
 // Subsystem: eLynxSDR solid
-// Description: Subsystem implementation and interface guidance for soliddialog.h.
+// Description: Header definitions and interface declarations for soliddialog.h.
 // ============================================================================
 
 #ifndef SOLIDDIALOG_H
@@ -24,52 +24,37 @@ class SolidDialog : public QDialog
     Q_OBJECT
 
 public:
-    // Constructor: Initializes SolidDialog subsystem components, default parameters, and state.
     explicit SolidDialog(QWidget *parent = nullptr);
-    // Destructor: Cleans up SolidDialog resources, timers, and allocated memory.
     ~SolidDialog();
 
 public slots:
-    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
 
 signals:
-    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
-    // Transmits send to main sig command/packet over communication interface.
     void sendToMainSig(QString);
-    // Transmits send status data to joshan signal command/packet over communication interface.
     void sendStatusDataToJoshanSignal(QJsonObject);
 
 
 public:
-    // Executes handle info routine.
     void handle_info(QString);
 
 signals:
-    // Transmits send command to other object signal command/packet over communication interface.
     void sendCommandToOtherObjectSignal(QString);
 //    void
 
 public slots:
-    // Reads and parses incoming receive command from other object slot data.
     void receiveCommandFromOtherObjectSlot(QString);
-    // Executes joshan status data slot routine.
     void joshanStatusDataSlot();
-    // Retrieves current evice connected slot state.
     void isDeviceConnectedSlot(bool);
 
 private slots:
-    // Event/Signal handler for on blinking timer time out.
     void  on_blinkingTimer_timeOut();
 
-    // Event/Signal handler for on btn start report clicked.
     void on_btnStartReport_clicked();
 
-    // Event/Signal handler for on btn stop report clicked.
     void on_btnStopReport_clicked();
 
-    // Event/Signal handler for on  solid dialog finished.
     void on_SolidDialog_finished(int result);
 
 private:
@@ -84,11 +69,8 @@ private:
     bool isDeviceConnected{false};
     //-----------------------------------
 
-    // Initializes init blinking timer for SolidDialog.
     void initBlinkingTimer();
-    // Executes connections routine.
     void connections();
-    // Initializes init leds icon for SolidDialog.
     void initLedsIcon();
 private:
     Ui::SolidDialog *ui;

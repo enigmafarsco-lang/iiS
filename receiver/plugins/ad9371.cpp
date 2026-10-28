@@ -206,7 +206,7 @@ AD9371::AD9371(QApplication *app,QWidget *parent) :
     ui->setupUi(this);
 }
 
-// Destructor: Cleans up AD9371 resources, timers, and allocated memory.
+// Destructor: Releases AD9371 allocated resources, buffers, and timers.
 AD9371::~AD9371()
 {
     delete ui;
@@ -411,7 +411,6 @@ void AD9371::make_widget_update_signal_based(struct iio_widget *widgets,
 /**
  * @brief AD9371::refreshTimerStarted
  */
-// Updates and synchronizes refresh timer started data stream.
 void AD9371::refreshTimerStarted()
 {
     qInfo()<<"refreshTimer started on "<<refreshTimer.thread();
@@ -421,7 +420,6 @@ void AD9371::refreshTimerStarted()
  * @brief rx_phase_rotation_set
  * @param user_data 
  */
-// Executes rx phase rotation set routine.
 void AD9371::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_data)
 {    
     uintptr_t offset = (uintptr_t) user_data;
@@ -457,7 +455,6 @@ void AD9371::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_data
 /**
  * @brief AD9371::reload_button_clicked
  */
-// Event/Signal handler for reload button clicked.
 void AD9371::reload_button_clicked()
 {
     update_widgets();
@@ -855,7 +852,7 @@ QWidget *AD9371::init()
 }
 
 
-// Event/Signal handler for tx sample rate changed.
+// Signal/Slot handler responding to tx sample rate changed event.
 void AD9371::tx_sample_rate_changed(QDoubleSpinBox *spinbutton)
 {
     gdouble rate;
@@ -897,7 +894,7 @@ void AD9371::int_dec_update_cb()
 }
 
 
-// Retrieves current gui_tx_sampling_freq state.
+// Retrieves current gui_tx_sampling_freq value.
 double AD9371::get_gui_tx_sampling_freq()
 {
     if(tx_widgets[tx_sample_freq].widget)
@@ -968,7 +965,6 @@ void AD9371::profile_update_labels(void) {
 /**
  * @brief AD9371::glb_settings_update_labels
  */
-// Executes glb settings update labels routine.
 void AD9371::glb_settings_update_labels()
 {
 
@@ -1097,7 +1093,7 @@ void AD9371::profile_update(void)
     rx_freq_info_update();
 }
 
-// Event/Signal handler for on btn reload settings clicked.
+// Signal/Slot handler responding to on btn reload settings clicked event.
 void AD9371::on_btnReloadSettings_clicked()
 {
     update_widgets();

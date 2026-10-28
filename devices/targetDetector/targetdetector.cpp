@@ -14,19 +14,19 @@ TargetDetector::TargetDetector(QWidget *parent) :
     ui->setupUi(this);
 }
 
-// Destructor: Cleans up TargetDetector resources, timers, and allocated memory.
+// Destructor: Releases TargetDetector allocated resources, buffers, and timers.
 TargetDetector::~TargetDetector()
 {
     delete ui;
 }
 
-// Event/Signal handler for on chb auto set clicked.
+// Signal/Slot handler responding to on chb auto set clicked event.
 void TargetDetector::on_chbAutoSet_clicked(bool checked)
 {
 
 }
 
-// Reads and parses incoming receive command from object slot data.
+// Reads, parses, and processes incoming receive command from object slot data.
 void TargetDetector::receiveCommandFromObjectSlot(QString response)
 {
 

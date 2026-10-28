@@ -85,7 +85,7 @@ struct loops_parse_params {
     bool unclosed_loops;
 };
 
-// Constructor: Initializes libini2 subsystem components, default parameters, and state.
+// Constructor: Initializes libini2 subsystem components, state, and UI bindings.
 libini2::libini2()
 {
 
@@ -453,7 +453,7 @@ bool libini2::attr_in_whitelist(const char *attr, const char *dev_name, size_t d
     return false;
 }
 
-// Reads and parses incoming read_from_ini data.
+// Reads, parses, and processes incoming read_from_ini data.
 ssize_t libini2::read_from_ini(load_store_params *params, const char *dev_name, size_t name_len, const char *attr, void *buf, size_t len)
 {
     bool found = false;
@@ -589,7 +589,7 @@ int libini2::save_to_ini_dev_cb(iio_device *dev, const char *attr, const char *v
     return 0;
 }
 
-// Transmits write_to_ini command/packet over communication interface.
+// Transmits write_to_ini command/packet over interface.
 void libini2::write_to_ini(load_store_params *params, const char *dev_name, size_t name_len, const char *attr, const char *val, size_t len)
 {
     FILE *f = params->f;
@@ -727,7 +727,7 @@ err_close:
     return ret;
 }
 
-// Transmits write_driver_name_to_ini command/packet over communication interface.
+// Transmits write_driver_name_to_ini command/packet over interface.
 void libini2::write_driver_name_to_ini(FILE *f, const char *driver_name)
 {
     if (driver_name) {

@@ -11,7 +11,7 @@
 #include <QFont>
 #include "constants/project_constans.h"
 
-// Constructor: Initializes BPanGauge subsystem components, default parameters, and state.
+// Constructor: Initializes BPanGauge subsystem components, state, and UI bindings.
 BPanGauge::BPanGauge(QWidget *parent)
     : QWidget(parent)
 {
@@ -52,7 +52,7 @@ void BPanGauge::init_panGauge()
 //    setEndWarningValue(100);
 }
 
-// Sets value value and updates internal subsystem configuration.
+// Sets value parameter and updates internal configuration.
 void BPanGauge::setValue(double value)
 {
     if(value>m_maxValue)
@@ -74,28 +74,28 @@ void BPanGauge::setValue(double value)
     update();
 }
 
-// Sets value value and updates internal subsystem configuration.
+// Sets value parameter and updates internal configuration.
 void BPanGauge::setValue(int value)
 {
    setValue((double)value);
    update();
 }
 
-// Sets min value value and updates internal subsystem configuration.
+// Sets min value parameter and updates internal configuration.
 void BPanGauge::setMinValue(double value)
 {
    m_minValue=value;
    update();
 }
 
-// Sets min value value and updates internal subsystem configuration.
+// Sets min value parameter and updates internal configuration.
 void BPanGauge::setMinValue(int value)
 {
   setMinValue((double)value);
 }
 
 
-// Sets max value value and updates internal subsystem configuration.
+// Sets max value parameter and updates internal configuration.
 void BPanGauge::setMaxValue(double value)
 {
     if(value > m_minValue)
@@ -107,14 +107,14 @@ void BPanGauge::setMaxValue(double value)
         emit errorSignal(MaxValueError);
 }
 
-// Sets max value value and updates internal subsystem configuration.
+// Sets max value parameter and updates internal configuration.
 void BPanGauge::setMaxValue(int value)
 {
   setMaxValue((double)value);
 }
 
 
-// Sets threshold value and updates internal subsystem configuration.
+// Sets threshold parameter and updates internal configuration.
 void BPanGauge::setThreshold(double value)
 {
     if(value > m_minValue && value < m_maxValue)
@@ -126,34 +126,34 @@ void BPanGauge::setThreshold(double value)
         emit errorSignal(ThresholdError);
 }
 
-// Sets threshold value and updates internal subsystem configuration.
+// Sets threshold parameter and updates internal configuration.
 void BPanGauge::setThreshold(int value)
 {
   setThreshold((double)value);
 }
 
-// Sets precision value and updates internal subsystem configuration.
+// Sets precision parameter and updates internal configuration.
 void BPanGauge::setPrecision(int precision)
 {
    m_precision=precision;
    update();
 }
 
-// Sets precision numeric value and updates internal subsystem configuration.
+// Sets precision numeric parameter and updates internal configuration.
 void BPanGauge::setPrecisionNumeric(int precision)
 {
    m_precisionNumeric=precision;
    update();
 }
 
-// Sets units value and updates internal subsystem configuration.
+// Sets units parameter and updates internal configuration.
 void BPanGauge::setUnits(QString units)
 {
   m_units=units;
   update();
 }
 
-// Sets label value and updates internal subsystem configuration.
+// Sets label parameter and updates internal configuration.
 void BPanGauge::setLabel(QString label)
 {
     m_label=label;
@@ -185,35 +185,35 @@ void BPanGauge::paintEvent(QPaintEvent *event)
     drawCrown(&painter);
 }
 
-// Sets steps value and updates internal subsystem configuration.
+// Sets steps parameter and updates internal configuration.
 void BPanGauge::setSteps(int nSteps)
 {
     m_steps=nSteps;
     update();
 }
 
-// Sets start angle value and updates internal subsystem configuration.
+// Sets start angle parameter and updates internal configuration.
 void BPanGauge::setStartAngle(double value)
 {
     m_startAngle=value;
     update();
 }
 
-// Sets end angle value and updates internal subsystem configuration.
+// Sets end angle parameter and updates internal configuration.
 void BPanGauge::setEndAngle(double value)
 {
     m_endAngle=value;
     update();
 }
 
-// Sets foreground value and updates internal subsystem configuration.
+// Sets foreground parameter and updates internal configuration.
 void BPanGauge::setForeground(QColor newForeColor)
 {
     m_foreground=newForeColor;
     update();
 }
 
-// Sets background value and updates internal subsystem configuration.
+// Sets background parameter and updates internal configuration.
 void BPanGauge::setBackground(QColor newBackColor)
 {
     m_background=newBackColor;
@@ -237,42 +237,42 @@ void BPanGauge::thresholdManager()
      }
 }
 
-// Sets threshold enabled value and updates internal subsystem configuration.
+// Sets threshold enabled parameter and updates internal configuration.
 void BPanGauge::setThresholdEnabled(bool enable)
 {
   m_thresholdEnabled=enable;
   update();
 }
 
-// Sets numeric indicator enabled value and updates internal subsystem configuration.
+// Sets numeric indicator enabled parameter and updates internal configuration.
 void BPanGauge::setNumericIndicatorEnabled(bool enable)
 {
   m_numericIndicatorEnabled=enable;
   update();
 }
 
-// Sets begin valid value value and updates internal subsystem configuration.
+// Sets begin valid value parameter and updates internal configuration.
 void BPanGauge::setBeginValidValue(double beginValue)
 {
     m_beginValidValue=beginValue;
     update();
 }
 
-// Sets end valid value value and updates internal subsystem configuration.
+// Sets end valid value parameter and updates internal configuration.
 void BPanGauge::setEndValidValue(double endValue)
 {
     m_endValidValue=endValue;
     update();
 }
 
-// Sets enable valid window value and updates internal subsystem configuration.
+// Sets enable valid window parameter and updates internal configuration.
 void BPanGauge::setEnableValidWindow(bool enable)
 {
     m_enableValidWindow=enable;
     update();
 }
 
-// Sets begin warning value value and updates internal subsystem configuration.
+// Sets begin warning value parameter and updates internal configuration.
 void BPanGauge::setBeginWarningValue(double beginValue)
 {
     m_beginWarningValue=beginValue;
@@ -280,14 +280,14 @@ void BPanGauge::setBeginWarningValue(double beginValue)
 
 }
 
-// Sets end warning value value and updates internal subsystem configuration.
+// Sets end warning value parameter and updates internal configuration.
 void BPanGauge::setEndWarningValue(double endValue)
 {
     m_endWarningValue=endValue;
     update();
 }
 
-// Sets enable warning window value and updates internal subsystem configuration.
+// Sets enable warning window parameter and updates internal configuration.
 void BPanGauge::setEnableWarningWindow(bool enable)
 {
     m_enableWarningWindow=enable;

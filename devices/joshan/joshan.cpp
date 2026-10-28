@@ -18,7 +18,7 @@ Joshan::Joshan(QWidget *parent) :
     connections();
 }
 
-// Retrieves current oshan stop setter state.
+// Retrieves current oshan stop setter value.
 void Joshan::isJoshanStopSetter(bool val)
 {
     isJoshanStop = val;
@@ -47,7 +47,7 @@ void Joshan::joshanIsConnected(bool connected)
 }
 
 
-// Destructor: Cleans up Joshan resources, timers, and allocated memory.
+// Destructor: Releases Joshan allocated resources, buffers, and timers.
 Joshan::~Joshan()
 {
     delete ui;
@@ -77,7 +77,7 @@ void Joshan::connections()
 
 }
 
-// Event/Signal handler for on  device response slot.
+// Signal/Slot handler responding to on  device response slot event.
 void Joshan::on_DeviceResponseSlot(QByteArray response)
 {
     if (isJoshanStop)
@@ -138,7 +138,7 @@ void Joshan::on_DeviceResponseSlot(QByteArray response)
     }
 }
 
-// Retrieves current func data joshan slot state.
+// Retrieves current func data joshan slot value.
 void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");
@@ -168,7 +168,7 @@ void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
     }
 }
 
-// Retrieves current status data joshan slot state.
+// Retrieves current status data joshan slot value.
 void Joshan::getStatusDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");
@@ -205,7 +205,6 @@ void Joshan::getStatusDataJoshanSlot(QJsonObject deviceData)
 //    this->lnaStatus=lnaStatus;
 //}
 
-// Executes handle info routine.
 void Joshan::handle_info(QString response)
 {
 

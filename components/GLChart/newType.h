@@ -1,7 +1,7 @@
 // ============================================================================
 // File: newType.h
 // Subsystem: eLynxSDR GLChart
-// Description: Subsystem implementation and interface guidance for newType.h.
+// Description: Header definitions and interface declarations for newType.h.
 // ============================================================================
 
 #pragma once
@@ -123,7 +123,6 @@ public:
 	bool	powerJupiterIsReset;
 	bool	powerAmpIsReset;
 
-	// Executes to json routine.
 	QJsonObject toJson();
 	
 };
@@ -294,9 +293,7 @@ public:
 	double							Amp_root_mean;
 	double							Freq_std;
 
-	// Executes to json routine.
 	QJsonObject toJson();
-	// Executes from json routine.
 	bool fromJson(QJsonObject);
 };
 Q_DECLARE_METATYPE(EdwType);
@@ -402,7 +399,6 @@ public:
 	quint32					m_lockTime;
 	quint32					m_processTime;
 	quint16				    m_tunerFilter;
-	// Executes to json routine.
 	QJsonObject toJson();
 };
 Q_DECLARE_METATYPE(TunerSetting);
@@ -518,9 +514,7 @@ public:
 	quint32			tunerStopFreq;
 	bool			isPanorama;
 	bool			isTunerConnected;
-	// Executes to json routine.
 	QJsonObject toJson();
-	// Executes from json routine.
 	void fromJson(QJsonObject);
 };
 
@@ -655,9 +649,7 @@ public:
 		SweepSpotMode       ssnj;
 		SweepLfmMode        slfmnj;
 	};
-	// Executes to json routine.
 	QJsonObject toJson();
-	// Executes from json routine.
 	void fromJson(QJsonObject);
 };
 
@@ -717,9 +709,7 @@ public:
 	bool outerRange;
 	qreal centerFrequency;
 	qreal BW;
-	// Executes to json routine.
 	QJsonObject toJson();
-	// Executes from json routine.
 	bool fromJson(QJsonObject);
 };
 

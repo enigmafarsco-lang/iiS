@@ -421,7 +421,7 @@ ControlUnitADRV9009::ControlUnitADRV9009(QWidget *parent) :
 
 }
 
-// Destructor: Cleans up ControlUnitADRV9009 resources, timers, and allocated memory.
+// Destructor: Releases ControlUnitADRV9009 allocated resources, buffers, and timers.
 ControlUnitADRV9009::~ControlUnitADRV9009()
 {
     delete ui;
@@ -434,7 +434,6 @@ ControlUnitADRV9009::~ControlUnitADRV9009()
 /**
  * @brief ControlUnitADRV9009::ReadAll
  */
-// Executes read all routine.
 void ControlUnitADRV9009::ReadAll()
 {
     if (!readDev || !writeDev)
@@ -471,7 +470,6 @@ void ControlUnitADRV9009::ReadAll()
 /**
  * @brief ControlUnitADRV9009::EnableWrite
  */
-// Executes enable write routine.
 void ControlUnitADRV9009::EnableWrite()
 {
     resolveRegisterDevices();
@@ -810,7 +808,7 @@ bool ControlUnitADRV9009::writeRegisterLikeThreshold(quint32 offset, quint32 val
     return ret == 0;
 }
 
-// Sets drfm enabled value and updates internal subsystem configuration.
+// Sets drfm enabled parameter and updates internal configuration.
 bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
 {
     // tcl07020.tcl:
@@ -826,7 +824,7 @@ bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
     return ok;
 }
 
-// Sets amplify value value and updates internal subsystem configuration.
+// Sets amplify value parameter and updates internal configuration.
 bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *details)
 {
     // TH0 is wired directly to MUXDACS amplify.  There is no separate
@@ -854,7 +852,7 @@ bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *
     return ok;
 }
 
-// Sets vgpo enabled value and updates internal subsystem configuration.
+// Sets vgpo enabled parameter and updates internal configuration.
 bool ControlUnitADRV9009::setVgpoEnabled(bool enabled, QString *details)
 {
     // PDW is the real Doppler/VGPO enable line.
@@ -926,7 +924,7 @@ bool ControlUnitADRV9009::setVgpoValue(quint32 phaseOffset, qint32 phaseStep,
     return paramsOk && enableOk;
 }
 
-// Sets target range value and updates internal subsystem configuration.
+// Sets target range parameter and updates internal configuration.
 bool ControlUnitADRV9009::setTargetRange(double rangeMeters, QString *details)
 {
     const double delayUs = calculateDelayUs(rangeMeters);
@@ -952,14 +950,14 @@ bool ControlUnitADRV9009::setTargetRange(double rangeMeters, QString *details)
     return true;
 }
 
-// Sets target delay value and updates internal subsystem configuration.
+// Sets target delay parameter and updates internal configuration.
 bool ControlUnitADRV9009::setTargetDelay(double delayUs, QString *details)
 {
     const double rangeMeters = calculateRangeMeters(delayUs);
     return setTargetRange(rangeMeters, details);
 }
 
-// Sets target doppler value and updates internal subsystem configuration.
+// Sets target doppler parameter and updates internal configuration.
 bool ControlUnitADRV9009::setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled, QString *details)
 {
     const double wavelengthM = calculateWavelengthM(centerFreqMhz);
@@ -988,7 +986,7 @@ bool ControlUnitADRV9009::setTargetDoppler(double dopplerHz, double centerFreqMh
     return ok;
 }
 
-// Sets target velocity value and updates internal subsystem configuration.
+// Sets target velocity parameter and updates internal configuration.
 bool ControlUnitADRV9009::setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled, QString *details)
 {
     const double dopplerHz = calculateDopplerHz(velocityMps, centerFreqMhz);
@@ -998,7 +996,6 @@ bool ControlUnitADRV9009::setTargetVelocity(double velocityMps, double centerFre
 /**
  * @brief ControlUnitADRV9009::WriteAll
  */
-// Executes write all routine.
 void ControlUnitADRV9009::WriteAll()
 {
     if (!writeDev)
@@ -1018,7 +1015,6 @@ void ControlUnitADRV9009::WriteAll()
  * @param address
  * @param val
  */
-// Executes write routine.
 void ControlUnitADRV9009::Write(uint32_t address,uint32_t val)
 {
     // Original TH1/TH2 and every legacy register button arrive here.

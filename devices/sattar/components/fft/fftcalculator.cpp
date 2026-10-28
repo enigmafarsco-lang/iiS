@@ -6,7 +6,7 @@
 
 #include "fftcalculator.h"
 
-// Constructor: Initializes fftCalculator subsystem components, default parameters, and state.
+// Constructor: Initializes fftCalculator subsystem components, state, and UI bindings.
 fftCalculator::fftCalculator(QObject *parent) : QObject(parent)
 {
 

@@ -33,37 +33,37 @@
 
 QLabel{
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 QPushButton{
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 
 QCheckBox{
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 
 QDoubleSpinBox{
 height:30px;
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 QSpinBox{
 height:30px;
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 QComboBox{
 height:30px;
 font: 75 11pt &quot;Ubuntu&quot;;
-color:rgb(0, 0, 104);
+color:rgb(255, 255, 255);
 }
 
 </string>

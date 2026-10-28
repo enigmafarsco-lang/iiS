@@ -88,7 +88,7 @@ const QString &Settings::getIp() const
     return Ip;
 }
 
-// Sets ip value and updates internal subsystem configuration.
+// Sets ip parameter and updates internal configuration.
 void Settings::setIp(const QString &newIp)
 {
     Ip = newIp;
@@ -99,7 +99,7 @@ const QString &Settings::getPort() const
     return Port;
 }
 
-// Sets port value and updates internal subsystem configuration.
+// Sets port parameter and updates internal configuration.
 void Settings::setPort(const QString &newPort)
 {
     Port = newPort;
@@ -110,19 +110,19 @@ const QString &Settings::getMode() const
     return Mode;
 }
 
-// Sets mode value and updates internal subsystem configuration.
+// Sets mode parameter and updates internal configuration.
 void Settings::setMode(const QString &newMode)
 {
     Mode = newMode;
 }
 
-// Retrieves current last filter state.
+// Retrieves current last filter value.
 QString Settings::getLastFilter() const
 {
     return LastFilter;
 }
 
-// Sets last filter value and updates internal subsystem configuration.
+// Sets last filter parameter and updates internal configuration.
 void Settings::setLastFilter(const QString &newLastFilter)
 {
     LastFilter = newLastFilter;

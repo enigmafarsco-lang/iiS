@@ -8,7 +8,7 @@
 #include <QAbstractButton>
 #include <QWidget>
 
-// Constructor: Initializes iio_utils subsystem components, default parameters, and state.
+// Constructor: Initializes iio_utils subsystem components, state, and UI bindings.
 iio_utils::iio_utils()
 {
 
@@ -115,7 +115,6 @@ char *iio_utils::iio_get_device_label(const struct iio_device *dev)
  * Gets all devices that have their name starting with the given sequence.
  * Returns an array of 'struct iio_device *' elements.
  */
-// Retrieves current iio_devices_starting_with state.
 GArray * iio_utils::get_iio_devices_starting_with(struct iio_context *ctx, const char *sequence)
 {
     GArray *devices = g_array_new(FALSE, FALSE, sizeof(struct iio_devices *));

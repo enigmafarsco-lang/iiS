@@ -1,9 +1,3 @@
-// ============================================================================
-// File: led.h
-// Subsystem: eLynxSDR led
-// Description: Subsystem implementation and interface guidance for led.h.
-// ============================================================================
-
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -32,7 +26,7 @@
 #include "widgetwithbackground.h"
 
    /**
-   * Klasa reprezentujca diod w dowolnym kolorze jako dwustabilny element wskazujcy 
+   * Klasa reprezentuj±ca diodê w dowolnym kolorze jako dwustabilny element wskazuj±cy 
    */
    class Led : public WidgetWithBackground
    {
@@ -43,46 +37,35 @@
      
      public:  
      
-     // Constructor: Initializes Led subsystem components, default parameters, and state.
      Led(QWidget *parent = 0);
      virtual ~Led() {};
      
-     /** Zdarzenie obsugujce malowanie kontrolki */ 
-     // Executes paint event routine.
+     /** Zdarzenie obs³uguj±ce malowanie kontrolki */ 
      void paintEvent(QPaintEvent * event);
-	 // Executes mouse press event routine.
 	 void mousePressEvent(QMouseEvent *ev);
-     // Retrieves current hecked state.
      bool isChecked () const ; 
      
      
-     // Executes color routine.
      QColor color() const; 
-     // Sets color value and updates internal subsystem configuration.
      void setColor(QColor); 
      
      public slots: 
      
-     // Sets checked value and updates internal subsystem configuration.
      void setChecked(bool); 
      
      signals: 
      
-     // Executes check changed routine.
      void checkChanged(bool val); 
-	 // Event/Signal handler for clicked.
 	 void clicked();
      protected:
      
-     /** Inicjuje ukad wsprzdnych paintera */
-     // Initializes init coordinate system for Led.
+     /** Inicjuje uk³ad wspó³rzêdnych paintera */
      void initCoordinateSystem(QPainter & painter);
      
      /**
-     * Maluje to kontrolki w tym przypadku pierwszy plan czyli odblask wiata kontrolki
-     * @param painter Przestrze kontrolki 
+     * Maluje t³o kontrolki w tym przypadku pierwszy plan czyli odblask ¶wiat³a kontrolki
+     * @param painter Przestrzeñ kontrolki 
      */
-     // Executes paint background routine.
      void paintBackground(QPainter & painter);
     
      protected: 

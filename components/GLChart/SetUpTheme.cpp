@@ -6,7 +6,7 @@
 
 #include "SetUpTheme.h"
 
-// Constructor: Initializes SetUpTheme subsystem components, default parameters, and state.
+// Constructor: Initializes SetUpTheme subsystem components, state, and UI bindings.
 SetUpTheme::SetUpTheme(QWidget *parent) : QWidget(parent)
 {
     initRadioButton();
@@ -31,7 +31,7 @@ SetUpTheme *SetUpTheme::getInstance(QWidget *parent)
     return instance;
 }
 
-// Sets a value and updates internal subsystem configuration.
+// Sets a parameter and updates internal configuration.
 void SetUpTheme::setA(QApplication *value)
 {
     a = value;
@@ -65,7 +65,7 @@ void SetUpTheme::initGroupBox()
 }
 
 
-// Sets group box them value and updates internal subsystem configuration.
+// Sets group box them parameter and updates internal configuration.
 void SetUpTheme::setGroupBoxThem()
 {
     QVBoxLayout* vblThem = new QVBoxLayout();
@@ -102,7 +102,7 @@ void SetUpTheme::seForm()
     this->setLayout(vblForm);
 }
 
-// Sets style for application value and updates internal subsystem configuration.
+// Sets style for application parameter and updates internal configuration.
 void SetUpTheme::setStyleForApplication()
 {
     QFile styleFile(qssAddress);
@@ -113,7 +113,7 @@ void SetUpTheme::setStyleForApplication()
     this->setStyleSheet(style);
 }
 
-// Sets connection value and updates internal subsystem configuration.
+// Sets connection parameter and updates internal configuration.
 void SetUpTheme::setConnection()
 {
     connect(btnStart       , SIGNAL(clicked()), this, SLOT(slot_start()));
@@ -136,14 +136,14 @@ void SetUpTheme::slot_start()
     this->close();
 }
 
-// Sets default value and updates internal subsystem configuration.
+// Sets default parameter and updates internal configuration.
 void SetUpTheme::set_Default()
 {
     qssAddress = "";
     setStyleForApplication();
 }
 
-// Sets a m o l e d value and updates internal subsystem configuration.
+// Sets a m o l e d parameter and updates internal configuration.
 void SetUpTheme::set_AMOLED()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/AMOLED.qss";
@@ -151,7 +151,7 @@ void SetUpTheme::set_AMOLED()
 
 }
 
-// Sets aqua value and updates internal subsystem configuration.
+// Sets aqua parameter and updates internal configuration.
 void SetUpTheme::set_Aqua()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/Aqua.qss";
@@ -159,42 +159,42 @@ void SetUpTheme::set_Aqua()
 
 }
 
-// Sets aref value and updates internal subsystem configuration.
+// Sets aref parameter and updates internal configuration.
 void SetUpTheme::set_Aref()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/aref.qss";
     setStyleForApplication();
 }
 
-// Sets console style value and updates internal subsystem configuration.
+// Sets console style parameter and updates internal configuration.
 void SetUpTheme::set_ConsoleStyle()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/ConsoleStyle.qss";
     setStyleForApplication();
 }
 
-// Sets elegant dark value and updates internal subsystem configuration.
+// Sets elegant dark parameter and updates internal configuration.
 void SetUpTheme::set_ElegantDark()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/MaterialDark.qss";
     setStyleForApplication();
 }
 
-// Sets manjaro mix value and updates internal subsystem configuration.
+// Sets manjaro mix parameter and updates internal configuration.
 void SetUpTheme::set_ManjaroMix()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/ManjaroMix.qss";
     setStyleForApplication();
 }
 
-// Sets ubuntu value and updates internal subsystem configuration.
+// Sets ubuntu parameter and updates internal configuration.
 void SetUpTheme::set_Ubuntu()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/Ubuntu.qss";
     setStyleForApplication();
 }
 
-// Sets fa value and updates internal subsystem configuration.
+// Sets fa parameter and updates internal configuration.
 void SetUpTheme::set_Fa()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/fa.qss";

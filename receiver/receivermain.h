@@ -1,7 +1,7 @@
 // ============================================================================
 // File: receivermain.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for receivermain.h.
+// Description: Header definitions and interface declarations for receivermain.h.
 // ============================================================================
 
 #ifndef RECEIVERMAIN_H
@@ -34,20 +34,15 @@ class ReceiverMain : public QWidget
     Q_OBJECT
 
     int cnt{0};
-    // Executes real time plot routine.
     void realTimePlot(QCustomPlot *customPlot);
     QCustomPlot * plt;
 
-    // Initializes setup realtime data demo for ReceiverMain.
     void setupRealtimeDataDemo(QCustomPlot *customPlot);
 
     QGLchart *freqPlot;
 
-    // Executes creating time plot routine.
     void creatingTimePlot     (QCustomPlot *);
-    // Executes creating histogram plot routine.
     void creatingHistogramPlot(QCustomPlot * , QCPAxisRect *, QCPBars*,  QCPGraph *);
-    // Initializes init g l plot for ReceiverMain.
     void initGLPlot(QGLchart *glChart, ChartType glChartType);
 
     QVector2D  vec;
@@ -62,7 +57,6 @@ class ReceiverMain : public QWidget
     plotfunction * t6 ;
     plotfunction * t7 ;
     plotfunction * t8 ;
-    // Executes select channel with frq routine.
     int selectChannelWithFrq(double);
     QString whichNoiseModeIsActive{};
     double holdFrq{};
@@ -71,31 +65,18 @@ class ReceiverMain : public QWidget
     double frqHold{};
 
 
-    // Executes smart time domain noise routine.
     void smartTimeDomainNoise();
-    // Sets auto amp value value and updates internal subsystem configuration.
     void setAutoAmpValue(double ampVal);
-    // Executes smart table noise routine.
     void smartTableNoise();
-    // Executes smart selected noise routine.
     void smartSelectedNoise();
-    // Executes show noise status routine.
     void showNoiseStatus(QString activeMode, QString msg);
-    // Executes message for auth routine.
     void messageForAuth(QString msg);
-    // Sets prv frq value and updates internal subsystem configuration.
     void setPrvFrq(double);
-    // Executes hash password routine.
     QString hashPassword(const QString &pass);
-    // Executes verify user routine.
     bool verifyUser(const QString, const QString &, const QString &);
-    // Executes input is not empty routine.
     bool inputIsNotEmpty(QString inputVal);
-    // Executes length checker routine.
     bool lengthChecker(QString inputVal);
-    // Executes user input checker routine.
     bool userInputChecker(QString val1, QString val2);
-    // Transmits write to file command/packet over communication interface.
     bool writeToFile(QString,QString, QString,QString);
     QString const fileAuth{dataFilePath(QStringLiteral("upf"))};
     QString superUser{"superadmin"};
@@ -109,29 +90,18 @@ class ReceiverMain : public QWidget
     int cntVecCalib{};
 
 
-    // Executes hidden ui elements routine.
     void hiddenUiElements(bool);
-    // Executes save calibr to file routine.
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
-    // Executes check frq in colibr routine.
     void checkFrqInColibr();
-    // Executes calib managment routine.
     void calibManagment();
-    // Executes calib initial routine.
     void calibInitial();
-    // Initializes setup drfm control tab for ReceiverMain.
     void setupDrfmControlTab();
-    // Initializes setup bit control tab for ReceiverMain.
     void setupBitControlTab();
-    // Executes ensure zero dac buffer file routine.
     QString ensureZeroDacBufferFile();
-    // Executes ensure drfm dac buffer running routine.
     void ensureDrfmDacBufferRunning();
 public:
-    // Constructor: Initializes ReceiverMain subsystem components, default parameters, and state.
     explicit ReceiverMain(QWidget *parent = nullptr);
-    // Initializes init for ReceiverMain.
     void init();
     // Called by MainWindow to place the exciter widget in the receiver tabs.
     void addExciterTab(QWidget *exciter);
@@ -142,43 +112,29 @@ public:
     double maxFrqLimit{};
     int cntOutCalib{};
 
-    // Destructor: Cleans up ReceiverMain resources, timers, and allocated memory.
     ~ReceiverMain();
 
 signals:
-    // Retrieves current onnect signal state.
     void isConnectSignal(bool);
-    // Executes in channel signal routine.
     void inChannelSignal(double);
 
 
 
 private slots:
-    // Event/Signal handler for on btn set clicked.
     void on_btnSet_clicked();
 
-    // Event/Signal handler for on btn set band select clicked.
     void on_btnSetBandSelect_clicked();
-    // Executes realtime data slot routine.
     void realtimeDataSlot();
 
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
-    // Event/Signal handler for on rdo profile100 toggled.
     void on_rdoProfile100_toggled(bool checked);
-    // Event/Signal handler for on rdo profile200 toggled.
     void on_rdoProfile200_toggled(bool checked);
-    // Event/Signal handler for on rdo profile400 toggled.
     void on_rdoProfile400_toggled(bool checked);
-    // Event/Signal handler for on btn save clicked.
     void on_btnSave_clicked();
-    // Event/Signal handler for on btn set default clicked.
     void on_btnSetDefault_clicked();
-    // Event/Signal handler for on btn reset clicked.
     void on_btnReset_clicked();
-    // Event/Signal handler for on btn default iio osc clicked.
     void on_btnDefaultIioOsc_clicked();
-    // Sets tings ini path value and updates internal subsystem configuration.
     QString settingsIniPath(const QString &fileName);
 
     //    QTimer * frqTimer;
@@ -262,13 +218,9 @@ public:
     Plot * timeDomainPlot ;
     Plot * smartTimeDomainPlot ;
     Plot * frqDomainPlot;
-    // Executes frq mode is selected routine.
     void frqModeIsSelected();
-    // Executes default parameters routine.
     void defaultParameters();
-    // Updates and synchronizes update serial number data stream.
     void updateSerialNumber();
-    // Executes board serial number routine.
     QString boardSerialNumber();
     // Apply a Talise profile to the board (the Profile tab Set button and
     // the startup assertion from the first-start IP form both use this).
@@ -286,7 +238,6 @@ public:
     // Keep the Profile tab ORx choices consistent with the TX choice:
     // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
     void syncProfileOrxChoices();
-    // Executes changing plot mode routine.
     void changingPlotMode(int);
     QTimer dataTimer;
 
@@ -333,34 +284,22 @@ public:
 
     //=====================================================================
 
-    // Sets ting min max band value and updates internal subsystem configuration.
     void settingMinMaxBand();
-    // Executes frq and seek stop capturing routine.
     void frqAndSeekStopCapturing(bool);
-    // Executes rebout with s s n routine.
     void reboutWithSSN();
-    // Initializes init plot for ReceiverMain.
     void initPlot();
-    // Executes re scale plot routine.
     void reScale_plot(int type, QCustomPlot *,QCPRange *,QCPRange *);
-    // Executes plotting values routine.
     int plottingValues( const double *, QCustomPlot * , QVector<double> *, QVector<double> *, double min, double max,int);
-    // Executes fill historam array routine.
     void fillHistoramArray(int, QCustomPlot *, double *, int );
-    // Executes plot histogram routine.
     void plotHistogram(QCustomPlot *,std::unordered_map<double, double > *);
-    // Executes plot init routine.
     void plotInit();
-    // Executes default settings routine.
     void defaultSettings();
     // Phase 6: one-shot ADRV9009 calibration after software start (all
     // calibration items except lol-ext and fhm), then never again.
     void smartNoise();
 
     double centerFrq{};
-    // Executes maximum finder routine.
     double maximumFinder(double *, double *);
-    // Executes minimum finder routine.
     double minimumFinder(double *, double *);
 
     double frqMax{0};
@@ -399,9 +338,7 @@ public:
 
     int currentTabState;
     QTimer* timer;
-    // Executes smart init routine.
     void smartInit();
-    // Executes stop smart noise routine.
     void stopSmartNoise(QString);
     int tabPress{};
     QWidget * wigRecover;
@@ -420,9 +357,7 @@ public:
     QVector<double> frqCardVec    = QVector<double> (700,0);
     QVector<double> powerCardVec  = QVector<double> (700,0);
 
-    // Transmits send frq to calib device command/packet over communication interface.
     void sendFrqToCalibDevice();
-    // Transmits send power to calib device command/packet over communication interface.
     void sendPowerToCalibDevice();
     bool isCalibAllowedToSend{true};
     double newPowerCalib{};
@@ -454,97 +389,65 @@ public:
 
 
 private slots:
-    // Event/Signal handler for on btn set t h clicked.
     void on_btnSetTH_clicked();
-    // Event/Signal handler for on btn set t h c w clicked.
     void on_btnSetTHCW_clicked();
-    // Event/Signal handler for on tab widget current changed.
     void on_tabWidget_currentChanged(int index);
-    // Event/Signal handler for on btn frq seek clicked.
     void on_btnFrqSeek_clicked();
-    // Event/Signal handler for on label 43 link activated.
     void on_label_43_linkActivated(const QString &link);
-    // Event/Signal handler for on cmb transmit activated.
     void on_cmbTransmit_activated(int index);
 
-    // Event/Signal handler for on chb en  p a t t e r n clicked.
     void on_chbEn_PATTERN_clicked(bool checked);
 
     //    void on_tabWidgetSetting_tabBarClicked(int index);
 
-    // Event/Signal handler for on btn reboot clicked.
     void on_btnReboot_clicked(bool checked);
 
-    // Event/Signal handler for on table widget 2 cell clicked.
     void on_tableWidget_2_cellClicked(int row, int column);
 
 
-    // Event/Signal handler for on push button clicked.
     void on_pushButton_clicked();
 
-    // Event/Signal handler for on tbl c w cell clicked.
     void on_tblCW_cellClicked(int row, int column);
 
 
-    // Event/Signal handler for on btn new user clicked.
     void on_btnNewUser_clicked();
 
-    // Event/Signal handler for on tab widget tab bar clicked.
     void on_tabWidget_tabBarClicked(int index);
 
-    // Event/Signal handler for on btn login clicked.
     void on_btnLogin_clicked();
 
-    // Event/Signal handler for on btn logout clicked.
     void on_btnLogout_clicked(bool checked);
 
-    // Event/Signal handler for on btn recovery clicked.
     void on_btnRecovery_clicked(bool checked);
 
-    // Event/Signal handler for on btn new admin clicked.
     void on_btnNewAdmin_clicked(bool checked);
 
-    // Event/Signal handler for on btn save limit clicked.
     void on_btnSaveLimit_clicked(bool checked);
 
-    // Event/Signal handler for on btn show user clicked.
     void on_btnShowUser_clicked(bool checked);
 
-    // Event/Signal handler for on btn calib clicked.
     void on_btnCalib_clicked(bool checked);
 
-    // Event/Signal handler for on btn calib rff clicked.
     void on_btnCalibRff_clicked(bool checked);
 
 //    void on_btnLimitation_clicked();
     void checkingCalibResponseInSpectromSlot(double, double);
 
 
-    // Event/Signal handler for on btn stop calib clicked.
     void on_btnStopCalib_clicked();
 
 //    void on_chbCalib_stateChanged(int arg1);
 
 public slots:
-    // Executes connection routine.
     void connection();
-    // Executes value slot routine.
     void ValueSlot (Pulse);
-    // Executes frq value chenged routine.
     void frqValueChenged(QString);
-    // Transmits send spot file to cart command/packet over communication interface.
     void sendSpotFileToCart(QString);
-    // Retrieves current plot data from thread state.
     void getPlotDataFromThread();
-    // Executes histo main plot slot routine.
     void histoMainPlotSlot(double, double);
-    // Executes stop smart noise slot routine.
     void stopSmartNoiseSlot();
-    // Executes stop exciter slot routine.
     void stopExciterSlot();
-    // Executes calculating cw table slot routine.
     void calculatingCwTableSlot(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
-    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
 
 
@@ -554,15 +457,10 @@ public slots:
 
 
 signals:
-    // Executes create plot signal1 routine.
     void createPlotSignal1(QCustomSeries);
-    // Executes seeking status signal routine.
     void seekingStatusSignal(QString);
-    // Executes frq domain is on routine.
     void frqDomainIsOn();
-    // Executes start exciter signal routine.
     void startExciterSignal();
-    // Executes frq plt signal routine.
     void frqPltSignal();
 
     // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
@@ -574,85 +472,48 @@ signals:
     void txCalibChangedSignal(double);
 
 
-    // Executes frq values routine.
     void frqValues      (QCustomSeries a);
-    // Executes frq value signal routine.
     void frqValueSignal      (double,double);
-    // Executes p a peak value signal routine.
     void PAPeakValueSignal   (double,double);
-    // Executes p a sum max value signal routine.
     void PASumMaxValueSignal (double,double);
-    // Executes pri value signal routine.
     void priValueSignal      (double,double);
-    // Executes pw one value signal routine.
     void pwOneValueSignal    (double,double);
-    // Executes pw two value signal routine.
     void pwTwoValueSignal    (double,double);
-    // Executes toa value signal routine.
     void toaValueSignal      (double,double);
-    // Executes channel value signal routine.
     void ChannelValueSignal  (double,double);
-    // Executes smart noise is active signal routine.
     void smartNoiseIsActiveSignal  ();
 
 
 
-    // Executes hi routine.
     void hi();
-    // Executes cw frq signal routine.
     void cwFrqSignal        (double);
-    // Executes cw power signal routine.
     void cwPowerSignal      (double);
-    // Executes spot frq signal routine.
     void spotFrqSignal      (double);
-    // Executes spot power signal routine.
     void spotPowerSignal    (double);
-    // Executes sweep start frq signal routine.
     void sweepStartFrqSignal(double);
-    // Executes sweep stop frq signal routine.
     void sweepStopFrqSignal (double);
-    // Executes sweep step signal routine.
     void sweepStepSignal    (double);
-    // Executes sweep power signal routine.
     void sweepPowerSignal   (double);
-    // Executes sweep delay signal routine.
     void sweepDelaySignal   (double);
-    // Executes imp frq signal routine.
     void impFrqSignal       (double);
-    // Executes imp power signal routine.
     void impPowerSignal     (double);
-    // Executes imp pw signal routine.
     void impPwSignal        (double);
-    // Executes imp pri signal routine.
     void impPriSignal       (double);
-    // Executes wb power signal routine.
     void wbPowerSignal      (double);
 
 
-    // Executes cw on btn signal routine.
     void cwOnBtnSignal     ();
-    // Executes cw off btn signal routine.
     void cwOffBtnSignal    ();
-    // Executes spot on btn signal routine.
     void spotOnBtnSignal   ();
-    // Executes spot off btn signal routine.
     void spotOffBtnSignal  ();
-    // Executes sweep on btn signal routine.
     void sweepOnBtnSignal  ();
-    // Executes sweep off btn signal routine.
     void sweepOffBtnSignal ();
-    // Executes imp on btn signal routine.
     void impOnBtnSignal    ();
-    // Executes imp off btn signal routine.
     void impOffBtnSignal   ();
-    // Executes wb on btn signal routine.
     void wbOnBtnSignal     ();
-    // Executes wb off btn signal routine.
     void wbOffBtnSignal    ();
 
-    // Executes user logged in signal routine.
     void userLoggedInSignal(double);
-    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
     //    void cwTabletoPlotSignal(qvdouble,double,QString);
 

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: globals.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for globals.h.
+// Description: Header definitions and interface declarations for globals.h.
 // ============================================================================
 
 #ifndef GLOBALS_H
@@ -34,7 +34,6 @@ class globals
 {
 
 public:
-    // Constructor: Initializes globals subsystem components, default parameters, and state.
     globals();
     static struct iio_context *ctx;
     static bool status;
@@ -53,20 +52,14 @@ public:
     // disable the option), SN003 uses the ORx 400 section without the
     // orxMergeFilter (orx_400_03.txt), every other board is normal.
     static QString boardSerialNumber();
-    // Executes serial is sn001 routine.
     static bool serialIsSn001(const QString &sn);
-    // Executes serial is sn003 routine.
     static bool serialIsSn003(const QString &sn);
 
-    // Executes osc destroy context routine.
     static void osc_destroy_context();
-    // Executes connect widgets routine.
     static int connect_widgets(QWidget *builder);
     static int __connect_widget(struct iio_device *dev, const char *attr,
                          const char *value, size_t len, void *d);
-    // Sets widget_value value and updates internal subsystem configuration.
     static char * set_widget_value(QWidget *widget, struct w_info *item, long long val);
-    // Executes connect widget routine.
     static void connect_widget(QWidget *widget, struct w_info *item, long long val);
 
 };

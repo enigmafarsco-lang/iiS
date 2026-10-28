@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plot.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for plot.h.
+// Description: Header definitions and interface declarations for plot.h.
 // ============================================================================
 
 #ifndef PLOT_H
@@ -129,15 +129,11 @@ struct _OscPlotClass
 {
     QWidget parent_class;
 
-    // Executes void routine.
     void (* capture_event) (OscPlot *plot, gboolean start_event);
-    // Executes void routine.
     void (* destroy_event) (OscPlot *plot);
-    // Executes void routine.
     void (* newplot_event) (OscPlot *plot, OscPlot *new_plot);
 };
 
-// Executes osc plot get type routine.
 GType osc_plot_get_type (void);
 
 G_END_DECLS
@@ -250,9 +246,7 @@ struct channel_settings {
 
     struct iio_device * (*get_iio_parent)(PlotChn *);
     QVector<double> * (*get_data_ref)(PlotChn *);
-    // Executes void routine.
     void (*assert_used_iio_channels)(PlotChn *, bool);
-    // Executes void routine.
     void (*destroy)(PlotChn *);
 };
 
@@ -273,7 +267,6 @@ struct math_channel_settings {
     int num_channels;
     char *iio_device_name;
     char *txt_math_expression;
-    // Executes void routine.
     void (*math_expression)(float ***channels_data, float *out_data, unsigned long long chn_sample_cnt);
     void *math_lib_handler;
     float *data_ref;
@@ -355,9 +348,7 @@ class Plot : public QMainWindow
 
 public:
 
-    // Constructor: Initializes Plot subsystem components, default parameters, and state.
     explicit Plot(QApplication *app,QString name="",QWidget *parent = nullptr);
-    // Destructor: Cleans up Plot resources, timers, and allocated memory.
     ~Plot();
     double dltTime{};
     //saeid raziani
@@ -407,7 +398,6 @@ public:
     double tmpVal{500};
     QDoubleSpinBox * deltaValue ;
     QString userName{};
-    // Executes frq value is changed routine.
     void frqValueIsChanged(bool);
 
     QString Mode{};
@@ -418,7 +408,6 @@ public:
     bool isCaptureOn{false};
     double holdPreFrq{};
 
-    // Executes stop capture routine.
     void stopCapture();
     bool isExciterOn{true}; //it is set by exciter and when it is true, plot doesnt show
     bool isSeekClicked{false};
@@ -432,7 +421,6 @@ public:
     bool isSmartNoisetOn{};
     QString frqValueStr;
     std::string ipCard {};
-    // Retrieves current delta time state.
     double getDeltaTime();
 
 
@@ -440,20 +428,16 @@ public:
 
     //waterfal
     QVector<QGLchart *> vectorOfCharts;
-    // Sets q glcharts parameters value and updates internal subsystem configuration.
     void setQGlchartsParameters(QGLchart *glChart, ChartType glChartType);
     UpdateData *waterfallUpdateData;
     QGLchart *waterfallChart ;
 
-    // Executes waterfall update routine.
     void waterfallUpdate();
 
     QVector<double> maxHold_X, maxHold_Y;
 
-    // Executes exciter mode on routine.
     void exciterModeOn();
 
-    // Executes create text on plot routine.
     QCPItemText * createTextOnPlot();
     double maximumFrq{};
     QTimer sendMaximumFrqTimer;
@@ -481,16 +465,13 @@ public:
     //void osc_plot_draw_stop(OscPlot *plot);
     //void osc_plot_destroy(OscPlot *plot);
     Plot * osc_plot_new_with_pref(OscPlotPreferences *pref);
-    // Executes osc plot new routine.
     Plot * osc_plot_new();
-    // Executes osc plot set visible routine.
     void osc_plot_set_visible (Plot *plot, bool visible);
 
     //    void osc_plot_update_rx_lbl(OscPlot *plot, bool initial_update);
     //    static ssize_t demux_sample(const iio_channel *chn, void *sample, size_t size, void *d);
     void DrawPlot();
     bool isFrqClicked{false};
-    // Executes do fft routine.
     static void do_fft(Transform *tr);
 
     QPushButton * selectedBtn = new QPushButton;
@@ -502,116 +483,70 @@ public:
     // Phase 5: spectrum x-axis window = selected freq +/- active bandwidth/2
     // (called from the receiver Profile tab "Set" handler).
     void setActiveBandwidth(double bwMHz);
-    // Executes apply bandwidth window routine.
     void applyBandwidthWindow();
 
 public slots:
-    // Executes on item clicked routine.
     void onItemClicked();
     //    void onItemClicked(QTreeWidgetItem *item, int column);
     void on_btn_capture_clicked();
-    // Event/Signal handler for on btnfftcapture clicked.
     void on_btnfftcapture_clicked();
-    // Executes frq value changed slot routine.
     void frqValueChangedSlot(QString);
-    // Event/Signal handler for on btn select fft clicked.
     void on_btn_select_fft_clicked();
 
-    // Executes check box unched routine.
     void checkBoxUnched();
 private slots:
-    // Event/Signal handler for on action save as triggered.
     void on_actionSaveAs_triggered();
-    // Event/Signal handler for on action save  whole  page triggered.
     void on_actionSave_Whole_Page_triggered();
-    // Event/Signal handler for on action close triggered.
     void on_actionClose_triggered();
-    // Event/Signal handler for on action quit triggered.
     void on_actionQuit_triggered();
-    // Event/Signal handler for on action plot  title triggered.
     void on_actionPlot_Title_triggered();
-    // Event/Signal handler for on action show  settings triggered.
     void on_actionShow_Settings_triggered();
-    // Event/Signal handler for on action full  screen triggered.
     void on_actionFull_Screen_triggered();
-    // Event/Signal handler for on btn new plot clicked.
     void on_btn_new_plot_clicked();
-    // Event/Signal handler for on chk auto scale state changed.
     void on_chk_auto_scale_stateChanged(int arg1);
     //    void on_btn_fullscreen_clicked();
 
-    // Event/Signal handler for on cmb plot type current index changed.
     void on_cmb_plot_type_currentIndexChanged(int index);
-    // Executes channel toggled routine.
     void channel_toggled(gchar *pathStr, gpointer plot);
 
-    // Event/Signal handler for on btn zoom in clicked.
     void on_btn_zoom_in_clicked();
-    // Event/Signal handler for on btn zoom out clicked.
     void on_btn_zoom_out_clicked();
-    // Event/Signal handler for on chk auto scale fft state changed.
     void on_chk_auto_scale_fft_stateChanged(int arg1);
-    // Event/Signal handler for on btn zoom in fft clicked.
     void on_btn_zoom_in_fft_clicked();
-    // Event/Signal handler for on btn zoom out fft clicked.
     void on_btn_zoom_out_fft_clicked();
-    // Event/Signal handler for on txt selected freq value changed.
     void on_txtSelectedFreq_valueChanged(double arg1);
-    // Event/Signal handler for on btn select clicked.
     void on_btn_select_clicked();
 
-    // Event/Signal handler for on cmb graph type current index changed.
     void on_cmb_graph_type_currentIndexChanged(int index);
 
-    // Event/Signal handler for on btn capture triggered.
     void on_btn_capture_triggered(QAction *arg1);
-    // Event/Signal handler for on btn plot frq clicked.
     void on_btn_plot_frq_clicked();
-    // Event/Signal handler for on btn clear clicked.
     void on_btnClear_clicked();
-    // Event/Signal handler for on btn hidden clicked.
     void on_btnHidden_clicked();
-    // Event/Signal handler for on btn hidden clicked.
     void on_btnHidden_clicked(bool checked);
-    // Event/Signal handler for on time data table cell clicked.
     void on_timeDataTable_cellClicked(int row, int column);
-    // Event/Signal handler for on time data table item clicked.
     void on_timeDataTable_itemClicked(QTableWidgetItem *item);
 
 
-    // Event/Signal handler for on btn hide show clicked.
     void on_btnHideShow_clicked(bool checked);
 
-    // Event/Signal handler for on btn save table data clicked.
     void on_btnSaveTableData_clicked();
 
-    // Event/Signal handler for on chk max hold clicked.
     void on_chk_maxHold_clicked(bool checked);
-    // Executes select channel with frq routine.
     int selectChannelWithFrq(double);
 
 signals:
     //-------------- [saeid raziani] -----------------
     void ValueSignal(Pulse);
-    // Executes frq domain is selected signal routine.
     void frqDomainIsSelectedSignal();
-    // Executes seek is selected signal routine.
     void seekIsSelectedSignal();
-    // Updates and synchronizes update data data stream.
     void updateData(QCustomSeries a);
-    // Transmits send max frq to card signal command/packet over communication interface.
     void sendMaxFrqToCardSignal(double);
-    // Executes amp value signal routine.
     void ampValueSignal(double);
-    // Transmits send time domain to card signal command/packet over communication interface.
     void sendTimeDomainToCardSignal(QString);
-    // Executes selected smart noise status signal routine.
     void selectedSmartNoiseStatusSignal(bool);
-    // Sets ting hide show signal value and updates internal subsystem configuration.
     void settingHideShowSignal(bool);
-    // Executes cw table value signal routine.
     void cwTableValueSignal(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
-    // Retrieves current max value signal state.
     void getMaxValueSignal(double,double);
     //    void test(modes);
 
@@ -643,149 +578,88 @@ private:
     std::vector<std::vector<long double>> toaChannel1;
     std::vector<std::vector<int>> toaChannel;
     std::vector<std::vector<long double>> deltaTime;
-    // Executes calculating p r i routine.
     void calculatingPRI(Pulse*, double);
     int cnt{0};
 
     int countArray[32] ={};
-    // Executes remove unupdated row routine.
     void removeUnupdatedRow();
     QTimer selectedSmartNoiseTimer;
 
     QMap<int, QString> timeMap;
-    // Executes save to c s v in thread routine.
     void saveToCSVInThread(QTableWidget *tableWidget, const QString &fileName) ;
 
 
     QList<ChannelItemData*> ChannelItemDataList;
     gboolean stop_capture;
 
-    // Executes create plot routine.
     void create_plot();
     //static void osc_plot_class_init(OscPlotClass *klass);
     //void osc_plot_data_update (OscPlot *plot);
     //static bool call_all_transform_functions(OscPlotPrivate *priv);
     //void osc_plot_restart (OscPlot *plot);
     void device_list_treeview_init();
-    // Event/Signal handler for single shot clicked cb.
     void single_shot_clicked_cb(gpointer data);
-    // Executes plot channels add device routine.
     void plot_channels_add_device( const char *dev_name);
-    // Executes plot channel add to plot routine.
     void plot_channel_add_to_plot(PlotChn *settings);
-    // Executes plot channels add channel routine.
     void plot_channels_add_channel(PlotChn *pchn);
-    // Executes treeview expand update routine.
     void treeview_expand_update();
-    // Executes saveas channels list fill routine.
     void saveas_channels_list_fill();
-    // Executes check valid setup routine.
     gboolean check_valid_setup();
-    // Executes check valid setup of all devices routine.
     gboolean check_valid_setup_of_all_devices();
-    // Executes check valid setup of device routine.
     gboolean check_valid_setup_of_device(const char *name);
-    // Executes num of channels of device routine.
     int num_of_channels_of_device(const char *name);
-    // Executes enabled channels count routine.
     int enabled_channels_count();
-    // Executes enabled channels of device routine.
     int enabled_channels_of_device(QString name, unsigned *enabled_mask);
-    // Executes plot channels update routine.
     void plot_channels_update();
-    // Executes plot get sample count of device routine.
     int plot_get_sample_count_of_device(const char *device);
-    // Executes osc plot get sample count routine.
     double osc_plot_get_sample_count();
-    // Executes collect parameters from plot routine.
     void collect_parameters_from_plot();
-    // Executes remove all transforms routine.
     void remove_all_transforms();
-    // Executes remove transform from list routine.
     void remove_transform_from_list(Transform *tr);
-    // Executes devices transform assignment routine.
     void devices_transform_assignment();
-    // Executes plot setup routine.
     void plot_setup();
-    // Executes markers init routine.
     void markers_init();
-    // Executes capture start routine.
     void capture_start();
-    // Executes dispose parameters from plot routine.
     void dispose_parameters_from_plot();
-    // Executes plot redraw routine.
     gboolean plot_redraw();
-    // Executes deassert used channels routine.
     void deassert_used_channels();
-    // Executes osc plot update rx lbl routine.
     void osc_plot_update_rx_lbl(bool initial_update);
-    // Executes device rx info update routine.
     void device_rx_info_update();
-    // Executes fps counter routine.
     void fps_counter();
-    // Executes draw marker values routine.
     void draw_marker_values(Transform *tr);
     static iio_device *transform_get_device_parent(Transform *transform);
-    // Executes markers phase diff show routine.
     void markers_phase_diff_show();
-    // Retrieves current frequency_transform state.
     bool is_frequency_transform();
-    // Executes transform add plot markers routine.
     void transform_add_plot_markers(Transform *transform);
-    // Executes transform add own markers routine.
     void transform_add_own_markers(Transform *transform);
-    // Updates and synchronizes update_grid data stream.
     void update_grid(gfloat left, gfloat right);
-    // Executes show controls routine.
     void ShowControls(int index);
-    // Event/Signal handler for count changed cb.
     void count_changed_cb();
-    // Executes call all transform functions routine.
     bool call_all_transform_functions();
-    // Executes osc plot data update routine.
     void osc_plot_data_update();
-    // Executes start routine.
     void start(gboolean start_event);
-    // Executes capture setup routine.
     int capture_setup();
-    // Executes channels transform assignment routine.
     void channels_transform_assignment(PlotChn * chn,ch_tr_params *user_data);
     Transform *add_transform_to_list(int tr_type, GSList *channels);
-    // Updates and synchronizes update_transform_settings data stream.
     void update_transform_settings(Transform *transform);
-    // Executes plot get sample count for transform routine.
     int plot_get_sample_count_for_transform(Transform *transform);
-    // Executes xcorr routine.
     void xcorr(fftw_complex *signala, fftw_complex *signalb, fftw_complex *result, int N, double avg);
-    // Executes cross correlation transform function routine.
     bool cross_correlation_transform_function(Transform *tr, gboolean init_transform);
     static QVector<double> *plot_channels_get_nth_data_ref(GSList *list, guint n);
-    // Executes time transform function routine.
     static bool time_transform_function(Transform *tr, gboolean init_transform);
-    // Executes freq spectrum transform function routine.
     static bool freq_spectrum_transform_function(Transform *tr, gboolean init_transform);
-    // Executes fft transform function routine.
     static bool fft_transform_function(Transform *tr, gboolean init_transform);
-    // Executes constellation transform function routine.
     static bool constellation_transform_function(Transform *tr, gboolean init_transform);
-    // Executes capture process routine.
     void capture_process();
     iio_buffer *osc_plot_get_buffer();
-    // Updates and synchronizes update_plot data stream.
     void update_plot(iio_buffer *buf);
-    // Executes capture process ended routine.
     void capture_process_ended();
 
-    // Executes initialize plots routine.
     void InitializePlots();
 
-    // Executes get base freq routine.
     bool GetBaseFreq();
-    // Executes re scale plot routine.
     void reScale_plot(int type);
-    // Executes draw f f t plot routine.
     void DrawFFTPlot();
-    // Executes start capture routine.
     void startCapture();
 
     //saeid raziani
@@ -806,21 +680,13 @@ private:
 
 
 
-    // Executes change frequency hopping routine.
     void ChangeFrequencyHopping(iio_channel *ch1,double freq);
-    // Executes demux sample routine.
     static ssize_t demux_sample(const iio_channel *chn, void *sample, size_t size, void *d);
-    // Retrieves current max state.
     void getMax(Transform *tr);
-    // Retrieves current min state.
     void getMin(Transform *tr);
-    // Retrieves current f f t max state.
     static void getFFTMax(Transform *tr,bool is_seek=false);
-    // Retrieves current f f t min state.
     static void getFFTMin(Transform *tr,bool is_seek=false);
-    // Executes stop sampling routine.
     void stop_sampling();
-    // Executes close active buffers routine.
     void close_active_buffers();
     double y{};
     std::vector<double> tableData;
@@ -829,29 +695,20 @@ private:
 
     //    bool isFrqClicked{false};
 
-    // Executes save y axis to file routine.
     void saveYAxisToFile(const QVector<double> &, const QVector<double> &,const QString &filename);
     QVector<double>  timeDataYaxis_i;
     QVector<double>  timeDataYaxis_q;
 
-    // Executes smart time domain routine.
     void smartTimeDomain();
 
 
 signals:
-    // Executes hopping signal routine.
     void HoppingSignal(bool,double min=0,double max=0,double step=0,int delay=0);
-    // Executes seeking is off routine.
     void seekingIsOff();
-    // Transmits send channel to card signal command/packet over communication interface.
     void sendChannelToCardSignal(double);
-    // Executes t h switch signal routine.
     void THSwitchSignal(bool);
-    // Executes check box status routine.
     void checkBoxStatus(int);
-    // Executes selected frq min max signal routine.
     void selectedFrqMinMaxSignal(double, double);
-    // Executes clean time signal routine.
     void cleanTimeSignal(double);
 
 

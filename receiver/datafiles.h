@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datafiles.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for datafiles.h.
+// Description: Header definitions and interface declarations for datafiles.h.
 // ============================================================================
 
 #ifndef DATAFILES_H
@@ -26,7 +26,6 @@ inline QString userFilesDirectory()
         appData = QDir::homePath() + QStringLiteral("/.local/share/eLynxSDR");
 
     const QString filesDir = QDir(appData).filePath(QStringLiteral("files"));
-    // Executes q dir routine.
     QDir().mkpath(filesDir);
     return QDir::cleanPath(filesDir);
 }
@@ -40,7 +39,6 @@ inline QString resourceFilesDirectory()
     QStringList dirs;
 #ifndef ELYNXSDR_PACKAGED
 #  ifdef PROJECT_FILES_DIR
-    // Executes q string literal routine.
     dirs << QStringLiteral(PROJECT_FILES_DIR);
 #  endif
 #endif
@@ -77,12 +75,10 @@ inline QString dataFilePath(const QString &fileName)
 
     const QString packagedPath = resourceFilePath(fileName);
     if (QFileInfo::exists(packagedPath)) {
-        // Executes q dir routine.
         QDir().mkpath(QFileInfo(userPath).absolutePath());
         if (QFile::copy(packagedPath, userPath))
             QFile::setPermissions(userPath, QFileInfo(packagedPath).permissions());
     } else {
-        // Executes q dir routine.
         QDir().mkpath(QFileInfo(userPath).absolutePath());
     }
 

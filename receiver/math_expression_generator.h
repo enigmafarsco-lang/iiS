@@ -1,7 +1,7 @@
 // ============================================================================
 // File: math_expression_generator.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for math_expression_generator.h.
+// Description: Header definitions and interface declarations for math_expression_generator.h.
 // ============================================================================
 
 #ifndef MATH_EXPRESSION_GENERATOR_H
@@ -32,27 +32,18 @@ typedef void (*math_function)(float ***channels_data, float *out_data, unsigned 
 class math_expression_generator
 {
 public:
-    // Constructor: Initializes math_expression_generator subsystem components, default parameters, and state.
     math_expression_generator();
 
-    // Executes math expression get math function routine.
     math_function math_expression_get_math_function(const char *expression_txt,void **lib_handler, GSList *basenames);
-    // Executes math expression close lib handler routine.
     void math_expression_close_lib_handler(void *lib_handler);
-    // Executes math expression objects clean routine.
     void math_expression_objects_clean(void);
-    // Executes remove cb routine.
     static int remove_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
     /* Recursively remove the given path from the filesystem. */
-    // Executes recursive remove routine.
     static int recursive_remove(char *dirpath);
-    // Executes eval routine.
     static gboolean eval(const GMatchInfo *info, GString *res, gpointer data);
     static char *string_replace(const char * string, const char *pattern,
                 const char *replacement, GRegexEvalCallback eval);
-    // Executes c file create routine.
     static char * c_file_create(const char *user_expression, GSList *basenames);
-    // Executes shared object compile routine.
     static int shared_object_compile(char *base_filename);
 
 

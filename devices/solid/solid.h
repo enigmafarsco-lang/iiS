@@ -1,7 +1,7 @@
 // ============================================================================
 // File: solid.h
 // Subsystem: eLynxSDR solid
-// Description: Subsystem implementation and interface guidance for solid.h.
+// Description: Header definitions and interface declarations for solid.h.
 // ============================================================================
 
 #ifndef SOLID_H
@@ -27,81 +27,56 @@ class Solid : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes Solid subsystem components, default parameters, and state.
     explicit Solid(QWidget *parent = nullptr);
-    // Destructor: Cleans up Solid resources, timers, and allocated memory.
     ~Solid();
 
 public slots:
-    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
-    // Executes joshan func data slot routine.
     void joshanFuncDataSlot();
-    // Executes joshan status data slot routine.
     void joshanStatusDataSlot();
 
 
 signals:
-    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
 
 public:
-    // Executes handle info routine.
     void handle_info(QByteArray);
 
 
 signals:
-    // Transmits send command to other object signal command/packet over communication interface.
     void sendCommandToOtherObjectSignal(QString);
 
 public slots:
-    // Reads and parses incoming receive command from other object slot data.
     void receiveCommandFromOtherObjectSlot(QString);
-    // Retrieves current evice connected slot state.
     void isDeviceConnectedSlot(bool);
-    // Executes joshan control data slot routine.
     void joshanControlDataSlot(QJsonObject);
 
-    // Event/Signal handler for timeout.
     void timeout();
 
 private slots:
-    // Event/Signal handler for on chk alc mode clicked.
     void on_chkAlcMode_clicked(bool checked);
 
-    // Event/Signal handler for on btn enable clicked.
     void on_btnEnable_clicked();
 
-    // Event/Signal handler for on btn disable clicked.
     void on_btnDisable_clicked();
 
-    // Event/Signal handler for on btn reset clicked.
     void on_btnReset_clicked();
 
-    // Event/Signal handler for on btn solid status clicked.
     void on_btnSolidStatus_clicked();
 
-    // Event/Signal handler for on rdb high clicked.
     void on_rdbHigh_clicked();
 
-    // Event/Signal handler for on rdb medium clicked.
     void on_rdbMedium_clicked();
 
-    // Event/Signal handler for on rdb low clicked.
     void on_rdbLow_clicked();
 
 
-    // Event/Signal handler for on chk err lacth mode clicked.
     void on_chkErrLacthMode_clicked(bool checked);
 
 signals:
-    // Transmits send status to outer node signal command/packet over communication interface.
     void sendStatusToOuterNodeSignal(QJsonObject);
-    // Transmits send func data to joshan signal command/packet over communication interface.
     void sendFuncDataToJoshanSignal(QJsonObject);
-    // Transmits send status data to joshan signal command/packet over communication interface.
     void sendStatusDataToJoshanSignal(QJsonObject);
-    // Transmits send status temp signal command/packet over communication interface.
     void sendStatusTempSignal(int);
 
 private:

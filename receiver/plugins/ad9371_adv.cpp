@@ -373,7 +373,7 @@ ad9371_adv::ad9371_adv(QWidget *parent) :
     ui->mainTabContainer->setTabPosition(QTabWidget::West);
 }
 
-// Destructor: Cleans up ad9371_adv resources, timers, and allocated memory.
+// Destructor: Releases ad9371_adv allocated resources, buffers, and timers.
 ad9371_adv::~ad9371_adv()
 {
     delete ui;
@@ -846,7 +846,7 @@ QWidget * ad9371_adv::init()
     return NULL;
 }
 
-// Event/Signal handler for on btn save settings clicked.
+// Signal/Slot handler responding to on btn save settings clicked event.
 void ad9371_adv::on_btn_save_settings_clicked()
 {
     iio_device_debug_attr_write_longlong(globals::dev, "initialize", 1);

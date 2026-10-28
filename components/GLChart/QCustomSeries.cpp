@@ -6,7 +6,7 @@
 
 #include "QCustomSeries.h"
 
-// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
+// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
 QCustomSeries::QCustomSeries(QObject *parent)
     : QObject(parent)
 {
@@ -15,7 +15,7 @@ QCustomSeries::QCustomSeries(QObject *parent)
     setVisible(true);
 }
 
-// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
+// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
 QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
 {
     m_inputSeries = newSeries.m_inputSeries;
@@ -24,7 +24,7 @@ QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
     m_seriesName = newSeries.m_seriesName;
 }
 
-// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
+// Constructor: Initializes QCustomSeries subsystem components, state, and UI bindings.
 QCustomSeries::QCustomSeries(QCustomSeries* newSeries)
 {
     m_inputSeries = newSeries->m_inputSeries;
@@ -38,7 +38,7 @@ QCustomSeries QCustomSeries::operator=(const QCustomSeries& newSeries)
     return QCustomSeries(newSeries);
 }
 
-// Destructor: Cleans up QCustomSeries resources, timers, and allocated memory.
+// Destructor: Releases QCustomSeries allocated resources, buffers, and timers.
 QCustomSeries::~QCustomSeries()
 {
 }
@@ -69,7 +69,7 @@ QVector<QVector2D> QCustomSeries::pointsVector() const
     return m_inputSeries;
 }
 
-// Sets series color value and updates internal subsystem configuration.
+// Sets series color parameter and updates internal configuration.
 void QCustomSeries::setSeriesColor(const QColor &color)
 {
     m_seriesColor = color;
@@ -87,25 +87,25 @@ int QCustomSeries::seriesSize() const
     return m_inputSeries.count();
 }
 
-// Sets visible value and updates internal subsystem configuration.
+// Sets visible parameter and updates internal configuration.
 void QCustomSeries::setVisible(bool visible)
 {
     m_visible = visible;
 }
 
-// Retrieves current isible state.
+// Retrieves current isible value.
 bool QCustomSeries::isVisible() const
 {
     return m_visible;
 }
 
-// Sets series name value and updates internal subsystem configuration.
+// Sets series name parameter and updates internal configuration.
 void QCustomSeries::setSeriesName(QString name)
 {
     m_seriesName = name;
 }
 
-// Retrieves current series name state.
+// Retrieves current series name value.
 QString QCustomSeries::getSeriesName() const
 {
     return m_seriesName;

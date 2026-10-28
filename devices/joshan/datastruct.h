@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datastruct.h
 // Subsystem: eLynxSDR joshan
-// Description: Subsystem implementation and interface guidance for datastruct.h.
+// Description: Header definitions and interface declarations for datastruct.h.
 // ============================================================================
 
 #ifndef DATASTRUCT_H
@@ -89,7 +89,6 @@ struct joshanStatusStruct
 class dataStruct
 {
 public:
-    // Constructor: Initializes dataStruct subsystem components, default parameters, and state.
     dataStruct();
 };
 

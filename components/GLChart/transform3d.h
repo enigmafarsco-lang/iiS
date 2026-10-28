@@ -1,7 +1,7 @@
 // ============================================================================
 // File: transform3d.h
 // Subsystem: eLynxSDR GLChart
-// Description: Subsystem implementation and interface guidance for transform3d.h.
+// Description: Header definitions and interface declarations for transform3d.h.
 // ============================================================================
 
 #ifndef TRANSFORM3D_H
@@ -11,7 +11,6 @@
 class Transform3D
 {
 public:
-    // Constructor: Initializes Transform3D subsystem components, default parameters, and state.
     Transform3D();
 
     // Accessors

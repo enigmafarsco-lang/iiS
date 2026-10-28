@@ -5,11 +5,6 @@
 // ============================================================================
 
 
-/**
- * @file exciter.cpp
- * @brief Implementation of the Multi-Waveform Signal Generation & Exciter Engine.
- */
-
 #include "exciter.h"
 #include "ui_exciter.h"
 #include "constants/tx_calibration.h"
@@ -27,11 +22,11 @@
 #include <QDebug>
 #include <cmath>
 
-/**
- * @brief Computes the DAC sample playback rate in MS/s for a given profile bandwidth.
- * @param profileBw Profile bandwidth (100, 200, 400 MHz).
- * @return Effective DAC sample rate in MSPS (122.88, 245.76, or 491.52).
- */
+// Phase 6: DAC file playback rate per ADRV9009 profile (MS/s) =
+// 122.88 x P/100: the board consumes the DAC buffer at the profile's
+// DAC sample rate - 122.88 MS/s at P100, 245.76 at P200, 491.52 at
+// P400.  The spot/bridge generators use the same table
+// (files/spot/generate.py, files/bridge/generate_bridge.py).
 static double txFileRateMhz(int profileBw)
 {
     // The txt generation rate for ALL exciter tabs is 122.88 x P/100
@@ -40,10 +35,6 @@ static double txFileRateMhz(int profileBw)
     return 122.88 * profileBw / 100.0;
 }
 
-/**
- * @brief Constructs Exciter widget, instantiates waveform tabs, and binds UI signals.
- * @param parent Optional parent QWidget.
- */
 Exciter::Exciter(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::exciter)
@@ -334,28 +325,41 @@ Exciter::Exciter(QWidget *parent) :
     refreshTxPowerDisplay();
 }
 
-/**
- * @brief Destructor releasing UI resources.
- */
-// Destructor: Cleans up Exciter resources, timers, and allocated memory.
+// Destructor: Releases Exciter allocated resources, buffers, and timers.
 Exciter::~Exciter()
 {
     delete ui;
 }
 
-/**
- * @brief Establishes low-level connection to ADRV9009 hardware device.
- */
-// Executes connect to device routine.
+
+
+//void Exciter::receiveIpAddressSlot(bool isConnect)
+//{
+////    ipAddress = ip;
+////    connectToDevice();
+//    if(isConnect && firstRun)
+//    {
+//        initConnection(isConnect);
+//        getDataSlot();
+//        firstRun = false;
+//    }
+
+//    else if(! isConnect)
+//    {
+//        initConnection(isConnect);
+//        firstRun = true;
+//    }
+//}
+
+
 void Exciter::connectToDevice()
 {
     //    isConnect = adrvObj->connect(ipAddress);
     //globals::ctx=adrvObj->ctx;
 }
 
-/**
- * @brief Packages and emits functional telemetry report to Joshan controller.
- */
+
+
 // Executes joshan func data slot routine.
 void Exciter::joshanFuncDataSlot()
 {
@@ -606,7 +610,7 @@ void Exciter::smartNoiseIsActiveSlot()
     ui->lblDacMsg->setText("Smart noise is active.");
 }
 
-// Retrieves current ser logged in slot state.
+// Retrieves current ser logged in slot value.
 void Exciter::isUserLoggedInSlot(double state)
 {
     isUserLoggedIn = state;
@@ -627,10 +631,8 @@ void Exciter::isUserLoggedInSlot(double state)
 //    maxFrqLimit = maxFrq;
 //}
 
-/**
- * @brief Resolves target runtime directory for waveform sample files.
- * @return Directory path string.
- */
+// Developer builds keep using their source-tree files/ directory. Packaged
+// builds use a writable per-user location, never the read-only /opt tree.
 static QString projectFilesDir()
 {
 #ifndef ELYNXSDR_PACKAGED
@@ -641,11 +643,6 @@ static QString projectFilesDir()
     return userFilesDirectory();
 }
 
-/**
- * @brief Resolves relative waveform filename into absolute filesystem path and checks existence.
- * @param fileName In/out filename reference.
- * @return True if file exists and is readable.
- */
 // Executes returnfile path routine.
 bool Exciter::returnfilePath(QString &fileName)
 {
@@ -671,7 +668,7 @@ bool Exciter::returnfilePath(QString &fileName)
 
 
 
-// Retrieves current data slot state.
+// Retrieves current data slot value.
 void Exciter::getDataSlot()
 {
     //set frq
@@ -720,7 +717,7 @@ bool Exciter::voltage23Selected() const
     return ui->chbVoltage23 && ui->chbVoltage23->isChecked();
 }
 
-// Sets profile bw value and updates internal subsystem configuration.
+// Sets profile bw parameter and updates internal configuration.
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.
@@ -736,7 +733,7 @@ void Exciter::setProfileBw(int bwMHz)
 }
 
 
-// Sets mode active value and updates internal subsystem configuration.
+// Sets mode active parameter and updates internal configuration.
 void Exciter::setModeActive(const QString &mode, bool on)
 {
     if (on)
@@ -747,7 +744,7 @@ void Exciter::setModeActive(const QString &mode, bool on)
     emit modeActivitySignal(!activeModes.isEmpty());
 }
 
-// Sets data slot value and updates internal subsystem configuration.
+// Sets data slot parameter and updates internal configuration.
 void Exciter::setDataSlot()
 {
 
@@ -1180,7 +1177,7 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
 }
 
 
-// Event/Signal handler for on btn stop sweep clicked.
+// Signal/Slot handler responding to on btn stop sweep clicked event.
 void Exciter::on_btnStopSweep_clicked()
 {
     if (isExciterOn) emit changeDacSignal("Sweep");
@@ -1188,7 +1185,7 @@ void Exciter::on_btnStopSweep_clicked()
 }
 
 
-// Event/Signal handler for on btn disable spot clicked.
+// Signal/Slot handler responding to on btn disable spot clicked event.
 void Exciter::on_btnDisableSpot_clicked()
 {
 
@@ -1201,7 +1198,7 @@ void Exciter::on_btnDisableSpot_clicked()
     //    ui->btnLoadSpot->setStyleSheet("background-color:");
 }
 
-// Event/Signal handler for on btn dis impulse clicked.
+// Signal/Slot handler responding to on btn dis impulse clicked event.
 void Exciter::on_btnDisImpulse_clicked()
 {    if (isExciterOn) emit changeDacSignal("Impulse");
     setModeActive("impulse", false);
@@ -1211,14 +1208,14 @@ void Exciter::on_btnDisImpulse_clicked()
 }
 
 
-// Event/Signal handler for on btn disable c w clicked.
+// Signal/Slot handler responding to on btn disable c w clicked event.
 void Exciter::on_btnDisableCW_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("CW");
     setModeActive("cw", false);
 }
 
-// Event/Signal handler for on btn disable w b clicked.
+// Signal/Slot handler responding to on btn disable w b clicked event.
 void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");
@@ -1229,7 +1226,6 @@ void Exciter::on_btnDisableWB_clicked(bool checked)
 // Phase 6: Multi Target tab
 // ---------------------------------------------------------------------------
 
-// Updates and synchronizes refresh tx power display data stream.
 void Exciter::refreshTxPowerDisplay()
 {
     // Phase 6: the "Current P (attenuation)" readout shows Pb = Pa + Pc -
@@ -1238,11 +1234,6 @@ void Exciter::refreshTxPowerDisplay()
     ui->lblCurrentPower->setNum(TxCalibration::boardP(ui->spnCWPower->value()));
 }
 
-/**
- * @brief Updates UI controls and input limits for a specific Multi-Target channel row.
- * @param row Target channel row index (0 to 4).
- * @param applyDefaults Whether to populate default parameters.
- */
 // Updates and synchronizes update multi target row data stream.
 void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
 {
@@ -1303,14 +1294,6 @@ void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
     mtShiftLbl[row]->setVisible(hasShift);
 }
 
-/**
- * @brief Reads space/tab-separated I/Q float samples from an analytical text file.
- * @param path File path to sample text file.
- * @param ti Output vector for In-phase (I) floating-point samples.
- * @param tq Output vector for Quadrature (Q) floating-point samples.
- * @param nMax Maximum number of samples to parse.
- * @return Count of successfully parsed sample pairs.
- */
 int Exciter::loadIqTextSamples(const QString &path,
                                QVector<double> &ti, QVector<double> &tq,
                                int nMax)
@@ -1343,10 +1326,6 @@ int Exciter::loadIqTextSamples(const QString &path,
     return n2;
 }
 
-/**
- * @brief Synthesizes and sums up to 5 concurrent independent radar targets into MultiTarget.txt.
- * @return True if multi-target waveform file was successfully synthesized.
- */
 // Executes build multi target waveform routine.
 bool Exciter::buildMultiTargetWaveform()
 {
@@ -1569,17 +1548,6 @@ bool Exciter::buildMultiTargetWaveform()
 // Phase 6: LFM / NLFM tabs
 // ---------------------------------------------------------------------------
 
-/**
- * @brief Computes analytical LFM/NLFM chirp baseband IQ samples.
- * @param ti Output vector for In-phase (I) samples.
- * @param tq Output vector for Quadrature (Q) samples.
- * @param n Total sample count.
- * @param fsMhz Sample rate in MHz.
- * @param nlfm If true, applies raised-cosine amplitude shaping (Non-Linear FM).
- * @param f0Mhz Start frequency offset in MHz.
- * @param bwMhz Chirp bandwidth in MHz.
- * @param tUs Pulse duration in microseconds.
- */
 void Exciter::fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
                                double fsMhz, bool nlfm,
                                double f0Mhz, double bwMhz, double tUs)
@@ -1607,15 +1575,6 @@ void Exciter::fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
     }
 }
 
-/**
- * @brief Synthesizes an LFM/NLFM chirp waveform file ready for DAC DMA upload.
- * @param fileName Output file name (e.g. "Lfm.txt" or "Nlfm.txt").
- * @param nlfm Non-linear FM flag.
- * @param f0Mhz Start frequency in MHz.
- * @param bwMhz Chirp bandwidth in MHz.
- * @param tUs Pulse duration in microseconds.
- * @return True if successfully generated.
- */
 bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
                              double f0Mhz, double bwMhz, double tUs)
 {
@@ -1662,14 +1621,6 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
 // Phase 6: Sweep tab - stepped-sine I/Q synthesis
 // ---------------------------------------------------------------------------
 
-/**
- * @brief Synthesizes a discrete stepped-frequency sweep waveform file into Sweep.txt.
- * @param fileName Output file name ("Sweep.txt").
- * @param fStartMhz Sweep start frequency in MHz.
- * @param fStopMhz Sweep stop frequency in MHz.
- * @param fStepMhz Frequency step in MHz.
- * @return True if successfully generated.
- */
 bool Exciter::buildSweepFile(const QString &fileName,
                              double fStartMhz, double fStopMhz, double fStepMhz)
 {

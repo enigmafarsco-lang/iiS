@@ -155,7 +155,7 @@ void PRIPage::periodTypeSlot(priSpace::periodicTypeEnum periodType)
     }
 }
 
-// Event/Signal handler for on btn ok clicked.
+// Signal/Slot handler responding to on btn ok clicked event.
 void PRIPage::on_btnOk_clicked()
 {
     QString tmp1;
@@ -225,7 +225,7 @@ void PRIPage::resetMaxPulseCount()
     radarData->maxPulseCount = priData->pri.count();
 }
 
-// Event/Signal handler for on btn add clicked.
+// Signal/Slot handler responding to on btn add clicked event.
 void PRIPage::on_btnAdd_clicked()
 {
 
@@ -265,7 +265,7 @@ void PRIPage::btnSlot()
     btnRed();
 }
 
-// Event/Signal handler for on btn clear clicked.
+// Signal/Slot handler responding to on btn clear clicked event.
 void PRIPage::on_btnClear_clicked()
 {
     row =0;
@@ -347,7 +347,7 @@ bool PRIPage::priTableValue()
     return  res;
 }
 
-// Destructor: Cleans up PRIPage resources, timers, and allocated memory.
+// Destructor: Releases PRIPage allocated resources, buffers, and timers.
 PRIPage::~PRIPage()
 {
     delete ui;
@@ -355,7 +355,7 @@ PRIPage::~PRIPage()
     //    delete radarData;
 }
 
-// Event/Signal handler for on tbl p r i one cell changed.
+// Signal/Slot handler responding to on tbl p r i one cell changed event.
 void PRIPage::on_tblPRIOne_cellChanged(int row, int column)
 {
     Q_UNUSED(row);
@@ -416,7 +416,6 @@ void PRIPage::btnGreen()
 
 //=======================================================================================
 
-// Executes generate p r i data routine.
 bool PRIPage::generatePRIData(priSpace::priDataStruct & data)
 {
     data.isError = false;

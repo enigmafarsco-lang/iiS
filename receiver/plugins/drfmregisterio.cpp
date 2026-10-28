@@ -70,7 +70,7 @@ QString stripCountPrefix(const QString &identifier)
 
 } // namespace
 
-// Constructor: Initializes DrfmRegisterIO subsystem components, default parameters, and state.
+// Constructor: Initializes DrfmRegisterIO subsystem components, state, and UI bindings.
 DrfmRegisterIO::DrfmRegisterIO()
     : m_ledDev(nullptr)
     , m_legacyDev(nullptr)
@@ -275,7 +275,7 @@ struct iio_device *DrfmRegisterIO::legacyBridgeDevice()
     return m_legacyDev;
 }
 
-// Sets legacy bridge enabled value and updates internal subsystem configuration.
+// Sets legacy bridge enabled parameter and updates internal configuration.
 void DrfmRegisterIO::setLegacyBridgeEnabled(bool enable)
 {
     struct iio_device *dev = legacyBridgeDevice();

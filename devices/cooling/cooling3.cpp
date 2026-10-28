@@ -38,7 +38,7 @@ Cooling3::Cooling3(QWidget *parent) :
 
 }
 
-// Destructor: Cleans up Cooling3 resources, timers, and allocated memory.
+// Destructor: Releases Cooling3 allocated resources, buffers, and timers.
 Cooling3::~Cooling3()
 {
     delete ui;
@@ -46,7 +46,7 @@ Cooling3::~Cooling3()
 
 
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void Cooling3::isDeviceConnectedSlot(bool val)
 {
 
@@ -129,7 +129,7 @@ void Cooling3::joshanControlDataSlot(QJsonObject val)
 
 }
 
-// Retrieves current solid temp slot state.
+// Retrieves current solid temp slot value.
 void Cooling3::getSolidTempSlot(int temp)
 {
     if (!autoMode) return;
@@ -141,7 +141,7 @@ void Cooling3::getSolidTempSlot(int temp)
 }
 
 
-// Event/Signal handler for on  btn auto clicked.
+// Signal/Slot handler responding to on  btn auto clicked event.
 void Cooling3::on_BtnAuto_clicked()
 {
     autoMode = true;
@@ -152,7 +152,7 @@ void Cooling3::on_BtnAuto_clicked()
     //emit sendCommandToDeviceSignal("");
 }
 
-// Event/Signal handler for on  btn manual clicked.
+// Signal/Slot handler responding to on  btn manual clicked event.
 void Cooling3::on_BtnManual_clicked()
 {
     autoMode = false;
@@ -169,7 +169,7 @@ void Cooling3::on_BtnManual_clicked()
 
 }
 
-// Event/Signal handler for on  btn turn on cooling clicked.
+// Signal/Slot handler responding to on  btn turn on cooling clicked event.
 void Cooling3::on_BtnTurnOnCooling_clicked()
 {
     status_mode = Cooler_On;
@@ -213,7 +213,7 @@ bool Cooling3::creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t dataLen,FC_
 }
 
 
-// Event/Signal handler for on  btn turn off cooling clicked.
+// Signal/Slot handler responding to on  btn turn off cooling clicked event.
 void Cooling3::on_BtnTurnOffCooling_clicked()
 {
     status_mode = Cooler_Off;

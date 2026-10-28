@@ -17,7 +17,7 @@ PlotSignal::PlotSignal(QWidget *parent) :
 
 
 
-// Destructor: Cleans up PlotSignal resources, timers, and allocated memory.
+// Destructor: Releases PlotSignal allocated resources, buffers, and timers.
 PlotSignal::~PlotSignal()
 {
     delete ui;
@@ -69,7 +69,7 @@ void PlotSignal::plotFile()
 
 
 
-// Sets q glcharts parameters value and updates internal subsystem configuration.
+// Sets q glcharts parameters parameter and updates internal configuration.
 void PlotSignal::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
     glChart->setMinimumSize(QSize(200, 140));
@@ -100,7 +100,7 @@ void PlotSignal::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType
     //    glChart->zoomEnable(true);
 }
 
-// Event/Signal handler for on push button clicked.
+// Signal/Slot handler responding to on push button clicked event.
 void PlotSignal::on_pushButton_clicked()
 {
 

@@ -6,7 +6,7 @@
 
 #include "pancomponent.h"
 
-// Constructor: Initializes BPanComponent subsystem components, default parameters, and state.
+// Constructor: Initializes BPanComponent subsystem components, state, and UI bindings.
 BPanComponent::BPanComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();
@@ -112,7 +112,7 @@ void BPanComponent::init_pan()
     panGauge->setMinimumSize(240, 240);
 }
 
-// Sets components_arrangements value and updates internal subsystem configuration.
+// Sets components_arrangements parameter and updates internal configuration.
 void BPanComponent::set_components_arrangements()
 {
     grdMainLayout = new QGridLayout(this);

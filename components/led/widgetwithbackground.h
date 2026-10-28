@@ -1,9 +1,3 @@
-// ============================================================================
-// File: widgetwithbackground.h
-// Subsystem: eLynxSDR led
-// Description: Subsystem implementation and interface guidance for widgetwithbackground.h.
-// ============================================================================
-
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -38,53 +32,47 @@ class WidgetWithBackground : public QWidget
 	Q_OBJECT
   public:
      /** Konstruktor */
-     // Constructor: Initializes WidgetWithBackground subsystem components, default parameters, and state.
      WidgetWithBackground(QWidget * parent = 0);
 
-     /** Destruktor - usuwa bitmapk.  */
-     // Destructor: Cleans up WidgetWithBackground resources, timers, and allocated memory.
+     /** Destruktor - usuwa bitmapkê.  */
      ~WidgetWithBackground ();
 
      /**
       * Operacja odmalowywania kontrolki  -
-      * wkleja bitmap z tem na kontrolk -
-      * generuj j wczeniej jeeli zajdzie taka potrzeba.
+      * wkleja bitmapê z t³em na kontrolkê -
+      * generuj±æ j± wcze¶niej je¿eli zajdzie taka potrzeba.
       */
-     // Executes draw background routine.
      void  drawBackground ();
 
-     /** Odmalowywuje kontrolk bezwarunkowo odmalowywujc to. */
-     // Updates and synchronizes update with background data stream.
+     /** Odmalowywuje kontrolkê bezwarunkowo odmalowywuj±c t³o. */
      void  updateWithBackground ();
     
      /** 
-     * Zawraca informacje czy kontrolka zostaa zmodyfikowana
-     * Ta informacja jest ustawiana gdy bitmapka ta si zmienia 
-     * to znaczy zmienia si rozmiar komponentu lub istnieje 
-     * potrzeba przemalowania ta. 
+     * Zawraca informacje czy kontrolka zosta³a zmodyfikowana
+     * Ta informacja jest ustawiana gdy bitmapka t³a siê zmienia 
+     * to znaczy zmienia siê rozmiar komponentu lub istnieje 
+     * potrzeba przemalowania t³a. 
      */ 
-     // Executes do repaint background routine.
      bool doRepaintBackground(); 
      
   protected:
-    /** Wywouje paintBackground - odmalowywujc to na nowo */
-    // Executes repaint background routine.
+    /** Wywo³uje paintBackground - odmalowywuj±c t³o na nowo */
     void repaintBackground();
 
     /**
-     * Odmalowywuje to kontrolki
-     * @param painter urzdzenie na ktrym mamy malowa.
-     * @param background to to kontrolki
+     * Odmalowywuje t³o kontrolki
+     * @param painter urz±dzenie na ktróym mamy malowaæ.
+     * @param background to t³o kontrolki
      */
     virtual void  paintBackground (QPainter & painer) = 0;
     
     
 
   protected:
-     /** Bufor na to. */
+     /** Bufor na t³o. */
      QPixmap * m_pixmap;
      /**
-     * Ustawia t zmienn po zmianie waciwoci
+     * Ustawia t± zmienn± po zmianie w³a¶ciwo¶ci
      */
      bool m_modified;
 };

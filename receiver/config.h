@@ -1,7 +1,7 @@
 // ============================================================================
 // File: config.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for config.h.
+// Description: Header definitions and interface declarations for config.h.
 // ============================================================================
 
 #ifndef CONFIG

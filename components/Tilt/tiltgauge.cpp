@@ -10,7 +10,7 @@
 #include <QPainter>
 #include <QFont>
 
-// Constructor: Initializes BTiltGauge subsystem components, default parameters, and state.
+// Constructor: Initializes BTiltGauge subsystem components, state, and UI bindings.
 BTiltGauge::BTiltGauge(QWidget *parent)
     : QWidget(parent)
 {
@@ -47,7 +47,7 @@ void BTiltGauge::init_panGauge()
     setEndWarningValue(-5);
 }
 
-// Sets value value and updates internal subsystem configuration.
+// Sets value parameter and updates internal configuration.
 void BTiltGauge::setValue(double value)
 {
     if(value>m_maxValue)
@@ -69,28 +69,28 @@ void BTiltGauge::setValue(double value)
     update();
 }
 
-// Sets value value and updates internal subsystem configuration.
+// Sets value parameter and updates internal configuration.
 void BTiltGauge::setValue(int value)
 {
     setValue((double)value);
     update();
 }
 
-// Sets min value value and updates internal subsystem configuration.
+// Sets min value parameter and updates internal configuration.
 void BTiltGauge::setMinValue(double value)
 {
     m_minValue=value;
     update();
 }
 
-// Sets min value value and updates internal subsystem configuration.
+// Sets min value parameter and updates internal configuration.
 void BTiltGauge::setMinValue(int value)
 {
     setMinValue((double)value);
 }
 
 
-// Sets max value value and updates internal subsystem configuration.
+// Sets max value parameter and updates internal configuration.
 void BTiltGauge::setMaxValue(double value)
 {
     if(value > m_minValue)
@@ -102,14 +102,14 @@ void BTiltGauge::setMaxValue(double value)
         emit errorSignal(MaxValueError);
 }
 
-// Sets max value value and updates internal subsystem configuration.
+// Sets max value parameter and updates internal configuration.
 void BTiltGauge::setMaxValue(int value)
 {
     setMaxValue((double)value);
 }
 
 
-// Sets threshold value and updates internal subsystem configuration.
+// Sets threshold parameter and updates internal configuration.
 void BTiltGauge::setThreshold(double value)
 {
     if(value > m_minValue && value < m_maxValue)
@@ -121,34 +121,34 @@ void BTiltGauge::setThreshold(double value)
         emit errorSignal(ThresholdError);
 }
 
-// Sets threshold value and updates internal subsystem configuration.
+// Sets threshold parameter and updates internal configuration.
 void BTiltGauge::setThreshold(int value)
 {
     setThreshold((double)value);
 }
 
-// Sets precision value and updates internal subsystem configuration.
+// Sets precision parameter and updates internal configuration.
 void BTiltGauge::setPrecision(int precision)
 {
     m_precision=precision;
     update();
 }
 
-// Sets precision numeric value and updates internal subsystem configuration.
+// Sets precision numeric parameter and updates internal configuration.
 void BTiltGauge::setPrecisionNumeric(int precision)
 {
     m_precisionNumeric=precision;
     update();
 }
 
-// Sets units value and updates internal subsystem configuration.
+// Sets units parameter and updates internal configuration.
 void BTiltGauge::setUnits(QString units)
 {
     m_units=units;
     update();
 }
 
-// Sets label value and updates internal subsystem configuration.
+// Sets label parameter and updates internal configuration.
 void BTiltGauge::setLabel(QString label)
 {
     m_label=label;
@@ -180,35 +180,35 @@ void BTiltGauge::paintEvent(QPaintEvent *event)
     drawCrown(&painter);
 }
 
-// Sets steps value and updates internal subsystem configuration.
+// Sets steps parameter and updates internal configuration.
 void BTiltGauge::setSteps(int nSteps)
 {
     m_steps=nSteps;
     update();
 }
 
-// Sets start angle value and updates internal subsystem configuration.
+// Sets start angle parameter and updates internal configuration.
 void BTiltGauge::setStartAngle(double value)
 {
     m_startAngle=value;
     update();
 }
 
-// Sets end angle value and updates internal subsystem configuration.
+// Sets end angle parameter and updates internal configuration.
 void BTiltGauge::setEndAngle(double value)
 {
     m_endAngle=value;
     update();
 }
 
-// Sets foreground value and updates internal subsystem configuration.
+// Sets foreground parameter and updates internal configuration.
 void BTiltGauge::setForeground(QColor newForeColor)
 {
     m_foreground=newForeColor;
     update();
 }
 
-// Sets background value and updates internal subsystem configuration.
+// Sets background parameter and updates internal configuration.
 void BTiltGauge::setBackground(QColor newBackColor)
 {
     m_background=newBackColor;
@@ -232,42 +232,42 @@ void BTiltGauge::thresholdManager()
         }
 }
 
-// Sets threshold enabled value and updates internal subsystem configuration.
+// Sets threshold enabled parameter and updates internal configuration.
 void BTiltGauge::setThresholdEnabled(bool enable)
 {
     m_thresholdEnabled=enable;
     update();
 }
 
-// Sets numeric indicator enabled value and updates internal subsystem configuration.
+// Sets numeric indicator enabled parameter and updates internal configuration.
 void BTiltGauge::setNumericIndicatorEnabled(bool enable)
 {
     m_numericIndicatorEnabled=enable;
     update();
 }
 
-// Sets begin valid value value and updates internal subsystem configuration.
+// Sets begin valid value parameter and updates internal configuration.
 void BTiltGauge::setBeginValidValue(double beginValue)
 {
     m_beginValidValue=beginValue;
     update();
 }
 
-// Sets end valid value value and updates internal subsystem configuration.
+// Sets end valid value parameter and updates internal configuration.
 void BTiltGauge::setEndValidValue(double endValue)
 {
     m_endValidValue=endValue;
     update();
 }
 
-// Sets enable valid window value and updates internal subsystem configuration.
+// Sets enable valid window parameter and updates internal configuration.
 void BTiltGauge::setEnableValidWindow(bool enable)
 {
     m_enableValidWindow=enable;
     update();
 }
 
-// Sets begin warning value value and updates internal subsystem configuration.
+// Sets begin warning value parameter and updates internal configuration.
 void BTiltGauge::setBeginWarningValue(double beginValue)
 {
     m_beginWarningValue=beginValue;
@@ -275,14 +275,14 @@ void BTiltGauge::setBeginWarningValue(double beginValue)
 
 }
 
-// Sets end warning value value and updates internal subsystem configuration.
+// Sets end warning value parameter and updates internal configuration.
 void BTiltGauge::setEndWarningValue(double endValue)
 {
     m_endWarningValue=endValue;
     update();
 }
 
-// Sets enable warning window value and updates internal subsystem configuration.
+// Sets enable warning window parameter and updates internal configuration.
 void BTiltGauge::setEnableWarningWindow(bool enable)
 {
     m_enableWarningWindow=enable;

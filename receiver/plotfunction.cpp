@@ -6,14 +6,14 @@
 
 #include "plotfunction.h"
 
-// Constructor: Initializes plotfunction subsystem components, default parameters, and state.
+// Constructor: Initializes plotfunction subsystem components, state, and UI bindings.
 plotfunction::plotfunction(QObject *parent) : QThread(parent)
 {
     this->start();
     moveToThread(this);
 }
 
-// Destructor: Cleans up plotfunction resources, timers, and allocated memory.
+// Destructor: Releases plotfunction allocated resources, buffers, and timers.
 plotfunction::~plotfunction()
 {
     //    if(isRunning())
@@ -23,14 +23,14 @@ plotfunction::~plotfunction()
     //    }
 }
 
-// Sets plot value and updates internal subsystem configuration.
+// Sets plot parameter and updates internal configuration.
 void plotfunction::setPlot(QCustomPlot *plt)
 {
     customPlot = plt;
 }
 
 
-// Sets histo plot value and updates internal subsystem configuration.
+// Sets histo plot parameter and updates internal configuration.
 void plotfunction::setHistoPlot(QCustomPlot *plt)
 {
     histogramPlot = plt;

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tabwidget.h
 // Subsystem: eLynxSDR custom
-// Description: Subsystem implementation and interface guidance for tabwidget.h.
+// Description: Header definitions and interface declarations for tabwidget.h.
 // ============================================================================
 
 #ifndef TABWIDGET
@@ -15,9 +15,7 @@ class TabWidget : public QTabWidget
 {
 public:
     TabWidget(QWidget *parent=0):QTabWidget(parent){
-        // Sets tab bar value and updates internal subsystem configuration.
         setTabBar(new TabBar);
-        // Sets tab position value and updates internal subsystem configuration.
         setTabPosition(QTabWidget::West);
 
 }

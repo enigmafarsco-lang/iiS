@@ -1,7 +1,7 @@
 // ============================================================================
 // File: connectdialog.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for connectdialog.h.
+// Description: Header definitions and interface declarations for connectdialog.h.
 // ============================================================================
 
 #ifndef CONNECTDIALOG_H
@@ -24,30 +24,22 @@ class connectDialog : public QDialog
     Q_OBJECT
 
 public:
-    // Constructor: Initializes connectDialog subsystem components, default parameters, and state.
     explicit connectDialog(QDialog *parent = nullptr);
-    // Destructor: Cleans up connectDialog resources, timers, and allocated memory.
     ~connectDialog();
 
-    // Executes initialize routine.
     bool Initialize();
 
     // TX bandwidth (100/200/400) and ORx bandwidth selected in the
     // first-start form.  The startup profile assertion composes the
     // Talise profile from these two choices (general + orx + tx + </profile>).
     int selectedTxBw() const;
-    // Executes selected orx bw routine.
     int selectedOrxBw() const;
 
 private slots:
 
-    // Event/Signal handler for btn cancel clicked.
     void btn_cancel_clicked();
-    // Event/Signal handler for btn refresh clicked.
     void btn_refresh_clicked();
-    // Event/Signal handler for btn connect clicked.
     void btn_connect_clicked();
-    // Executes tx bw toggled routine.
     void txBwToggled(bool checked);
 
 private:
@@ -76,7 +68,6 @@ private:
     void updateBoardSerial();
 
 signals:
-    // Executes connect signal routine.
     void connectSignal();
 };
 

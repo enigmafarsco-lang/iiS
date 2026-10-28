@@ -1,7 +1,7 @@
 // ============================================================================
 // File: pangauge.h
 // Subsystem: eLynxSDR Pan
-// Description: Subsystem implementation and interface guidance for pangauge.h.
+// Description: Header definitions and interface declarations for pangauge.h.
 // ============================================================================
 
 
@@ -48,7 +48,6 @@ class BPanGauge : public QWidget
 public:
 
     enum ErrorCode {MaxValueError=1,MinValueError,ThresholdError,TargetError,PrecisionError,ColorError,UnitsEmpty,OutOfRange};
-    // Constructor: Initializes BPanGauge subsystem components, default parameters, and state.
     BPanGauge(QWidget *parent = 0);
     double value() const { return m_value; }
     double minValue() const { return m_minValue; }
@@ -82,62 +81,35 @@ public:
 
 signals:
 
-    // Executes error signal routine.
     void errorSignal(int);
-    // Executes threshold alarm routine.
     void thresholdAlarm(bool);
 
 public slots:
 
-    // Sets value value and updates internal subsystem configuration.
     void setValue(double);
-    // Sets value value and updates internal subsystem configuration.
     void setValue(int);
-    // Sets min value value and updates internal subsystem configuration.
     void setMinValue(double);
-    // Sets min value value and updates internal subsystem configuration.
     void setMinValue(int);
-    // Sets max value value and updates internal subsystem configuration.
     void setMaxValue(double);
-    // Sets max value value and updates internal subsystem configuration.
     void setMaxValue(int);
-    // Sets threshold value and updates internal subsystem configuration.
     void setThreshold(double);
-    // Sets threshold value and updates internal subsystem configuration.
     void setThreshold(int);
-    // Sets precision value and updates internal subsystem configuration.
     void setPrecision(int);
-    // Sets precision numeric value and updates internal subsystem configuration.
     void setPrecisionNumeric(int);
-    // Sets units value and updates internal subsystem configuration.
     void setUnits(QString);
-    // Sets label value and updates internal subsystem configuration.
     void setLabel(QString);
-    // Sets steps value and updates internal subsystem configuration.
     void setSteps(int);
-    // Sets start angle value and updates internal subsystem configuration.
     void setStartAngle(double);
-    // Sets end angle value and updates internal subsystem configuration.
     void setEndAngle(double);
-    // Sets foreground value and updates internal subsystem configuration.
     void setForeground(QColor);
-    // Sets background value and updates internal subsystem configuration.
     void setBackground(QColor);
-    // Sets threshold enabled value and updates internal subsystem configuration.
     void setThresholdEnabled(bool);
-    // Sets numeric indicator enabled value and updates internal subsystem configuration.
     void setNumericIndicatorEnabled(bool);
-    // Sets begin valid value value and updates internal subsystem configuration.
     void setBeginValidValue(double);
-    // Sets end valid value value and updates internal subsystem configuration.
     void setEndValidValue(double);
-    // Sets enable valid window value and updates internal subsystem configuration.
     void setEnableValidWindow(bool);
-    // Sets begin warning value value and updates internal subsystem configuration.
     void setBeginWarningValue(double);
-    // Sets end warning value value and updates internal subsystem configuration.
     void setEndWarningValue(double);
-    // Sets enable warning window value and updates internal subsystem configuration.
     void setEnableWarningWindow(bool);
 
 protected:
@@ -146,33 +118,19 @@ protected:
     double m_maxValue, m_minValue;
     int m_precision;
     int m_precisionNumeric;
-    // Executes threshold manager routine.
     void thresholdManager();
-    // Executes paint event routine.
     void paintEvent(QPaintEvent *event);
-    // Executes draw crown routine.
     void drawCrown(QPainter *painter);
-    // Executes draw background routine.
     void drawBackground(QPainter *painter);
-    // Executes draw ticks routine.
     void drawTicks(QPainter *painter);
-    // Executes draw scale routine.
     void drawScale(QPainter *painter);
-    // Executes draw units routine.
     void drawUnits(QPainter *painter);
-    // Executes draw needle routine.
     void drawNeedle(QPainter *painter);
-    // Executes draw threshold line routine.
     void drawThresholdLine(QPainter *painter);
-    // Executes draw numeric value routine.
     void drawNumericValue(QPainter *painter);
-    // Executes draw cover glass routine.
     void drawCoverGlass(QPainter *painter);
-    // Executes draw label routine.
     void drawLabel(QPainter *painter);
-    // Executes draw valid window routine.
     void drawValidWindow(QPainter *painter);
-    // Executes draw warning window routine.
     void drawWarningWindow(QPainter *painter);
 
     QString m_units;

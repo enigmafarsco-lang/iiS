@@ -582,7 +582,6 @@ Plot::Plot(QApplication *app,QString name,QWidget *parent) :
 //}
 
 
-// Executes waterfall update routine.
 void Plot::waterfallUpdate()
 {
     //    QCustomSeries a;
@@ -608,7 +607,7 @@ void Plot::waterfallUpdate()
     //    }
 }
 
-// Sets q glcharts parameters value and updates internal subsystem configuration.
+// Sets q glcharts parameters parameter and updates internal configuration.
 void Plot::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
     //    glChart->setMinimumSize(QSize(2000, 300));
@@ -651,7 +650,7 @@ void Plot::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 
 
 
-// Destructor: Cleans up Plot resources, timers, and allocated memory.
+// Destructor: Releases Plot allocated resources, buffers, and timers.
 Plot::~Plot()
 {
     delete ui;
@@ -2332,7 +2331,7 @@ void Plot::DrawFFTPlot()
 
 #pragma region Menu Actions {
 
-// Event/Signal handler for on action save as triggered.
+// Signal/Slot handler responding to on action save as triggered event.
 void Plot::on_actionSaveAs_triggered()
 {
     QPixmap pixmap(ui->timeChart->rect().size());
@@ -2344,7 +2343,7 @@ void Plot::on_actionSaveAs_triggered()
 
 }
 
-// Event/Signal handler for on action save  whole  page triggered.
+// Signal/Slot handler responding to on action save  whole  page triggered event.
 void Plot::on_actionSave_Whole_Page_triggered()
 {
     QPixmap pixmap(ui->centralwidget->rect().size());
@@ -2355,24 +2354,24 @@ void Plot::on_actionSave_Whole_Page_triggered()
     pixmap.save(filename);
 }
 
-// Event/Signal handler for on action close triggered.
+// Signal/Slot handler responding to on action close triggered event.
 void Plot::on_actionClose_triggered()
 {
     this->close();
 }
 
-// Event/Signal handler for on action quit triggered.
+// Signal/Slot handler responding to on action quit triggered event.
 void Plot::on_actionQuit_triggered()
 {
     QApplication::quit();
 }
 
-// Event/Signal handler for on action plot  title triggered.
+// Signal/Slot handler responding to on action plot  title triggered event.
 void Plot::on_actionPlot_Title_triggered()
 {
 }
 
-// Event/Signal handler for on action show  settings triggered.
+// Signal/Slot handler responding to on action show  settings triggered event.
 void Plot::on_actionShow_Settings_triggered()
 {
     if(ui->settingsMenu->isVisible())
@@ -2381,7 +2380,7 @@ void Plot::on_actionShow_Settings_triggered()
         ui->settingsMenu->setVisible(true);
 }
 
-// Event/Signal handler for on action full  screen triggered.
+// Signal/Slot handler responding to on action full  screen triggered event.
 void Plot::on_actionFull_Screen_triggered()
 {
     if(this->isFullScreen())
@@ -3394,7 +3393,6 @@ void Plot::create_plot()
 /**
  * @brief Initialize plots
  */
-// Executes initialize plots routine.
 void Plot::InitializePlots()
 {
     // Hold count of checked channels
@@ -3446,7 +3444,6 @@ void Plot::ChangeFrequencyHopping(iio_channel *ch1,double freq){
  * @brief Get current frequency
  * @return freqChanged status
  */
-// Executes get base freq routine.
 bool Plot::GetBaseFreq()
 {
     //    qInfo() << "GetBaseFreq" ;
@@ -3646,7 +3643,7 @@ void Plot::stopCapture(){
     if(Mode == SMART_TIME_DOMAIN) sendTimeDataToCardTimer.stop();
 }
 
-// Retrieves current delta time state.
+// Retrieves current delta time value.
 double Plot::getDeltaTime()
 {
     return dltValue;
@@ -3657,7 +3654,6 @@ double Plot::getDeltaTime()
  * @brief Plot::capture_setup
  * @return
  */
-// Executes capture setup routine.
 int Plot::capture_setup(void)
 {
     int i, j;
@@ -3776,7 +3772,6 @@ int Plot::capture_setup(void)
  * @brief Plot::start
  * @param start_event
  */
-// Executes start routine.
 void Plot::start(gboolean start_event)
 {
 
@@ -3821,7 +3816,6 @@ void Plot::start(gboolean start_event)
 /**
  * @brief Plot::capture_process
  */
-// Executes capture process routine.
 void Plot::capture_process()
 {
     unsigned int i;
@@ -3996,7 +3990,6 @@ capture_stop_check:
 /**
  * @brief Plot::capture_start
  */
-// Executes capture start routine.
 void Plot::capture_start()
 {
     if (!priv->redraw_function) {
@@ -4013,7 +4006,6 @@ void Plot::capture_start()
 /**
  * @brief Plot::capture_process_ended
  */
-// Executes capture process ended routine.
 void Plot::capture_process_ended()
 {
     if (restart_capture == true) {
@@ -4104,7 +4096,6 @@ int Plot::plot_get_sample_count_of_device(const char *device)
 /**
  * @brief Plot::plot_channels_update
  */
-// Executes plot channels update routine.
 void Plot::plot_channels_update()
 {
     GSList *node;
@@ -6074,7 +6065,7 @@ capture_button_err:
     return false;
 }
 
-// Event/Signal handler for single shot clicked cb.
+// Signal/Slot handler responding to single shot clicked cb event.
 void Plot::single_shot_clicked_cb(gpointer data)
 {
     priv->single_shot_mode = true;
@@ -6296,7 +6287,7 @@ QCPItemText * Plot::createTextOnPlot()
     txtLbl->setText("");
     return txtLbl;
 }
-// Event/Signal handler for count changed cb.
+// Signal/Slot handler responding to count changed cb event.
 void Plot::count_changed_cb()
 {
     extra_dev_info *dev_info;
@@ -6328,7 +6319,6 @@ void Plot::count_changed_cb()
  * @param name
  * @return
  */
-// Executes num of channels of device routine.
 int Plot::num_of_channels_of_device(const char *name)
 {
 
@@ -6355,7 +6345,6 @@ int Plot::num_of_channels_of_device(const char *name)
  * @param enabled_mask
  * @return
  */
-// Executes enabled channels of device routine.
 int Plot::enabled_channels_of_device(QString name, unsigned *enabled_mask)
 {
     int num_enabled = 0;
@@ -6379,7 +6368,6 @@ int Plot::enabled_channels_of_device(QString name, unsigned *enabled_mask)
  * @brief Plot::enabled_channels_count
  * @return
  */
-// Executes enabled channels count routine.
 int Plot::enabled_channels_count()
 {
     gboolean next_iter;
@@ -6408,7 +6396,6 @@ int Plot::enabled_channels_count()
  * @param name
  * @return
  */
-// Executes check valid setup of device routine.
 gboolean Plot::check_valid_setup_of_device(const char *name)
 {
 
@@ -6525,7 +6512,6 @@ gboolean Plot::check_valid_setup_of_device(const char *name)
  * @brief Plot::check_valid_setup_of_all_devices
  * @return
  */
-// Executes check valid setup of all devices routine.
 gboolean Plot::check_valid_setup_of_all_devices()
 {
     gboolean valid=false;
@@ -6554,7 +6540,6 @@ gboolean Plot::check_valid_setup_of_all_devices()
 /**
  * @brief Plot::treeview_expand_update
  */
-// Executes treeview expand update routine.
 void Plot::treeview_expand_update()
 {
     //	GtkTreeIter dev_iter;
@@ -6577,7 +6562,6 @@ void Plot::treeview_expand_update()
  * @param pathStr
  * @param plot
  */
-// Executes channel toggled routine.
 void Plot::channel_toggled( gchar* pathStr, gpointer plot)
 {
     gboolean active;
@@ -6592,7 +6576,6 @@ void Plot::channel_toggled( gchar* pathStr, gpointer plot)
  */
 
 
-// Executes on item clicked routine.
 void Plot::onItemClicked()
 {
     //    QString itemName=item->text (0);
@@ -6836,7 +6819,6 @@ void Plot::onItemClicked()
 /**
  * Add channels to devices
  */
-// Executes plot channels add channel routine.
 void Plot::plot_channels_add_channel(PlotChn *pchn)
 {
 
@@ -6908,7 +6890,6 @@ void Plot::plot_channels_add_channel(PlotChn *pchn)
 /**
  * Add The Devices to tree view
  */
-// Executes plot channels add device routine.
 void Plot::plot_channels_add_device(const char *dev_name)
 {
     priv->deviceList.append (dev_name);
@@ -6927,7 +6908,6 @@ void Plot::plot_channels_add_device(const char *dev_name)
  * @brief Plot::plot_channel_add_to_plot
  * @param settings
  */
-// Executes plot channel add to plot routine.
 void Plot::plot_channel_add_to_plot(PlotChn *settings)
 {
     GSList *list = priv->ch_settings_list;
@@ -6947,7 +6927,6 @@ void Plot::plot_channel_add_to_plot(PlotChn *settings)
 /**
  * Initialize The Devices Tree view
  */
-// Executes device list treeview init routine.
 void Plot::device_list_treeview_init()
 {
     unsigned int i, j;
@@ -7043,7 +7022,7 @@ math_channels:
 
 #pragma region Side Panel {
 
-// Event/Signal handler for on cmb plot type current index changed.
+// Signal/Slot handler responding to on cmb plot type current index changed event.
 void Plot::on_cmb_plot_type_currentIndexChanged(int index)
 {
     count_changed_cb();
@@ -7051,7 +7030,7 @@ void Plot::on_cmb_plot_type_currentIndexChanged(int index)
     device_list_treeview_init();
 }
 
-// Event/Signal handler for on cmb graph type current index changed.
+// Signal/Slot handler responding to on cmb graph type current index changed event.
 void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 {
 
@@ -7103,7 +7082,7 @@ void Plot::applyBandwidthWindow()
     ui->fftChart->replot();
 }
 
-// Event/Signal handler for on txt selected freq value changed.
+// Signal/Slot handler responding to on txt selected freq value changed event.
 void Plot::on_txtSelectedFreq_valueChanged(double value)
 {
     // Remember the entered frequency; the marker itself is drawn in
@@ -7253,7 +7232,7 @@ void Plot::ShowControls(int index){
 
 #pragma region Time Domain Top Panel {
 
-// Event/Signal handler for on btn capture clicked.
+// Signal/Slot handler responding to on btn capture clicked event.
 void Plot::on_btn_capture_clicked()
 {
     //    qInfo()<<"dddddddddddddddddddddd";
@@ -7404,7 +7383,7 @@ void Plot::exciterModeOn()
     });
 }
 
-// Event/Signal handler for on btn select clicked.
+// Signal/Slot handler responding to on btn select clicked event.
 void Plot::on_btn_select_clicked()
 {
     rangeYTimeChart.lower=ui->txt_y_axis_min->value();
@@ -7412,7 +7391,7 @@ void Plot::on_btn_select_clicked()
     selectTimeChart=false;
 }
 
-// Event/Signal handler for on btn new plot clicked.
+// Signal/Slot handler responding to on btn new plot clicked event.
 void Plot::on_btn_new_plot_clicked()
 {
     //    Plot *plot=new Plot(mApp,"newPlot");
@@ -7423,7 +7402,7 @@ void Plot::on_btn_new_plot_clicked()
     osc.new_plot_cb();
 }
 
-// Event/Signal handler for on btn zoom in clicked.
+// Signal/Slot handler responding to on btn zoom in clicked event.
 void Plot::on_btn_zoom_in_clicked()
 {
     if(rangeXTimeChart.lower==rangeXTimeChart.upper)
@@ -7436,7 +7415,7 @@ void Plot::on_btn_zoom_in_clicked()
     selectTimeChart=true;
 }
 
-// Event/Signal handler for on btn zoom out clicked.
+// Signal/Slot handler responding to on btn zoom out clicked event.
 void Plot::on_btn_zoom_out_clicked()
 {
     if(rangeXTimeChart.lower==rangeXTimeChart.upper)
@@ -7449,7 +7428,7 @@ void Plot::on_btn_zoom_out_clicked()
     selectTimeChart=true;
 }
 
-// Event/Signal handler for on chk auto scale state changed.
+// Signal/Slot handler responding to on chk auto scale state changed event.
 void Plot::on_chk_auto_scale_stateChanged(int arg1)
 {
 
@@ -7481,7 +7460,7 @@ void Plot::on_chk_auto_scale_stateChanged(int arg1)
 
 #pragma region Frequency Domain Top Panel  {
 
-// Event/Signal handler for on btn select fft clicked.
+// Signal/Slot handler responding to on btn select fft clicked event.
 void Plot::on_btn_select_fft_clicked()
 {
 
@@ -7504,7 +7483,7 @@ void Plot::on_btn_select_fft_clicked()
     }
 }
 
-// Event/Signal handler for on btn zoom in fft clicked.
+// Signal/Slot handler responding to on btn zoom in fft clicked event.
 void Plot::on_btn_zoom_in_fft_clicked()
 {
     //    if(rangeXFFTChart.lower==rangeXFFTChart.upper)
@@ -7517,7 +7496,7 @@ void Plot::on_btn_zoom_in_fft_clicked()
     //    selectFFTChart=true;
 }
 
-// Event/Signal handler for on btn zoom out fft clicked.
+// Signal/Slot handler responding to on btn zoom out fft clicked event.
 void Plot::on_btn_zoom_out_fft_clicked()
 {
     if(rangeXFFTChart.lower==rangeXFFTChart.upper)
@@ -7530,7 +7509,7 @@ void Plot::on_btn_zoom_out_fft_clicked()
     selectFFTChart=true;
 }
 
-// Event/Signal handler for on chk auto scale fft state changed.
+// Signal/Slot handler responding to on chk auto scale fft state changed event.
 void Plot::on_chk_auto_scale_fft_stateChanged(int arg1)
 {
 
@@ -7552,13 +7531,13 @@ void Plot::on_chk_auto_scale_fft_stateChanged(int arg1)
 
 #pragma endregion }
 
-// Event/Signal handler for on btn capture triggered.
+// Signal/Slot handler responding to on btn capture triggered event.
 void Plot::on_btn_capture_triggered(QAction *arg1)
 {
 
 }
 
-// Event/Signal handler for on btnfftcapture clicked.
+// Signal/Slot handler responding to on btnfftcapture clicked event.
 void Plot::on_btnfftcapture_clicked()
 {
     on_btn_capture_clicked();
@@ -7575,13 +7554,13 @@ void Plot::frqValueChangedSlot(QString val)
 
 
 
-// Event/Signal handler for on btn plot frq clicked.
+// Signal/Slot handler responding to on btn plot frq clicked event.
 void Plot::on_btn_plot_frq_clicked()
 {
 
 }
 
-// Event/Signal handler for on btn clear clicked.
+// Signal/Slot handler responding to on btn clear clicked event.
 void Plot::on_btnClear_clicked()
 {
     ui->timeDataTable->clearContents();
@@ -7590,20 +7569,20 @@ void Plot::on_btnClear_clicked()
 }
 
 
-// Event/Signal handler for on btn hidden clicked.
+// Signal/Slot handler responding to on btn hidden clicked event.
 void Plot::on_btnHidden_clicked()
 {
 
 }
 
-// Event/Signal handler for on btn hidden clicked.
+// Signal/Slot handler responding to on btn hidden clicked event.
 void Plot::on_btnHidden_clicked(bool checked)
 {
     ui->wdgWaterFall->setVisible(!ui->wdgWaterFall->isVisible());
 }
 
 
-// Event/Signal handler for on time data table cell clicked.
+// Signal/Slot handler responding to on time data table cell clicked event.
 void Plot::on_timeDataTable_cellClicked(int row, int column)
 {
     for(int i{}; i < ui->timeDataTable->rowCount(); i++)
@@ -7629,7 +7608,7 @@ void Plot::on_timeDataTable_cellClicked(int row, int column)
     //    if (column != 12) return;
 }
 
-// Event/Signal handler for on time data table item clicked.
+// Signal/Slot handler responding to on time data table item clicked event.
 void Plot::on_timeDataTable_itemClicked(QTableWidgetItem *item)
 {
     // item->setBackground(Qt::green);
@@ -7637,7 +7616,7 @@ void Plot::on_timeDataTable_itemClicked(QTableWidgetItem *item)
 
 
 
-// Event/Signal handler for on btn hide show clicked.
+// Signal/Slot handler responding to on btn hide show clicked event.
 void Plot::on_btnHideShow_clicked(bool checked)
 {
     //    qInfo() << Mode;
@@ -7700,7 +7679,7 @@ void Plot::saveToCSVInThread(QTableWidget *tableWidget, const QString &fileName)
 
     thread->start();
 }
-// Event/Signal handler for on btn save table data clicked.
+// Signal/Slot handler responding to on btn save table data clicked event.
 void Plot::on_btnSaveTableData_clicked()
 {
     //    QString fileName = QFileDialog::getSaveFileName(this, "Save CSV File", "", "CSV Files (*.csv)");
@@ -7717,7 +7696,7 @@ void Plot::on_btnSaveTableData_clicked()
 
 }
 
-// Event/Signal handler for on chk max hold clicked.
+// Signal/Slot handler responding to on chk max hold clicked event.
 void Plot::on_chk_maxHold_clicked(bool checked)
 {
 

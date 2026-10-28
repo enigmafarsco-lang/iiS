@@ -12,7 +12,6 @@
  * @brief dacDataManager::dacDataManager
  * @param parent
  */
-// Constructor: Initializes dacDataManager subsystem components, default parameters, and state.
 dacDataManager::dacDataManager(QObject *parent): QObject(parent)
 {    
 
@@ -74,7 +73,6 @@ init_error:
  * @param ctx
  * @return
  */
-// Executes dac manager init routine.
 int dacDataManager::dac_manager_init(dac_data_manager *manager, iio_device *dac, iio_device *second_dac, iio_context *ctx)
 {
     long long alignment;
@@ -119,7 +117,6 @@ int dacDataManager::dac_manager_init(dac_data_manager *manager, iio_device *dac,
  * @param iio_dac
  * @return
  */
-// Executes dds dac init routine.
 int dacDataManager::dds_dac_init(dac_data_manager *manager, dds_dac *ddac, iio_device *iio_dac)
 {
     int ret = 0;
@@ -164,7 +161,6 @@ int dacDataManager::dds_dac_init(dac_data_manager *manager, dds_dac *ddac, iio_d
  * @param tx
  * @param dds_index
  */
-// Executes dds non iq tx init routine.
 void dacDataManager::dds_non_iq_tx_init(dds_dac *ddac, dds_tx *tx, unsigned dds_index)
 {
     tx->index = dds_index;
@@ -195,7 +191,6 @@ void dacDataManager::dds_non_iq_tx_init(dds_dac *ddac, dds_tx *tx, unsigned dds_
  * @brief dacDataManager::gui_manager_create
  * @param manager
  */
-// Executes gui manager create routine.
 void dacDataManager::gui_manager_create(dac_data_manager *manager)
 {
     QHBoxLayout *hbox= new QHBoxLayout;
@@ -276,7 +271,7 @@ QFrame *dacDataManager::gui_dds_mode_chooser_create(struct dds_tx *tx)
 }
 
 
-// Retrieves current val state.
+// Retrieves current val value.
 void dacDataManager::getVal(QComboBox * cmb,bool isWork)
 {
 //    mode = cmb;
@@ -525,7 +520,6 @@ QScrollArea *dacDataManager::gui_dac_channels_tree_create(struct dac_buffer *d_b
  * @param manager
  * @param tx_sample_rate
  */
-// Executes dac data manager freq widgets range update routine.
 void dacDataManager::dac_data_manager_freq_widgets_range_update(struct dac_data_manager *manager, double tx_sample_rate)
 {
     GSList *node;
@@ -543,7 +537,6 @@ void dacDataManager::dac_data_manager_freq_widgets_range_update(struct dac_data_
  * @param tone
  * @param tx_sample_rate
  */
-// Executes freq spin range update routine.
 void dacDataManager::freq_spin_range_update(struct dds_tone *tone, double tx_sample_rate)
 {
     QDoubleSpinBox *adj;
@@ -563,7 +556,6 @@ void dacDataManager::freq_spin_range_update(struct dds_tone *tone, double tx_sam
  * @return
  */
 
-// Executes dac channels assign routine.
 int dacDataManager::dac_channels_assign(dds_dac *ddac)
 {
     struct dac_data_manager *manager;
@@ -731,7 +723,6 @@ int dacDataManager::parse_wavefile_line(const char *line, double *vals,
  * @param dac
  * @return
  */
-// Executes dac offset get value routine.
 double dacDataManager::dac_offset_get_value(struct iio_device *dac)
 {
     double offset;
@@ -754,7 +745,6 @@ double dacDataManager::dac_offset_get_value(struct iio_device *dac)
  * E.g. (data1, data2, NULL, NULL) becomes (data1, data2, data1, data2)
  * ...
  */
-// Executes replicate tx data channels routine.
 void dacDataManager::replicate_tx_data_channels(struct _complex_ref *data, int count)
 {
     if (!data)
@@ -1065,7 +1055,6 @@ int dacDataManager::analyse_wavefile(struct dac_data_manager *manager,
  * @param data
  * @return
  */
-// Executes scale spin button output cb routine.
 gboolean dacDataManager::scale_spin_button_output_cb(QDoubleSpinBox *spin,gpointer data)
 {
     gchar *text;
@@ -1091,7 +1080,6 @@ gboolean dacDataManager::scale_spin_button_output_cb(QDoubleSpinBox *spin,gpoint
  * @param enabled_mask
  * @return
  */
-// Executes tx enabled channels count routine.
 int dacDataManager::tx_enabled_channels_count(QTreeWidget *treeview, unsigned *enabled_mask)
 {
     int num_enabled = 0;
@@ -1121,7 +1109,6 @@ int dacDataManager::tx_enabled_channels_count(QTreeWidget *treeview, unsigned *e
  * @param inverse
  * @return
  */
-// Executes db full scale convert routine.
 double dacDataManager::db_full_scale_convert(double value, bool inverse)
 {
     if (inverse) {
@@ -1139,7 +1126,6 @@ double dacDataManager::db_full_scale_convert(double value, bool inverse)
  * @brief dacDataManager::enable_dds_channels
  * @param db
  */
-// Executes enable dds channels routine.
 void dacDataManager::enable_dds_channels(struct dac_buffer *db)
 {
     QTreeWidget *treeview = db->tx_channels_view;
@@ -1171,7 +1157,6 @@ void dacDataManager::enable_dds_channels(struct dac_buffer *db)
  * @param manager
  * @param on_off
  */
-// Executes enable dds routine.
 void dacDataManager::enable_dds(struct dac_data_manager *manager, bool on_off)
 {
     struct iio_device *dac1 = NULL;
@@ -1212,7 +1197,6 @@ void dacDataManager::enable_dds(struct dac_data_manager *manager, bool on_off)
  * @param stat_msg
  * @return
  */
-// Executes process dac buffer file routine.
 int dacDataManager::process_dac_buffer_file (struct dac_data_manager *manager, const char *file_name, char **stat_msg)
 {
     int ret, size = 0, s_size;
@@ -1349,7 +1333,6 @@ int dacDataManager::process_dac_buffer_file (struct dac_data_manager *manager, c
  * @brief When user clicked on Load button
  * @param dbuf
  */
-// Event/Signal handler for waveform load button clicked cb.
 void dacDataManager::waveform_load_button_clicked_cb (struct dac_buffer *dbuf)
 {
     const QByteArray filenameBytes = (*dbuf->dac_buf_filename).toLocal8Bit();
@@ -1378,7 +1361,6 @@ void dacDataManager::waveform_load_button_clicked_cb (struct dac_buffer *dbuf)
  * @param fileName
  * @param dbuf
  */
-// Executes dac buffer config file set cb routine.
 void dacDataManager::dac_buffer_config_file_set_cb(QString fileName, struct dac_buffer &dbuf)
 {
     *dbuf.dac_buf_filename = fileName;
@@ -1526,7 +1508,6 @@ char *dacDataManager::build_default_channel_name_from_index(guint ch_index)
  * @param device_name
  * @return
  */
-// Retrieves current adi_part_code state.
 const char * dacDataManager::get_adi_part_code(const char *device_name)
 {
     const char *ad = NULL;
@@ -1553,7 +1534,6 @@ const char * dacDataManager::get_adi_part_code(const char *device_name)
  * @param channel_count
  * @return
  */
-// Executes dma valid selection routine.
 bool dacDataManager::dma_valid_selection(const char *device, unsigned mask, unsigned channel_count)
 {
     static const unsigned long eight_channel_masks[] = {
@@ -1603,7 +1583,6 @@ bool dacDataManager::dma_valid_selection(const char *device, unsigned mask, unsi
  * @param dbuf
  * @return
  */
-// Executes tx channels check valid setup routine.
 bool dacDataManager::tx_channels_check_valid_setup(struct dac_buffer *dbuf)
 {
     struct iio_device *dac = dbuf->dac_with_scanelems;
@@ -1623,7 +1602,6 @@ bool dacDataManager::tx_channels_check_valid_setup(struct dac_buffer *dbuf)
  * @param offset
  * @return
  */
-// Executes convert routine.
 unsigned short dacDataManager::convert(double scale, float val, double offset)
 {
     return (short) (val * scale + offset);
@@ -1635,7 +1613,6 @@ unsigned short dacDataManager::convert(double scale, float val, double offset)
  * @param b
  * @return
  */
-// Executes compare gain routine.
 int dacDataManager::compare_gain(const char *a, const char *b)
 {
     double val_a, val_b;
@@ -1654,7 +1631,6 @@ int dacDataManager::compare_gain(const char *a, const char *b)
  * @brief dacDataManager::save_scale_widget_value
  * @param data
  */
-// Executes save scale widget value routine.
 void dacDataManager::save_scale_widget_value(void *data)
 {
     struct dds_tone *tone =(struct dds_tone *) data;
@@ -1678,7 +1654,6 @@ void dacDataManager::save_scale_widget_value(void *data)
  * @param scale
  * @param value
  */
-// Executes dds scale set value routine.
 void dacDataManager::dds_scale_set_value(QWidget *scale, gdouble value)
 {
     QString className=scale->metaObject()->className();
@@ -1695,7 +1670,6 @@ void dacDataManager::dds_scale_set_value(QWidget *scale, gdouble value)
  * @param scale
  * @return
  */
-// Executes dds scale get value routine.
 double dacDataManager::dds_scale_get_value(QWidget *scale)
 {
     QString className=scale->metaObject()->className();
@@ -1713,7 +1687,6 @@ double dacDataManager::dds_scale_get_value(QWidget *scale)
  * @brief dacDataManager::dds_locked_scale_cb
  * @param tx
  */
-// Executes dds locked scale cb routine.
 void dacDataManager::dds_locked_scale_cb(struct dds_tx *tx)
 {
     struct dds_tone **tones = tx->dds_tones;
@@ -1741,7 +1714,6 @@ void dacDataManager::dds_locked_scale_cb(struct dds_tx *tx)
  * @brief dacDataManager::dds_locked_phase_cb
  * @param tx
  */
-// Executes dds locked phase cb routine.
 void dacDataManager::dds_locked_phase_cb(struct dds_tx *tx)
 {
     struct dds_tone **tones = tx->dds_tones;
@@ -2252,7 +2224,7 @@ int dacDataManager::device_scan_elements_count(iio_device *dev)
     return count;
 }
 
-// Retrieves current iio_tones_count state.
+// Retrieves current iio_tones_count value.
 unsigned dacDataManager::get_iio_tones_count(iio_device *dev)
 {
     unsigned int i, count;
@@ -2370,7 +2342,6 @@ QHBoxLayout *dacDataManager::dac_data_manager_get_gui_container(dac_data_manager
  * @param fileName : file to load on card
  * @param scale : scale value
  */
-// Sets file value and updates internal subsystem configuration.
 QString dacDataManager::setFile(QString fileName,double scale)
 {
 //     Set dds Mode to Disable
@@ -2401,7 +2372,6 @@ QString dacDataManager::setFile(QString fileName,double scale)
 /**
  * @brief dacDataManager::DisableDac
  */
-// Executes disable dac routine.
 void dacDataManager::DisableDac()
 {
     // Set dds Mode to Disable
@@ -2410,7 +2380,7 @@ void dacDataManager::DisableDac()
 
 }
 
-// Retrieves current data state.
+// Retrieves current data value.
 void dacDataManager::getData(bool val)
 {
     int i{};

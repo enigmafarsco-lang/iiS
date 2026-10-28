@@ -1,7 +1,7 @@
 // ============================================================================
 // File: menupage.h
 // Subsystem: eLynxSDR pages
-// Description: Subsystem implementation and interface guidance for menupage.h.
+// Description: Header definitions and interface declarations for menupage.h.
 // ============================================================================
 
 #ifndef MENUPAGE_H
@@ -35,9 +35,7 @@ class MenuPage : public QMenuBar
     Q_OBJECT
 
 public:
-    // Constructor: Initializes MenuPage subsystem components, default parameters, and state.
     explicit MenuPage(QWidget *parent = nullptr);
-    // Destructor: Cleans up MenuPage resources, timers, and allocated memory.
     ~MenuPage();
 
     QAction * actionNewProject;
@@ -63,37 +61,25 @@ private:
 
 
 private:
-    // Initializes init function for MenuPage.
     void initFunction();
-    // Executes create menus routine.
     void createMenus();
-    // Initializes init tool bar for MenuPage.
     void initToolBar();
-    // Executes new project routine.
     void newProject();
-    // Executes save project routine.
     void saveProject();
-    // Executes save project as routine.
     void saveProjectAs();
-    // Executes load project routine.
     bool loadProject();
-    // Executes close routine.
     void close();
-    // Executes save file routine.
     bool saveFile();
 
 
 private slots:
-    // Executes generate radar routine.
     void generateRadar();
 
 
 public slots:
-    // Executes show menu option slot routine.
     void showMenuOptionSlot(bool);
 
 signals:
-    // Executes menu generate signal routine.
     void menuGenerateSignal();
 };
 

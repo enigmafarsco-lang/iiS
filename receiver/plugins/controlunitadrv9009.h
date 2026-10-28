@@ -1,7 +1,7 @@
 // ============================================================================
 // File: controlunitadrv9009.h
 // Subsystem: eLynxSDR plugins
-// Description: Subsystem implementation and interface guidance for controlunitadrv9009.h.
+// Description: Header definitions and interface declarations for controlunitadrv9009.h.
 // ============================================================================
 
 #ifndef CONTROLUNITADRV9009_H
@@ -27,12 +27,9 @@ class ControlUnitADRV9009 : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes ControlUnitADRV9009 subsystem components, default parameters, and state.
     explicit ControlUnitADRV9009(QWidget *parent = nullptr);
-    // Destructor: Cleans up ControlUnitADRV9009 resources, timers, and allocated memory.
     ~ControlUnitADRV9009();
 
-    // Initializes init for ControlUnitADRV9009.
     void init();
     //saeid raziani
     QSpinBox * TH1 = new QSpinBox;
@@ -66,12 +63,9 @@ private:
     struct iio_device *readDev = nullptr;
     struct iio_device *writeDev = nullptr;
 
-    // Executes enable write routine.
     void EnableWrite();
-    // Executes disable write routine.
     void DisableWrite();
 
-    // Executes resolve register devices routine.
     void resolveRegisterDevices();
     bool writeRegisterVerified(quint32 offset, quint32 value,
                                const QString &label, QString *details);
@@ -90,9 +84,7 @@ private:
     // board console (picocom).
     bool writeRegisterToHw(quint32 offset, quint32 value,
                            const QString &label, QString *details = nullptr);
-    // Executes try read register routine.
     bool tryReadRegister(quint32 offset, quint32 *value);
-    // Executes device display name routine.
     QString deviceDisplayName(struct iio_device *dev) const;
 
     DrfmRegisterIO registerIo;
@@ -180,13 +172,9 @@ public:
     // register transaction in details. Nothing is written until the user
     // presses Set in the DRFM control tab.
     bool setDrfmEnabled(bool enabled, QString *details = nullptr);
-    // Sets amplify value value and updates internal subsystem configuration.
     bool setAmplifyValue(quint16 value, bool enabled = true, QString *details = nullptr);
-    // Sets vgpo enabled value and updates internal subsystem configuration.
     bool setVgpoEnabled(bool enabled, QString *details = nullptr);
-    // Sets vgpo parameters value and updates internal subsystem configuration.
     bool setVgpoParameters(quint32 phaseOffset, qint32 phaseStep, QString *details = nullptr);
-    // Sets vgpo value value and updates internal subsystem configuration.
     bool setVgpoValue(quint32 phaseOffset, qint32 phaseStep, bool enabled = true, QString *details = nullptr);
     // Compatibility overload: phase offset defaults to zero.
     bool setVgpoValue(qint32 phaseStep, bool enabled = true, QString *details = nullptr)
@@ -194,62 +182,41 @@ public:
 
     // Set Target Range & Propagation Delay
     bool setTargetRange(double rangeMeters, QString *details = nullptr);
-    // Sets target delay value and updates internal subsystem configuration.
     bool setTargetDelay(double delayUs, QString *details = nullptr);
 
     // Set Target Radial Velocity & Doppler Shift
     bool setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
-    // Sets target doppler value and updates internal subsystem configuration.
     bool setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
 
     // Scan report: every led-count IIO debug attribute (name = value) and the
     // register it represents (th0/dacsel/...).  Pure IIO - no UART.
     QString scanIioRegisters() { return registerIo.scanReport(); }
-    // Executes register backend info routine.
     QString registerBackendInfo();
 
 public slots:
-    // Executes write all routine.
     void WriteAll();
 
 private slots:
-    // Executes read all routine.
     void ReadAll();
 
-    // Executes write routine.
     void Write(uint32_t address,uint32_t val);
 
 signals:
-    // Transmits send transmit signal command/packet over communication interface.
     void sendTransmitSignal(int);
-    // Sets noise signal value and updates internal subsystem configuration.
     void setNoiseSignal(int);
-    // Transmits send file to dac signal command/packet over communication interface.
     void sendFileToDacSignal();
-    // Sets auto amp signal value and updates internal subsystem configuration.
     void setAutoAmpSignal(int);
-    // Sets channel signal value and updates internal subsystem configuration.
     void setChannelSignal(double);
-    // Sets channel from table value and updates internal subsystem configuration.
     void setChannelFromTable(double);
-    // Sets inchannel signal value and updates internal subsystem configuration.
     void setInchannelSignal(double);
 
-    // Sets pdiv signal value and updates internal subsystem configuration.
     void setPdivSignal     (int);
-    // Sets te ta_az signal value and updates internal subsystem configuration.
     void setteTa_azSignal  (int);
-    // Sets num_ side signal value and updates internal subsystem configuration.
     void setNum_SideSignal (int);
-    // Sets num_ back signal value and updates internal subsystem configuration.
     void setNum_BackSignal (int);
-    // Sets p_to_ b signal value and updates internal subsystem configuration.
     void setP_to_BSignal   (int);
-    // Sets n p s signal value and updates internal subsystem configuration.
     void setNPSSignal      (int);
-    // Sets p_to_ s signal value and updates internal subsystem configuration.
     void setP_to_SSignal   (int);
-    // Executes en pattern signal routine.
     void enPatternSignal   (int);
 };
 

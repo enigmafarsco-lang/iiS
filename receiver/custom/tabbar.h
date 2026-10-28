@@ -1,7 +1,7 @@
 // ============================================================================
 // File: tabbar.h
 // Subsystem: eLynxSDR custom
-// Description: Subsystem implementation and interface guidance for tabbar.h.
+// Description: Header definitions and interface declarations for tabbar.h.
 // ============================================================================
 
 #ifndef TABBAR_H
@@ -22,20 +22,17 @@ public:
     }
 protected:
     void paintEvent(QPaintEvent * /*event*/){
-        // Executes painter routine.
         QStylePainter painter(this);
         QStyleOptionTab opt;
 
         for(int i = 0;i < count();i++)
         {
-            // Initializes init style option for TabBar.
             initStyleOption(&opt,i);
             painter.drawControl(QStyle::CE_TabBarTabShape, opt);
             painter.save();
 
             QSize s = opt.rect.size();
             s.transpose();
-            // Executes r routine.
             QRect r(QPoint(), s);
             r.moveCenter(opt.rect.center());
             opt.rect = r;

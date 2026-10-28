@@ -413,7 +413,7 @@ adrv9009_adv::adrv9009_adv(QWidget *parent) :
     //end
 }
 
-// Destructor: Cleans up adrv9009_adv resources, timers, and allocated memory.
+// Destructor: Releases adrv9009_adv allocated resources, buffers, and timers.
 adrv9009_adv::~adrv9009_adv()
 {
     delete ui;
@@ -426,7 +426,6 @@ adrv9009_adv::~adrv9009_adv()
  * @param lut
  * @param lut_len
  */
-// Executes add widget to list routine.
 void adrv9009_adv::AddWidgetToList(QWidget *widget, char *name, unsigned char * const lut,  unsigned char lut_len)
 {
     w_info *temp=new w_info();
@@ -861,7 +860,6 @@ void adrv9009_adv::InitializeWidgets(){
  * @brief adrv9009_adv::init
  * @return
  */
-// Initializes init for adrv9009_adv.
 QWidget * adrv9009_adv::init()
 {
 
@@ -917,7 +915,6 @@ QWidget * adrv9009_adv::init()
 /**
  * @brief adrv9009_adv::on_btn_save_settings_clicked
  */
-// Event/Signal handler for on btn save settings clicked.
 void adrv9009_adv::on_btn_save_settings_clicked()
 {
 
@@ -977,7 +974,6 @@ void adrv9009_adv::on_btn_save_settings_clicked()
 /**
  * @brief adrv9009_adv::bist_tone_cb
  */
-// Executes bist tone cb routine.
 void adrv9009_adv::bist_tone_cb()
 {
     unsigned enable, tx1_freq, tx2_freq;
@@ -996,7 +992,7 @@ void adrv9009_adv::bist_tone_cb()
 
 
 
-// Event/Signal handler for on fhm chk trigger mode state changed.
+// Signal/Slot handler responding to on fhm chk trigger mode state changed event.
 void adrv9009_adv::on_fhm_chk_trigger_mode_stateChanged(int arg1)
 {
 

@@ -1,7 +1,7 @@
 // ============================================================================
 // File: libini2.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for libini2.h.
+// Description: Header definitions and interface declarations for libini2.h.
 // ============================================================================
 
 #ifndef LIBINI_H
@@ -17,13 +17,10 @@ class libini2
 
 private:
 
-    // Executes loops params init routine.
     void loops_params_init(struct loops_parse_params *p, FILE *i, FILE *o);
-    // Executes ini line begins with keyword routine.
     bool ini_line_begins_with_keyword(char *line, char *extracted_keyword);
     int loop_expand(struct loops_parse_params *parse_params,
             char *buf_with_loop, char *loop_name);
-    // Executes ini loop new routine.
     struct ini_loop * ini_loop_new(char *buf_with_loop, char *loop_name);
     char *ini_loop_get_iteration(struct ini_loop *loop);
     static ssize_t update_from_ini_chn_cb(struct iio_channel *chn,
@@ -39,11 +36,8 @@ private:
     static bool attr_matches(const char *dev_name, size_t dev_len,
             const char *attr, size_t attr_len,
             const char *key, size_t len, bool debug);
-    // Executes ini next section routine.
     int ini_next_section(INI *ini, const char **name, size_t *name_len);
-    // Executes skip comments routine.
     static bool skip_comments(INI *ini);
-    // Executes skip line routine.
     static bool skip_line(INI *ini);
     static int save_to_ini_chn_cb(struct iio_channel *chn,
             const char *attr, const char *val, size_t len, void *d);
@@ -53,7 +47,6 @@ private:
             size_t name_len, const char *attr, const char *val, size_t len);
 
 public:
-    // Constructor: Initializes libini2 subsystem components, default parameters, and state.
     libini2();
     char *read_token_from_ini(const char *ini_file,const char *driver_name, const char *token);
     void update_from_ini(const char *ini_file,
@@ -64,13 +57,10 @@ public:
             const char * const *whitelist, size_t list_len);
 
     int foreach_in_ini(const char *ini_file,
-            // Executes int routine.
             int (*cb)(int, const char *, const char *, const char *));
 
-    // Executes ini unroll routine.
     int ini_unroll(const char *input, const char *output);
 
-    // Transmits write_driver_name_to_ini command/packet over communication interface.
     void write_driver_name_to_ini(FILE *f, const char *driver_name);
 };
 

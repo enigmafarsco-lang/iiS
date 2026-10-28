@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plotpage.h
 // Subsystem: eLynxSDR pages
-// Description: Subsystem implementation and interface guidance for plotpage.h.
+// Description: Header definitions and interface declarations for plotpage.h.
 // ============================================================================
 
 #ifndef PLOTPAGE_H
@@ -19,15 +19,12 @@ class PlotPage : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes PlotPage subsystem components, default parameters, and state.
     explicit PlotPage(QWidget *parent = nullptr);
-    // Destructor: Cleans up PlotPage resources, timers, and allocated memory.
     ~PlotPage();
 
 private:
     Ui::PlotPage *ui;
     QCustomPlot * plotCustom;
-    // Executes test plot routine.
     void testPlot();
 };
 

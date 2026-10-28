@@ -98,7 +98,7 @@ void FrqPage::changeLable()
     ui->totalPulse->setText("PRI/PRF Pulse Count: " + tmp );
 }
 
-// Sets frq center slot value and updates internal subsystem configuration.
+// Sets frq center slot parameter and updates internal configuration.
 void FrqPage::setFrqCenterSlot(double frqCenter)
 {
     ui->lblFrqCenter->setText("Center frq:"+QString::number(frqCenter));
@@ -109,7 +109,7 @@ void FrqPage::setFrqCenterSlot(double frqCenter)
     ui->lblEndFrq->setText("Band End Frequency: "+QString::number(frqCenter+250));
 }
 
-// Event/Signal handler for on btn ok clicked.
+// Signal/Slot handler responding to on btn ok clicked event.
 void FrqPage::on_btnOk_clicked()
 {
     float frq{};
@@ -184,7 +184,7 @@ void FrqPage::on_btnOk_clicked()
     }
 }
 
-// Event/Signal handler for on btn add clicked.
+// Signal/Slot handler responding to on btn add clicked event.
 void FrqPage::on_btnAdd_clicked()
 {
     btnRed();
@@ -216,7 +216,7 @@ void FrqPage::btnSlot()
 }
 
 
-// Event/Signal handler for on tbl frq cell changed.
+// Signal/Slot handler responding to on tbl frq cell changed event.
 void FrqPage::on_tblFrq_cellChanged(int row, int column)
 {
     Q_UNUSED(row);
@@ -255,7 +255,7 @@ void FrqPage::on_tblFrq_cellChanged(int row, int column)
 }
 
 
-// Event/Signal handler for on btn clear clicked.
+// Signal/Slot handler responding to on btn clear clicked event.
 void FrqPage::on_btnClear_clicked()
 {
     row =0;
@@ -342,7 +342,7 @@ bool FrqPage::agileCalc(float &frq)
     return true;
 }
 
-// Destructor: Cleans up FrqPage resources, timers, and allocated memory.
+// Destructor: Releases FrqPage allocated resources, buffers, and timers.
 FrqPage::~FrqPage()
 {
     delete ui;

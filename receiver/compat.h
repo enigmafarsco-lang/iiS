@@ -1,7 +1,7 @@
 // ============================================================================
 // File: compat.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for compat.h.
+// Description: Header definitions and interface declarations for compat.h.
 // ============================================================================
 
 #ifndef COMPAT

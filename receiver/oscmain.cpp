@@ -40,7 +40,7 @@ OSCMain::OSCMain(QApplication *app,QWidget *parent) :
     ClearTabContainer();
 }
 
-// Destructor: Cleans up OSCMain resources, timers, and allocated memory.
+// Destructor: Releases OSCMain allocated resources, buffers, and timers.
 OSCMain::~OSCMain()
 {
     delete ui;
@@ -67,20 +67,20 @@ void OSCMain::application_quit()
 
 #pragma region Menu {
 
-// Event/Signal handler for on action quit triggered.
+// Signal/Slot handler responding to on action quit triggered event.
 void OSCMain::on_actionQuit_triggered()
 {
     QApplication::quit();
 }
 
-// Event/Signal handler for on action connect triggered.
+// Signal/Slot handler responding to on action connect triggered event.
 void OSCMain::on_actionConnect_triggered()
 {
     connectDialog *connect_dialog=new connectDialog();
     connect_dialog->exec();
 }
 
-// Event/Signal handler for on action new  plot triggered.
+// Signal/Slot handler responding to on action new  plot triggered event.
 void OSCMain::on_actionNew_Plot_triggered()
 {
     Plot * plot = new Plot(mainApp);
@@ -88,7 +88,7 @@ void OSCMain::on_actionNew_Plot_triggered()
     plot->show();
 }
 
-// Event/Signal handler for on action load  save  profile triggered.
+// Signal/Slot handler responding to on action load  save  profile triggered event.
 void OSCMain::on_actionLoad_Save_Profile_triggered()
 {
     //    FileDialog* fileDialog=new FileDialog(this);
@@ -357,7 +357,7 @@ void OSCMain::ClearTabContainer(void)
     ui->tab_container->clear();
 }
 
-// Retrieves current plugin_from_name state.
+// Retrieves current plugin_from_name value.
 struct osc_plugin * OSCMain::get_plugin_from_name(const char *name)
 {
     GSList *node;
@@ -579,7 +579,6 @@ void OSCMain::plugin_make_detachable(detachable_plugin *d_plugin)
 }
 
 /* Before we really start, let's load the last saved profile */
-// Executes check inifile routine.
 bool OSCMain::check_inifile(const char *filepath)
 {
     struct stat sts;
@@ -741,7 +740,7 @@ bool OSCMain::rx_update_device_sampling_freq(iio_context* ctx,const char *device
     return true;
 }
 
-// Retrieves current input_device state.
+// Retrieves current input_device value.
 bool OSCMain::is_input_device(const iio_device *dev)
 {
     return device_type_get(dev, 1);
@@ -768,7 +767,7 @@ bool OSCMain::device_type_get(const iio_device *dev, int type)
     return false;
 }
 
-// Reads and parses incoming read_sampling_frequency data.
+// Reads, parses, and processes incoming read_sampling_frequency data.
 double OSCMain::read_sampling_frequency(const iio_device *dev)
 {
     double freq = 400.0;

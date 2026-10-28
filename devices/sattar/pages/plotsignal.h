@@ -1,7 +1,7 @@
 // ============================================================================
 // File: plotsignal.h
 // Subsystem: eLynxSDR pages
-// Description: Subsystem implementation and interface guidance for plotsignal.h.
+// Description: Header definitions and interface declarations for plotsignal.h.
 // ============================================================================
 
 #ifndef PLOTSIGNAL_H
@@ -34,14 +34,11 @@ class PlotSignal : public QWidget
     Q_OBJECT
 
 public:
-    // Constructor: Initializes PlotSignal subsystem components, default parameters, and state.
     explicit PlotSignal(QWidget *parent = nullptr);
 
-    // Destructor: Cleans up PlotSignal resources, timers, and allocated memory.
     ~PlotSignal();
 
 private slots:
-    // Event/Signal handler for on push button clicked.
     void on_pushButton_clicked();
 
 
@@ -49,15 +46,10 @@ private:
     Ui::PlotSignal *ui;
     fftCalculator * fftInstance = new fftCalculator;
 
-    // Initializes init for PlotSignal.
     void init();
-    // Executes zoom plot routine.
     void zoomPlot(QVector<QGLchart *> &);
-    // Sets q glcharts parameters value and updates internal subsystem configuration.
     void setQGlchartsParameters(QGLchart *glChart, ChartType glChartType);
-    // Computes mathematical calculate f f t w calculation.
     QCustomSeries calculateFFTW();
-    // Executes plot file routine.
     void plotFile();
     QGLchart *panoramaChart;
     QGLchart *panoramaChart2;
@@ -79,9 +71,7 @@ private:
 
 
 signals:
-    // Executes create plot signal routine.
     void createPlotSignal(QCustomSeries);
-    // Executes create plot signal2 routine.
     void createPlotSignal2(QCustomSeries);
 
 };

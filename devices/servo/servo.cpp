@@ -20,7 +20,6 @@ Servo::Servo(QWidget *parent) :
 //######### Common functions ###########
 ///#####################################
 
-// Initializes init for Servo.
 void Servo::init()
 {
     connect(this,&Servo::sendUdpCommandToTargetDetectionSignal, ui->targrtDetection,&TargetDetector::udpDeviceResponseSlot);
@@ -56,7 +55,7 @@ int Servo::showMessage(QString meg, int status){
     return -1;
 }
 
-// Event/Signal handler for on btn park clicked.
+// Signal/Slot handler responding to on btn park clicked event.
 void Servo::on_btnPark_clicked()
 {
     if (ui->chbGun->isChecked())
@@ -77,7 +76,7 @@ void Servo::on_btnPark_clicked()
 
 
 
-// Sets til pan speed value and updates internal subsystem configuration.
+// Sets til pan speed parameter and updates internal configuration.
 void Servo::setTilPanSpeed(int tiltSpeed , int panSpeed, QString status = "")
 {
     if (ui->chbGun->isChecked())
@@ -243,7 +242,7 @@ QByteArray Servo::handleWildCharacter(const QByteArray &byteArr)
     return  tempArr;
 }
 
-// Event/Signal handler for on btn stop clicked.
+// Signal/Slot handler responding to on btn stop clicked event.
 void Servo::on_btnStop_clicked()
 {
     rotatorIsStop = true;
@@ -277,7 +276,7 @@ void Servo::on_btnJogUp_pressed()
     setTilPanSpeed(0, +5, btnJog);
 }
 
-// Event/Signal handler for on btn jog up released.
+// Signal/Slot handler responding to on btn jog up released event.
 void Servo::on_btnJogUp_released()
 {
     on_btnStop_clicked();
@@ -290,7 +289,7 @@ void Servo::on_btnJogDown_pressed()
     setTilPanSpeed(0, -3, btnJog);
 }
 
-// Event/Signal handler for on btn jog down released.
+// Signal/Slot handler responding to on btn jog down released event.
 void Servo::on_btnJogDown_released()
 {
     on_btnStop_clicked();
@@ -303,7 +302,7 @@ void Servo::on_btnJogLeft_pressed()
     setTilPanSpeed(-3, 0, btnJog);
 }
 
-// Event/Signal handler for on btn jog left released.
+// Signal/Slot handler responding to on btn jog left released event.
 void Servo::on_btnJogLeft_released()
 {
     on_btnStop_clicked();
@@ -316,7 +315,7 @@ void Servo::on_btnJogRight_pressed()
     setTilPanSpeed(3, 0, btnJog);
 }
 
-// Event/Signal handler for on btn jog right released.
+// Signal/Slot handler responding to on btn jog right released event.
 void Servo::on_btnJogRight_released()
 {
     on_btnStop_clicked();
@@ -404,7 +403,7 @@ QByteArray Servo::getByteSetTilt  (const double &TiltPos){
     return creatingCmd(TiltPos, "tilt");
 }
 
-// Retrieves current check sum state.
+// Retrieves current check sum value.
 quint8 Servo::getCheckSum(const QByteArray &byteArr)
 {
     quint8 checksum = 0;
@@ -438,7 +437,7 @@ void Servo::on_btnSetPan_clicked()
     setPanPos(setPosVal, northOffset);
 }
 
-// Sets pan pos value and updates internal subsystem configuration.
+// Sets pan pos parameter and updates internal configuration.
 bool Servo::setPanPos(double &panPosDeg ,double &northOffset)
 {
     try {
@@ -470,7 +469,7 @@ bool Servo::setPanPos(double &panPosDeg ,double &northOffset)
     return  true;
 }
 
-// Retrieves current cmd set pan pos state.
+// Retrieves current cmd set pan pos value.
 QByteArray Servo::getCmdSetPanPos(double panPos)
 {
     if (panPos > 180)  panPos -=360;
@@ -488,13 +487,13 @@ QByteArray Servo::getCmdSetPanPos(double panPos)
 }
 
 
-// Event/Signal handler for on btn set pan speed clicked.
+// Signal/Slot handler responding to on btn set pan speed clicked event.
 void Servo::on_btnSetPanSpeed_clicked()
 {
     setTilPanSpeed(ui->sbTiltSpeed->value(), ui->sbPanSpeed->value());
 }
 
-// Event/Signal handler for on btn set tilt speed clicked.
+// Signal/Slot handler responding to on btn set tilt speed clicked event.
 void Servo::on_btnSetTiltSpeed_clicked()
 {
     setTilPanSpeed(ui->sbTiltSpeed->value(), ui->sbPanSpeed->value());
@@ -503,7 +502,6 @@ void Servo::on_btnSetTiltSpeed_clicked()
 //############ Chech Offset ############
 ///#####################################
 
-// Event/Signal handler for on chb checkoffset state changed.
 void Servo::on_chbCheckoffset_stateChanged(int arg1)
 {
     if(arg1)
@@ -514,7 +512,7 @@ void Servo::on_chbCheckoffset_stateChanged(int arg1)
 }
 
 
-// Event/Signal handler for on chb auto set clicked.
+// Signal/Slot handler responding to on chb auto set clicked event.
 void Servo::on_chbAutoSet_clicked(bool checked)
 {
     if(checked)
@@ -590,14 +588,14 @@ double Servo::coordinatorToAngle(double jammerLatitude, double jammerLongtitude,
 
 
 
-// Destructor: Cleans up Servo resources, timers, and allocated memory.
+// Destructor: Releases Servo allocated resources, buffers, and timers.
 Servo::~Servo()
 {
     delete ui;
 }
 
 
-// Event/Signal handler for on btn auto set clicked.
+// Signal/Slot handler responding to on btn auto set clicked event.
 void Servo::on_btnAutoSet_clicked()
 {
     emit(
@@ -645,7 +643,7 @@ bool Servo::compareDouble(double val1, double val2)
     return qAbs(val1 - val2) <= 0.01;
 }
 
-// Event/Signal handler for on chb checkoffset clicked.
+// Signal/Slot handler responding to on chb checkoffset clicked event.
 void Servo::on_chbCheckoffset_clicked(bool checked)
 {
     if (checked)
@@ -717,7 +715,7 @@ void Servo::on_DeviceResponseSlot(QByteArray response){
     UserType::gis_elevation = el_val;
 }
 
-// Transmits send pan tilt to commander command/packet over communication interface.
+// Transmits send pan tilt to commander command/packet over interface.
 void Servo::sendPanTiltToCommander(double az_val, double el_val)
 {
 
@@ -729,7 +727,7 @@ void Servo::sendPanTiltToCommander(double az_val, double el_val)
     }
 }
 
-// Reads and parses incoming receive command from object slot data.
+// Reads, parses, and processes incoming receive command from object slot data.
 void Servo::receiveCommandFromObjectSlot(QString response)
 {
     QStringList frame;
@@ -770,7 +768,7 @@ void Servo::joshanStatusDataSlot()
     emit sendStatusDataToJoshanSignal(servoData);
 }
 
-// Retrieves current evice connected slot state.
+// Retrieves current evice connected slot value.
 void Servo::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;

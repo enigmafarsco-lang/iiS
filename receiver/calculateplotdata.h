@@ -1,7 +1,7 @@
 // ============================================================================
 // File: calculateplotdata.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for calculateplotdata.h.
+// Description: Header definitions and interface declarations for calculateplotdata.h.
 // ============================================================================
 
 //#ifndef CALCULATEPLOTDATA_H

@@ -6,7 +6,7 @@
 
 #include "datastruct.h"
 
-// Constructor: Initializes dataStruct subsystem components, default parameters, and state.
+// Constructor: Initializes dataStruct subsystem components, state, and UI bindings.
 dataStruct::dataStruct()
 {
 

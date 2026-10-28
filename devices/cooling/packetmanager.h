@@ -1,7 +1,7 @@
 // ============================================================================
 // File: packetmanager.h
 // Subsystem: eLynxSDR cooling
-// Description: Subsystem implementation and interface guidance for packetmanager.h.
+// Description: Header definitions and interface declarations for packetmanager.h.
 // ============================================================================
 
 #ifndef PACKETMANAGER_H
@@ -120,7 +120,6 @@ public:
     }CoolingBoard_t;
 
 
-    // Constructor: Initializes packetManager subsystem components, default parameters, and state.
     packetManager();
     static uint8_t LT[50];
     static CoolingBoard_t CoolingBoard;
@@ -129,25 +128,17 @@ public:
 private:
 //    TCPClient tcpClient;
     bool creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t Packetlen,FC_t fc);
-    // Executes f c  write mult reg  fun routine.
     bool FC_WriteMultReg_Fun(uint8_t data[]);
-    // Executes c r c16  calculate routine.
     uint16_t CRC16_Calculate( uint8_t *buf,uint16_t len );
-    // Executes fill model routine.
     void fillModel();
-    // Executes check input packet routine.
     void checkInputPacket(uint8_t *inPack);
-    // Executes validation input packet routine.
     uint8_t validationInputPacket(uint8_t *inPack);
-    // Executes f c  read mult reg  fun routine.
     void FC_ReadMultReg_Fun(uint8_t *data);
 
 
 public slots:
-    // Executes packet received routine.
     void packetReceived(QByteArray);
 signals:
-    // Executes new data update routine.
     void newDataUpdate(CoolingBoard_t);
 
 };

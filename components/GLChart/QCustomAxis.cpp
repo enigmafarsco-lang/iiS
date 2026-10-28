@@ -6,7 +6,7 @@
 
 #include "QCustomAxis.h"
 
-// Constructor: Initializes QCustomAxis subsystem components, default parameters, and state.
+// Constructor: Initializes QCustomAxis subsystem components, state, and UI bindings.
 QCustomAxis::QCustomAxis(QObject *parent)
     : QObject(parent)
 {
@@ -27,12 +27,12 @@ QCustomAxis::QCustomAxis(QObject *parent)
     m_upperPartialRangeSet = false;
 }
 
-// Destructor: Cleans up QCustomAxis resources, timers, and allocated memory.
+// Destructor: Releases QCustomAxis allocated resources, buffers, and timers.
 QCustomAxis::~QCustomAxis()
 {
 }
 
-// Sets alignment value and updates internal subsystem configuration.
+// Sets alignment parameter and updates internal configuration.
 void QCustomAxis::setAlignment(const Qt::Alignment &alignment)
 {
     if (m_alignment != alignment)
@@ -48,7 +48,7 @@ Qt::Alignment QCustomAxis::alignment() const
     return m_alignment;
 }
 
-// Sets orientation value and updates internal subsystem configuration.
+// Sets orientation parameter and updates internal configuration.
 void QCustomAxis::setOrientation(const Qt::Orientation &orientation)
 {
     if (m_orientation != orientation)
@@ -64,7 +64,7 @@ Qt::Orientation QCustomAxis::orientation() const
     return m_orientation;
 }
 
-// Sets max value and updates internal subsystem configuration.
+// Sets max parameter and updates internal configuration.
 void QCustomAxis::setMax(const double &max)
 {
     m_upperPartialRangeSet = true;
@@ -74,7 +74,7 @@ void QCustomAxis::setMax(const double &max)
     }
 }
 
-// Sets min value and updates internal subsystem configuration.
+// Sets min parameter and updates internal configuration.
 void QCustomAxis::setMin(const double &min)
 {
     m_lowerPartialRangeSet = true;
@@ -90,7 +90,7 @@ bool QCustomAxis::visibility() const
     return m_axisVisibility;
 }
 
-// Sets visible value and updates internal subsystem configuration.
+// Sets visible parameter and updates internal configuration.
 void QCustomAxis::setVisible(bool on)
 {
     m_axisVisibility = on;
@@ -102,13 +102,13 @@ bool QCustomAxis::rangeReversed() const
     return m_reverseRange;
 }
 
-// Sets range reversed value and updates internal subsystem configuration.
+// Sets range reversed parameter and updates internal configuration.
 void QCustomAxis::setRangeReversed(bool reversed)
 {
     m_reverseRange = reversed;
 }
 
-// Sets range value and updates internal subsystem configuration.
+// Sets range parameter and updates internal configuration.
 void QCustomAxis::setRange(const double &min, const double &max)
 {
     setMin(min);
@@ -117,32 +117,32 @@ void QCustomAxis::setRange(const double &min, const double &max)
     m_upperPartialRangeSet = false;
 }
 
-// Retrieves current artial range set state.
+// Retrieves current artial range set value.
 QPair<bool, bool> QCustomAxis::isPartialRangeSet() const
 {
     return QPair<bool, bool>(m_lowerPartialRangeSet, m_upperPartialRangeSet);
 }
 
-// Retrieves current max state.
+// Retrieves current max value.
 double QCustomAxis::getMax() const
 {
     return m_max;
 }
 
-// Retrieves current min state.
+// Retrieves current min value.
 double QCustomAxis::getMin() const
 {
     return m_min;
 }
 
-// Retrieves current range state.
+// Retrieves current range value.
 QPair<qreal, qreal> QCustomAxis::getRange() const
 {
     QPair<qreal, qreal> range(m_min, m_max);
     return range;
 }
 
-// Sets labels angle value and updates internal subsystem configuration.
+// Sets labels angle parameter and updates internal configuration.
 void QCustomAxis::setLabelsAngle(const qint32 &angle)
 {
     if (m_labelsAngle != angle)
@@ -152,7 +152,7 @@ void QCustomAxis::setLabelsAngle(const qint32 &angle)
     }
 }
 
-// Sets labels brush value and updates internal subsystem configuration.
+// Sets labels brush parameter and updates internal configuration.
 void QCustomAxis::setLabelsBrush(const QBrush &brush)
 {
     if (m_labelsBrush != brush)
@@ -162,7 +162,7 @@ void QCustomAxis::setLabelsBrush(const QBrush &brush)
     }
 }
 
-// Sets labels color value and updates internal subsystem configuration.
+// Sets labels color parameter and updates internal configuration.
 void QCustomAxis::setLabelsColor(const QColor &color)
 {
     if (m_labelsColor != color)
@@ -172,7 +172,7 @@ void QCustomAxis::setLabelsColor(const QColor &color)
     }
 }
 
-// Sets labels font value and updates internal subsystem configuration.
+// Sets labels font parameter and updates internal configuration.
 void QCustomAxis::setLabelsFont(const QFont &font)
 {
     if (m_labelsFont != font)
@@ -182,7 +182,7 @@ void QCustomAxis::setLabelsFont(const QFont &font)
     }
 }
 
-// Sets labels text value and updates internal subsystem configuration.
+// Sets labels text parameter and updates internal configuration.
 void QCustomAxis::setLabelsText(const QString &text)
 {
     if (m_labelsText != text)
@@ -192,7 +192,7 @@ void QCustomAxis::setLabelsText(const QString &text)
     }
 }
 
-// Sets labels visible value and updates internal subsystem configuration.
+// Sets labels visible parameter and updates internal configuration.
 void QCustomAxis::setLabelsVisible(bool visible)
 {
     if (m_labelsVisibility != visible)
@@ -238,7 +238,7 @@ bool QCustomAxis::labelsVisible() const
     return m_labelsVisibility;
 }
 
-// Sets line pen value and updates internal subsystem configuration.
+// Sets line pen parameter and updates internal configuration.
 void QCustomAxis::setLinePen(const QPen &pen)
 {
     if (m_linePen != pen)
@@ -248,7 +248,7 @@ void QCustomAxis::setLinePen(const QPen &pen)
     }
 }
 
-// Sets line pen color value and updates internal subsystem configuration.
+// Sets line pen color parameter and updates internal configuration.
 void QCustomAxis::setLinePenColor(const QColor &color)
 {
     if (m_linePenColor != color)
@@ -258,7 +258,7 @@ void QCustomAxis::setLinePenColor(const QColor &color)
     }
 }
 
-// Sets line visible value and updates internal subsystem configuration.
+// Sets line visible parameter and updates internal configuration.
 void QCustomAxis::setLineVisible(bool visible)
 {
     if (m_lineVisible != visible)
@@ -286,7 +286,7 @@ bool QCustomAxis::lineVisible() const
     return m_lineVisible;
 }
 
-// Sets shades border color value and updates internal subsystem configuration.
+// Sets shades border color parameter and updates internal configuration.
 void QCustomAxis::setShadesBorderColor(const QColor &color)
 {
     if (m_shadesBorderColor != color)
@@ -296,7 +296,7 @@ void QCustomAxis::setShadesBorderColor(const QColor &color)
     }
 }
 
-// Sets shades brush value and updates internal subsystem configuration.
+// Sets shades brush parameter and updates internal configuration.
 void QCustomAxis::setShadesBrush(const QBrush &brush)
 {
     if (m_shadesBrush != brush)
@@ -306,7 +306,7 @@ void QCustomAxis::setShadesBrush(const QBrush &brush)
     }
 }
 
-// Sets shades color value and updates internal subsystem configuration.
+// Sets shades color parameter and updates internal configuration.
 void QCustomAxis::setShadesColor(const QColor &color)
 {
     if (m_shadesColor != color)
@@ -316,7 +316,7 @@ void QCustomAxis::setShadesColor(const QColor &color)
     }
 }
 
-// Sets shades pen value and updates internal subsystem configuration.
+// Sets shades pen parameter and updates internal configuration.
 void QCustomAxis::setShadesPen(const QPen &pen)
 {
     if (m_shadesPen != pen)
@@ -326,7 +326,7 @@ void QCustomAxis::setShadesPen(const QPen &pen)
     }
 }
 
-// Sets shades visible value and updates internal subsystem configuration.
+// Sets shades visible parameter and updates internal configuration.
 void QCustomAxis::setShadesVisible(bool visible)
 {
     if (m_shadesVisible != visible)
@@ -366,7 +366,7 @@ bool QCustomAxis::shadesVisible() const
     return m_shadesVisible;
 }
 
-// Sets title brush value and updates internal subsystem configuration.
+// Sets title brush parameter and updates internal configuration.
 void QCustomAxis::setTitleBrush(const QBrush &brush)
 {
     if (m_titleBrush != brush)
@@ -376,7 +376,7 @@ void QCustomAxis::setTitleBrush(const QBrush &brush)
     }
 }
 
-// Sets titles font value and updates internal subsystem configuration.
+// Sets titles font parameter and updates internal configuration.
 void QCustomAxis::setTitlesFont(const QFont &font)
 {
     if (m_titleFont != font)
@@ -386,7 +386,7 @@ void QCustomAxis::setTitlesFont(const QFont &font)
     }
 }
 
-// Sets title text value and updates internal subsystem configuration.
+// Sets title text parameter and updates internal configuration.
 void QCustomAxis::setTitleText(const QString &text)
 {
     if (m_titleText != text)
@@ -396,7 +396,7 @@ void QCustomAxis::setTitleText(const QString &text)
     }
 }
 
-// Sets title visible value and updates internal subsystem configuration.
+// Sets title visible parameter and updates internal configuration.
 void QCustomAxis::setTitleVisible(bool visible)
 {
     if (m_titleVisible != visible)
@@ -430,7 +430,7 @@ bool QCustomAxis::titleVisible() const
     return m_titleVisible;
 }
 
-// Sets ticks value and updates internal subsystem configuration.
+// Sets ticks parameter and updates internal configuration.
 void QCustomAxis::setTicks(bool show)
 {
     m_showTicks = show;
@@ -440,7 +440,6 @@ void QCustomAxis::setTicks(bool show)
 /***----- Grid related functions -----***/
 /****************************************/
 
-// Sets grid line pen value and updates internal subsystem configuration.
 void QCustomAxis::setGridLinePen(const QPen &pen)
 {
     if (m_gridLinePen != pen)
@@ -450,7 +449,7 @@ void QCustomAxis::setGridLinePen(const QPen &pen)
     }
 }
 
-// Sets grid line color value and updates internal subsystem configuration.
+// Sets grid line color parameter and updates internal configuration.
 void QCustomAxis::setGridLineColor(const QColor &color)
 {
     if (m_gridLineColor != color)
@@ -460,7 +459,7 @@ void QCustomAxis::setGridLineColor(const QColor &color)
     }
 }
 
-// Sets grid line visible value and updates internal subsystem configuration.
+// Sets grid line visible parameter and updates internal configuration.
 void QCustomAxis::setGridLineVisible(bool visible)
 {
     if (m_gridLineVisible != visible)
@@ -470,7 +469,7 @@ void QCustomAxis::setGridLineVisible(bool visible)
     }
 }
 
-// Sets grid line count value and updates internal subsystem configuration.
+// Sets grid line count parameter and updates internal configuration.
 void QCustomAxis::setGridLineCount(int count)
 {
     m_gridLineCount = count;
@@ -500,7 +499,7 @@ int QCustomAxis::gridLineCount() const
     return m_gridLineCount;
 }
 
-// Sets minor grid line pen value and updates internal subsystem configuration.
+// Sets minor grid line pen parameter and updates internal configuration.
 void QCustomAxis::setMinorGridLinePen(const QPen &pen)
 {
     if (m_minorGridLinePen != pen)
@@ -510,7 +509,7 @@ void QCustomAxis::setMinorGridLinePen(const QPen &pen)
     }
 }
 
-// Sets minor grid line color value and updates internal subsystem configuration.
+// Sets minor grid line color parameter and updates internal configuration.
 void QCustomAxis::setMinorGridLineColor(const QColor &color)
 {
     if (m_minorGridLineColor != color)
@@ -520,7 +519,7 @@ void QCustomAxis::setMinorGridLineColor(const QColor &color)
     }
 }
 
-// Sets minor grid line visible value and updates internal subsystem configuration.
+// Sets minor grid line visible parameter and updates internal configuration.
 void QCustomAxis::setMinorGridLineVisible(bool visible)
 {
     if (m_minorGridLineVisible != visible)
@@ -552,50 +551,49 @@ bool QCustomAxis::minorGridLineVisible() const
 /***----- Tick related functions -----***/
 /****************************************/
 
-// Sets tick labels value and updates internal subsystem configuration.
 void QCustomAxis::setTickLabels(bool show)
 {
     m_showTickLabels = show;
 }
 
-// Sets tick label padding value and updates internal subsystem configuration.
+// Sets tick label padding parameter and updates internal configuration.
 void QCustomAxis::setTickLabelPadding(int padding)
 {
     m_tickLabelPadding = padding;
 }
 
-// Sets tick label font value and updates internal subsystem configuration.
+// Sets tick label font parameter and updates internal configuration.
 void QCustomAxis::setTickLabelFont(const QFont &font)
 {
     m_tickLabelFont = font;
 }
 
-// Sets tick label color value and updates internal subsystem configuration.
+// Sets tick label color parameter and updates internal configuration.
 void QCustomAxis::setTickLabelColor(const QColor &color)
 {
     m_tickLabelColor = color;
 }
 
-// Sets tick length value and updates internal subsystem configuration.
+// Sets tick length parameter and updates internal configuration.
 void QCustomAxis::setTickLength(int inside, int outside)
 {
     m_tickLengthIn = inside;
     m_tickLengthOut = outside;
 }
 
-// Sets tick length in value and updates internal subsystem configuration.
+// Sets tick length in parameter and updates internal configuration.
 void QCustomAxis::setTickLengthIn(int inside)
 {
     m_tickLengthIn = inside;
 }
 
-// Sets tick length out value and updates internal subsystem configuration.
+// Sets tick length out parameter and updates internal configuration.
 void QCustomAxis::setTickLengthOut(int outside)
 {
     m_tickLengthOut = outside;
 }
 
-// Sets tick pen value and updates internal subsystem configuration.
+// Sets tick pen parameter and updates internal configuration.
 void QCustomAxis::setTickPen(const QPen &pen)
 {
     m_tickPen = pen;
@@ -659,32 +657,31 @@ QPen QCustomAxis::tickPen() const
 /***----- Sub tick related functions -----***/
 /********************************************/
 
-// Sets sub ticks value and updates internal subsystem configuration.
 void QCustomAxis::setSubTicks(bool show)
 {
     m_showSubTicks = show;
 }
 
-// Sets sub tick length value and updates internal subsystem configuration.
+// Sets sub tick length parameter and updates internal configuration.
 void QCustomAxis::setSubTickLength(int inside, int outside)
 {
     m_subTickLengthIn = inside;
     m_subTickLengthOut = outside;
 }
 
-// Sets sub tick length in value and updates internal subsystem configuration.
+// Sets sub tick length in parameter and updates internal configuration.
 void QCustomAxis::setSubTickLengthIn(int inside)
 {
     m_subTickLengthIn = inside;
 }
 
-// Sets sub tick length out value and updates internal subsystem configuration.
+// Sets sub tick length out parameter and updates internal configuration.
 void QCustomAxis::setSubTickLengthOut(int outside)
 {
     m_subTickLengthOut = outside;
 }
 
-// Sets sub tick pen value and updates internal subsystem configuration.
+// Sets sub tick pen parameter and updates internal configuration.
 void QCustomAxis::setSubTickPen(const QPen &pen)
 {
     m_subTickPen = pen;
@@ -724,7 +721,6 @@ QPen QCustomAxis::subTickPen() const
 /***----- Number Precision related functions -----***/
 /****************************************************/
 
-// Sets number precision value and updates internal subsystem configuration.
 void QCustomAxis::setNumberPrecision(int precision)
 {
     m_numberPrecision = precision;
@@ -740,7 +736,6 @@ int QCustomAxis::numberPrecision() const
 /***----- Scale related functions -----***/
 /*****************************************/
 
-// Sets scale type value and updates internal subsystem configuration.
 void QCustomAxis::setScaleType(ScaleType scaleType)
 {
     m_scaleType = scaleType;

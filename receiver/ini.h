@@ -1,7 +1,7 @@
 // ============================================================================
 // File: ini.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for ini.h.
+// Description: Header definitions and interface declarations for ini.h.
 // ============================================================================
 
 #ifndef __INI_H
@@ -22,19 +22,15 @@ class ini
 {
 
 private:
-    // Executes skip line routine.
     static bool skip_line(INI *ini);
-    // Executes skip comments routine.
     static bool skip_comments(INI *ini);
     static INI *_ini_open_mem(const char *buf,
                 size_t len, bool free_buf_on_exit);
 
 public:
-    // Constructor: Initializes ini subsystem components, default parameters, and state.
     ini();
     INI *ini_open(const char *file);
     INI *ini_open_mem(const char *buf, size_t len);
-    // Executes ini close routine.
     void ini_close(INI *ini);
 
     /* Jump to the next section.
@@ -48,7 +44,6 @@ public:
      * 	0 if no more section can be found,
      * 	1 otherwise.
      */
-    // Executes ini next section routine.
     int ini_next_section(INI *ini, const char **name, size_t *name_len);
 
     /* Read a key/value pair.
@@ -67,7 +62,6 @@ public:
                       const char **value, size_t *value_len);
 
     /* Set the read head to a specified offset. */
-    // Executes ini set read pointer routine.
     void ini_set_read_pointer(INI *ini,const char *pointer);
 
     /* Get the number of the line that contains the specified address.
@@ -76,7 +70,6 @@ public:
      * -EINVAL if the pointer points outside the INI string,
      *  The line number otherwise.
      */
-    // Executes ini get line number routine.
     int ini_get_line_number(INI *ini,const char *pointer);
 
 

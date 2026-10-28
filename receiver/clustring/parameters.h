@@ -1,7 +1,7 @@
 // ============================================================================
 // File: parameters.h
 // Subsystem: eLynxSDR clustring
-// Description: Subsystem implementation and interface guidance for parameters.h.
+// Description: Header definitions and interface declarations for parameters.h.
 // ============================================================================
 
 #ifndef PARAMETERS_H
@@ -13,7 +13,6 @@ class Parameters
 {
 
 public:
-    // Constructor: Initializes Parameters subsystem components, default parameters, and state.
     Parameters();
 
 #pragma region S Band Parameters{

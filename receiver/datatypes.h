@@ -1,7 +1,7 @@
 // ============================================================================
 // File: datatypes.h
 // Subsystem: eLynxSDR receiver
-// Description: Subsystem implementation and interface guidance for datatypes.h.
+// Description: Header definitions and interface declarations for datatypes.h.
 // ============================================================================
 
 #ifndef DATATYPES_H
@@ -154,7 +154,6 @@ struct _transform {
     QColor *graph_color;
     bool has_the_marker;
     void *settings;
-    // Executes bool routine.
     bool (*transform_function)(Transform *tr, gboolean init_transform);
 };
 
@@ -247,37 +246,24 @@ struct _freq_spectrum_settings {
 class DataTypes
 {
 public:
-    // Constructor: Initializes DataTypes subsystem components, default parameters, and state.
     DataTypes();
 
     Transform *Transform_new(int tr_type);
-    // Executes transform destroy routine.
     void Transform_destroy(Transform *tr);
-    // Executes transform resize x axis routine.
     void Transform_resize_x_axis(Transform *tr, int new_size);
-    // Executes transform resize y axis routine.
     void Transform_resize_y_axis(Transform *tr, int new_size);
-    // Executes transform resize seek x axis routine.
     void Transform_resize_seek_x_axis(Transform *tr, int new_size);
-    // Executes transform resize seek y axis routine.
     void Transform_resize_seek_y_axis(Transform *tr, int new_size);
     QVector<double> *Transform_get_x_axis_ref(Transform *tr);
     QVector<double> *Transform_get_y_axis_ref(Transform *tr);
-    // Executes transform attach settings routine.
     void Transform_attach_settings(Transform *tr, void *settings);
-    // Executes transform attach function routine.
     void Transform_attach_function(Transform *tr, bool (*f)(Transform *tr , gboolean init_transform));
-    // Executes transform setup routine.
     void Transform_setup(Transform *tr);
-    // Executes transform update output routine.
     bool Transform_update_output(Transform *tr);
 
     QList<Transform*> *TrList_new(void);
-    // Executes tr list destroy routine.
     void TrList_destroy(QList<Transform*> *list);
-    // Executes tr list add transform routine.
     void TrList_add_transform(QList<Transform*> *list, Transform *tr);
-    // Executes tr list remove transform routine.
     void TrList_remove_transform(QList<Transform*> *list, Transform *tr);
 };
 
