@@ -1,5 +1,18 @@
+/**
+ * @file UpdateData.cpp
+ * @brief Subsystem module for GLChart in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "UpdateData.h"
 
+/**
+ * @brief Constructs a new UpdateData instance and initializes subsystem components and UI state.
+ * @param chart Input parameter specifying chart (QGLchart).
+ */
 UpdateData::UpdateData(QGLchart *chart)
 {
     this->chart = chart;
@@ -33,6 +46,9 @@ void UpdateData::run()
     }
 }
 
+/**
+ * @brief Executes the spectrum update data procedure for UpdateData.
+ */
 void UpdateData::spectrumUpdateData()
 {
     QCustomSeries a;
@@ -89,6 +105,9 @@ void UpdateData::spectrumUpdateData()
 
 }
 
+/**
+ * @brief Executes the waterfall update data procedure for UpdateData.
+ */
 void UpdateData::waterfallUpdateData()
 {
     QCustomSeries a;
@@ -120,6 +139,9 @@ void UpdateData::waterfallUpdateData()
     }
 }
 
+/**
+ * @brief Executes the scatter update data procedure for UpdateData.
+ */
 void UpdateData::scatterUpdateData()
 {
     QCustomSeries a;
@@ -167,6 +189,10 @@ void UpdateData::scatterUpdateData()
     }
 }
 
+/**
+ * @brief Calculates and returns the mathematical calculate max hold formulation.
+ * @param inputSeries Input parameter specifying inputSeries (QCustomSeries).
+ */
 void UpdateData::calculateMaxHold(QCustomSeries inputSeries)
 {
     QVector<QVector2D> inputVector = inputSeries.pointsVector();
@@ -192,16 +218,28 @@ void UpdateData::calculateMaxHold(QCustomSeries inputSeries)
     }
 }
 
+/**
+ * @brief Executes the clear data slot procedure for UpdateData.
+ * @param state Input parameter specifying state (bool).
+ */
 void UpdateData::clearDataSlot(bool state)
 {
     m_clearData = state;
 }
 
+/**
+ * @brief Executes the pause slot procedure for UpdateData.
+ * @param state Input parameter specifying state (bool).
+ */
 void UpdateData::pauseSlot(bool state)
 {
     m_pause = state;
 }
 
+/**
+ * @brief Executes the max hold procedure for UpdateData.
+ * @param state Input parameter specifying state (bool).
+ */
 void UpdateData::maxHold(bool state)
 {
     if(!state)
@@ -210,6 +248,11 @@ void UpdateData::maxHold(bool state)
     maxHoldSeries->removeAllPoints();
 }
 
+/**
+ * @brief Executes the masking data procedure for UpdateData.
+ * @param state Input parameter specifying state (bool).
+ * @param range Input parameter specifying range (QVector<QVector2D>).
+ */
 void UpdateData::maskingData(bool state, QVector<QVector2D> range)
 {
     m_updateMasking = true;
@@ -230,6 +273,10 @@ void UpdateData::maskingData(bool state, QVector<QVector2D> range)
     m_updateMasking = false;
 }
 
+/**
+ * @brief Calculates and returns the mathematical calculate mask data formulation.
+ * @param point Input parameter specifying point (QVector2D).
+ */
 void UpdateData::calculateMaskData(QVector2D point)
 {
     // for lock in lower and upper that could be change in maskingData

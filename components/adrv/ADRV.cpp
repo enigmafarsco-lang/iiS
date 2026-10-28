@@ -1,3 +1,12 @@
+/**
+ * @file ADRV.cpp
+ * @brief Subsystem module for adrv in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "ADRV.h"
 #include <QtConcurrent>
 
@@ -129,6 +138,10 @@ double adrv::GetFrequency()
 }
 
 
+/**
+ * @brief Executes the get power procedure for adrv.
+ * @return Output value of type double.
+ */
 double adrv::GetPower()
 {
     struct iio_device *dev;
@@ -155,6 +168,11 @@ double adrv::GetPower()
     return power;
 }
 
+/**
+ * @brief Executes the set power procedure for adrv.
+ * @param power Input parameter specifying power (double).
+ * @return Output value of type bool.
+ */
 bool adrv::SetPower(double power)
 {
     struct iio_device *dev;
@@ -187,12 +205,21 @@ QHBoxLayout *adrv::InitializeDacBuffer()
 }
 
 
+/**
+ * @brief Executes the set file procedure for adrv.
+ * @param fileName Input parameter specifying fileName (QString).
+ * @param scale Input parameter specifying scale (double).
+ * @return Output value of type QString.
+ */
 QString adrv::SetFile(QString fileName, double scale)
 {
     return dac_data_manager->setFile(fileName,scale);
 }
 
 
+/**
+ * @brief Executes the disable dac procedure for adrv.
+ */
 void adrv::DisableDac()
 {
     dac_data_manager->DisableDac();

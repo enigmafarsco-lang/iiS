@@ -1,3 +1,12 @@
+/**
+ * @file soliddialog.h
+ * @brief Subsystem module for solid in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef SOLIDDIALOG_H
 #define SOLIDDIALOG_H
 
@@ -10,30 +19,71 @@
 
 using namespace std;
 namespace Ui {
+/**
+ * @class SolidDialog
+ * @brief High-level controller class for SolidDialog.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class SolidDialog;
 }
 
+/**
+ * @class SolidDialog
+ * @brief High-level controller class for SolidDialog.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class SolidDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructs a new SolidDialog instance and initializes subsystem components and UI state.
+     * @param parent Input parameter specifying parent (QWidget).
+     */
     explicit SolidDialog(QWidget *parent = nullptr);
+    /**
+     * @brief Destructor for SolidDialog, releasing allocated hardware resources, timers, and buffers.
+     */
     ~SolidDialog();
 
 public slots:
+    /**
+     * @brief Slot handler responding to on  device response slot event.
+     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
+     */
     void on_DeviceResponseSlot(QByteArray);
 
 signals:
+    /**
+     * @brief Transmits send command to device signal command/packet over the communication bus.
+     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
+     */
     void sendCommandToDeviceSignal(QByteArray);
+    /**
+     * @brief Transmits send to main sig command/packet over the communication bus.
+     * @param QString Input parameter specifying QString (QString).
+     */
     void sendToMainSig(QString);
+    /**
+     * @brief Transmits send status data to joshan signal command/packet over the communication bus.
+     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
+     */
     void sendStatusDataToJoshanSignal(QJsonObject);
 
 
 public:
+    /**
+     * @brief Executes the handle info procedure for SolidDialog.
+     * @param QString Input parameter specifying QString (QString).
+     */
     void handle_info(QString);
 
 signals:
+    /**
+     * @brief Transmits send command to other object signal command/packet over the communication bus.
+     * @param QString Input parameter specifying QString (QString).
+     */
     void sendCommandToOtherObjectSignal(QString);
 //    void
 
@@ -43,12 +93,25 @@ public slots:
     void isDeviceConnectedSlot(bool);
 
 private slots:
+    /**
+     * @brief Slot handler responding to on blinking timer time out event.
+     */
     void  on_blinkingTimer_timeOut();
 
+    /**
+     * @brief Slot handler responding to on btn start report clicked event.
+     */
     void on_btnStartReport_clicked();
 
+    /**
+     * @brief Slot handler responding to on btn stop report clicked event.
+     */
     void on_btnStopReport_clicked();
 
+    /**
+     * @brief Slot handler responding to on  solid dialog finished event.
+     * @param result Input parameter specifying result (int).
+     */
     void on_SolidDialog_finished(int result);
 
 private:

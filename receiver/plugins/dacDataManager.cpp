@@ -1,3 +1,12 @@
+/**
+ * @file dacDataManager.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "dacDataManager.h"
 
 #pragma region Constructor {
@@ -265,6 +274,11 @@ QFrame *dacDataManager::gui_dds_mode_chooser_create(struct dds_tx *tx)
 }
 
 
+/**
+ * @brief Retrieves the current val value.
+ * @param cmb Input parameter specifying cmb (QComboBox *).
+ * @param isWork Input parameter specifying isWork (bool).
+ */
 void dacDataManager::getVal(QComboBox * cmb,bool isWork)
 {
 //    mode = cmb;
@@ -1752,6 +1766,10 @@ void dacDataManager::dds_locked_phase_cb(struct dds_tx *tx)
     }
 }
 
+/**
+ * @brief Executes the dds locked freq cb procedure for dacDataManager.
+ * @param tx Input parameter specifying tx (struct dds_tx).
+ */
 void dacDataManager::dds_locked_freq_cb(struct dds_tx *tx)
 {
     struct dds_tone **tones = tx->dds_tones;
@@ -1779,6 +1797,11 @@ void dacDataManager::dds_locked_freq_cb(struct dds_tx *tx)
     dds_locked_phase_cb(tx);
 }
 
+/**
+ * @brief Executes the manage dds mode procedure for dacDataManager.
+ * @param box Input parameter specifying box (QComboBox).
+ * @param tx Input parameter specifying tx (struct dds_tx).
+ */
 void dacDataManager::manage_dds_mode(QComboBox *box,struct dds_tx *tx)
 {
     struct dac_data_manager *manager;
@@ -2071,6 +2094,10 @@ void dacDataManager::manage_dds_mode(QComboBox *box,struct dds_tx *tx)
     }
 }
 
+/**
+ * @brief Executes the tone setup procedure for dacDataManager.
+ * @param tone Input parameter specifying tone (struct dds_tone).
+ */
 void dacDataManager::tone_setup(struct dds_tone *tone)
 {
     bool combobox_scales = tone->parent->parent->parent->parent->scale_available_mode;
@@ -2113,6 +2140,10 @@ void dacDataManager::tone_setup(struct dds_tone *tone)
 
 }
 
+/**
+ * @brief Executes the manager iio setup procedure for dacDataManager.
+ * @param manager Input parameter specifying manager (dac_data_manager).
+ */
 void dacDataManager::manager_iio_setup(dac_data_manager *manager)
 {
     GSList *node;
@@ -2164,6 +2195,10 @@ void dacDataManager::manager_iio_setup(dac_data_manager *manager)
     }
 }
 
+/**
+ * @brief Executes the dac data manager free procedure for dacDataManager.
+ * @param manager Input parameter specifying manager (dac_data_manager).
+ */
 void dacDataManager::dac_data_manager_free(dac_data_manager *manager)
 {
     if (manager) {
@@ -2178,6 +2213,11 @@ void dacDataManager::dac_data_manager_free(dac_data_manager *manager)
     }
 }
 
+/**
+ * @brief Executes the dac buffer init procedure for dacDataManager.
+ * @param manager Input parameter specifying manager (dac_data_manager).
+ * @param d_buffer Input parameter specifying d_buffer (dac_buffer).
+ */
 void dacDataManager::dac_buffer_init(dac_data_manager *manager, dac_buffer *d_buffer)
 {
     int count;
@@ -2195,6 +2235,11 @@ void dacDataManager::dac_buffer_init(dac_data_manager *manager, dac_buffer *d_bu
     d_buffer->dac_with_scanelems = dac_with_scanelems;
 }
 
+/**
+ * @brief Executes the device scan elements count procedure for dacDataManager.
+ * @param dev Input parameter specifying dev (iio_device).
+ * @return Output value of type int.
+ */
 int dacDataManager::device_scan_elements_count(iio_device *dev)
 {
     unsigned int i;
@@ -2210,6 +2255,11 @@ int dacDataManager::device_scan_elements_count(iio_device *dev)
     return count;
 }
 
+/**
+ * @brief Retrieves the current iio_tones_count value.
+ * @param dev Input parameter specifying dev (iio_device).
+ * @return Output value of type unsigned.
+ */
 unsigned dacDataManager::get_iio_tones_count(iio_device *dev)
 {
     unsigned int i, count;
@@ -2227,6 +2277,12 @@ unsigned dacDataManager::get_iio_tones_count(iio_device *dev)
     return count;
 }
 
+/**
+ * @brief Executes the dds tx init procedure for dacDataManager.
+ * @param ddac Input parameter specifying ddac (dds_dac).
+ * @param tx Input parameter specifying tx (dds_tx).
+ * @param dds_index Input parameter specifying dds_index (unsigned).
+ */
 void dacDataManager::dds_tx_init(dds_dac *ddac, dds_tx *tx, unsigned dds_index)
 {
     tx->index = dds_index;
@@ -2253,6 +2309,11 @@ void dacDataManager::dds_tx_init(dds_dac *ddac, dds_tx *tx, unsigned dds_index)
     ddac->tx_count++;
 }
 
+/**
+ * @brief Executes the dac data manager set buffer size alignment procedure for dacDataManager.
+ * @param manager Input parameter specifying manager (dac_data_manager).
+ * @param align Input parameter specifying align (unsigned).
+ */
 void dacDataManager::dac_data_manager_set_buffer_size_alignment(dac_data_manager *manager, unsigned align)
 {
     if (!manager)
@@ -2281,6 +2342,10 @@ int dacDataManager::manager_channels_assign(dac_data_manager *manager)
     return 0;
 }
 
+/**
+ * @brief Executes the dds tone iio widgets update procedure for dacDataManager.
+ * @param tone Input parameter specifying tone (struct dds_tone).
+ */
 void dacDataManager::dds_tone_iio_widgets_update(struct dds_tone *tone)
 {
     tone->iio_freq.update(&tone->iio_freq);
@@ -2288,6 +2353,10 @@ void dacDataManager::dds_tone_iio_widgets_update(struct dds_tone *tone)
     tone->iio_phase.update(&tone->iio_phase);
 }
 
+/**
+ * @brief Executes the dac data manager update iio widgets procedure for dacDataManager.
+ * @param manager Input parameter specifying manager (dac_data_manager).
+ */
 void dacDataManager::dac_data_manager_update_iio_widgets(dac_data_manager *manager)
 {
     GSList *node;

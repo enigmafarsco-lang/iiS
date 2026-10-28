@@ -394,12 +394,19 @@ void Exciter::joshanFuncDataSlot()
     emit sendFuncDataToJoshanSignal(exciterData);
 }
 
+/**
+ * @brief Executes the joshan status data slot procedure for Exciter.
+ */
 void Exciter::joshanStatusDataSlot()
 {
 
 }
 
 
+/**
+ * @brief Initializes and configures the init connection for the Exciter subsystem.
+ * @param val Input parameter specifying val (bool).
+ */
 void Exciter::initConnection(bool val)
 {
 
@@ -424,6 +431,10 @@ void Exciter::changingDacMsg(QString dacMsg,QString mode)
     ui->lblDacMsg->setText(mode  + " " + dacMsg);
 }
 
+/**
+ * @brief Executes the joshan control data slot procedure for Exciter.
+ * @param val Input parameter specifying val (QJsonObject).
+ */
 void Exciter::joshanControlDataSlot(QJsonObject val)
 {
     QJsonObject value = val["parameters"].toObject();
@@ -586,11 +597,18 @@ void Exciter::joshanControlDataSlot(QJsonObject val)
     }
 }
 
+/**
+ * @brief Executes the smart noise is active slot procedure for Exciter.
+ */
 void Exciter::smartNoiseIsActiveSlot()
 {
     ui->lblDacMsg->setText("Smart noise is active.");
 }
 
+/**
+ * @brief Retrieves the current ser logged in slot value.
+ * @param state Input parameter specifying state (double).
+ */
 void Exciter::isUserLoggedInSlot(double state)
 {
     isUserLoggedIn = state;
@@ -654,6 +672,9 @@ bool Exciter::returnfilePath(QString &fileName)
 
 
 
+/**
+ * @brief Retrieves the current data slot value.
+ */
 void Exciter::getDataSlot()
 {
     //set frq
@@ -678,6 +699,11 @@ bool Exciter::existsFile (const std::string& name)
     return (stat (name.c_str(), &buffer) == 0);
 }
 
+/**
+ * @brief Executes the resolve file in app folders procedure for Exciter.
+ * @param relPath Input parameter specifying relPath (const QString).
+ * @return Output value of type QString.
+ */
 QString Exciter::resolveFileInAppFolders(const QString &relPath)
 {
     // Only the runtime waveform directory selected by projectFilesDir() is
@@ -688,16 +714,28 @@ QString Exciter::resolveFileInAppFolders(const QString &relPath)
     return QString();
 }
 
+/**
+ * @brief Executes the voltage01 selected procedure for Exciter.
+ * @return Output value of type bool.
+ */
 bool Exciter::voltage01Selected() const
 {
     return ui->chbVoltage01 && ui->chbVoltage01->isChecked();
 }
 
+/**
+ * @brief Executes the voltage23 selected procedure for Exciter.
+ * @return Output value of type bool.
+ */
 bool Exciter::voltage23Selected() const
 {
     return ui->chbVoltage23 && ui->chbVoltage23->isChecked();
 }
 
+/**
+ * @brief Sets the profile bw parameter and updates internal state.
+ * @param bwMHz Input parameter specifying bwMHz (int).
+ */
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.
@@ -713,6 +751,11 @@ void Exciter::setProfileBw(int bwMHz)
 }
 
 
+/**
+ * @brief Sets the mode active parameter and updates internal state.
+ * @param mode Input parameter specifying mode (const QString).
+ * @param on Input parameter specifying on (bool).
+ */
 void Exciter::setModeActive(const QString &mode, bool on)
 {
     if (on)
@@ -723,6 +766,9 @@ void Exciter::setModeActive(const QString &mode, bool on)
     emit modeActivitySignal(!activeModes.isEmpty());
 }
 
+/**
+ * @brief Sets the data slot parameter and updates internal state.
+ */
 void Exciter::setDataSlot()
 {
 
@@ -1099,6 +1145,13 @@ void Exciter::setDataSlot()
 }
 
 
+/**
+ * @brief Executes the create impulse file procedure for Exciter.
+ * @param pri Input parameter specifying pri (double).
+ * @param pw Input parameter specifying pw (double).
+ * @param impulseFileName Input parameter specifying impulseFileName (QString).
+ * @param fs_msps Input parameter specifying fs_msps (double).
+ */
 void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName, double fs_msps)
 {
     uint iValue{}, qValue{};
@@ -1154,6 +1207,9 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
 }
 
 
+/**
+ * @brief Slot handler responding to on btn stop sweep clicked event.
+ */
 void Exciter::on_btnStopSweep_clicked()
 {
     if (isExciterOn) emit changeDacSignal("Sweep");
@@ -1161,6 +1217,9 @@ void Exciter::on_btnStopSweep_clicked()
 }
 
 
+/**
+ * @brief Slot handler responding to on btn disable spot clicked event.
+ */
 void Exciter::on_btnDisableSpot_clicked()
 {
 
@@ -1188,6 +1247,10 @@ void Exciter::on_btnDisableCW_clicked(bool checked)
     setModeActive("cw", false);
 }
 
+/**
+ * @brief Slot handler responding to on btn disable w b clicked event.
+ * @param checked Input parameter specifying checked (bool).
+ */
 void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");

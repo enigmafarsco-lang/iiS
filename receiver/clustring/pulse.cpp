@@ -1,3 +1,12 @@
+/**
+ * @file pulse.cpp
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "pulse.h"
 
 #pragma region Constructors {
@@ -74,6 +83,10 @@ QList<Pulse*> *Pulse::Clone(QList<Pulse*> *inputPulse)
     return nullptr;
 }
 
+/**
+ * @brief Executes the update procedure for Pulse.
+ * @param p Input parameter specifying p (Pulse).
+ */
 void Pulse::Update(Pulse *p)
 {
     this->Channel=p->Channel;

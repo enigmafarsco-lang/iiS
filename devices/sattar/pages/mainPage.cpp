@@ -1,3 +1,12 @@
+/**
+ * @file mainPage.cpp
+ * @brief Subsystem module for pages in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "mainPage.h"
 #include "ui_mainPage.h"
 
@@ -12,6 +21,9 @@ MainPage::MainPage(QWidget *parent) :
 
 }
 
+/**
+ * @brief Initializes and configures the init for the MainPage subsystem.
+ */
 void MainPage::init()
 {
     // init pages
@@ -35,6 +47,9 @@ void MainPage::init()
     ui->tabMenu->setStyleSheet("QTabBar::tab:selected {background-color:  #186a3b;}");
 }
 
+/**
+ * @brief Executes the connections procedure for MainPage.
+ */
 void MainPage::connections()
 {
     //PW connects
@@ -110,6 +125,9 @@ void MainPage::showModulTab()
     ui->tabMenu->setCurrentIndex(4);
 }
 
+/**
+ * @brief Executes the menu generate slot procedure for MainPage.
+ */
 void MainPage::menuGenerateSlot()
 {
 
@@ -126,6 +144,9 @@ void MainPage::menuGenerateSlot()
 }
 
 
+/**
+ * @brief Destructor for MainPage, releasing allocated hardware resources, timers, and buffers.
+ */
 MainPage::~MainPage()
 {
 //        delete radarData;

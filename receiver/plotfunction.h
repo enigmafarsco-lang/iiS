@@ -31,6 +31,12 @@ class plotfunction : public QThread
     Q_OBJECT
     int plottingValues(const double *val, QCustomPlot *plot, QVector<double> *x, QVector<double> *y, double min, double max, int count);
     void fillHistoramArray(int type, QCustomPlot *plot, double *val, int cnt);
+    /**
+     * @brief Executes the plot histogram procedure for plotfunction.
+     * @param plot Input parameter specifying plot (QCustomPlot).
+     * @param std::unordered_map<double Input parameter specifying std::unordered_map<double (std::unordered_map<double).
+     * @param histogramData Input parameter specifying histogramData (double>).
+     */
     void plotHistogram(QCustomPlot *plot, std::unordered_map<double, double> *histogramData);
 
     QCPAxisRect * wideAxisRect = nullptr;
@@ -39,10 +45,29 @@ class plotfunction : public QThread
     QCustomPlot * plot;
 
 public:
+    /**
+     * @brief Constructs a new plotfunction instance and initializes subsystem components and UI state.
+     * @param parent Input parameter specifying parent (QObject).
+     */
     explicit plotfunction(QObject *parent = nullptr);
+    /**
+     * @brief Destructor for plotfunction, releasing allocated hardware resources, timers, and buffers.
+     */
     ~plotfunction();
     double centerFrq{};
+    /**
+     * @brief Executes the maximum finder procedure for plotfunction.
+     * @param  Input parameter specifying  (double).
+     * @param  Input parameter specifying  (double).
+     * @return Output value of type double.
+     */
     double maximumFinder(double *, double *);
+    /**
+     * @brief Executes the minimum finder procedure for plotfunction.
+     * @param  Input parameter specifying  (double).
+     * @param  Input parameter specifying  (double).
+     * @return Output value of type double.
+     */
     double minimumFinder(double *, double *);
 
     double frqMax{0};
@@ -72,10 +97,24 @@ public:
     int clickCnt{};
     int frqValue{};
 
+    /**
+     * @brief Sets the plot parameter and updates internal state.
+     * @param  Input parameter specifying  (QCustomPlot).
+     */
     void setPlot(QCustomPlot *);
 
+    /**
+     * @brief Sets the histo plot parameter and updates internal state.
+     * @param  Input parameter specifying  (QCustomPlot).
+     */
     void setHistoPlot(QCustomPlot *);
+    /**
+     * @brief Executes the creating time plot procedure for plotfunction.
+     */
     void creatingTimePlot();
+    /**
+     * @brief Executes the creating histogram plot procedure for plotfunction.
+     */
     void creatingHistogramPlot();
 
     QMap<double, int> tmpMap;
@@ -108,6 +147,10 @@ public:
     QCustomSeries a;
     int cnt{};
 
+    /**
+     * @brief Calculates and returns the mathematical calculate histogram formulation.
+     * @param  Input parameter specifying  (double).
+     */
     void calculateHistogram(double *);
     //    void histPlot();
 public slots:
@@ -123,6 +166,10 @@ signals:
     void histoMainPlotSignal( double, double);
     void histoBarPlotSignal (QVector<double>, QVector<double>);
 
+    /**
+     * @brief Executes the plt update signal procedure for plotfunction.
+     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
+     */
     void pltUpdateSignal(QCustomSeries);
 
     // QThread interface

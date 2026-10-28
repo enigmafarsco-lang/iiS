@@ -1,3 +1,12 @@
+/**
+ * @file detector.cpp
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "detector.h"
 #include "receiver/globals.h"
 
@@ -45,11 +54,19 @@ void Detector::setTunerFrequency(double newTunerFrequency)
     ft = newTunerFrequency;
 }
 
+/**
+ * @brief Sets the stop parameter and updates internal state.
+ * @param newStop Input parameter specifying newStop (bool).
+ */
 void Detector::setStop(bool newStop)
 {
     stop = newStop;
 }
 
+/**
+ * @brief Executes the calculating p r i procedure for Detector.
+ * @param pls Input parameter specifying pls (Pulse).
+ */
 void Detector::calculatingPRI(Pulse pls)
 {
     int chNo = int(pls.Channel);

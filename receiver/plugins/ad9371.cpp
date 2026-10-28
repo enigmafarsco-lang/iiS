@@ -1,3 +1,12 @@
+/**
+ * @file ad9371.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "ad9371.h"
 #include <receiver/osc.h>
 
@@ -200,6 +209,9 @@ AD9371::AD9371(QApplication *app,QWidget *parent) :
     ui->setupUi(this);
 }
 
+/**
+ * @brief Destructor for AD9371, releasing allocated hardware resources, timers, and buffers.
+ */
 AD9371::~AD9371()
 {
     delete ui;
@@ -845,6 +857,10 @@ QWidget *AD9371::init()
 }
 
 
+/**
+ * @brief Slot handler responding to tx sample rate changed event.
+ * @param spinbutton Input parameter specifying spinbutton (QDoubleSpinBox).
+ */
 void AD9371::tx_sample_rate_changed(QDoubleSpinBox *spinbutton)
 {
     gdouble rate;
@@ -855,6 +871,9 @@ void AD9371::tx_sample_rate_changed(QDoubleSpinBox *spinbutton)
 }
 
 
+/**
+ * @brief Executes the int dec freq update procedure for AD9371.
+ */
 void AD9371::int_dec_freq_update(void)
 {
     struct iio_channel *ch;
@@ -877,6 +896,9 @@ void AD9371::int_dec_freq_update(void)
 }
 
 
+/**
+ * @brief Executes the int dec update cb procedure for AD9371.
+ */
 void AD9371::int_dec_update_cb()
 {
     int_dec_freq_update();
@@ -884,6 +906,10 @@ void AD9371::int_dec_update_cb()
 }
 
 
+/**
+ * @brief Retrieves the current gui_tx_sampling_freq value.
+ * @return Output value of type double.
+ */
 double AD9371::get_gui_tx_sampling_freq()
 {
     if(tx_widgets[tx_sample_freq].widget)
@@ -1004,6 +1030,9 @@ void AD9371::glb_settings_update_labels()
 
 }
 
+/**
+ * @brief Executes the rx phase rotation update procedure for AD9371.
+ */
 void AD9371::rx_phase_rotation_update()
 {
     struct iio_channel *out[4];
@@ -1068,6 +1097,9 @@ void AD9371::rx_phase_rotation_update()
 }
 
 
+/**
+ * @brief Executes the profile update procedure for AD9371.
+ */
 void AD9371::profile_update(void)
 {
     //    if (plugin_osc_running_state() == true) {
@@ -1080,6 +1112,9 @@ void AD9371::profile_update(void)
     rx_freq_info_update();
 }
 
+/**
+ * @brief Slot handler responding to on btn reload settings clicked event.
+ */
 void AD9371::on_btnReloadSettings_clicked()
 {
     update_widgets();

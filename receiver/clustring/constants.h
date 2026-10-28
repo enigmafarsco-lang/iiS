@@ -1,11 +1,28 @@
+/**
+ * @file constants.h
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
 #include <QString>
 
+/**
+ * @class Constants
+ * @brief High-level controller class for Constants.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class Constants
 {
 public:
+    /**
+     * @brief Constructs a new Constants instance and initializes subsystem components and UI state.
+     */
     Constants();
 
     static QString sweepMode ;

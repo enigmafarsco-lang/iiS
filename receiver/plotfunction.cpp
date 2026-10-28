@@ -1,11 +1,27 @@
+/**
+ * @file plotfunction.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "plotfunction.h"
 
+/**
+ * @brief Constructs a new plotfunction instance and initializes subsystem components and UI state.
+ * @param parent Input parameter specifying parent (QObject).
+ */
 plotfunction::plotfunction(QObject *parent) : QThread(parent)
 {
     this->start();
     moveToThread(this);
 }
 
+/**
+ * @brief Destructor for plotfunction, releasing allocated hardware resources, timers, and buffers.
+ */
 plotfunction::~plotfunction()
 {
     //    if(isRunning())
@@ -21,11 +37,18 @@ void plotfunction::setPlot(QCustomPlot *plt)
 }
 
 
+/**
+ * @brief Sets the histo plot parameter and updates internal state.
+ * @param plt Input parameter specifying plt (QCustomPlot).
+ */
 void plotfunction::setHistoPlot(QCustomPlot *plt)
 {
     histogramPlot = plt;
 }
 
+/**
+ * @brief Executes the creating time plot procedure for plotfunction.
+ */
 void plotfunction::creatingTimePlot()
 {
     if(!customPlot) return;
@@ -46,6 +69,9 @@ void plotfunction::creatingTimePlot()
     connect(customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->yAxis2, SLOT(setRange(QCPRange)));
 }
 
+/**
+ * @brief Executes the creating histogram plot procedure for plotfunction.
+ */
 void plotfunction::creatingHistogramPlot()
 {
 
@@ -74,6 +100,11 @@ void plotfunction::creatingHistogramPlot()
 
 
 
+/**
+ * @brief Executes the main plot procedure for plotfunction.
+ * @param xAx Input parameter specifying xAx (double).
+ * @param yAx Input parameter specifying yAx (double).
+ */
 void plotfunction::mainPlot(double xAx , double yAx)
 {
     double key = timeStart.msecsTo(QTime::currentTime())/1000.0;
@@ -90,6 +121,11 @@ void plotfunction::mainPlot(double xAx , double yAx)
 
 
 
+/**
+ * @brief Executes the plt get data slot procedure for plotfunction.
+ * @param val Input parameter specifying val (double).
+ * @param toa Input parameter specifying toa (double).
+ */
 void plotfunction::pltGetDataSlot(double val , double toa)
 {
 
@@ -131,6 +167,10 @@ void plotfunction::run()
 
 
 
+/**
+ * @brief Calculates and returns the mathematical calculate histogram formulation.
+ * @param val Input parameter specifying val (double *).
+ */
 void plotfunction::calculateHistogram(double * val)
 {
     //    if( 6000< *val || *val< 1000) return;

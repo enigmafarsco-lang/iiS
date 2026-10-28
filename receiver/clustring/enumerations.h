@@ -1,10 +1,27 @@
+/**
+ * @file enumerations.h
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef ENUMERATIONS_H
 #define ENUMERATIONS_H
 
+/**
+ * @class Enumerations
+ * @brief High-level controller class for Enumerations.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class Enumerations
 {
 
 public:
+    /**
+     * @brief Constructs a new Enumerations instance and initializes subsystem components and UI state.
+     */
     Enumerations();
     enum class Band{ L, S, X, None} ;
     enum class FunctionMode { Sweep, Spectrum, Scope, SweepFS, SweepHRS, SpectrumFix, SpectrumScan, Fix, NotFix, None}  ;

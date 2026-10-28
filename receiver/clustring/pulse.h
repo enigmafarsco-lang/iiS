@@ -1,14 +1,35 @@
+/**
+ * @file pulse.h
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef PULSE_H
 #define PULSE_H
 
 #include "enumerations.h"
 #include "constants.h"
 #include "qlist.h"
+/**
+ * @class Pulse
+ * @brief High-level controller class for Pulse.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class Pulse
 {
 
 public:
+    /**
+     * @brief Constructs a new Pulse instance and initializes subsystem components and UI state.
+     */
     Pulse();
+    /**
+     * @brief Constructs a new Pulse instance and initializes subsystem components and UI state.
+     * @param pulseBand Input parameter specifying pulseBand (Enumerations::Band).
+     */
     Pulse(Enumerations::Band pulseBand);
 
     int          MinFrequency=0;

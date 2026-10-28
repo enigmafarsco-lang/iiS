@@ -1,3 +1,12 @@
+/**
+ * @file tuner.cpp
+ * @brief Subsystem module for tuner in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "tuner.h"
 #include "ui_tuner.h"
 
@@ -21,6 +30,9 @@ Tuner::Tuner(QWidget *parent) :
 }
 
 
+/**
+ * @brief Executes the plot init procedure for Tuner.
+ */
 void Tuner::plotInit()
 {
     //================== one plot ==========================
@@ -150,6 +162,11 @@ void Tuner::plotInit()
 
 
 
+/**
+ * @brief Sets the q glcharts parameters parameter and updates internal state.
+ * @param glChart Input parameter specifying glChart (QGLchart).
+ * @param glChartType Input parameter specifying glChartType (ChartType).
+ */
 void Tuner::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
 //    glChart->setMinimumSize(QSize(50, 50));
@@ -325,6 +342,12 @@ void Tuner::fillingPlotVector(QStringList &frame)
     }
 }
 
+/**
+ * @brief Sets the vector to qcustom parameter and updates internal state.
+ * @param vec Input parameter specifying vec (QVector2D &).
+ * @param QCustom Input parameter specifying QCustom (QCustomSeries &).
+ * @param data Input parameter specifying data (int).
+ */
 void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int data)
 {
     vec.setX(yAxiosCounter);
@@ -332,6 +355,10 @@ void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int dat
     QCustom.addPoints(vec);
 }
 
+/**
+ * @brief Slot handler responding to on  device response slot event.
+ * @param response Input parameter specifying response (QByteArray).
+ */
 void Tuner::on_DeviceResponseSlot(QByteArray response)
 {
 //    qDebug ()<<"tuner ---> "  <<response;
@@ -368,17 +395,28 @@ void Tuner::on_DeviceResponseSlot(QByteArray response)
     yAxiosCounter++;
 }
 
+/**
+ * @brief Retrieves the current evice connected slot value.
+ * @param val Input parameter specifying val (bool).
+ */
 void Tuner::isDeviceConnectedSlot(bool val)
 {
     isConnect = val;
     ui->btnConnect->setStyleSheet(isConnect?"background-color:"+QString(YELLOW_GREEN)+";color:"+QString(BLACK):"background-color:#"+QString(RED)+";color:white");
 }
 
+/**
+ * @brief Executes the joshan func data slot procedure for Tuner.
+ * @param QString Input parameter specifying QString (QString).
+ */
 void Tuner::joshanFuncDataSlot(QString)
 {
 
 }
 
+/**
+ * @brief Slot handler responding to on push button 5 clicked event.
+ */
 void Tuner::on_pushButton_5_clicked()
 {
     if(isConnect){
@@ -394,6 +432,9 @@ void Tuner::on_pushButton_5_clicked()
     }
 }
 
+/**
+ * @brief Updates and synchronizes the update auto send data stream and visual indicators.
+ */
 void Tuner::updateAutoSend()
 {
     if(timerCount == temp.size())
@@ -414,6 +455,9 @@ void Tuner::updateAutoSend()
 
 
 
+/**
+ * @brief Destructor for Tuner, releasing allocated hardware resources, timers, and buffers.
+ */
 Tuner::~Tuner()
 {
     //    delete vBox1       ;
@@ -470,6 +514,9 @@ Tuner::~Tuner()
 
 }
 
+/**
+ * @brief Slot handler responding to on btn start clicked event.
+ */
 void Tuner::on_btnStart_clicked()
 {
     if(isConnect){
@@ -480,6 +527,9 @@ void Tuner::on_btnStart_clicked()
     }
 }
 
+/**
+ * @brief Slot handler responding to on btn set frq clicked event.
+ */
 void Tuner::on_btnSetFrq_clicked()
 {
 

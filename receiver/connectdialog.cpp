@@ -1,3 +1,12 @@
+/**
+ * @file connectdialog.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "connectdialog.h"
 #include "ui_connectdialog.h"
 
@@ -31,6 +40,10 @@ connectDialog::~connectDialog()
     delete ui;
 }
 
+/**
+ * @brief Executes the initialize procedure for connectDialog.
+ * @return Output value of type bool.
+ */
 bool connectDialog::Initialize()
 {
     /* Do not create an IIO context while the dialog is being initialized:
@@ -60,6 +73,10 @@ bool connectDialog::Initialize()
 
 #pragma region Profile Selection {
 
+/**
+ * @brief Executes the selected tx bw procedure for connectDialog.
+ * @return Output value of type int.
+ */
 int connectDialog::selectedTxBw() const
 {
     if (ui->radTx400->isChecked())
@@ -69,6 +86,10 @@ int connectDialog::selectedTxBw() const
     return 100;
 }
 
+/**
+ * @brief Executes the selected orx bw procedure for connectDialog.
+ * @return Output value of type int.
+ */
 int connectDialog::selectedOrxBw() const
 {
     if (ui->radOrx400->isChecked())

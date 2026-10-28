@@ -1,3 +1,12 @@
+/**
+ * @file joshan.cpp
+ * @brief Subsystem module for joshan in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "joshan.h"
 #include "ui_joshan.h"
 
@@ -12,6 +21,10 @@ Joshan::Joshan(QWidget *parent) :
     connections();
 }
 
+/**
+ * @brief Retrieves the current oshan stop setter value.
+ * @param val Input parameter specifying val (bool).
+ */
 void Joshan::isJoshanStopSetter(bool val)
 {
     isJoshanStop = val;
@@ -24,6 +37,10 @@ void Joshan::isJoshanStopSetter(bool val)
     on_DeviceResponseSlot(f);
 }
 
+/**
+ * @brief Executes the joshan is connected procedure for Joshan.
+ * @param connected Input parameter specifying connected (bool).
+ */
 void Joshan::joshanIsConnected(bool connected)
 {
     if(connected)
@@ -39,11 +56,17 @@ void Joshan::joshanIsConnected(bool connected)
 }
 
 
+/**
+ * @brief Destructor for Joshan, releasing allocated hardware resources, timers, and buffers.
+ */
 Joshan::~Joshan()
 {
     delete ui;
 }
 
+/**
+ * @brief Initializes and configures the init for the Joshan subsystem.
+ */
 void Joshan::init()
 {
     //    /*joshanFuncData*/ = new joshanFuncStruct;
@@ -58,6 +81,9 @@ void Joshan::init()
 
 }
 
+/**
+ * @brief Executes the connections procedure for Joshan.
+ */
 void Joshan::connections()
 {
 
@@ -66,6 +92,10 @@ void Joshan::connections()
 
 }
 
+/**
+ * @brief Slot handler responding to on  device response slot event.
+ * @param response Input parameter specifying response (QByteArray).
+ */
 void Joshan::on_DeviceResponseSlot(QByteArray response)
 {
     if (isJoshanStop)
@@ -126,6 +156,10 @@ void Joshan::on_DeviceResponseSlot(QByteArray response)
     }
 }
 
+/**
+ * @brief Retrieves the current func data joshan slot value.
+ * @param deviceData Input parameter specifying deviceData (QJsonObject).
+ */
 void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");
@@ -155,6 +189,10 @@ void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
     }
 }
 
+/**
+ * @brief Retrieves the current status data joshan slot value.
+ * @param deviceData Input parameter specifying deviceData (QJsonObject).
+ */
 void Joshan::getStatusDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");

@@ -7,7 +7,7 @@
 - **Hardware Under Repair:** ADRV9009 Dual-Channel Wideband RF Transceiver Evaluation & Baseband Carrier Board
 - **Maintenance Level:** Level 1 (Field Maintenance), Level 2 (Bench Testing), Level 3 (BGA Component Repair)
 - **Workmanship Standards:** IPC-7711/7721 (Rework & Repair of Electronic Assemblies), IPC-A-610 Class 3
-- **Document Version:** v2.0.0 — October 2026 | Technical Maintenance Manual for eLynxSDR System Engineers
+- **Document Version:** v2.3.0 — October 2026 | Technical Maintenance Manual for eLynxSDR System Engineers
 
 ---
 
@@ -28,7 +28,13 @@
 
 ---
 
-## 2. Schematic Sheet-by-Sheet Diagnostic & Fault Tracing Reference
+## 2. Altium Designer Job 1 Output: Complete Schematic Prints (Sheets 1 to 6) & Fault Tracing Reference
+
+### Figure 1.0: Altium Job 1 Multi-Sheet Schematic Compilation Overview (Job1.PDF)
+![Altium Job 1 Overview](images/altium_job1_schematic_checkpoints.png)
+*Figure 1.0: Altium Designer OutJob 'Job1.PDF' — Complete Multi-Sheet Schematic Prints (Sheets 1 to 6) Compilation Overview & Subsystem Diagnostic Reference.*
+
+---
 
 ### 2.1 Schematic Sheet 1: 12V Main Power Entry, Fuse F1 & TVS D1 Protection
 ![Schematic Sheet 1](images/schematic_sheet1_power_entry.png)
@@ -78,23 +84,27 @@
 
 ---
 
-## 3. PCB Layout Top & Bottom Layer Fault Tracing Maps
+## 3. Altium Designer Job 2 Output: PCB Assembly & Fabrication Prints (Job2.PDF) & Fault Maps
 
-### Figure 1.7: PCB Top Layer Component & Fault Tracing Map
+### Figure 1.7: Altium Job 2 PCB Assembly Overview (Top & Bottom Layers)
+![Altium Job 2 Overview](images/altium_job2_pcb_assembly_top_bottom.png)
+*Figure 1.7: Altium Designer OutJob 'Job2.PDF' — PCB Assembly & Fabrication Prints (Top & Bottom Layers Compilation Overview).*
+
+### Figure 1.8: PCB Top Layer Component & Fault Tracing Map
 ![PCB Top Layer Map](images/pcb_top_layer_fault_map.png)
-*Figure 1.7: ADRV9009 PCB Top Layer Component & Fault Tracing Map (Locations of Fuse F1, Diode D1, ADRV9009 U1, HMC7044 U2, Baluns T1–T4, and Test Points TP1–TP6).*
+*Figure 1.8: ADRV9009 PCB Top Layer Component & Fault Tracing Map (Locations of Fuse F1, Diode D1, ADRV9009 U1, HMC7044 U2, Baluns T1–T4, and Test Points TP1–TP6).*
 
-### Figure 1.8: PCB Bottom Layer Component & Decoupling Map
+### Figure 1.9: PCB Bottom Layer Component & Decoupling Map
 ![PCB Bottom Layer Map](images/pcb_bottom_layer_fault_map.png)
-*Figure 1.8: ADRV9009 PCB Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and Underside BGA 0402 Decoupling Matrix).*
+*Figure 1.9: ADRV9009 PCB Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and Underside BGA 0402 Decoupling Matrix).*
 
 ---
 
 ## 4. ADRV9009 BGA IC Rework & Reflow Soldering Profile (IPC-7711/7721)
 
-### Figure 1.9: BGA Rework Thermal Profile
+### Figure 1.10: BGA Rework Thermal Profile
 ![BGA Rework Profile](images/adrv9009_bga_rework_thermal_profile.png)
-*Figure 1.9: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).*
+*Figure 1.10: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).*
 
 ---
 
@@ -116,9 +126,9 @@
 
 ## 6. End-to-End Hardware Troubleshooting & Fault Isolation Flowchart
 
-### Figure 1.10: Hardware Troubleshooting Flowchart
+### Figure 1.11: Hardware Troubleshooting Flowchart
 ![Troubleshooting Flowchart](images/adrv9009_hardware_troubleshooting_flowchart.png)
-*Figure 1.10: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.*
+*Figure 1.11: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.*
 
 ---
 
@@ -136,7 +146,11 @@
 
 ---
 
-## ۲. نقشه‌های شیت‌به‌شیت شماتیک آلتیوم و راهنمای تفکیک عیب
+## ۲. خروجی Job 1 نرم‌افزار آلتیوم: نقشه‌های شیت‌به‌شیت شماتیک (شیت‌های ۱ تا ۶)
+
+### شکل ۲.۰: نمای کلی خروجی Job1.PDF آلتیوم — مجموعه شیت‌های ۱ تا ۶ شماتیک
+![Altium Job 1 Overview](images/altium_job1_schematic_checkpoints.png)
+*شکل ۲.۰: نمای کلی خروجی Job1.PDF آلتیوم — مجموعه شیت‌های ۱ تا ۶ شماتیک و نقاط تست تشخیصی.*
 
 ### شکل ۲.۱: شیت ۱ شماتیک — مدار ورودی ۱۲ ولت، فیوز F1 و دیود TVS D1
 ![Schematic Sheet 1](images/schematic_sheet1_power_entry.png)
@@ -164,28 +178,32 @@
 
 ---
 
-## ۳. نقشه‌های جانمایی و تفکیک عیب لایه‌های رو و پشت PCB
+## ۳. خروجی Job 2 نرم‌افزار آلتیوم: نقشه‌های جانمایی و مونتاژ لایه‌های رو و پشت PCB
 
-### شکل ۲.۷: نقشه عیب‌یابی لایه روی برد (PCB Top Layer)
+### شکل ۲.۷: نمای کلی خروجی Job2.PDF آلتیوم — نقشه‌های مونتاژ لایه‌های رو و پشت
+![Altium Job 2 Overview](images/altium_job2_pcb_assembly_top_bottom.png)
+*شکل ۲.۷: نمای کلی خروجی Job2.PDF آلتیوم — نقشه‌های مونتاژ و جانمایی لایه‌های رو و پشت برد.*
+
+### شکل ۲.۸: نقشه عیب‌یابی لایه روی برد (PCB Top Layer)
 ![PCB Top Layer Map](images/pcb_top_layer_fault_map.png)
-*شکل ۲.۷: نقشه عیب‌یابی لایه روی برد (PCB Top Layer) شامل موقعیت فیوز F1، دیود TVS، تراشه‌های U1 و U2 و نقاط تست TP1 تا TP6.*
+*شکل ۲.۸: نقشه عیب‌یابی لایه روی برد (PCB Top Layer) شامل موقعیت فیوز F1، دیود TVS، تراشه‌های U1 و U2 و نقاط تست TP1 تا TP6.*
 
-### شکل ۲.۸: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer)
+### شکل ۲.۹: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer)
 ![PCB Bottom Layer Map](images/pcb_bottom_layer_fault_map.png)
-*شکل ۲.۸: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer) شامل موقعیت آی‌سی ADP5054، رگولاتورهای LT3045 و ماتریس خازن‌های دیکوپلینگ BGA.*
+*شکل ۲.۹: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer) شامل موقعیت آی‌سی ADP5054، رگولاتورهای LT3045 و ماتریس خازن‌های دیکوپلینگ BGA.*
 
 ---
 
 ## ۴. دستورالعمل ریورک و تعویض تراشه BGA فرستنده/گیرنده ADRV9009
 
-### شکل ۲.۹: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک BGA
+### شکل ۲.۱۰: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک BGA
 ![BGA Rework Profile](images/adrv9009_bga_rework_thermal_profile.png)
-*شکل ۲.۹: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.*
+*شکل ۲.۱۰: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.*
 
 ---
 
 ## ۵. فلوچارت جامع عیب‌یابی و تفکیک خطای سخت‌افزاری برد
 
-### شکل ۲.۱۰: فلوچارت گام‌به‌گام عیب‌یابی و تعمیرات سخت‌افزاری
+### شکل ۲.۱۱: فلوچارت گام‌به‌گام عیب‌یابی و تعمیرات سخت‌افزاری
 ![Troubleshooting Flowchart](images/adrv9009_hardware_troubleshooting_flowchart.png)
-*شکل ۲.۱۰: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.*
+*شکل ۲.۱۱: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.*

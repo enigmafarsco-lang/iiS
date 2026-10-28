@@ -1,3 +1,12 @@
+/**
+ * @file controlunitadrv9009.h
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef CONTROLUNITADRV9009_H
 #define CONTROLUNITADRV9009_H
 
@@ -13,17 +22,37 @@
 #include <receiver/plugins/drfmregisterio.h>
 
 namespace Ui {
+/**
+ * @class ControlUnitADRV9009
+ * @brief High-level controller class for ControlUnitADRV9009.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class ControlUnitADRV9009;
 }
 
+/**
+ * @class ControlUnitADRV9009
+ * @brief High-level controller class for ControlUnitADRV9009.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class ControlUnitADRV9009 : public QWidget
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructs a new ControlUnitADRV9009 instance and initializes subsystem components and UI state.
+     * @param parent Input parameter specifying parent (QWidget).
+     */
     explicit ControlUnitADRV9009(QWidget *parent = nullptr);
+    /**
+     * @brief Destructor for ControlUnitADRV9009, releasing allocated hardware resources, timers, and buffers.
+     */
     ~ControlUnitADRV9009();
 
+    /**
+     * @brief Initializes and configures the init for the ControlUnitADRV9009 subsystem.
+     */
     void init();
     //saeid raziani
     QSpinBox * TH1 = new QSpinBox;
@@ -57,9 +86,18 @@ private:
     struct iio_device *readDev = nullptr;
     struct iio_device *writeDev = nullptr;
 
+    /**
+     * @brief Executes the enable write procedure for ControlUnitADRV9009.
+     */
     void EnableWrite();
+    /**
+     * @brief Executes the disable write procedure for ControlUnitADRV9009.
+     */
     void DisableWrite();
 
+    /**
+     * @brief Executes the resolve register devices procedure for ControlUnitADRV9009.
+     */
     void resolveRegisterDevices();
     bool writeRegisterVerified(quint32 offset, quint32 value,
                                const QString &label, QString *details);
@@ -110,6 +148,12 @@ public:
                                                     double intrinsicNs = SYSTEM_INTRINSIC_LATENCY_NS,
                                                     double c = SPEED_OF_LIGHT)
     {
+        /**
+         * @brief Calculates and returns the mathematical calculate delay us formulation.
+         * @param rangeMeters Input parameter specifying rangeMeters (rangeMeters).
+         * @param c Input parameter specifying c (c).
+         * @return Output value of type return.
+         */
         return calculateDelayUs(rangeMeters, c) + (intrinsicNs * 1.0e-3);
     }
 
@@ -191,26 +235,93 @@ public slots:
     void WriteAll();
 
 private slots:
+    /**
+     * @brief Executes the read all procedure for ControlUnitADRV9009.
+     */
     void ReadAll();
 
+    /**
+     * @brief Executes the write procedure for ControlUnitADRV9009.
+     * @param address Input parameter specifying address (uint32_t).
+     * @param val Input parameter specifying val (uint32_t).
+     */
     void Write(uint32_t address,uint32_t val);
 
 signals:
+    /**
+     * @brief Transmits send transmit signal command/packet over the communication bus.
+     * @param int Input parameter specifying int (int).
+     */
     void sendTransmitSignal(int);
+    /**
+     * @brief Sets the noise signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setNoiseSignal(int);
+    /**
+     * @brief Transmits send file to dac signal command/packet over the communication bus.
+     */
     void sendFileToDacSignal();
+    /**
+     * @brief Sets the auto amp signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setAutoAmpSignal(int);
+    /**
+     * @brief Sets the channel signal parameter and updates internal state.
+     * @param double Input parameter specifying double (double).
+     */
     void setChannelSignal(double);
+    /**
+     * @brief Sets the channel from table parameter and updates internal state.
+     * @param double Input parameter specifying double (double).
+     */
     void setChannelFromTable(double);
+    /**
+     * @brief Sets the inchannel signal parameter and updates internal state.
+     * @param double Input parameter specifying double (double).
+     */
     void setInchannelSignal(double);
 
+    /**
+     * @brief Sets the pdiv signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setPdivSignal     (int);
+    /**
+     * @brief Sets the te ta_az signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setteTa_azSignal  (int);
+    /**
+     * @brief Sets the num_ side signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setNum_SideSignal (int);
+    /**
+     * @brief Sets the num_ back signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setNum_BackSignal (int);
+    /**
+     * @brief Sets the p_to_ b signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setP_to_BSignal   (int);
+    /**
+     * @brief Sets the n p s signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setNPSSignal      (int);
+    /**
+     * @brief Sets the p_to_ s signal parameter and updates internal state.
+     * @param int Input parameter specifying int (int).
+     */
     void setP_to_SSignal   (int);
+    /**
+     * @brief Executes the en pattern signal procedure for ControlUnitADRV9009.
+     * @param int Input parameter specifying int (int).
+     */
     void enPatternSignal   (int);
 };
 

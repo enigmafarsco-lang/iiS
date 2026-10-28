@@ -1,5 +1,18 @@
+/**
+ * @file tcpclient.cpp
+ * @brief Subsystem module for cooling in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "tcpclient.h"
 #include <QDebug>
+/**
+ * @brief Constructs a new TCPClient instance and initializes subsystem components and UI state.
+ * @param parent Input parameter specifying parent (QObject).
+ */
 TCPClient::TCPClient(QObject *parent) : QObject(parent)
 {
 //    connect(&socket_tcp,&QTcpSocket::connected,this,&TCPClient::connected);

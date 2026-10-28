@@ -1,3 +1,12 @@
+/**
+ * @file packetmanager.cpp
+ * @brief Subsystem module for cooling in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "packetmanager.h"
 //#include "tcpclient.h"
 
@@ -5,11 +14,18 @@
 uint8_t packetManager::LT[50]={};
 packetManager::CoolingBoard_t packetManager::CoolingBoard={};
 
+/**
+ * @brief Constructs a new packetManager instance and initializes subsystem components and UI state.
+ */
 packetManager::packetManager()
 {
 
 }
 
+/**
+ * @brief Executes the packet received procedure for packetManager.
+ * @param dataReceiced Input parameter specifying dataReceiced (QByteArray).
+ */
 void packetManager::packetReceived(QByteArray dataReceiced)
 {
     dataReceiced = dataReceiced.toHex();
@@ -44,6 +60,11 @@ void packetManager::checkInputPacket(uint8_t *inPack)
     }
 }
 
+/**
+ * @brief Executes the validation input packet procedure for packetManager.
+ * @param inPack Input parameter specifying inPack (uint8_t).
+ * @return Output value of type uint8_t.
+ */
 uint8_t packetManager::validationInputPacket(uint8_t *inPack)
 {
     uint8_t result=0;
@@ -67,6 +88,10 @@ uint8_t packetManager::validationInputPacket(uint8_t *inPack)
 }
 
 
+/**
+ * @brief Executes the f c  read mult reg  fun procedure for packetManager.
+ * @param data Input parameter specifying data (uint8_t).
+ */
 void packetManager::FC_ReadMultReg_Fun(uint8_t *data)
 {
     uint8_t DatapackLen=data[0];
@@ -91,6 +116,9 @@ void packetManager::FC_ReadMultReg_Fun(uint8_t *data)
     fillModel();
 }
 
+/**
+ * @brief Executes the fill model procedure for packetManager.
+ */
 void packetManager::fillModel()
 {
     int index=3;

@@ -29,6 +29,9 @@ WidgetWithBackground::WidgetWithBackground(QWidget * parent) : QWidget(parent)
   m_modified = false;
 }
 
+/**
+ * @brief Destructor for WidgetWithBackground, releasing allocated hardware resources, timers, and buffers.
+ */
 WidgetWithBackground::~WidgetWithBackground()
 {
    if (m_pixmap)
@@ -38,13 +41,16 @@ WidgetWithBackground::~WidgetWithBackground()
      }
 }
 
+/**
+ * @brief Executes the draw background procedure for WidgetWithBackground.
+ */
 void WidgetWithBackground::drawBackground()
 {
   if (m_pixmap->size() != size() || m_modified )
     {
 	delete m_pixmap;
 	m_pixmap = new QPixmap(size());
-	m_modified=true; // by wiadomo bylo ¿e jest przemalowywane tlo
+	m_modified=true; // by wiadomo bylo e jest przemalowywane tlo
 	repaintBackground();
 	m_modified=false;
     }
@@ -52,17 +58,27 @@ void WidgetWithBackground::drawBackground()
     painter.drawPixmap(0,0,*m_pixmap);
 }
 
+/**
+ * @brief Updates and synchronizes the update with background data stream and visual indicators.
+ */
 void WidgetWithBackground::updateWithBackground()
 {
   m_modified=true;
   update();
 }
 
+/**
+ * @brief Executes the do repaint background procedure for WidgetWithBackground.
+ * @return Output value of type bool.
+ */
 bool WidgetWithBackground::doRepaintBackground()
 {
   return m_modified;
 }
 
+/**
+ * @brief Executes the repaint background procedure for WidgetWithBackground.
+ */
 void WidgetWithBackground::repaintBackground()
 {
   m_pixmap->fill(QColor(0,0,0,0));

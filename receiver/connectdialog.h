@@ -1,3 +1,12 @@
+/**
+ * @file connectdialog.h
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef CONNECTDIALOG_H
 #define CONNECTDIALOG_H
 
@@ -10,17 +19,38 @@
 #include <receiver/settings.h>
 
 namespace Ui {
+/**
+ * @class connectDialog
+ * @brief High-level controller class for connectDialog.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class connectDialog;
 }
 
+/**
+ * @class connectDialog
+ * @brief High-level controller class for connectDialog.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class connectDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructs a new connectDialog instance and initializes subsystem components and UI state.
+     * @param parent Input parameter specifying parent (QDialog).
+     */
     explicit connectDialog(QDialog *parent = nullptr);
+    /**
+     * @brief Destructor for connectDialog, releasing allocated hardware resources, timers, and buffers.
+     */
     ~connectDialog();
 
+    /**
+     * @brief Executes the initialize procedure for connectDialog.
+     * @return Output value of type bool.
+     */
     bool Initialize();
 
     // TX bandwidth (100/200/400) and ORx bandwidth selected in the
@@ -31,9 +61,22 @@ public:
 
 private slots:
 
+    /**
+     * @brief Slot handler responding to btn cancel clicked event.
+     */
     void btn_cancel_clicked();
+    /**
+     * @brief Slot handler responding to btn refresh clicked event.
+     */
     void btn_refresh_clicked();
+    /**
+     * @brief Slot handler responding to btn connect clicked event.
+     */
     void btn_connect_clicked();
+    /**
+     * @brief Executes the tx bw toggled procedure for connectDialog.
+     * @param checked Input parameter specifying checked (bool).
+     */
     void txBwToggled(bool checked);
 
 private:

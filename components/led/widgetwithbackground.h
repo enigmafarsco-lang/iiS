@@ -25,8 +25,18 @@
 
 #include <QWidget>
 
+/**
+ * @class QPixmap
+ * @brief High-level controller class for QPixmap.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class QPixmap;
 
+/**
+ * @class WidgetWithBackground
+ * @brief High-level controller class for WidgetWithBackground.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class WidgetWithBackground : public QWidget
 {
 	Q_OBJECT
@@ -34,45 +44,45 @@ class WidgetWithBackground : public QWidget
      /** Konstruktor */
      WidgetWithBackground(QWidget * parent = 0);
 
-     /** Destruktor - usuwa bitmapkê.  */
+     /** Destruktor - usuwa bitmapk.  */
      ~WidgetWithBackground ();
 
      /**
       * Operacja odmalowywania kontrolki  -
-      * wkleja bitmapê z t³em na kontrolkê -
-      * generuj±æ j± wcze¶niej je¿eli zajdzie taka potrzeba.
+      * wkleja bitmap z tem na kontrolk -
+      * generuj j wczeniej jeeli zajdzie taka potrzeba.
       */
      void  drawBackground ();
 
-     /** Odmalowywuje kontrolkê bezwarunkowo odmalowywuj±c t³o. */
+     /** Odmalowywuje kontrolk bezwarunkowo odmalowywujc to. */
      void  updateWithBackground ();
     
      /** 
-     * Zawraca informacje czy kontrolka zosta³a zmodyfikowana
-     * Ta informacja jest ustawiana gdy bitmapka t³a siê zmienia 
-     * to znaczy zmienia siê rozmiar komponentu lub istnieje 
-     * potrzeba przemalowania t³a. 
+     * Zawraca informacje czy kontrolka zostaa zmodyfikowana
+     * Ta informacja jest ustawiana gdy bitmapka ta si zmienia 
+     * to znaczy zmienia si rozmiar komponentu lub istnieje 
+     * potrzeba przemalowania ta. 
      */ 
      bool doRepaintBackground(); 
      
   protected:
-    /** Wywo³uje paintBackground - odmalowywuj±c t³o na nowo */
+    /** Wywouje paintBackground - odmalowywujc to na nowo */
     void repaintBackground();
 
     /**
-     * Odmalowywuje t³o kontrolki
-     * @param painter urz±dzenie na ktróym mamy malowaæ.
-     * @param background to t³o kontrolki
+     * Odmalowywuje to kontrolki
+     * @param painter urzdzenie na ktrym mamy malowa.
+     * @param background to to kontrolki
      */
     virtual void  paintBackground (QPainter & painer) = 0;
     
     
 
   protected:
-     /** Bufor na t³o. */
+     /** Bufor na to. */
      QPixmap * m_pixmap;
      /**
-     * Ustawia t± zmienn± po zmianie w³a¶ciwo¶ci
+     * Ustawia t zmienn po zmianie waciwoci
      */
      bool m_modified;
 };

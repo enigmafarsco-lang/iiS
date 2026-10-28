@@ -1,3 +1,12 @@
+/**
+ * @file detector.h
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef DETECTOR_H
 #define DETECTOR_H
 
@@ -15,16 +24,40 @@
 #include "QDebug"
 
 
+/**
+ * @class Detector
+ * @brief High-level controller class for Detector.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class Detector:public QThread
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructs a new Detector instance and initializes subsystem components and UI state.
+     */
     Detector();
+    /**
+     * @brief Executes the add to queue procedure for Detector.
+     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
+     */
     void AddToQueue(QVector<double>);
+    /**
+     * @brief Executes the read block data x procedure for Detector.
+     * @param yItems Input parameter specifying yItems (QVector<double>).
+     */
     void ReadBlockDataX(QVector<double> yItems);
+    /**
+     * @brief Sets the tuner frequency parameter and updates internal state.
+     * @param newTunerFrequency Input parameter specifying newTunerFrequency (double).
+     */
     void setTunerFrequency(double newTunerFrequency);
 
     int cnt{};
+    /**
+     * @brief Sets the stop parameter and updates internal state.
+     * @param newStop Input parameter specifying newStop (bool).
+     */
     void setStop(bool newStop);
 
 private:
@@ -70,12 +103,29 @@ private:
     double pulseIndicator=-24576;
     double cwIndicator=-24319;
 
+    /**
+     * @brief Executes the check pulse procedure for Detector.
+     * @param Pulse* Input parameter specifying Pulse* (Pulse*).
+     * @param bool Input parameter specifying bool (bool).
+     * @return Output value of type bool.
+     */
     bool CheckPulse(Pulse*,bool);
 
+    /**
+     * @brief Executes the clear unused freqs procedure for Detector.
+     */
     void ClearUnusedFreqs();
 
 signals:
+    /**
+     * @brief Executes the new list procedure for Detector.
+     * @param >* Input parameter specifying >* (QList<Pulse).
+     */
     void newList(QList<Pulse *>*);
+    /**
+     * @brief Executes the show list procedure for Detector.
+     * @param >* Input parameter specifying >* (QList<Pulse).
+     */
     void showList(QList<Pulse *>*);
 
     // QThread interface

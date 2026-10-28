@@ -1,3 +1,12 @@
+/**
+ * @file servo.cpp
+ * @brief Subsystem module for servo in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "servo.h"
 #include "ui_servo.h"
 
@@ -49,6 +58,9 @@ int Servo::showMessage(QString meg, int status){
     return -1;
 }
 
+/**
+ * @brief Slot handler responding to on btn park clicked event.
+ */
 void Servo::on_btnPark_clicked()
 {
     if (ui->chbGun->isChecked())
@@ -69,6 +81,12 @@ void Servo::on_btnPark_clicked()
 
 
 
+/**
+ * @brief Sets the til pan speed parameter and updates internal state.
+ * @param tiltSpeed Input parameter specifying tiltSpeed (int).
+ * @param panSpeed Input parameter specifying panSpeed (int).
+ * @param status Input parameter specifying status (QString).
+ */
 void Servo::setTilPanSpeed(int tiltSpeed , int panSpeed, QString status = "")
 {
     if (ui->chbGun->isChecked())
@@ -99,6 +117,13 @@ void Servo::setTilPanSpeed(int tiltSpeed , int panSpeed, QString status = "")
 
 }
 
+/**
+ * @brief Executes the creating speed cmd procedure for Servo.
+ * @param temp1 Input parameter specifying temp1 (int).
+ * @param temp2 Input parameter specifying temp2 (int).
+ * @param status Input parameter specifying status (QString).
+ * @return Output value of type QByteArray.
+ */
 QByteArray Servo::creatingSpeedCmd(int temp1, int temp2, QString status)
 {
     QByteArray byteList    = nullptr;
@@ -140,6 +165,10 @@ QByteArray Servo::creatingSpeedCmd(int temp1, int temp2, QString status)
     return  byteList;
 }
 
+/**
+ * @brief Executes the creating stop cmd procedure for Servo.
+ * @return Output value of type QByteArray.
+ */
 QByteArray Servo::creatingStopCmd()
 {
     QByteArray byteList    = nullptr;
@@ -208,6 +237,11 @@ QByteArray Servo::creatingCmd(double degree, QString state)
 }
 
 
+/**
+ * @brief Executes the handle wild character procedure for Servo.
+ * @param byteArr Input parameter specifying byteArr (const QByteArray).
+ * @return Output value of type QByteArray.
+ */
 QByteArray Servo::handleWildCharacter(const QByteArray &byteArr)
 {
     QByteArray tempArr;
@@ -231,6 +265,9 @@ QByteArray Servo::handleWildCharacter(const QByteArray &byteArr)
     return  tempArr;
 }
 
+/**
+ * @brief Slot handler responding to on btn stop clicked event.
+ */
 void Servo::on_btnStop_clicked()
 {
     rotatorIsStop = true;
@@ -264,6 +301,9 @@ void Servo::on_btnJogUp_pressed()
     setTilPanSpeed(0, +5, btnJog);
 }
 
+/**
+ * @brief Slot handler responding to on btn jog up released event.
+ */
 void Servo::on_btnJogUp_released()
 {
     on_btnStop_clicked();
@@ -276,6 +316,9 @@ void Servo::on_btnJogDown_pressed()
     setTilPanSpeed(0, -3, btnJog);
 }
 
+/**
+ * @brief Slot handler responding to on btn jog down released event.
+ */
 void Servo::on_btnJogDown_released()
 {
     on_btnStop_clicked();
@@ -288,6 +331,9 @@ void Servo::on_btnJogLeft_pressed()
     setTilPanSpeed(-3, 0, btnJog);
 }
 
+/**
+ * @brief Slot handler responding to on btn jog left released event.
+ */
 void Servo::on_btnJogLeft_released()
 {
     on_btnStop_clicked();
@@ -300,11 +346,17 @@ void Servo::on_btnJogRight_pressed()
     setTilPanSpeed(3, 0, btnJog);
 }
 
+/**
+ * @brief Slot handler responding to on btn jog right released event.
+ */
 void Servo::on_btnJogRight_released()
 {
     on_btnStop_clicked();
 }
 
+/**
+ * @brief Executes the checking pan in park procedure for Servo.
+ */
 void Servo::checkingPanInPark()
 {
     if ( (panPosDeg > 87) && (panPosDeg < 93) )
@@ -386,6 +438,11 @@ QByteArray Servo::getByteSetTilt  (const double &TiltPos){
     return creatingCmd(TiltPos, "tilt");
 }
 
+/**
+ * @brief Retrieves the current check sum value.
+ * @param byteArr Input parameter specifying byteArr (const QByteArray).
+ * @return Output value of type quint8.
+ */
 quint8 Servo::getCheckSum(const QByteArray &byteArr)
 {
     quint8 checksum = 0;
@@ -419,6 +476,12 @@ void Servo::on_btnSetPan_clicked()
     setPanPos(setPosVal, northOffset);
 }
 
+/**
+ * @brief Sets the pan pos parameter and updates internal state.
+ * @param panPosDeg Input parameter specifying panPosDeg (double).
+ * @param northOffset Input parameter specifying northOffset (double).
+ * @return Output value of type bool.
+ */
 bool Servo::setPanPos(double &panPosDeg ,double &northOffset)
 {
     try {
@@ -450,6 +513,11 @@ bool Servo::setPanPos(double &panPosDeg ,double &northOffset)
     return  true;
 }
 
+/**
+ * @brief Retrieves the current cmd set pan pos value.
+ * @param panPos Input parameter specifying panPos (double).
+ * @return Output value of type QByteArray.
+ */
 QByteArray Servo::getCmdSetPanPos(double panPos)
 {
     if (panPos > 180)  panPos -=360;
@@ -467,11 +535,17 @@ QByteArray Servo::getCmdSetPanPos(double panPos)
 }
 
 
+/**
+ * @brief Slot handler responding to on btn set pan speed clicked event.
+ */
 void Servo::on_btnSetPanSpeed_clicked()
 {
     setTilPanSpeed(ui->sbTiltSpeed->value(), ui->sbPanSpeed->value());
 }
 
+/**
+ * @brief Slot handler responding to on btn set tilt speed clicked event.
+ */
 void Servo::on_btnSetTiltSpeed_clicked()
 {
     setTilPanSpeed(ui->sbTiltSpeed->value(), ui->sbPanSpeed->value());
@@ -490,6 +564,10 @@ void Servo::on_chbCheckoffset_stateChanged(int arg1)
 }
 
 
+/**
+ * @brief Slot handler responding to on chb auto set clicked event.
+ * @param checked Input parameter specifying checked (bool).
+ */
 void Servo::on_chbAutoSet_clicked(bool checked)
 {
     if(checked)
@@ -519,6 +597,9 @@ void Servo::on_chbAutoSet_clicked(bool checked)
 }
 
 
+/**
+ * @brief Updates and synchronizes the update auto set data stream and visual indicators.
+ */
 void Servo::updateAutoSet()
 {
     double targetPan  = 90;
@@ -537,16 +618,34 @@ void Servo::updateAutoSet()
 }
 
 
+/**
+ * @brief Executes the degree to radian procedure for Servo.
+ * @param degree Input parameter specifying degree (double).
+ * @return Output value of type double.
+ */
 double Servo::degreeToRadian(double degree)
 {
     return  (degree * PI / 180.0);
 }
 
+/**
+ * @brief Executes the radian to degree procedure for Servo.
+ * @param degree Input parameter specifying degree (double).
+ * @return Output value of type double.
+ */
 double Servo::radianToDegree(double degree)
 {
     return  (degree * 180.0 / PI);
 }
 
+/**
+ * @brief Executes the coordinator to angle procedure for Servo.
+ * @param jammerLatitude Input parameter specifying jammerLatitude (double).
+ * @param jammerLongtitude Input parameter specifying jammerLongtitude (double).
+ * @param targetLatitude Input parameter specifying targetLatitude (double).
+ * @param targetLongitude Input parameter specifying targetLongitude (double).
+ * @return Output value of type double.
+ */
 double Servo::coordinatorToAngle(double jammerLatitude, double jammerLongtitude, double targetLatitude, double targetLongitude )
 {
     double longitudeDifferenceRadios = degreeToRadian(targetLongitude - jammerLongtitude);
@@ -561,12 +660,18 @@ double Servo::coordinatorToAngle(double jammerLatitude, double jammerLongtitude,
 
 
 
+/**
+ * @brief Destructor for Servo, releasing allocated hardware resources, timers, and buffers.
+ */
 Servo::~Servo()
 {
     delete ui;
 }
 
 
+/**
+ * @brief Slot handler responding to on btn auto set clicked event.
+ */
 void Servo::on_btnAutoSet_clicked()
 {
     emit(
@@ -608,11 +713,21 @@ void Servo::on_btnAutoSet_clicked()
     }
 }
 
+/**
+ * @brief Executes the compare double procedure for Servo.
+ * @param val1 Input parameter specifying val1 (double).
+ * @param val2 Input parameter specifying val2 (double).
+ * @return Output value of type bool.
+ */
 bool Servo::compareDouble(double val1, double val2)
 {
     return qAbs(val1 - val2) <= 0.01;
 }
 
+/**
+ * @brief Slot handler responding to on chb checkoffset clicked event.
+ * @param checked Input parameter specifying checked (bool).
+ */
 void Servo::on_chbCheckoffset_clicked(bool checked)
 {
     if (checked)
@@ -684,6 +799,11 @@ void Servo::on_DeviceResponseSlot(QByteArray response){
     UserType::gis_elevation = el_val;
 }
 
+/**
+ * @brief Transmits send pan tilt to commander command/packet over the communication bus.
+ * @param az_val Input parameter specifying az_val (double).
+ * @param el_val Input parameter specifying el_val (double).
+ */
 void Servo::sendPanTiltToCommander(double az_val, double el_val)
 {
 
@@ -713,6 +833,9 @@ void Servo::receiveCommandFromObjectSlot(QString response)
     }
 }
 
+/**
+ * @brief Executes the joshan func data slot procedure for Servo.
+ */
 void Servo::joshanFuncDataSlot()
 {
     QJsonObject servoData;
@@ -726,6 +849,9 @@ void Servo::joshanFuncDataSlot()
     emit sendFuncDataToJoshanSignal(servoData);
 }
 
+/**
+ * @brief Executes the joshan status data slot procedure for Servo.
+ */
 void Servo::joshanStatusDataSlot()
 {
     QJsonObject servoData;
@@ -733,11 +859,19 @@ void Servo::joshanStatusDataSlot()
     emit sendStatusDataToJoshanSignal(servoData);
 }
 
+/**
+ * @brief Retrieves the current evice connected slot value.
+ * @param val Input parameter specifying val (bool).
+ */
 void Servo::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;
 }
 
+/**
+ * @brief Executes the joshan control data slot procedure for Servo.
+ * @param val Input parameter specifying val (QJsonObject).
+ */
 void Servo::joshanControlDataSlot(QJsonObject val)
 {
     QJsonObject value = val["parameters"].toObject();
@@ -816,6 +950,9 @@ void Servo::joshanControlDataSlot(QJsonObject val)
 }
 
 
+/**
+ * @brief Executes the pan tilt stop earlier procedure for Servo.
+ */
 void Servo::panTiltStopEarlier()
 {
 

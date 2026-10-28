@@ -1,3 +1,12 @@
+/**
+ * @file drfmregisterio.h
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef DRFMREGISTERIO_H
 #define DRFMREGISTERIO_H
 
@@ -85,6 +94,10 @@ private:
 
     struct iio_device *ledCountDevice();
     struct iio_device *legacyBridgeDevice();
+    /**
+     * @brief Sets the legacy bridge enabled parameter and updates internal state.
+     * @param enable Input parameter specifying enable (bool).
+     */
     void setLegacyBridgeEnabled(bool enable);
 
     // Finds the channel raw attribute that represents one of the register
@@ -96,12 +109,28 @@ private:
                          quint32 value, bool isSigned, QString *how,
                          ChannelRawMatch *usedMatch = nullptr);
 
+    /**
+     * @brief Executes the debug attr names procedure for DrfmRegisterIO.
+     * @param dev Input parameter specifying dev (struct iio_device).
+     * @return Output value of type QStringList.
+     */
     QStringList debugAttrNames(struct iio_device *dev) const;
     QString matchAttrName(const QStringList &available,
                           const QStringList &wanted) const;
     bool writeDebugAttr(struct iio_device *dev, const QString &name,
                         quint32 value, bool isSigned, QString *how);
+    /**
+     * @brief Executes the value text procedure for DrfmRegisterIO.
+     * @param value Input parameter specifying value (quint32).
+     * @param isSigned Input parameter specifying isSigned (bool).
+     * @return Output value of type static QString.
+     */
     static QString valueText(quint32 value, bool isSigned);
+    /**
+     * @brief Executes the channel name candidates procedure for DrfmRegisterIO.
+     * @param ch Input parameter specifying ch (struct iio_channel).
+     * @return Output value of type static QStringList.
+     */
     static QStringList channelNameCandidates(struct iio_channel *ch);
 
     struct iio_device *m_ledDev;

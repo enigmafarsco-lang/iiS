@@ -1,7 +1,19 @@
+/**
+ * @file iio_utils.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "iio_utils.h"
 #include <QAbstractButton>
 #include <QWidget>
 
+/**
+ * @brief Constructs a new iio_utils instance and initializes subsystem components and UI state.
+ */
 iio_utils::iio_utils()
 {
 
@@ -67,6 +79,12 @@ static gint iio_chn_cmp_by_name(gconstpointer ptr_a, gconstpointer ptr_b)
     return str_natural_cmp(name_a, name_b);
 }
 
+/**
+ * @brief Executes the iio dev cmp by name procedure for iio_utils.
+ * @param ptr_a Input parameter specifying ptr_a (gconstpointer).
+ * @param ptr_b Input parameter specifying ptr_b (gconstpointer).
+ * @return Output value of type gint.
+ */
 gint iio_utils::iio_dev_cmp_by_name(gconstpointer ptr_a, gconstpointer ptr_b)
 {
     const struct iio_device *dev_a = *(struct iio_device **)ptr_a;

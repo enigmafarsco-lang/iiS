@@ -26,7 +26,7 @@
 #include "widgetwithbackground.h"
 
    /**
-   * Klasa reprezentuj±ca diodê w dowolnym kolorze jako dwustabilny element wskazuj±cy 
+   * Klasa reprezentujca diod w dowolnym kolorze jako dwustabilny element wskazujcy 
    */
    class Led : public WidgetWithBackground
    {
@@ -37,34 +37,57 @@
      
      public:  
      
+     /**
+      * @brief Constructs a new Led instance and initializes subsystem components and UI state.
+      * @param parent Input parameter specifying parent (QWidget).
+      */
      Led(QWidget *parent = 0);
      virtual ~Led() {};
      
-     /** Zdarzenie obs³uguj±ce malowanie kontrolki */ 
+     /** Zdarzenie obsugujce malowanie kontrolki */ 
      void paintEvent(QPaintEvent * event);
 	 void mousePressEvent(QMouseEvent *ev);
      bool isChecked () const ; 
      
      
+     /**
+      * @brief Executes the color procedure for Led.
+      * @return Output value of type QColor.
+      */
      QColor color() const; 
+     /**
+      * @brief Sets the color parameter and updates internal state.
+      * @param QColor Input parameter specifying QColor (QColor).
+      */
      void setColor(QColor); 
      
      public slots: 
      
+     /**
+      * @brief Sets the checked parameter and updates internal state.
+      * @param bool Input parameter specifying bool (bool).
+      */
      void setChecked(bool); 
      
      signals: 
      
+     /**
+      * @brief Executes the check changed procedure for Led.
+      * @param val Input parameter specifying val (bool).
+      */
      void checkChanged(bool val); 
+	 /**
+	  * @brief Slot handler responding to clicked event.
+	  */
 	 void clicked();
      protected:
      
-     /** Inicjuje uk³ad wspó³rzêdnych paintera */
+     /** Inicjuje ukad wsprzdnych paintera */
      void initCoordinateSystem(QPainter & painter);
      
      /**
-     * Maluje t³o kontrolki w tym przypadku pierwszy plan czyli odblask ¶wiat³a kontrolki
-     * @param painter Przestrzeñ kontrolki 
+     * Maluje to kontrolki w tym przypadku pierwszy plan czyli odblask wiata kontrolki
+     * @param painter Przestrze kontrolki 
      */
      void paintBackground(QPainter & painter);
     

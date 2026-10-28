@@ -1,3 +1,12 @@
+/**
+ * @file rff.cpp
+ * @brief Subsystem module for rff in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "rff.h"
 #include "ui_rff.h"
 
@@ -15,12 +24,18 @@ RFF::RFF(QWidget *parent) :
     ui->groupBox->setVisible(false);
 }
 
+/**
+ * @brief Destructor for RFF, releasing allocated hardware resources, timers, and buffers.
+ */
 RFF::~RFF()
 {
     delete ui;
 }
 
 
+/**
+ * @brief Slot handler responding to on  btn lna on clicked event.
+ */
 void RFF::on_BtnLnaOn_clicked()
 {
     QString m_commandString = "<LnaOn:1>";
@@ -29,6 +44,9 @@ void RFF::on_BtnLnaOn_clicked()
     QThread::currentThread()->msleep(50);
 }
 
+/**
+ * @brief Slot handler responding to on  btn lna off clicked event.
+ */
 void RFF::on_BtnLnaOff_clicked()
 {
     QString m_commandString = "<LnaOn:0>";
@@ -39,16 +57,25 @@ void RFF::on_BtnLnaOff_clicked()
 
 
 
+/**
+ * @brief Slot handler responding to on  rdb dbm clicked event.
+ */
 void RFF::on_RdbDbm_clicked()
 {
     m_powerUnitDbm = true;
 }
 
+/**
+ * @brief Transmits send start slot command/packet over the communication bus.
+ */
 void RFF::sendStartSlot()
 {
     emit sendStartSignal("<BIT:?>");
 }
 
+/**
+ * @brief Executes the joshan func data slot procedure for RFF.
+ */
 void RFF::joshanFuncDataSlot()
 {
     QJsonObject rffData;
@@ -57,6 +84,9 @@ void RFF::joshanFuncDataSlot()
     emit sendFuncDataToJoshanSignal(rffData);
 }
 
+/**
+ * @brief Executes the joshan status data slot procedure for RFF.
+ */
 void RFF::joshanStatusDataSlot()
 {
     QJsonObject rffData;
@@ -68,11 +98,19 @@ void RFF::joshanStatusDataSlot()
     emit sendStatusDataToJoshanSignal(rffData);
 }
 
+/**
+ * @brief Retrieves the current evice connected slot value.
+ * @param val Input parameter specifying val (bool).
+ */
 void RFF::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;
 }
 
+/**
+ * @brief Executes the joshan control data slot procedure for RFF.
+ * @param val Input parameter specifying val (QJsonObject).
+ */
 void RFF::joshanControlDataSlot(QJsonObject val)
 {
     QJsonObject value = val["parameters"].toObject();
@@ -103,6 +141,10 @@ void RFF::on_RdbWatt_clicked()
 
 
 
+/**
+ * @brief Slot handler responding to on  device response slot event.
+ * @param response Input parameter specifying response (QByteArray).
+ */
 void RFF::on_DeviceResponseSlot(QByteArray response)
 {
     QString packet;
@@ -130,6 +172,10 @@ void RFF::on_DeviceResponseSlot(QByteArray response)
     }
 }
 
+/**
+ * @brief Executes the handle info procedure for RFF.
+ * @param response Input parameter specifying response (QString).
+ */
 void RFF::handle_info(QString response)
 {
     if(!response.isEmpty() && !response.isNull() && response.at(0) == "<" )
@@ -249,6 +295,10 @@ void RFF::handle_info(QString response)
     }
 }
 
+/**
+ * @brief Executes the on pow tx procedure for RFF.
+ * @param val Input parameter specifying val (QString).
+ */
 void RFF::onPowTx(QString val)
 {
     if(ui->RdbWatt->isChecked()) //watt
@@ -262,6 +312,11 @@ void RFF::onPowTx(QString val)
     }
 }
 
+/**
+ * @brief Executes the dbm to watt procedure for RFF.
+ * @param val Input parameter specifying val (QString).
+ * @return Output value of type QString.
+ */
 QString RFF::dbmToWatt(QString val)
 {
     double temp = val.toDouble();
@@ -271,6 +326,11 @@ QString RFF::dbmToWatt(QString val)
     return QString::number(temp, 'f', 2);
 }
 
+/**
+ * @brief Executes the watt to dbm procedure for RFF.
+ * @param val Input parameter specifying val (QString).
+ * @return Output value of type QString.
+ */
 QString RFF::wattToDbm(QString val)
 {
     if(!(val == "0"))

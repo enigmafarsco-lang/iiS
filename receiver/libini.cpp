@@ -1,3 +1,12 @@
+/**
+ * @file libini.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "ini.h"
 
 #include <errno.h>
@@ -5,11 +14,19 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/**
+ * @brief Constructs a new ini instance and initializes subsystem components and UI state.
+ */
 ini::ini()
 {
 
 }
 
+/**
+ * @brief Executes the skip line procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @return Output value of type bool.
+ */
 bool ini::skip_line(INI *ini)
 {
     const char *curr = ini->curr;
@@ -25,6 +42,11 @@ bool ini::skip_line(INI *ini)
     }
 }
 
+/**
+ * @brief Executes the skip comments procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @return Output value of type bool.
+ */
 bool ini::skip_comments(INI *ini)
 {
     const char *curr = ini->curr;
@@ -113,6 +135,10 @@ INI *ini::ini_open_mem(const char *buf, size_t len)
     return _ini_open_mem(buf, len, false);
 }
 
+/**
+ * @brief Executes the ini close procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ */
 void ini::ini_close(INI *ini)
 {
     if (ini->free_buf_on_exit)
@@ -120,6 +146,13 @@ void ini::ini_close(INI *ini)
     free(ini);
 }
 
+/**
+ * @brief Executes the ini next section procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @param name Input parameter specifying name (const char).
+ * @param name_len Input parameter specifying name_len (size_t).
+ * @return Output value of type int.
+ */
 int ini::ini_next_section(INI *ini, const char **name, size_t *name_len)
 {
     const char *_name;
@@ -157,6 +190,15 @@ int ini::ini_next_section(INI *ini, const char **name, size_t *name_len)
     return 1;
 }
 
+/**
+ * @brief Executes the ini read pair procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @param key Input parameter specifying key (const char).
+ * @param key_len Input parameter specifying key_len (size_t).
+ * @param value Input parameter specifying value (const char).
+ * @param value_len Input parameter specifying value_len (size_t).
+ * @return Output value of type int.
+ */
 int ini::ini_read_pair(INI *ini, const char **key, size_t *key_len, const char **value, size_t *value_len)
 {
     size_t _key_len = 0;
@@ -211,6 +253,11 @@ int ini::ini_read_pair(INI *ini, const char **key, size_t *key_len, const char *
     return 1;
 }
 
+/**
+ * @brief Executes the ini set read pointer procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @param pointer Input parameter specifying pointer (const char).
+ */
 void ini::ini_set_read_pointer(INI *ini, const char *pointer)
 {
     if ((uintptr_t) pointer < (uintptr_t) ini->buf)
@@ -221,6 +268,12 @@ void ini::ini_set_read_pointer(INI *ini, const char *pointer)
         ini->curr = pointer;
 }
 
+/**
+ * @brief Executes the ini get line number procedure for ini.
+ * @param ini Input parameter specifying ini (INI).
+ * @param pointer Input parameter specifying pointer (const char).
+ * @return Output value of type int.
+ */
 int ini::ini_get_line_number(INI *ini,const char *pointer)
 {
     int line = 1;

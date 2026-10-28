@@ -1,3 +1,12 @@
+/**
+ * @file globals.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "globals.h"
 
 #include <QProcess>
@@ -211,6 +220,11 @@ QString globals::boardSerialNumber()
     return sn;
 }
 
+/**
+ * @brief Executes the serial is sn001 procedure for globals.
+ * @param sn Input parameter specifying sn (const QString).
+ * @return Output value of type bool.
+ */
 bool globals::serialIsSn001(const QString &sn)
 {
     const QString snUp = sn.trimmed().toUpper();
@@ -218,6 +232,11 @@ bool globals::serialIsSn001(const QString &sn)
            snUp.endsWith(QLatin1String("001"));
 }
 
+/**
+ * @brief Executes the serial is sn003 procedure for globals.
+ * @param sn Input parameter specifying sn (const QString).
+ * @return Output value of type bool.
+ */
 bool globals::serialIsSn003(const QString &sn)
 {
     const QString snUp = sn.trimmed().toUpper();

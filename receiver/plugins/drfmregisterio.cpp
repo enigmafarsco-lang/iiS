@@ -1,3 +1,12 @@
+/**
+ * @file drfmregisterio.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "drfmregisterio.h"
 
 #include <receiver/globals.h>
@@ -146,18 +155,34 @@ const DrfmRegisterDef *DrfmRegisterIO::defForOffset(quint32 offset)
     return nullptr;
 }
 
+/**
+ * @brief Executes the attr names for offset procedure for DrfmRegisterIO.
+ * @param offset Input parameter specifying offset (quint32).
+ * @return Output value of type QStringList.
+ */
 QStringList DrfmRegisterIO::attrNamesForOffset(quint32 offset)
 {
     const DrfmRegisterDef *def = defForOffset(offset);
     return def ? def->attrNames : QStringList();
 }
 
+/**
+ * @brief Executes the label for offset procedure for DrfmRegisterIO.
+ * @param offset Input parameter specifying offset (quint32).
+ * @return Output value of type QString.
+ */
 QString DrfmRegisterIO::labelForOffset(quint32 offset)
 {
     const DrfmRegisterDef *def = defForOffset(offset);
     return def ? def->label : QStringLiteral("register %1").arg(hexText(offset, 3));
 }
 
+/**
+ * @brief Executes the value text procedure for DrfmRegisterIO.
+ * @param value Input parameter specifying value (quint32).
+ * @param isSigned Input parameter specifying isSigned (bool).
+ * @return Output value of type QString.
+ */
 QString DrfmRegisterIO::valueText(quint32 value, bool isSigned)
 {
     if (isSigned)
@@ -265,6 +290,10 @@ struct iio_device *DrfmRegisterIO::legacyBridgeDevice()
     return m_legacyDev;
 }
 
+/**
+ * @brief Sets the legacy bridge enabled parameter and updates internal state.
+ * @param enable Input parameter specifying enable (bool).
+ */
 void DrfmRegisterIO::setLegacyBridgeEnabled(bool enable)
 {
     struct iio_device *dev = legacyBridgeDevice();
@@ -273,6 +302,11 @@ void DrfmRegisterIO::setLegacyBridgeEnabled(bool enable)
     iio_device_attr_write(dev, "reg_access", enable ? "enabled" : "disabled");
 }
 
+/**
+ * @brief Executes the debug attr names procedure for DrfmRegisterIO.
+ * @param dev Input parameter specifying dev (struct iio_device).
+ * @return Output value of type QStringList.
+ */
 QStringList DrfmRegisterIO::debugAttrNames(struct iio_device *dev) const
 {
     if (!dev)
@@ -304,6 +338,11 @@ QString DrfmRegisterIO::matchAttrName(const QStringList &available,
     return QString();
 }
 
+/**
+ * @brief Executes the channel name candidates procedure for DrfmRegisterIO.
+ * @param ch Input parameter specifying ch (struct iio_channel).
+ * @return Output value of type QStringList.
+ */
 QStringList DrfmRegisterIO::channelNameCandidates(struct iio_channel *ch)
 {
     QStringList candidates;
@@ -617,6 +656,10 @@ bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
     return written;
 }
 
+/**
+ * @brief Executes the scan report procedure for DrfmRegisterIO.
+ * @return Output value of type QString.
+ */
 QString DrfmRegisterIO::scanReport()
 {
     struct iio_device *ledDev = ledCountDevice();
@@ -701,6 +744,10 @@ QString DrfmRegisterIO::scanReport()
     return lines.join(QStringLiteral("\n"));
 }
 
+/**
+ * @brief Executes the backend info procedure for DrfmRegisterIO.
+ * @return Output value of type QString.
+ */
 QString DrfmRegisterIO::backendInfo()
 {
     struct iio_device *ledDev = ledCountDevice();

@@ -1,3 +1,12 @@
+/**
+ * @file adrv9009.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "adrv9009.h"
 #include "qtconcurrentrun.h"
 #include "constants/tx_calibration.h"
@@ -617,6 +626,11 @@ double adrv9009::widgetValue(QWidget *w) const
     return 0.0;
 }
 
+/**
+ * @brief Executes the apply widget value procedure for adrv9009.
+ * @param w Input parameter specifying w (QWidget).
+ * @param v Input parameter specifying v (double).
+ */
 void adrv9009::applyWidgetValue(QWidget *w, double v)
 {
     if (!w)
@@ -637,6 +651,10 @@ void adrv9009::applyWidgetValue(QWidget *w, double v)
     }
 }
 
+/**
+ * @brief Sets the tings widget list parameter and updates internal state.
+ * @return Output value of type QVector<QPair<QString, QWidget *> >.
+ */
 QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
 {
     QVector<QPair<QString, QWidget *> > list;
@@ -856,6 +874,9 @@ void adrv9009::firmwareResetOverLan()
         qWarning() << "ADRV9009 firmware reset over LAN: initialize write FAILED:" << (long long)ret;
 }
 
+/**
+ * @brief Executes the resave tx gain widgets procedure for adrv9009.
+ */
 void adrv9009::resaveTxGainWidgets()
 {
     for (int i = 0; i < subcomponents.size(); i++) {
@@ -1911,6 +1932,9 @@ void adrv9009::on_btnReloadSettings_clicked()
     rx_phase_rotation_update();
 }
 
+/**
+ * @brief Executes the print hello procedure for adrv9009.
+ */
 void adrv9009::printHello()
 {
     std::cout << "hellooooooooooooooooooo" <<std::endl;
@@ -1934,6 +1958,14 @@ void adrv9009::reload_button_clicked()
 
 #pragma region Hopping {
 
+/**
+ * @brief Executes the start hopping procedure for adrv9009.
+ * @param status Input parameter specifying status (bool).
+ * @param min Input parameter specifying min (double).
+ * @param max Input parameter specifying max (double).
+ * @param step Input parameter specifying step (double).
+ * @param delay Input parameter specifying delay (int).
+ */
 void adrv9009::startHopping(bool status,double min,double max,double step,int delay)
 {
     hopping=status;
@@ -1975,6 +2007,10 @@ void adrv9009::startHopping(bool status,double min,double max,double step,int de
     });
 }
 
+/**
+ * @brief Executes the test procedure for adrv9009.
+ * @param QString Input parameter specifying QString (QString).
+ */
 void adrv9009::test(QString)
 {
     int i;
@@ -2369,6 +2405,14 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 
 
 
+/**
+ * @brief Sets the file parameter and updates internal state.
+ * @param fileName Input parameter specifying fileName (QString).
+ * @param scale Input parameter specifying scale (double).
+ * @param pair01 Input parameter specifying pair01 (bool).
+ * @param pair23 Input parameter specifying pair23 (bool).
+ * @return Output value of type QString.
+ */
 QString adrv9009::setFile(QString fileName,double scale,bool pair01,bool pair23)
 {
         if (!pair01 && !pair23)
@@ -2422,6 +2466,11 @@ void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
     g_cwDdsPhase = phaseDeg;
 }
 
+/**
+ * @brief Executes the changing dac procedure for adrv9009.
+ * @param mode Input parameter specifying mode (QString).
+ * @return Output value of type QString.
+ */
 QString adrv9009::changingDac(QString mode)
 {
     if (!dac_tx_manager)
@@ -2516,6 +2565,10 @@ QString adrv9009::changeDacToBuffer()
         return "DAC output changed from CW tone to DAC Buffer Output.";
 }
 
+/**
+ * @brief Retrieves the current ac buffer running value.
+ * @return Output value of type bool.
+ */
 bool adrv9009::isDacBufferRunning() const
 {
     return dac_tx_manager != nullptr && dac_tx_manager->dds_buffer != nullptr;

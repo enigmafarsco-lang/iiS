@@ -790,6 +790,148 @@ def generate_phase_noise_evm_diagram():
     plt.close()
     print(f"Generated: {output_path}")
 
+# ==============================================================================
+# 12. Altium Job 1: Multi-Sheet Schematic Prints Overview (Job1.PDF)
+# ==============================================================================
+def generate_altium_job1_schematic_checkpoints():
+    fig, ax = plt.subplots(figsize=(18, 12), dpi=300)
+    ax.set_facecolor('#FFFFFC')
+    fig.patch.set_facecolor('#F1F5F9')
+    ax.set_xlim(0, 180)
+    ax.set_ylim(0, 120)
+    ax.axis('off')
+
+    # Border & Title Block
+    border = Rectangle((2, 2), 176, 116, fill=False, edgecolor='#8B0000', lw=2.2)
+    inner_border = Rectangle((4, 4), 172, 112, fill=False, edgecolor='#8B0000', lw=1.2)
+    ax.add_patch(border)
+    ax.add_patch(inner_border)
+
+    # Title Block
+    tb = Rectangle((115, 4), 61, 18, fill=True, facecolor='#FFFFF0', edgecolor='#8B0000', lw=1.2)
+    ax.add_patch(tb)
+    ax.plot([115, 176], [16, 16], color='#8B0000', lw=1)
+    ax.plot([115, 176], [10, 10], color='#8B0000', lw=1)
+    ax.plot([145, 145], [4, 16], color='#8B0000', lw=1)
+
+    ax.text(117, 18.5, "ALTIUM OUTJOB: Job1.PDF (SCHEMATIC PRINTS)", fontsize=8, fontweight='bold', color='#8B0000')
+    ax.text(117, 12.5, "TITLE: ADRV9009 SCHEMATICS 1-6", fontsize=7.5, fontweight='bold', color='#0F172A')
+    ax.text(117, 6.5, "DOC: OUTJOB_JOB1_SCHEMATICS", fontsize=6.8, color='#334155')
+    ax.text(147, 12.5, "SHEETS: 01 TO 06 COMPLETE", fontsize=7.5, fontweight='bold', color='#0F172A')
+    ax.text(147, 6.5, "REV: 3.2 (OCT 2026)", fontsize=6.8, color='#334155')
+
+    # Header
+    ax.text(60, 112, "ALTIUM DESIGNER JOB 1: COMPLETE MULTI-SHEET SCHEMATIC PRINTS (SHEETS 1 TO 6)",
+            fontsize=12, fontweight='bold', color='#00008B', ha='center')
+    ax.text(60, 108, "Master Hardware Diagnostic Reference with Component Designators & Check Points",
+            fontsize=8.5, color='#475569', ha='center')
+
+    # 6 Panels for 6 Sheets
+    sheets_info = [
+        ("SHEET 1: 12V POWER ENTRY & PROTECTION", "Components: Fuse F1 (5A 1206), TVS D1 (SMBJ12A)\nCheck Point: TP6 (+12V IN)\nFaults: Blown F1 on overcurrent, Shorted D1 on reverse polarity", 8, 62, 52, 42, '#EFF6FF', '#2563EB'),
+        ("SHEET 2: ADP5054 QUAD BUCK PMIC", "Components: U3 (ADP5054), SW1-SW4, L1-L4 (1.5uH)\nCheck Points: TP1 (1.0V Dig), TP5 (3.3V Sys), TP4 (1.8V Aux)\nFaults: Low voltage on SW node, blown buck inductor, shorted 0805 cap", 64, 62, 52, 42, '#FEFCE8', '#CA8A04'),
+        ("SHEET 3: LT3045 ULTRA-LOW NOISE RF LDO", "Components: U4 (1.3V RF LDO), U5 (1.3V Synth LDO), FB3\nCheck Points: TP2 (1.3V RF, <3mV rms), TP3 (1.3V Synth, <2mV rms)\nFaults: Open FB3 ferrite, cracked SET pin resistor, high phase noise", 120, 62, 52, 42, '#F0FDF4', '#16A34A'),
+        ("SHEET 4: CLOCK GENERATION & TCXO", "Components: Y1 (SiT5356 40MHz TCXO), U2 (HMC7044 Jitter Cleaner)\nCheck Points: TP_CLK_P/N (122.88 MHz LVDS, 700mVpp), SYSREF\nFaults: Unlocked PLL2 (pll2_locked==0), missing 40MHz input, jitter > 250fs", 8, 16, 52, 42, '#FAF5FF', '#9333EA'),
+        ("SHEET 5: ADRV9009 BGA & JESD204B", "Components: U1 (ADRV9009 196-BGA), 100nF AC Caps, J1 (FMC)\nCheck Points: SPI_CLK, SPI_EN, RESETB, JESD Lane0-Lane3\nFaults: JESD CGS/ILAS timeout, cracked AC caps, BGA ball voiding", 64, 16, 52, 42, '#FFF1F2', '#E11D48'),
+        ("SHEET 6: RF FRONT-END BALUNS & ESD", "Components: T1-T4 (TCM1-63AX+ 50:100 Ohm), D2-D5 ESD Diodes\nCheck Points: TX1, TX2, RX1, RX2, ORX (SMA S11 Return Loss > 12dB)\nFaults: Blown balun windings, shorted 0.5pF ESD diode, low RX sensitivity", 120, 24, 52, 34, '#ECFEFF', '#0891B2'),
+    ]
+
+    for title, desc, px, py, pw, ph, bg_c, bd_c in sheets_info:
+        p_box = FancyBboxPatch((px, py), pw, ph, boxstyle="round,pad=0.2,rounding_size=0.6",
+                               fc=bg_c, ec=bd_c, lw=1.5)
+        ax.add_patch(p_box)
+        ax.text(px + pw/2, py + ph - 4, title, fontsize=7.5, fontweight='bold', color=bd_c, ha='center')
+        ax.text(px + 3, py + ph - 8, desc, fontsize=6.2, color='#1E293B', va='top', linespacing=1.4)
+
+    plt.tight_layout()
+    output_path = os.path.join(OUTPUT_DIR, "altium_job1_schematic_checkpoints.png")
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Generated: {output_path}")
+
+# ==============================================================================
+# 13. Altium Job 2: PCB Assembly Prints (Top & Bottom Overlay) (Job2.PDF)
+# ==============================================================================
+def generate_altium_job2_pcb_assembly_top_bottom():
+    fig, ax = plt.subplots(figsize=(18, 12), dpi=300)
+    ax.set_facecolor('#FFFFFC')
+    fig.patch.set_facecolor('#F1F5F9')
+    ax.set_xlim(0, 180)
+    ax.set_ylim(0, 120)
+    ax.axis('off')
+
+    # Border & Title Block
+    border = Rectangle((2, 2), 176, 116, fill=False, edgecolor='#8B0000', lw=2.2)
+    inner_border = Rectangle((4, 4), 172, 112, fill=False, edgecolor='#8B0000', lw=1.2)
+    ax.add_patch(border)
+    ax.add_patch(inner_border)
+
+    # Title Block
+    tb = Rectangle((115, 4), 61, 18, fill=True, facecolor='#FFFFF0', edgecolor='#8B0000', lw=1.2)
+    ax.add_patch(tb)
+    ax.plot([115, 176], [16, 16], color='#8B0000', lw=1)
+    ax.plot([115, 176], [10, 10], color='#8B0000', lw=1)
+    ax.plot([145, 145], [4, 16], color='#8B0000', lw=1)
+
+    ax.text(117, 18.5, "ALTIUM OUTJOB: Job2.PDF (ASSEMBLY PRINTS)", fontsize=8, fontweight='bold', color='#8B0000')
+    ax.text(117, 12.5, "TITLE: PCB ASSEMBLY TOP & BOTTOM", fontsize=7.5, fontweight='bold', color='#0F172A')
+    ax.text(117, 6.5, "DOC: OUTJOB_JOB2_ASSEMBLY", fontsize=6.8, color='#334155')
+    ax.text(147, 12.5, "PAGES: 01 & 02 COMPLETE", fontsize=7.5, fontweight='bold', color='#0F172A')
+    ax.text(147, 6.5, "REV: 3.2 (OCT 2026)", fontsize=6.8, color='#334155')
+
+    # Header
+    ax.text(60, 112, "ALTIUM DESIGNER JOB 2: PCB ASSEMBLY & FABRICATION DRAWINGS (JOB2.PDF)",
+            fontsize=12, fontweight='bold', color='#00008B', ha='center')
+    ax.text(60, 108, "Component Placement Overlay & Decoupling Matrix for Top and Bottom Layers",
+            fontsize=8.5, color='#475569', ha='center')
+
+    # Top Assembly Panel (Left)
+    p_top = FancyBboxPatch((8, 16), 78, 88, boxstyle="round,pad=0.2,rounding_size=0.8",
+                           fc='#133820', ec='#D4AF37', lw=2)
+    ax.add_patch(p_top)
+    ax.text(47, 98, "JOB2 PAGE 1: PCB TOP LAYER ASSEMBLY DRAWING", fontsize=9, fontweight='bold', color='#FDE047', ha='center')
+
+    # Top components
+    ax.add_patch(Rectangle((37, 50), 20, 20, fc='#1E293B', ec='#E2E8F0', lw=1.5))
+    ax.text(47, 60, "U1: ADRV9009\n196-CSP_BGA", fontsize=7.5, fontweight='bold', color='#FFFFFF', ha='center')
+
+    ax.add_patch(Rectangle((39, 74), 16, 14, fc='#1E293B', ec='#60A5FA', lw=1.2))
+    ax.text(47, 81, "U2: HMC7044\nClock Generator", fontsize=6.5, fontweight='bold', color='#60A5FA', ha='center')
+
+    ax.add_patch(Rectangle((12, 48), 12, 10, fc='#FEF08A', ec='#CA8A04', lw=1.2))
+    ax.text(18, 53, "F1: 5A Fuse\nD1: SMBJ12A", fontsize=5.8, fontweight='bold', color='#854D0E', ha='center')
+
+    ax.add_patch(Rectangle((64, 48), 18, 22, fc='#334155', ec='#94A3B8', lw=1.2))
+    ax.text(73, 59, "T1-T4 Baluns\nD2-D5 ESD Diodes", fontsize=6, fontweight='bold', color='#F1F5F9', ha='center')
+
+    ax.text(47, 24, "Test Points: TP1 (1.0V), TP2 (1.3V RF), TP3 (1.3V Synth),\nTP4 (1.8V), TP5 (3.3V), TP6 (12V IN), TP_CLK_P/N",
+            fontsize=6.5, color='#FDE047', ha='center')
+
+    # Bottom Assembly Panel (Right)
+    p_bot = FancyBboxPatch((92, 16), 80, 88, boxstyle="round,pad=0.2,rounding_size=0.8",
+                           fc='#0B2212', ec='#D4AF37', lw=2)
+    ax.add_patch(p_bot)
+    ax.text(132, 98, "JOB2 PAGE 2: PCB BOTTOM LAYER ASSEMBLY DRAWING", fontsize=9, fontweight='bold', color='#FDE047', ha='center')
+
+    # Bottom components
+    ax.add_patch(Rectangle((122, 68), 20, 16, fc='#1E293B', ec='#FEF08A', lw=1.2))
+    ax.text(132, 76, "U3: ADP5054\nPMIC (4-Ch Buck)", fontsize=6.8, fontweight='bold', color='#FEF08A', ha='center')
+
+    ax.add_patch(Rectangle((98, 68), 18, 16, fc='#334155', ec='#CBD5E1', lw=1.2))
+    ax.text(107, 76, "L1-L4 Inductors\n(1.5 uH High-Isat)", fontsize=6, fontweight='bold', color='#FFFFFF', ha='center')
+
+    ax.add_patch(Rectangle((122, 44), 20, 16, fc='#1E293B', ec='#86EFAC', lw=1.2))
+    ax.text(132, 52, "U4 & U5: LT3045\nUltra-Low Noise LDOs", fontsize=6.5, fontweight='bold', color='#86EFAC', ha='center')
+
+    ax.add_patch(Rectangle((120, 24), 24, 14, fc='#475569', ec='#94A3B8', lw=1.2))
+    ax.text(132, 31, "Under-BGA Decoupling\n0402 100nF/10uF Matrix", fontsize=6, fontweight='bold', color='#FFFFFF', ha='center')
+
+    plt.tight_layout()
+    output_path = os.path.join(OUTPUT_DIR, "altium_job2_pcb_assembly_top_bottom.png")
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Generated: {output_path}")
+
 if __name__ == '__main__':
     print("Generating Complete Suite of Engineering Diagrams for Manuals...")
     generate_schematic_sheet1()
@@ -803,4 +945,7 @@ if __name__ == '__main__':
     generate_tx_spectrum_measurement_diagram()
     generate_rx_nf_iip3_diagram()
     generate_phase_noise_evm_diagram()
+    generate_altium_job1_schematic_checkpoints()
+    generate_altium_job2_pcb_assembly_top_bottom()
     print("All diagrams generated successfully!")
+

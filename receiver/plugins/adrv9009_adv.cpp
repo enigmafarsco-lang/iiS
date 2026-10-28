@@ -1,3 +1,12 @@
+/**
+ * @file adrv9009_adv.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "adrv9009_adv.h"
 #include "ui_adrv9009_adv.h"
 
@@ -985,6 +994,10 @@ void adrv9009_adv::bist_tone_cb()
 
 
 
+/**
+ * @brief Slot handler responding to on fhm chk trigger mode state changed event.
+ * @param arg1 Input parameter specifying arg1 (int).
+ */
 void adrv9009_adv::on_fhm_chk_trigger_mode_stateChanged(int arg1)
 {
 

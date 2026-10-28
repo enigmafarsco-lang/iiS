@@ -1,3 +1,12 @@
+/**
+ * @file settings.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "settings.h"
 #include <receiver/datafiles.h>
 #include <qfile.h>
@@ -82,6 +91,10 @@ const QString &Settings::getIp() const
     return Ip;
 }
 
+/**
+ * @brief Sets the ip parameter and updates internal state.
+ * @param newIp Input parameter specifying newIp (const QString).
+ */
 void Settings::setIp(const QString &newIp)
 {
     Ip = newIp;
@@ -92,6 +105,10 @@ const QString &Settings::getPort() const
     return Port;
 }
 
+/**
+ * @brief Sets the port parameter and updates internal state.
+ * @param newPort Input parameter specifying newPort (const QString).
+ */
 void Settings::setPort(const QString &newPort)
 {
     Port = newPort;
@@ -102,16 +119,28 @@ const QString &Settings::getMode() const
     return Mode;
 }
 
+/**
+ * @brief Sets the mode parameter and updates internal state.
+ * @param newMode Input parameter specifying newMode (const QString).
+ */
 void Settings::setMode(const QString &newMode)
 {
     Mode = newMode;
 }
 
+/**
+ * @brief Retrieves the current last filter value.
+ * @return Output value of type QString.
+ */
 QString Settings::getLastFilter() const
 {
     return LastFilter;
 }
 
+/**
+ * @brief Sets the last filter parameter and updates internal state.
+ * @param newLastFilter Input parameter specifying newLastFilter (const QString).
+ */
 void Settings::setLastFilter(const QString &newLastFilter)
 {
     LastFilter = newLastFilter;

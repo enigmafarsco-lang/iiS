@@ -1,3 +1,12 @@
+/**
+ * @file plotsignal.cpp
+ * @brief Subsystem module for pages in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 ﻿#include "plotsignal.h"
 #include "ui_plotsignal.h"
 
@@ -11,6 +20,9 @@ PlotSignal::PlotSignal(QWidget *parent) :
 
 
 
+/**
+ * @brief Destructor for PlotSignal, releasing allocated hardware resources, timers, and buffers.
+ */
 PlotSignal::~PlotSignal()
 {
     delete ui;
@@ -61,6 +73,11 @@ void PlotSignal::plotFile()
 
 
 
+/**
+ * @brief Sets the q glcharts parameters parameter and updates internal state.
+ * @param glChart Input parameter specifying glChart (QGLchart).
+ * @param glChartType Input parameter specifying glChartType (ChartType).
+ */
 void PlotSignal::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
     glChart->setMinimumSize(QSize(200, 140));
@@ -142,6 +159,10 @@ void PlotSignal::on_pushButton_clicked()
 
 }
 
+/**
+ * @brief Calculates and returns the mathematical calculate f f t w formulation.
+ * @return Output value of type QCustomSeries.
+ */
 QCustomSeries PlotSignal::calculateFFTW()
 {
     QCustomSeries fftSeriesVal;
@@ -169,6 +190,10 @@ QCustomSeries PlotSignal::calculateFFTW()
 }
 
 
+/**
+ * @brief Executes the zoom plot procedure for PlotSignal.
+ * @param >&vectorOfCharts Input parameter specifying >&vectorOfCharts (QVector<QGLchart).
+ */
 void PlotSignal::zoomPlot(QVector<QGLchart *>&vectorOfCharts)
 {
     for(int i = 0; i < vectorOfCharts.length(); i++)

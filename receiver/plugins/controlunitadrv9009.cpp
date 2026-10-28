@@ -1,3 +1,12 @@
+/**
+ * @file controlunitadrv9009.cpp
+ * @brief Subsystem module for plugins in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 //#include "controlunitadrv9009.h"
 //#include "ui_controlunitadrv9009.h"
 
@@ -481,6 +490,9 @@ void ControlUnitADRV9009::EnableWrite()
         qWarning() << "ADRV9009 Control Unit: failed to enable register access, error" << ret;
 }
 
+/**
+ * @brief Executes the disable write procedure for ControlUnitADRV9009.
+ */
 void ControlUnitADRV9009::DisableWrite()
 {
     resolveRegisterDevices();
@@ -496,6 +508,11 @@ void ControlUnitADRV9009::DisableWrite()
         qWarning() << "ADRV9009 Control Unit: failed to disable register access, error" << ret;
 }
 
+/**
+ * @brief Executes the device display name procedure for ControlUnitADRV9009.
+ * @param dev Input parameter specifying dev (struct iio_device).
+ * @return Output value of type QString.
+ */
 QString ControlUnitADRV9009::deviceDisplayName(struct iio_device *dev) const
 {
     if (!dev)
@@ -510,6 +527,9 @@ QString ControlUnitADRV9009::deviceDisplayName(struct iio_device *dev) const
     return QStringLiteral("<unnamed IIO device>");
 }
 
+/**
+ * @brief Executes the resolve register devices procedure for ControlUnitADRV9009.
+ */
 void ControlUnitADRV9009::resolveRegisterDevices()
 {
     readDev = nullptr;
@@ -564,6 +584,12 @@ QString ControlUnitADRV9009::registerBackendInfo()
             .arg(registerIo.backendInfo(), deviceDisplayName(readDev));
 }
 
+/**
+ * @brief Executes the try read register procedure for ControlUnitADRV9009.
+ * @param offset Input parameter specifying offset (quint32).
+ * @param value Input parameter specifying value (quint32).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::tryReadRegister(quint32 offset, quint32 *value)
 {
     if (!value)
@@ -796,6 +822,12 @@ bool ControlUnitADRV9009::writeRegisterLikeThreshold(quint32 offset, quint32 val
     return ret == 0;
 }
 
+/**
+ * @brief Sets the drfm enabled parameter and updates internal state.
+ * @param enabled Input parameter specifying enabled (bool).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
 {
     // tcl07020.tcl:
@@ -811,6 +843,13 @@ bool ControlUnitADRV9009::setDrfmEnabled(bool enabled, QString *details)
     return ok;
 }
 
+/**
+ * @brief Sets the amplify value parameter and updates internal state.
+ * @param value Input parameter specifying value (quint16).
+ * @param enabled Input parameter specifying enabled (bool).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *details)
 {
     // TH0 is wired directly to MUXDACS amplify.  There is no separate
@@ -838,6 +877,12 @@ bool ControlUnitADRV9009::setAmplifyValue(quint16 value, bool enabled, QString *
     return ok;
 }
 
+/**
+ * @brief Sets the vgpo enabled parameter and updates internal state.
+ * @param enabled Input parameter specifying enabled (bool).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setVgpoEnabled(bool enabled, QString *details)
 {
     // PDW is the real Doppler/VGPO enable line.
@@ -909,6 +954,12 @@ bool ControlUnitADRV9009::setVgpoValue(quint32 phaseOffset, qint32 phaseStep,
     return paramsOk && enableOk;
 }
 
+/**
+ * @brief Sets the target range parameter and updates internal state.
+ * @param rangeMeters Input parameter specifying rangeMeters (double).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setTargetRange(double rangeMeters, QString *details)
 {
     const double delayUs = calculateDelayUs(rangeMeters);
@@ -934,12 +985,26 @@ bool ControlUnitADRV9009::setTargetRange(double rangeMeters, QString *details)
     return true;
 }
 
+/**
+ * @brief Sets the target delay parameter and updates internal state.
+ * @param delayUs Input parameter specifying delayUs (double).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setTargetDelay(double delayUs, QString *details)
 {
     const double rangeMeters = calculateRangeMeters(delayUs);
     return setTargetRange(rangeMeters, details);
 }
 
+/**
+ * @brief Sets the target doppler parameter and updates internal state.
+ * @param dopplerHz Input parameter specifying dopplerHz (double).
+ * @param centerFreqMhz Input parameter specifying centerFreqMhz (double).
+ * @param enabled Input parameter specifying enabled (bool).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled, QString *details)
 {
     const double wavelengthM = calculateWavelengthM(centerFreqMhz);
@@ -968,6 +1033,14 @@ bool ControlUnitADRV9009::setTargetDoppler(double dopplerHz, double centerFreqMh
     return ok;
 }
 
+/**
+ * @brief Sets the target velocity parameter and updates internal state.
+ * @param velocityMps Input parameter specifying velocityMps (double).
+ * @param centerFreqMhz Input parameter specifying centerFreqMhz (double).
+ * @param enabled Input parameter specifying enabled (bool).
+ * @param details Input parameter specifying details (QString).
+ * @return Output value of type bool.
+ */
 bool ControlUnitADRV9009::setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled, QString *details)
 {
     const double dopplerHz = calculateDopplerHz(velocityMps, centerFreqMhz);

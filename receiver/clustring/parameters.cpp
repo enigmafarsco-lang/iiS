@@ -1,3 +1,12 @@
+/**
+ * @file parameters.cpp
+ * @brief Subsystem module for clustring in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "parameters.h"
 
 #pragma region S Band Parameters{
@@ -42,6 +51,9 @@ int  Parameters::Threshold2X = 30;
 
 #pragma endregion X Band Parameters}
 
+/**
+ * @brief Constructs a new Parameters instance and initializes subsystem components and UI state.
+ */
 Parameters::Parameters()
 {
 

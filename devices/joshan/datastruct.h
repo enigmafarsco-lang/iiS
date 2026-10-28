@@ -1,3 +1,12 @@
+/**
+ * @file datastruct.h
+ * @brief Subsystem module for joshan in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 
@@ -80,9 +89,17 @@ struct joshanStatusStruct
 
 
 
+/**
+ * @class dataStruct
+ * @brief High-level controller class for dataStruct.
+ * @details Manages state, algorithms, signals, and hardware interfaces.
+ */
 class dataStruct
 {
 public:
+    /**
+     * @brief Constructs a new dataStruct instance and initializes subsystem components and UI state.
+     */
     dataStruct();
 };
 

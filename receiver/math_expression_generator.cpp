@@ -1,3 +1,12 @@
+/**
+ * @file math_expression_generator.cpp
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "math_expression_generator.h"
 
 
@@ -191,6 +200,9 @@ int shared_object_compile(char *base_filename)
 }
 
 
+/**
+ * @brief Constructs a new math_expression_generator instance and initializes subsystem components and UI state.
+ */
 math_expression_generator::math_expression_generator()
 {
 }

@@ -1,3 +1,12 @@
+/**
+ * @file FFT.h
+ * @brief Subsystem module for fft in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef FFT_H
 #define FFT_H
 #include <iostream>
@@ -65,11 +74,20 @@ void transform(complex<double>* f, int N) //
     n *= 2;
     a = a / 2;
   }
+  /**
+   * @brief Executes the free procedure for the module.
+   * @param W Input parameter specifying W (W).
+   */
   free(W);
 }
 
 void FFT(complex<double>* f, int N, double d)
 {
+  /**
+   * @brief Executes the transform procedure for the module.
+   * @param f Input parameter specifying f (f).
+   * @param N Input parameter specifying N (N).
+   */
   transform(f, N);
   for(int i = 0; i < N; i++)
     f[i] *= d; //multiplying by step

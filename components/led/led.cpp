@@ -24,6 +24,10 @@
 #include "led.h" 
 
 
+/**
+ * @brief Constructs a new Led instance and initializes subsystem components and UI state.
+ * @param parent Input parameter specifying parent (QWidget *).
+ */
 Led::Led(QWidget * parent):WidgetWithBackground(parent)
 {
   m_checked = true; 
@@ -32,12 +36,20 @@ Led::Led(QWidget * parent):WidgetWithBackground(parent)
 }
 
 
+/**
+ * @brief Retrieves the current hecked value.
+ * @return Output value of type bool.
+ */
 bool Led::isChecked () const 
 {
   return m_checked; 
 }
 
 
+/**
+ * @brief Sets the checked parameter and updates internal state.
+ * @param i Input parameter specifying i (bool).
+ */
 void Led::setChecked(bool i) 
 {
   m_checked = i; 
@@ -46,19 +58,27 @@ void Led::setChecked(bool i)
 }
 
 
+/**
+ * @brief Executes the color procedure for Led.
+ * @return Output value of type QColor.
+ */
 QColor Led::color() const
 {
   return m_color; 
 }
 
 
+/**
+ * @brief Sets the color parameter and updates internal state.
+ * @param i Input parameter specifying i (QColor).
+ */
 void Led::setColor(QColor i)
 { 
   m_color = i; 
   updateWithBackground(); 
 }
 
-// Maluje ca³± diodê - ko³o o kolorze bazowym a na to nak³ada odblask. 
+// Maluje ca diod - koo o kolorze bazowym a na to nakada odblask. 
 void Led::paintEvent(QPaintEvent * /* event*/ )
 {
   QPainter painter(this); 
@@ -90,7 +110,7 @@ void Led::paintEvent(QPaintEvent * /* event*/ )
   painter.drawEllipse(-149,-149,299,299);
   painter.end(); 
   
-  // odblask ¶wiat³a diody 
+  // odblask wiata diody 
   drawBackground(); // to maluje na tym co dotychczas to co jest w bitmapce 
 }
 
@@ -100,7 +120,7 @@ void Led::mousePressEvent(QMouseEvent * ev)
 }
 
 
-// Rysuje odblask swiat³a na diodzie 
+// Rysuje odblask swiata na diodzie 
 void Led::paintBackground(QPainter & painter)
 {
   initCoordinateSystem(painter); 
@@ -117,6 +137,10 @@ void Led::paintBackground(QPainter & painter)
         
 }
 
+/**
+ * @brief Initializes and configures the init coordinate system for the Led subsystem.
+ * @param painter Input parameter specifying painter (QPainter &).
+ */
 void Led::initCoordinateSystem(QPainter & painter)
 {
   int side = qMin(width(), height());

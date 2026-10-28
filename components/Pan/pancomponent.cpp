@@ -1,5 +1,18 @@
+/**
+ * @file pancomponent.cpp
+ * @brief Subsystem module for Pan in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #include "pancomponent.h"
 
+/**
+ * @brief Constructs a new BPanComponent instance and initializes subsystem components and UI state.
+ * @param parent Input parameter specifying parent (QWidget).
+ */
 BPanComponent::BPanComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();
@@ -14,6 +27,9 @@ BPanComponent::BPanComponent(QWidget *parent) : QWidget(parent)
     connect(btnSetPanAngle, SIGNAL(clicked()), this, SLOT(on_btnSetPanAngle_clicked()));
 }
 
+/**
+ * @brief Initializes and configures the init labels for the BPanComponent subsystem.
+ */
 void BPanComponent::init_labels()
 {
     lblPanAngle = new QLabel("Pan Angle:");
@@ -62,6 +78,9 @@ void BPanComponent::init_doubleSpinBoxes()
     dsbPanSpeed->setMaximum(12);
 }
 
+/**
+ * @brief Initializes and configures the init buttons for the BPanComponent subsystem.
+ */
 void BPanComponent::init_buttons()
 {
     btnSetPanAngle = new QPushButton("Set Pan Angle");
@@ -82,6 +101,9 @@ void BPanComponent::init_buttons()
     }
 }
 
+/**
+ * @brief Initializes and configures the init progress bar for the BPanComponent subsystem.
+ */
 void BPanComponent::init_progressBar()
 {
     pgbPanAngle = new QProgressBar;
@@ -93,6 +115,9 @@ void BPanComponent::init_progressBar()
     pgbPanAngle->setStyleSheet("background-color:white");
 }
 
+/**
+ * @brief Initializes and configures the init pan for the BPanComponent subsystem.
+ */
 void BPanComponent::init_pan()
 {
     panGauge = new BPanGauge;
@@ -100,6 +125,9 @@ void BPanComponent::init_pan()
     panGauge->setMinimumSize(240, 240);
 }
 
+/**
+ * @brief Sets the components_arrangements parameter and updates internal state.
+ */
 void BPanComponent::set_components_arrangements()
 {
     grdMainLayout = new QGridLayout(this);

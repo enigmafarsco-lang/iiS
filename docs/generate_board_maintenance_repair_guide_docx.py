@@ -284,18 +284,24 @@ def build_maintenance_guide_document():
     # SECTION 2: Schematic Sheet-by-Sheet Fault Tracing (Sheets 1 to 6)
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("2. Schematic Sheet-by-Sheet Diagnostic & Fault Tracing Reference")
+    r = h1.add_run("2. Altium Designer Job 1 Output: Complete Schematic Prints (Sheets 1 to 6) & Fault Tracing Reference")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     p = doc.add_paragraph(
-        "Technicians must reference the exact Altium schematic sheet corresponding to the suspected subsystem failure. "
-        "Below are the 6 individual schematic sheets with highlighted check points and specific fault isolation procedures:"
+        "Technicians must reference the exact Altium Designer OutputJob 'Job1.PDF' schematic sheets corresponding to the suspected "
+        "subsystem failure. Figure 1.0 displays the complete Job 1 Multi-Sheet compilation overview, followed by high-resolution "
+        "drawings of each individual schematic sheet (Sheets 1 through 6) with highlighted check points and fault isolation procedures:"
     )
     p.runs[0].font.name = "Arial"
     p.runs[0].font.size = Pt(10)
+
+    # Insert Figure 1.0: Altium Job 1 Multi-Sheet Schematic Overview
+    add_figure(doc, "docs/images/altium_job1_schematic_checkpoints.png",
+               "Figure 1.0: Altium Designer OutJob 'Job1.PDF' — Complete Multi-Sheet Schematic Prints (Sheets 1 to 6) Compilation Overview.",
+               width_inches=6.2)
 
     # Sheet 1: Power Entry
     h2 = doc.add_heading(level=2)
@@ -367,27 +373,33 @@ def build_maintenance_guide_document():
     # SECTION 3: PCB Top & Bottom Layer Fault Maps
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("3. PCB Layout Top & Bottom Layer Fault Tracing Maps")
+    r = h1.add_run("3. Altium Designer Job 2 Output: PCB Assembly & Fabrication Prints (Job2.PDF) & Fault Maps")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     p = doc.add_paragraph(
-        "Figures 1.7 and 1.8 provide the physical location maps for all active components, test pads, annular check rings, "
-        "and high-frequency decoupling capacitor arrays on the top and bottom layers of the PCB:"
+        "Technicians must reference the Altium Designer OutputJob 'Job2.PDF' PCB Assembly Drawings to physically locate all "
+        "active components, test pads, annular check rings, and high-frequency decoupling capacitor arrays on the top and bottom layers of the PCB. "
+        "Figure 1.7 provides the dual-layer assembly compilation overview, followed by individual detailed top and bottom fault maps:"
     )
     p.runs[0].font.name = "Arial"
     p.runs[0].font.size = Pt(10)
 
-    # Insert Figure 1.7: PCB Top Layer Fault Map
-    add_figure(doc, "docs/images/pcb_top_layer_fault_map.png",
-               "Figure 1.7: ADRV9009 PCB Top Layer Component & Fault Tracing Map (Locations of Fuse F1, Diode D1, ADRV9009 U1, HMC7044 U2, Baluns T1–T4, and Test Points TP1–TP6).",
+    # Insert Figure 1.7: Altium Job 2 PCB Assembly Overview
+    add_figure(doc, "docs/images/altium_job2_pcb_assembly_top_bottom.png",
+               "Figure 1.7: Altium Designer OutJob 'Job2.PDF' — PCB Assembly & Fabrication Prints (Top & Bottom Layers Compilation Overview).",
                width_inches=6.2)
 
-    # Insert Figure 1.8: PCB Bottom Layer Fault Map
+    # Insert Figure 1.8: PCB Top Layer Fault Map
+    add_figure(doc, "docs/images/pcb_top_layer_fault_map.png",
+               "Figure 1.8: ADRV9009 PCB Top Layer Component & Fault Tracing Map (Locations of Fuse F1, Diode D1, ADRV9009 U1, HMC7044 U2, Baluns T1–T4, and Test Points TP1–TP6).",
+               width_inches=6.2)
+
+    # Insert Figure 1.9: PCB Bottom Layer Fault Map
     add_figure(doc, "docs/images/pcb_bottom_layer_fault_map.png",
-               "Figure 1.8: ADRV9009 PCB Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and Underside BGA 0402 Decoupling Matrix).",
+               "Figure 1.9: ADRV9009 PCB Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and Underside BGA 0402 Decoupling Matrix).",
                width_inches=6.2)
 
     # -------------------------------------------------------------
@@ -401,7 +413,7 @@ def build_maintenance_guide_document():
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
-               "Figure 1.9: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).",
+               "Figure 1.10: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).",
                width_inches=6.0)
 
     # -------------------------------------------------------------
@@ -545,8 +557,13 @@ def build_maintenance_guide_document():
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۲. نقشه‌های شیت‌به‌شیت شماتیک آلتیوم و راهنمای تفکیک عیب")
+    r = h1_fa.add_run("۲. خروجی Job 1 نرم‌افزار آلتیوم: نقشه‌های شیت‌به‌شیت شماتیک (شیت‌های ۱ تا ۶)")
     make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
+
+    # Persian Job 1 Overview
+    add_figure(doc, "docs/images/altium_job1_schematic_checkpoints.png",
+               "شکل ۲.۰: نمای کلی خروجی Job1.PDF آلتیوم — مجموعه شیت‌های ۱ تا ۶ شماتیک و نقاط تست تشخیصی.",
+               width_inches=6.2, is_rtl=True)
 
     # Persian Sheet 1
     add_figure(doc, "docs/images/schematic_sheet1_power_entry.png",
@@ -582,15 +599,20 @@ def build_maintenance_guide_document():
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۳. نقشه‌های جانمایی و تفکیک عیب لایه‌های رو و پشت PCB")
+    r = h1_fa.add_run("۳. خروجی Job 2 نرم‌افزار آلتیوم: نقشه‌های جانمایی و مونتاژ لایه‌های رو و پشت PCB")
     make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
+    # Persian Job 2 Overview
+    add_figure(doc, "docs/images/altium_job2_pcb_assembly_top_bottom.png",
+               "شکل ۲.۷: نمای کلی خروجی Job2.PDF آلتیوم — نقشه‌های مونتاژ و جانمایی لایه‌های رو و پشت برد.",
+               width_inches=6.2, is_rtl=True)
+
     add_figure(doc, "docs/images/pcb_top_layer_fault_map.png",
-               "شکل ۲.۷: نقشه عیب‌یابی لایه روی برد (PCB Top Layer) شامل موقعیت فیوز F1، دیود TVS، تراشه‌های U1 و U2 و نقاط تست TP1 تا TP6.",
+               "شکل ۲.۸: نقشه عیب‌یابی لایه روی برد (PCB Top Layer) شامل موقعیت فیوز F1، دیود TVS، تراشه‌های U1 و U2 و نقاط تست TP1 تا TP6.",
                width_inches=6.2, is_rtl=True)
 
     add_figure(doc, "docs/images/pcb_bottom_layer_fault_map.png",
-               "شکل ۲.۸: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer) شامل موقعیت آی‌سی ADP5054، رگولاتورهای LT3045 و ماتریس خازن‌های دیکوپلینگ BGA.",
+               "شکل ۲.۹: نقشه عیب‌یابی لایه پشت برد (PCB Bottom Layer) شامل موقعیت آی‌سی ADP5054، رگولاتورهای LT3045 و ماتریس خازن‌های دیکوپلینگ BGA.",
                width_inches=6.2, is_rtl=True)
 
     # Persian Section 4 - BGA Rework
@@ -601,7 +623,7 @@ def build_maintenance_guide_document():
     make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
     add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
-               "شکل ۲.۹: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.",
+               "شکل ۲.۱۰: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.",
                width_inches=6.0, is_rtl=True)
 
     # Persian Section 5 - Flowchart
@@ -612,7 +634,7 @@ def build_maintenance_guide_document():
     make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
     add_figure(doc, "docs/images/adrv9009_hardware_troubleshooting_flowchart.png",
-               "شکل ۲.۱۰: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.",
+               "شکل ۲.۱۱: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.",
                width_inches=6.2, is_rtl=True)
 
     # Save DOCX

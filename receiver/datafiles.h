@@ -1,3 +1,12 @@
+/**
+ * @file datafiles.h
+ * @brief Subsystem module for receiver in eLynxSDR system.
+ * @details Provides comprehensive operational guidance, signal processing,
+ *          hardware register interaction, and UI control workflows.
+ * @author eLynxSDR Technical & Maintenance Engineering Team
+ * @date 2026-10-28
+ */
+
 #ifndef DATAFILES_H
 #define DATAFILES_H
 
@@ -20,6 +29,9 @@ inline QString userFilesDirectory()
         appData = QDir::homePath() + QStringLiteral("/.local/share/eLynxSDR");
 
     const QString filesDir = QDir(appData).filePath(QStringLiteral("files"));
+    /**
+     * @brief Executes the q dir procedure for the module.
+     */
     QDir().mkpath(filesDir);
     return QDir::cleanPath(filesDir);
 }
@@ -33,6 +45,11 @@ inline QString resourceFilesDirectory()
     QStringList dirs;
 #ifndef ELYNXSDR_PACKAGED
 #  ifdef PROJECT_FILES_DIR
+    /**
+     * @brief Executes the q string literal procedure for the module.
+     * @param PROJECT_FILES_DIR Input parameter specifying PROJECT_FILES_DIR (PROJECT_FILES_DIR).
+     * @return Output value of type dirs <<.
+     */
     dirs << QStringLiteral(PROJECT_FILES_DIR);
 #  endif
 #endif
@@ -45,6 +62,11 @@ inline QString resourceFilesDirectory()
 
     for (const QString &dir : dirs) {
         if (QFileInfo(dir).isDir())
+            /**
+             * @brief Executes the q dir procedure for the module.
+             * @param dir Input parameter specifying dir (dir).
+             * @return Output value of type return.
+             */
             return QDir(dir).absolutePath();
     }
 
@@ -55,6 +77,11 @@ inline QString resourceFilesDirectory()
 
 inline QString resourceFilePath(const QString &fileName)
 {
+    /**
+     * @brief Executes the q dir procedure for the module.
+     * @param resourceFilesDirectory( Input parameter specifying resourceFilesDirectory( (resourceFilesDirectory().
+     * @return Output value of type return.
+     */
     return QDir(resourceFilesDirectory()).absoluteFilePath(fileName);
 }
 
@@ -69,10 +96,16 @@ inline QString dataFilePath(const QString &fileName)
 
     const QString packagedPath = resourceFilePath(fileName);
     if (QFileInfo::exists(packagedPath)) {
+        /**
+         * @brief Executes the q dir procedure for the module.
+         */
         QDir().mkpath(QFileInfo(userPath).absolutePath());
         if (QFile::copy(packagedPath, userPath))
             QFile::setPermissions(userPath, QFileInfo(packagedPath).permissions());
     } else {
+        /**
+         * @brief Executes the q dir procedure for the module.
+         */
         QDir().mkpath(QFileInfo(userPath).absolutePath());
     }
 
