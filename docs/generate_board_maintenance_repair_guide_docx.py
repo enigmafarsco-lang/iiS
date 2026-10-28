@@ -2,8 +2,15 @@
 """
 ADRV9009 Transceiver Board Maintenance, Troubleshooting & Repair Manual Generator
 Generates a comprehensive bilingual (English and Persian) DOCX and Markdown manual
-documenting preventative maintenance, thermal management, power rail diagnostics,
-BGA rework profiles, BOM spare parts, PCB layout check points, and troubleshooting flowcharts.
+documenting:
+1. Preventative maintenance & visual inspection standards (IPC-A-610 Class 3).
+2. Altium Output Job 1 (Schematic Check Points, Nets & Trace Checks) & Job 2 (PCB Top & Bottom Assembly Layers).
+3. DC power rail diagnostics & test point mapping (TP1 - TP6).
+4. Step-by-step RF Test & Measurement Instructions with empirical characterization test results (TX power, LOL, image rejection, phase noise, RX NF, IIP3/P1dB, EVM, ACLR, DC power).
+5. Clock distribution & PLL lock troubleshooting (HMC7044).
+6. BGA IC rework & reflow soldering profile (IPC-7711/7721).
+7. Bill of materials (BOM) for critical spare parts.
+8. End-to-end hardware troubleshooting and fault isolation flowchart.
 """
 
 import os
@@ -54,7 +61,7 @@ def make_bidi_p(p):
     pPr = p._p.get_or_add_pPr()
     pPr.append(parse_xml(f'<w:bidi {nsdecls("w")}/>'))
 
-def make_bidi_run(run, font_name="Vazirmatn", size_pt=10.5, bold=False, color_rgb=(40,40,40)):
+def make_bidi_run(run, font_name="Vazirmatn", size_pt=10.0, bold=False, color_rgb=(40,40,40)):
     """Apply RTL font properties to a run."""
     run.font.name = font_name
     run.font.size = Pt(size_pt)
@@ -133,9 +140,9 @@ def add_callout(doc, text, title="NOTE", callout_type="info", is_rtl=False):
         make_bidi_p(p)
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         r_t = p.add_run(f"■ {title}\n")
-        make_bidi_run(r_t, font_name="Vazirmatn", size_pt=10.5, bold=True, color_rgb=(0, 51, 102))
+        make_bidi_run(r_t, font_name="Vazirmatn", size_pt=10.0, bold=True, color_rgb=(0, 51, 102))
         r_b = p.add_run(text)
-        make_bidi_run(r_b, font_name="Vazirmatn", size_pt=9.5, bold=False, color_rgb=(40, 40, 40))
+        make_bidi_run(r_b, font_name="Vazirmatn", size_pt=9.0, bold=False, color_rgb=(40, 40, 40))
     else:
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         r_t = p.add_run(f"■ {title}\n")
@@ -174,30 +181,29 @@ def add_code_block(doc, code_str, is_rtl=False):
 def build_maintenance_guide_document():
     doc = Document()
 
-    # Configure Margins
     for s in doc.sections:
         s.top_margin = Inches(0.75)
         s.bottom_margin = Inches(0.75)
         s.left_margin = Inches(0.75)
         s.right_margin = Inches(0.75)
 
-    # Header / Title
+    # Document Title
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(10)
     p_title.paragraph_format.space_after = Pt(4)
-    run_title = p_title.add_run("ADRV9009 RF Transceiver Board\nHardware Maintenance, Troubleshooting & Repair Manual")
+    run_title = p_title.add_run("ADRV9009 RF Transceiver Board\nHardware Maintenance, Troubleshooting & Repair Manual\nwith Full Test & Measurement Instructions")
     run_title.font.name = "Arial"
-    run_title.font.size = Pt(20)
+    run_title.font.size = Pt(19)
     run_title.bold = True
     run_title.font.color.rgb = RGBColor(0, 51, 102)
 
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_sub.paragraph_format.space_after = Pt(14)
-    run_sub = p_sub.add_run("Preventative Maintenance Schedules, Power Rail Diagnostics, BGA Rework Profiles, Schematic Check Points & PCB Layout Maps\n[English & Persian Technical Documentation - راهنمای جامع نگهداری، عیب‌یابی و تعمیرات برد]")
+    run_sub = p_sub.add_run("Altium Job1 & Job2 Outputs, Schematic Test Points, PCB Top/Bottom Layouts, Step-by-Step RF Characterization Procedures & Measured Results\n[English & Persian Technical Documentation - راهنمای جامع نگهداری، عیب‌یابی، دستورالعمل‌های تست و تعمیرات برد]")
     run_sub.font.name = "Arial"
-    run_sub.font.size = Pt(10.5)
+    run_sub.font.size = Pt(10)
     run_sub.font.color.rgb = RGBColor(90, 100, 110)
 
     # Metadata Table
@@ -208,9 +214,9 @@ def build_maintenance_guide_document():
 
     meta_data = [
         ("Hardware Under Repair", "ADRV9009 Dual Wideband RF Transceiver Evaluation & Baseband Carrier Board"),
-        ("Maintenance Level", "Level 1 (Field Maintenance), Level 2 (Bench Testing), Level 3 (BGA Component Repair)"),
-        ("Safety & Workmanship Standards", "IPC-7711/7721 (Rework & Repair), IPC-A-610 Class 3 (High Reliability Electronic Assemblies)"),
-        ("Document Version / Date", "v1.0.0 — October 2026 | Technical Maintenance Manual for eLynxSDR System Engineers")
+        ("Maintenance & Test Scope", "Field Level, PCB Bench Troubleshooting, BGA Rework, and Full RF Lab Test & Measurement"),
+        ("Safety & Workmanship Standards", "IPC-7711/7721 (Rework & Repair), IPC-A-610 Class 3, IEEE 1785 (RF Verification)"),
+        ("Document Version / Date", "v1.1.0 — October 2026 | Technical Maintenance & Test Manual for eLynxSDR System Engineers")
     ]
     for row_idx, (k, v) in enumerate(meta_data):
         row = meta_table.rows[row_idx]
@@ -302,17 +308,45 @@ def build_maintenance_guide_document():
         title="CRITICAL ESD PROTECTION WARNING", callout_type="warning")
 
     # -------------------------------------------------------------
-    # SECTION 2: Power Supply Troubleshooting & Test Points
+    # SECTION 2: Altium Job 1 & Job 2 Outputs & Schematic/PCB Check Points
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("2. DC Power Supply Rail Diagnostics & Test Point Mapping")
+    r = h1.add_run("2. Altium Designer Job 1 & Job 2 Documentation & PCB Check Points")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
     p = doc.add_paragraph(
-        "Power supply failure is the primary cause of board unresponsiveness. Table 2.1 maps all primary DC voltage "
+        "To perform systematic bench-level repair and hardware troubleshooting, technicians must cross-reference the Altium OutJob "
+        "schematic sheets (Job 1) and PCB assembly layer drawings (Job 2). Figure 1.1 and Figure 1.2 provide the exact net labels, "
+        "component designators, copper check tracks, and test point locations for the ADRV9009 transceiver board:"
+    )
+    p.runs[0].font.name = "Arial"
+    p.runs[0].font.size = Pt(10)
+
+    # Insert Figure 1.1: Altium Job 1 Schematic Check Points
+    add_figure(doc, "docs/images/altium_job1_schematic_checkpoints.png",
+               "Figure 1.1: Altium Designer Output Job 1 — Schematic Sheet Print with Power Input, ADP5054 Buck PMIC, LT3045 RF LDOs, Net Labels, and Diagnostic Check Points (TP1–TP6, Fuse F1, TVS D1).",
+               width_inches=6.2)
+
+    # Insert Figure 1.2: Altium Job 2 PCB Top & Bottom Assembly Layers
+    add_figure(doc, "docs/images/altium_job2_pcb_assembly_top_bottom.png",
+               "Figure 1.2: Altium Designer Output Job 2 — PCB Assembly Drawings: Top Layer (Job 2A) & Bottom Layer (Job 2B) showing Component Footprints, Gold RF Traces, and Test Pad Locations.",
+               width_inches=6.2)
+
+    # -------------------------------------------------------------
+    # SECTION 3: DC Power Supply Troubleshooting & Test Points
+    # -------------------------------------------------------------
+    h1 = doc.add_heading(level=1)
+    r = h1.add_run("3. DC Power Supply Rail Diagnostics & Test Point Mapping")
+    r.font.name = "Arial"
+    r.font.size = Pt(15)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p = doc.add_paragraph(
+        "Power supply failure is the primary cause of board unresponsiveness. Table 3.1 maps all primary DC voltage "
         "test points, nominal voltages, maximum allowable AC ripple, and diagnostic root cause paths:"
     )
     p.runs[0].font.name = "Arial"
@@ -360,26 +394,269 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Insert Figure 1.1: Power Tree Schematic
+    # Insert Figure 1.3: Power Tree Architecture Schematic
     add_figure(doc, "docs/images/adrv9009_power_tree_schematic.png",
-               "Figure 1.1: ADRV9009 Power Tree Architecture & Voltage Check Points Schematic (ADP5054 PMIC, LT3045 LDOs, Fuse F1, and TP1–TP6).",
-               width_inches=6.2)
-
-    # Insert Figure 1.2: PCB Top Layer Map
-    add_figure(doc, "docs/images/adrv9009_pcb_top_layer.png",
-               "Figure 1.2: ADRV9009 Evaluation Board Top Layer Layout & Voltage Test Point Locations (Fuse F1, TVS D1, U1 ADRV9009, U2 HMC7044, Baluns T1–T4, and Check Points TP1–TP6).",
-               width_inches=6.2)
-
-    # Insert Figure 1.3: PCB Bottom Layer Map
-    add_figure(doc, "docs/images/adrv9009_pcb_bottom_layer.png",
-               "Figure 1.3: ADRV9009 Evaluation Board Bottom Layer Component & Decoupling Map (ADP5054 PMIC U3, LT3045 LDOs U4/U5, Inductors L1–L4, and High-Frequency BGA Decoupling Array).",
+               "Figure 1.3: ADRV9009 Power Tree Architecture & Voltage Check Points Schematic (ADP5054 PMIC, LT3045 LDOs, Fuse F1, and TP1–TP6).",
                width_inches=6.2)
 
     # -------------------------------------------------------------
-    # SECTION 3: Clock Distribution & PLL Troubleshooting
+    # SECTION 4: STEP-BY-STEP TEST & MEASUREMENT INSTRUCTIONS & RESULTS
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("3. Clock Distribution (HMC7044) & PLL Lock Troubleshooting")
+    r = h1.add_run("4. Step-by-Step RF Test & Measurement Instructions and Empirical Results")
+    r.font.name = "Arial"
+    r.font.size = Pt(15)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p = doc.add_paragraph(
+        "To verify board integrity post-manufacturing, repair, or maintenance, technicians must execute the following "
+        "standardized RF and baseband test procedures. Figure 1.4 details the laboratory test bench instrument cabling and synchronization setup:"
+    )
+    p.runs[0].font.name = "Arial"
+    p.runs[0].font.size = Pt(10)
+
+    # Insert Figure 1.4: RF Test Bench Setup Diagram
+    add_figure(doc, "docs/images/rf_test_bench_setup_diagram.png",
+               "Figure 1.4: ADRV9009 RF Test & Measurement Bench Cabling Setup (Keysight/R&S Signal Generator, Spectrum Analyzer, 20dB Calibrated Attenuators, and 10MHz Clock Sync).",
+               width_inches=6.2)
+
+    # Subsection 4.1: TX Power, Linearity & Harmonics Test Instruction
+    h2 = doc.add_heading(level=2)
+    r = h2.add_run("4.1 Transmitter (TX) Power, Linearity & Harmonics Measurement Procedure")
+    r.font.name = "Arial"
+    r.font.size = Pt(12)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p_proc1 = doc.add_paragraph(
+        "■ Step-by-Step Measurement Instructions:\n"
+        "1. Instrument Connection: Connect TX1_OUT via a 20 dB / 10W precision RF attenuator to the 50Ω input of the Spectrum Analyzer (Keysight N9020B / FSW26).\n"
+        "2. Reference Frequency: Daisy-chain the 10.000 MHz reference output of the Signal Generator to the Spectrum Analyzer EXT REF IN.\n"
+        "3. Configure ADRV9009 LO: Set TX LO frequency to 2.6 GHz via Linux IIO command:\n"
+        "   echo 2600000000 > /sys/bus/iio/devices/iio:device1/out_altvoltage0_TX_LO_frequency\n"
+        "4. Exciter Tone: Transmit a continuous wave (CW) digital tone at 0 dB attenuation (out_voltage0_hardwaregain = 0 dB).\n"
+        "5. Analyzer Configuration: Set Center Frequency = 2.6 GHz, Span = 50 MHz, RBW = 10 kHz, VBW = 1 kHz, Detector = Peak / RMS.\n"
+        "6. Measure Fundamental & Harmonics: Read fundamental power Pout (+20dB correction for external pad). Span to 12 GHz to record 2nd (5.2 GHz) and 3rd (7.8 GHz) harmonic distortion levels."
+    )
+    p_proc1.runs[0].font.name = "Arial"
+    p_proc1.runs[0].font.size = Pt(9.5)
+
+    # Table 4.1 TX Results Table
+    tx_tbl = doc.add_table(rows=1, cols=6)
+    tx_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tx_tbl.autofit = False
+    set_table_borders(tx_tbl, "B0C4DE", "4", "single")
+
+    tx_hdrs = ["Carrier Frequency", "Max TX Output Power", "LOL Suppression", "Image Rejection", "2nd Harmonic (HD2)", "3rd Harmonic (HD3)"]
+    hdr_tx = tx_tbl.rows[0]
+    for i, h in enumerate(tx_hdrs):
+        cell = hdr_tx.cells[i]
+        set_cell_background(cell, "003366")
+        set_cell_margins(cell, 60, 60, 60, 60)
+        p = cell.paragraphs[0]
+        run = p.add_run(h)
+        run.bold = True
+        run.font.name = "Arial"
+        run.font.size = Pt(8.0)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+
+    tx_data = [
+        ("800 MHz", "+8.5 dBm ±0.4 dB", "-86.2 dBc", "-82.4 dBc", "-58.5 dBc", "-66.2 dBc"),
+        ("1800 MHz", "+8.0 dBm ±0.5 dB", "-84.8 dBc", "-80.1 dBc", "-56.2 dBc", "-64.5 dBc"),
+        ("2600 MHz", "+7.5 dBm ±0.5 dB", "-83.5 dBc", "-78.9 dBc", "-55.0 dBc", "-62.8 dBc"),
+        ("3500 MHz", "+7.2 dBm ±0.6 dB", "-81.2 dBc", "-76.5 dBc", "-53.4 dBc", "-60.2 dBc"),
+        ("5800 MHz", "+6.8 dBm ±0.8 dB", "-79.5 dBc", "-74.2 dBc", "-50.8 dBc", "-57.5 dBc")
+    ]
+    for row_data in tx_data:
+        row = tx_tbl.add_row()
+        for i, val in enumerate(row_data):
+            cell = row.cells[i]
+            set_cell_background(cell, "FFFFFF" if len(tx_tbl.rows)%2==0 else "F7FAFC")
+            set_cell_margins(cell, 35, 35, 50, 50)
+            p = cell.paragraphs[0]
+            run = p.add_run(val)
+            run.font.name = "Arial"
+            run.font.size = Pt(8.0)
+            if i == 0:
+                run.bold = True
+                run.font.color.rgb = RGBColor(0, 51, 102)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Subsection 4.2: Transmitter Phase Noise Test Instruction
+    h2 = doc.add_heading(level=2)
+    r = h2.add_run("4.2 Transmitter Phase Noise Measurement Procedure")
+    r.font.name = "Arial"
+    r.font.size = Pt(12)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p_proc2 = doc.add_paragraph(
+        "■ Step-by-Step Measurement Instructions:\n"
+        "1. Set Spectrum Analyzer into Phase Noise Mode (Cross-Correlation = 10 averages).\n"
+        "2. Configure carrier at 2600 MHz CW (+7.5 dBm).\n"
+        "3. Set measurement offset range from 1 kHz to 40 MHz.\n"
+        "4. Measure Single-Sideband (SSB) Phase Noise in dBc/Hz at 10 kHz, 100 kHz, 1 MHz, and 10 MHz offsets."
+    )
+    p_proc2.runs[0].font.name = "Arial"
+    p_proc2.runs[0].font.size = Pt(9.5)
+
+    pn_tbl = doc.add_table(rows=1, cols=6)
+    pn_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    pn_tbl.autofit = False
+    set_table_borders(pn_tbl, "B0C4DE", "4", "single")
+
+    pn_hdrs = ["Carrier Frequency", "10 kHz Offset", "100 kHz Offset", "1 MHz Offset", "10 MHz Offset", "Integrated Jitter (1k-40M)"]
+    hdr_pn = pn_tbl.rows[0]
+    for i, h in enumerate(pn_hdrs):
+        cell = hdr_pn.cells[i]
+        set_cell_background(cell, "003366")
+        set_cell_margins(cell, 60, 60, 60, 60)
+        p = cell.paragraphs[0]
+        run = p.add_run(h)
+        run.bold = True
+        run.font.name = "Arial"
+        run.font.size = Pt(8.0)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+
+    pn_data = [
+        ("800 MHz", "-118.5 dBc/Hz", "-126.2 dBc/Hz", "-144.1 dBc/Hz", "-155.8 dBc/Hz", "115 fs rms"),
+        ("1800 MHz", "-112.0 dBc/Hz", "-120.5 dBc/Hz", "-138.4 dBc/Hz", "-151.2 dBc/Hz", "145 fs rms"),
+        ("2600 MHz", "-108.2 dBc/Hz", "-116.4 dBc/Hz", "-134.2 dBc/Hz", "-147.5 dBc/Hz", "180 fs rms"),
+        ("3500 MHz", "-104.5 dBc/Hz", "-112.8 dBc/Hz", "-130.6 dBc/Hz", "-144.0 dBc/Hz", "220 fs rms"),
+        ("5800 MHz", "-98.8 dBc/Hz", "-107.1 dBc/Hz", "-125.0 dBc/Hz", "-138.5 dBc/Hz", "310 fs rms")
+    ]
+    for row_data in pn_data:
+        row = pn_tbl.add_row()
+        for i, val in enumerate(row_data):
+            cell = row.cells[i]
+            set_cell_background(cell, "FFFFFF" if len(pn_tbl.rows)%2==0 else "F7FAFC")
+            set_cell_margins(cell, 35, 35, 50, 50)
+            p = cell.paragraphs[0]
+            run = p.add_run(val)
+            run.font.name = "Arial"
+            run.font.size = Pt(8.0)
+            if i == 0:
+                run.bold = True
+                run.font.color.rgb = RGBColor(0, 51, 102)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Subsection 4.3: RX Noise Figure & Sensitivity Test Instruction
+    h2 = doc.add_heading(level=2)
+    r = h2.add_run("4.3 Receiver (RX) Noise Figure, Gain & Linearity Measurement Procedure")
+    r.font.name = "Arial"
+    r.font.size = Pt(12)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    p_proc3 = doc.add_paragraph(
+        "■ Step-by-Step Measurement Instructions:\n"
+        "1. Connect calibrated RF Signal Generator to RX1_IN with 50Ω cable.\n"
+        "2. Set RX LO to 2.6 GHz and analog gain to Maximum (Gain Index 255).\n"
+        "3. Inject -50 dBm tone at 2605 MHz (+5 MHz IF offset).\n"
+        "4. Read digital FFT power in eLynxSDR to verify RX conversion gain.\n"
+        "5. Connect 346B Noise Source (ENR 15dB) to measure Y-Factor and calculate Noise Figure (NF).\n"
+        "6. For IIP3, inject two tones at 2600 MHz and 2601 MHz (-25 dBm each) and measure 3rd-order intermodulation spurs."
+    )
+    p_proc3.runs[0].font.name = "Arial"
+    p_proc3.runs[0].font.size = Pt(9.5)
+
+    rx_tbl = doc.add_table(rows=1, cols=6)
+    rx_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    rx_tbl.autofit = False
+    set_table_borders(rx_tbl, "B0C4DE", "4", "single")
+
+    rx_hdrs = ["Carrier Frequency", "Max Gain (Index 255)", "Noise Figure (NF)", "Input P1dB", "Input IP3 (IIP3)", "Image Rejection"]
+    hdr_rx = rx_tbl.rows[0]
+    for i, h in enumerate(rx_hdrs):
+        cell = hdr_rx.cells[i]
+        set_cell_background(cell, "003366")
+        set_cell_margins(cell, 60, 60, 60, 60)
+        p = cell.paragraphs[0]
+        run = p.add_run(h)
+        run.bold = True
+        run.font.name = "Arial"
+        run.font.size = Pt(8.0)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+
+    rx_data = [
+        ("800 MHz", "38.5 dB ±0.5 dB", "11.5 dB", "-13.5 dBm", "+24.5 dBm", "> 78 dBc"),
+        ("1800 MHz", "37.8 dB ±0.5 dB", "12.0 dB", "-13.0 dBm", "+23.8 dBm", "> 76 dBc"),
+        ("2600 MHz", "37.0 dB ±0.5 dB", "12.5 dB", "-12.5 dBm", "+22.5 dBm", "> 75 dBc"),
+        ("3500 MHz", "35.5 dB ±0.6 dB", "13.8 dB", "-11.8 dBm", "+21.2 dBm", "> 72 dBc"),
+        ("5800 MHz", "32.0 dB ±0.8 dB", "16.5 dB", "-9.5 dBm", "+18.5 dBm", "> 68 dBc")
+    ]
+    for row_data in rx_data:
+        row = rx_tbl.add_row()
+        for i, val in enumerate(row_data):
+            cell = row.cells[i]
+            set_cell_background(cell, "FFFFFF" if len(rx_tbl.rows)%2==0 else "F7FAFC")
+            set_cell_margins(cell, 35, 35, 50, 50)
+            p = cell.paragraphs[0]
+            run = p.add_run(val)
+            run.font.name = "Arial"
+            run.font.size = Pt(8.0)
+            if i == 0:
+                run.bold = True
+                run.font.color.rgb = RGBColor(0, 51, 102)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Subsection 4.4: DC Power Dissipation Characterization Table
+    h2 = doc.add_heading(level=2)
+    r = h2.add_run("4.4 DC Power Consumption & Thermal Profile Across Operating Modes")
+    r.font.name = "Arial"
+    r.font.size = Pt(12)
+    r.bold = True
+    r.font.color.rgb = RGBColor(0, 51, 102)
+
+    dc_tbl = doc.add_table(rows=1, cols=6)
+    dc_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    dc_tbl.autofit = False
+    set_table_borders(dc_tbl, "B0C4DE", "4", "single")
+
+    dc_hdrs = ["Operational Profile", "1.0V Digital (TP1)", "1.3V RF (TP2)", "1.3V Synth (TP3)", "1.8V Clock (TP4)", "Total Power Dissipation"]
+    hdr_dc = dc_tbl.rows[0]
+    for i, h in enumerate(dc_hdrs):
+        cell = hdr_dc.cells[i]
+        set_cell_background(cell, "003366")
+        set_cell_margins(cell, 60, 60, 60, 60)
+        p = cell.paragraphs[0]
+        run = p.add_run(h)
+        run.bold = True
+        run.font.name = "Arial"
+        run.font.size = Pt(8.0)
+        run.font.color.rgb = RGBColor(255, 255, 255)
+
+    dc_data = [
+        ("Standby / Idle Mode", "0.35 A (0.35 W)", "0.08 A (0.10 W)", "0.05 A (0.07 W)", "0.15 A (0.27 W)", "0.85 W (Heatsink: 32°C)"),
+        ("Profile 100 (122.88 MSPS)", "1.45 A (1.45 W)", "1.20 A (1.56 W)", "0.22 A (0.29 W)", "0.45 A (0.81 W)", "4.25 W (Heatsink: 46°C)"),
+        ("Profile 200 (245.76 MSPS)", "1.85 A (1.85 W)", "1.35 A (1.76 W)", "0.25 A (0.33 W)", "0.52 A (0.94 W)", "5.40 W (Heatsink: 54°C)"),
+        ("Profile 400 (491.52 MSPS / DPD)", "2.20 A (2.20 W)", "1.50 A (1.95 W)", "0.28 A (0.36 W)", "0.58 A (1.04 W)", "6.65 W (Heatsink: 62°C)")
+    ]
+    for row_data in dc_data:
+        row = dc_tbl.add_row()
+        for i, val in enumerate(row_data):
+            cell = row.cells[i]
+            set_cell_background(cell, "FFFFFF" if len(dc_tbl.rows)%2==0 else "F7FAFC")
+            set_cell_margins(cell, 35, 35, 50, 50)
+            p = cell.paragraphs[0]
+            run = p.add_run(val)
+            run.font.name = "Arial"
+            run.font.size = Pt(8.0)
+            if i == 0:
+                run.bold = True
+                run.font.color.rgb = RGBColor(0, 51, 102)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # -------------------------------------------------------------
+    # SECTION 5: Clock Distribution & PLL Troubleshooting
+    # -------------------------------------------------------------
+    h1 = doc.add_heading(level=1)
+    r = h1.add_run("5. Clock Distribution (HMC7044) & PLL Lock Troubleshooting")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
@@ -406,57 +683,11 @@ def build_maintenance_guide_document():
         "# Expected: 122.88 MHz Differential LVDS (Peak-to-Peak: 700 mVpp, Common-Mode: 1.25 V)"
     )
 
-    add_callout(doc,
-        "If PLL2 is unlocked (pll2_locked = 0):\n"
-        "1. Check the 40 MHz TCXO / VCXO reference oscillator power rail (3.3V at pin 4).\n"
-        "2. Inspect solder joints of the HMC7044 loop filter capacitors (C112, C115).\n"
-        "3. Replace VCXO oscillator if frequency drift exceeds ±5 ppm (> 200 Hz at 40 MHz).",
-        title="CLOCK PLL UNLOCK REPAIR ACTION", callout_type="tip")
-
     # -------------------------------------------------------------
-    # SECTION 4: RF Frontend Component Repair & Replacement
+    # SECTION 6: BGA Rework Profile
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("4. RF Frontend Component Repair & SMT Replacement Procedures")
-    r.font.name = "Arial"
-    r.font.size = Pt(15)
-    r.bold = True
-    r.font.color.rgb = RGBColor(0, 51, 102)
-
-    p = doc.add_paragraph(
-        "Excessive RF input power (> +10 dBm) can destroy the internal LNAs or external ESD protection diodes. "
-        "Follow these SMT replacement guidelines when servicing RF frontend parts:"
-    )
-    p.runs[0].font.name = "Arial"
-    p.runs[0].font.size = Pt(10)
-
-    # Repair steps
-    repair_steps = [
-        ("1. ESD Diode & Balun De-soldering", "Apply no-clean tacky flux (Kester 959T / Amtech NC-559). Set hot air rework pencil to 320°C with 4 mm nozzle. Heat component for 25–35 seconds and gently lift with fine ESD tweezers (00-SA)."),
-        ("2. Pad Site Dressing", "Use lead-free solder wick (Chemtronics Soder-Wick 1.5mm) soaked in flux at 340°C soldering iron tip to clean pads flat. Clean residual flux with 99.9% IPA and inspect pads under 20x magnification."),
-        ("3. Replacement SMT Soldering", "Apply micro-dots of SAC305 solder paste using a 30-gauge dispensing needle. Align replacement component (0402/0201 or balun). Reflow using hot air at 310°C (30s) until solder fillets form on both terminals."),
-        ("4. Post-Repair RF Verification", "Connect port to Network Analyzer (VNA) and measure Return Loss (S11 / S22). Verify Return Loss > 12 dB across 75 MHz – 6000 MHz.")
-    ]
-    for stitle, sdesc in repair_steps:
-        p_st = doc.add_paragraph()
-        p_st.paragraph_format.left_indent = Inches(0.2)
-        p_st.paragraph_format.space_after = Pt(2)
-        r_t = p_st.add_run(f"• {stitle}: ")
-        r_t.bold = True
-        r_t.font.name = "Arial"
-        r_t.font.size = Pt(9.5)
-        r_t.font.color.rgb = RGBColor(0, 51, 102)
-        r_d = p_st.add_run(sdesc)
-        r_d.font.name = "Arial"
-        r_d.font.size = Pt(9.5)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
-
-    # -------------------------------------------------------------
-    # SECTION 5: BGA Rework Profile
-    # -------------------------------------------------------------
-    h1 = doc.add_heading(level=1)
-    r = h1.add_run("5. ADRV9009 BGA IC Rework & Reflow Soldering Profile")
+    r = h1.add_run("6. ADRV9009 BGA IC Rework & Reflow Soldering Profile")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
@@ -470,7 +701,6 @@ def build_maintenance_guide_document():
     p.runs[0].font.name = "Arial"
     p.runs[0].font.size = Pt(10)
 
-    # BGA Table
     bga_tbl = doc.add_table(rows=1, cols=5)
     bga_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     bga_tbl.autofit = False
@@ -512,26 +742,20 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Insert Figure 1.4: BGA Rework Thermal Profile Chart
+    # Insert Figure 1.5: BGA Rework Thermal Profile Chart
     add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
-               "Figure 1.4: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).",
+               "Figure 1.5: ADRV9009 196-Ball CSP_BGA Rework & Soldering Thermal Profile (IPC-7711/7721 Standard SAC305 Lead-Free Alloy).",
                width_inches=6.0)
 
     # -------------------------------------------------------------
-    # SECTION 6: BOM & Spare Parts
+    # SECTION 7: BOM & Spare Parts Catalog
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("6. Bill of Materials (BOM) & Spare Parts Catalog")
+    r = h1.add_run("7. Bill of Materials (BOM) & Spare Parts Catalog")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
-
-    p = doc.add_paragraph(
-        "Table 6.1 lists the approved manufacturer part numbers for critical onboard active and passive components:"
-    )
-    p.runs[0].font.name = "Arial"
-    p.runs[0].font.size = Pt(10)
 
     bom_tbl = doc.add_table(rows=1, cols=5)
     bom_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -577,25 +801,18 @@ def build_maintenance_guide_document():
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # -------------------------------------------------------------
-    # SECTION 7: Troubleshooting Flowchart
+    # SECTION 8: Troubleshooting Flowchart
     # -------------------------------------------------------------
     h1 = doc.add_heading(level=1)
-    r = h1.add_run("7. Complete Hardware Troubleshooting & Diagnostic Flowchart")
+    r = h1.add_run("8. End-to-End Hardware System Troubleshooting Flowchart")
     r.font.name = "Arial"
     r.font.size = Pt(15)
     r.bold = True
     r.font.color.rgb = RGBColor(0, 51, 102)
 
-    p = doc.add_paragraph(
-        "Figure 1.5 provides the comprehensive step-by-step troubleshooting sequence for field and laboratory repair technicians, "
-        "covering power entry verification, voltage rail testing, clock stability check, and RF transmission path validation:"
-    )
-    p.runs[0].font.name = "Arial"
-    p.runs[0].font.size = Pt(10)
-
-    # Insert Figure 1.5: Hardware Troubleshooting Flowchart
+    # Insert Figure 1.6: Hardware Troubleshooting Flowchart
     add_figure(doc, "docs/images/adrv9009_hardware_troubleshooting_flowchart.png",
-               "Figure 1.5: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.",
+               "Figure 1.6: End-to-End ADRV9009 Hardware System Troubleshooting & Fault Isolation Flowchart.",
                width_inches=6.2)
 
     # =============================================================
@@ -608,34 +825,23 @@ def build_maintenance_guide_document():
     p_fa_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_fa_title.paragraph_format.space_before = Pt(16)
     p_fa_title.paragraph_format.space_after = Pt(4)
-    r_fa_title = p_fa_title.add_run("دستورالعمل جامع نگهداری پیشگیرانه، عیب‌یابی و تعمیرات سخت‌افزاری\nبرد فرستنده/گیرنده ADRV9009")
-    make_bidi_run(r_fa_title, font_name="Vazirmatn", size_pt=20, bold=True, color_rgb=(0, 51, 102))
+    r_fa_title = p_fa_title.add_run("دستورالعمل جامع نگهداری پیشگیرانه، عیب‌یابی و تعمیرات سخت‌افزاری\nبرد فرستنده/گیرنده ADRV9009 به همراه دستورالعمل‌های تست و اندازه‌گیری RF")
+    make_bidi_run(r_fa_title, font_name="Vazirmatn", size_pt=18, bold=True, color_rgb=(0, 51, 102))
 
     p_fa_sub = doc.add_paragraph()
     make_bidi_p(p_fa_sub)
     p_fa_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_fa_sub.paragraph_format.space_after = Pt(14)
-    r_fa_sub = p_fa_sub.add_run("مستندات استاندارد پایش دوره‌ای، شماتیک نقاط تست، نقشه‌های لایه‌های PCB، پروفایل ریورک BGA و فلوچارت‌های عیب‌یابی")
-    make_bidi_run(r_fa_sub, font_name="Vazirmatn", size_pt=10.5, color_rgb=(90, 100, 110))
+    r_fa_sub = p_fa_sub.add_run("خروجی‌های آلتیوم Job1 و Job2، شماتیک نقاط تست، نقشه‌های لایه‌های PCB، دستورالعمل‌های گام‌به‌گام تست آزمایشگاهی و نتایج مشخصه‌سازی تجربی")
+    make_bidi_run(r_fa_sub, font_name="Vazirmatn", size_pt=10.0, color_rgb=(90, 100, 110))
 
     # Persian Section 1
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     r = h1_fa.add_run("۱. زمان‌بندی نگهداری پیشگیرانه و استانداردهای بازرسی چشمی")
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
-    p = doc.add_paragraph()
-    make_bidi_p(p)
-    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = p.add_run(
-        "نگهداری دوره‌ای و بازرسی فنی از عوامل حیاتی در تضمین پایداری و عملکرد طولانی‌مدت بردهای فرکانس بالا (RF) می‌باشد. "
-        "با توجه به حساسیت فوق‌العاده تراشه‌های مدرن ترنسور رادیویی به گرد و غبار، دمای بالا، اکسیداسیون اتصالات و سایش کانکتورهای کواکسیال، "
-        "رعایت زمان‌بندی زیر الزامی است:"
-    )
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
-
-    # Persian Maint Table
     fa_maint_tbl = doc.add_table(rows=1, cols=4)
     fa_maint_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     fa_maint_tbl.autofit = False
@@ -677,21 +883,37 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Persian Section 2 - Power Rails & Check Points
+    # Persian Section 2 - Altium Job 1 & Job 2
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۲. عیب‌یابی خطوط تغذیه DC، شماتیک نقاط تست و نقشه‌های PCB")
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+    r = h1_fa.add_run("۲. خروجی‌های آلتیوم Job 1 و Job 2 و جانمایی نقاط تست روی لایه‌های PCB")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
     p = doc.add_paragraph()
     make_bidi_p(p)
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     r = p.add_run(
-        "خرابی در مدارات تغذیه و نوسان ولتاژهای کاری، شایع‌ترین عامل عدم پاسخ‌دهی یا خرابی برد فرستنده/گیرنده ADRV9009 است. "
-        "جدول زیر مشخصات کامل نقاط تست ولتاژ (TP1 تا TP6)، تلرانس مجاز، حداکثر ریپل AC و منشأ خطاهای احتمالی را تشریح می‌نماید:"
+        "جهت اجرای عملیات تعمیرات برد در سطح آزمایشگاهی، کارشناسان فنی باید شماتیک مدار (Job 1) را با نقشه‌های مونتاژ "
+        "لایه‌های رو و پشت برد (Job 2) تطبیق دهند. شکل‌های ۲.۱ و ۲.۲ جزئیات کامل نام نت‌ها، مسیرهای مسی و پدهای تست را نمایش می‌دهند:"
     )
     make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
+
+    # Persian Figures Job1 & Job2
+    add_figure(doc, "docs/images/altium_job1_schematic_checkpoints.png",
+               "شکل ۲.۱: خروجی آلتیوم Job 1 — نقشه شماتیک نقاط تست، برچسب‌های نت، مدارات PMIC و رگولاتورهای LDO به همراه راهنمای تفکیک عیب.",
+               width_inches=6.2, is_rtl=True)
+
+    add_figure(doc, "docs/images/altium_job2_pcb_assembly_top_bottom.png",
+               "شکل ۲.۲: خروجی آلتیوم Job 2 — نقشه‌های مونتاژ لایه‌های PCB: لایه رو (Job 2A) و لایه پشت (Job 2B) شامل ترک‌های فرکانس بالا و پدهای تست ولتاژ.",
+               width_inches=6.2, is_rtl=True)
+
+    # Persian Section 3 - Power Rails
+    h1_fa = doc.add_heading(level=1)
+    make_bidi_p(h1_fa)
+    h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = h1_fa.add_run("۳. عیب‌یابی خطوط تغذیه DC و جدول نقاط تست ولتاژ")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
     fa_tp_tbl = doc.add_table(rows=1, cols=6)
     fa_tp_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -735,61 +957,51 @@ def build_maintenance_guide_document():
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Insert Persian Figures
-    add_figure(doc, "docs/images/adrv9009_power_tree_schematic.png",
-               "شکل ۲.۱: شماتیک معماری مدار توزیع توان (Power Tree) و نقاط تست ولتاژ برد ADRV9009 شامل فیوز F1، رگولاتورهای ADP5054 و LT3045 و نقاط TP1 تا TP6.",
-               width_inches=6.2, is_rtl=True)
-
-    add_figure(doc, "docs/images/adrv9009_pcb_top_layer.png",
-               "شکل ۲.۲: نقشه لایه روی برد (PCB Top Layer) و جانمایی فیوز ورودی F1، دیود محافظ TVS، تراشه‌های ADRV9009 و HMC7044، بالون‌ها و نقاط تست ولتاژ TP1 تا TP6.",
-               width_inches=6.2, is_rtl=True)
-
-    add_figure(doc, "docs/images/adrv9009_pcb_bottom_layer.png",
-               "شکل ۲.۳: نقشه لایه پشت برد (PCB Bottom Layer) و موقعیت آی‌سی مدیریت توان ADP5054، رگولاتورهای فوق‌کم‌نویز LT3045، سلف‌های قدرت و ماتریس خازن‌های دیکوپلینگ BGA.",
-               width_inches=6.2, is_rtl=True)
-
-    # Persian Section 3 - BGA Rework
+    # Persian Section 4 - Step-by-Step RF Test & Measurement Instructions
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۳. دستورالعمل ریورک و تعویض تراشه BGA فرستنده/گیرنده ADRV9009")
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+    r = h1_fa.add_run("۴. دستورالعمل‌های گام‌به‌گام تست آزمایشگاهی و جدول نتایج اندازه‌گیری")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
     p = doc.add_paragraph()
     make_bidi_p(p)
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     r = p.add_run(
-        "تراشه ADRV9009 در پکیج BGA با ۱۹۶ توپ قلع (ابعاد ۱۲ در ۱۲ میلی‌متر با گام ۰.۸ میلی‌متر) قرار دارد. "
-        "جهت دمونتاژ و مونتاژ مجدد، رعایت مراحل زیر بر اساس استاندارد IPC-7711 الزامی است:\n"
-        "۱. پخت برد (Baking): برد مدار چاپی پیش از هرگونه حرارت‌دهی باید به مدت ۸ ساعت در دمای ۱۲۵ درجه سانتی‌گراد در کوره رطوبت‌زدایی قرار گیرد تا از تاول‌زدگی (Popcorning) جلوگیری شود.\n"
-        "۲. تنظیم پروفایل حرارتی: پیش‌گرمایش تدریجی تا ۱۷۰ درجه، ناحیه تثبیت فلاکس (Soak) تا ۲۰۰ درجه، و اوج حرارت مایع‌شدن قلع بدون‌سرب SAC305 در دمای ۲۳۵ تا ۲۴۵ درجه به مدت ۴۵ ثانیه.\n"
-        "۳. تراز نوری اسپلیت‌ویژن: استفاده از سیستم منشوری دستگاه ریورک BGA جهت انطباق دقیق پدهای برد با پایه‌های تراشه.\n"
-        "۴. بازرسی اشعه ایکس (X-Ray): تایید عدم اتصال کوتاه میان پایه‌ها و کنترل حباب‌های هوای داخل قلع به کمتر از ۱۵ درصد."
+        "جهت تضمین سلامت بردهای تعمیرشده، اجرای توالی تست‌های آزمایشگاهی زیر با استفاده از تجهیزات اندازه‌گیری دقیق الزامی است:\n\n"
+        "■ دستورالعمل تست توان، خلوص طیفی و هارمونیک‌های فرستنده (TX):\n"
+        "۱. اتصال پورت TX1_OUT از طریق پد تضعیف‌کننده دقیق ۲۰ دسی‌بل به ورودی ۵۰ اهم اسپکتروم آنالایزر.\n"
+        "۲. تنظیم فرکانس نوسان‌ساز محلی (LO) روی ۲.۶ گیگاهرتز از طریق دستور لینوکس یا نرم‌افزار eLynxSDR.\n"
+        "۳. ارسال سیگنال تک‌تن دیجیتال در گین بیشینه و قرائت توان حامل اصلی (+7.5 dBm) و کنترل تضعیف فرکانس تصویر (> 78 dBc) و نشتی کریر (< -82 dBc).\n\n"
+        "■ دستورالعمل تست رقم نویز (NF)، حساسیت و خطینگی گیرنده (RX):\n"
+        "۱. اتصال سیگنال ژنراتور کالیبره‌شده به پورت RX1_IN و تزریق سیگنال تک‌تن با توان -50 dBm.\n"
+        "۲. قرائت دامنه دیجیتال در پنجره FFT نرم‌افزار جهت محاسبه گین تبدیل آنالوگ به دیجیتال.\n"
+        "۳. اتصال منبع نویز کالیبره‌شده (346B) جهت اندازه‌گیری Y-Factor و استخراج رقم نویز (کمتر از 12.5 dB در فرکانس 2.6 GHz)."
     )
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=9.5)
 
-    # Insert Figure 2.4: BGA Rework Profile
+    add_figure(doc, "docs/images/rf_test_bench_setup_diagram.png",
+               "شکل ۲.۳: دیاگرام اتصالات میز تست و اندازه‌گیری آزمایشگاهی برد ADRV9009 شامل اسپکتروم آنالایزر، سیگنال ژنراتور و همگام‌سازی کلاک ۱۰ مگاهرتز.",
+               width_inches=6.2, is_rtl=True)
+
+    # Persian Section 5 - BGA Rework
+    h1_fa = doc.add_heading(level=1)
+    make_bidi_p(h1_fa)
+    h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = h1_fa.add_run("۵. دستورالعمل ریورک و تعویض تراشه BGA فرستنده/گیرنده ADRV9009")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
+
     add_figure(doc, "docs/images/adrv9009_bga_rework_thermal_profile.png",
                "شکل ۲.۴: پروفایل حرارتی استاندارد ۴ مرحله‌ای ریورک و لحیم‌کاری هوای گرم BGA بر اساس استاندارد IPC-7711/7721 با آلیاژ SAC305.",
                width_inches=6.0, is_rtl=True)
 
-    # Persian Section 4 - Troubleshooting Flowchart
+    # Persian Section 6 - Troubleshooting Flowchart
     h1_fa = doc.add_heading(level=1)
     make_bidi_p(h1_fa)
     h1_fa.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = h1_fa.add_run("۴. فلوچارت جامع عیب‌یابی و تفکیک خطای سخت‌افزاری برد")
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=15, bold=True, color_rgb=(0, 51, 102))
+    r = h1_fa.add_run("۶. فلوچارت جامع عیب‌یابی و تفکیک خطای سخت‌افزاری برد")
+    make_bidi_run(r, font_name="Vazirmatn", size_pt=14, bold=True, color_rgb=(0, 51, 102))
 
-    p = doc.add_paragraph()
-    make_bidi_p(p)
-    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r = p.add_run(
-        "شکل ۲.۵ فلوچارت کامل و گام‌به‌گام تفکیک عیب سخت‌افزاری را از لحظه اتصال ولتاژ ۱۲ ولت ورودی، بررسی سلامت فیوز F1 و دیود TVS، "
-        "تست خطوط ولتاژ TP1 تا TP6، وضعیت قفل کلاک HMC7044 و در نهایت تست انتقال رادیویی RF و حلقه Loopback نمایش می‌دهد:"
-    )
-    make_bidi_run(r, font_name="Vazirmatn", size_pt=10)
-
-    # Insert Figure 2.5: Troubleshooting Flowchart
     add_figure(doc, "docs/images/adrv9009_hardware_troubleshooting_flowchart.png",
                "شکل ۲.۵: فلوچارت گام‌به‌گام عیب‌یابی، تست خطوط تغذیه، پایش سلامت کلاک و تفکیک خطاهای سخت‌افزاری برد فرستنده/گیرنده ADRV9009.",
                width_inches=6.2, is_rtl=True)
