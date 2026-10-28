@@ -21,14 +21,20 @@
 // DAC sample rate - 122.88 MS/s at P100, 245.76 at P200, 491.52 at
 // P400.  The spot/bridge generators use the same table
 // (files/spot/generate.py, files/bridge/generate_bridge.py).
+/**
+ * @brief Computes the DAC sample playback rate in MS/s for a given profile bandwidth.
+ * @param profileBw Profile bandwidth (100, 200, 400 MHz).
+ * @return Effective DAC sample rate in MSPS (122.88, 245.76, or 491.52).
+ */
 static double txFileRateMhz(int profileBw)
 {
-    // The txt generation rate for ALL exciter tabs is 122.88 x P/100
-    // MS/s: 122.88 x 1 = 122.88 (profile 100), 122.88 x 2 = 245.76
-    // (profile 200), 122.88 x 4 = 491.52 (profile 400).
     return 122.88 * profileBw / 100.0;
 }
 
+/**
+ * @brief Constructs Exciter widget, instantiates waveform tabs, and binds UI signals.
+ * @param parent Optional parent QWidget.
+ */
 Exciter::Exciter(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::exciter)
@@ -319,40 +325,25 @@ Exciter::Exciter(QWidget *parent) :
     refreshTxPowerDisplay();
 }
 
+/**
+ * @brief Destructor releasing UI resources.
+ */
 Exciter::~Exciter()
 {
     delete ui;
 }
 
-
-
-//void Exciter::receiveIpAddressSlot(bool isConnect)
-//{
-////    ipAddress = ip;
-////    connectToDevice();
-//    if(isConnect && firstRun)
-//    {
-//        initConnection(isConnect);
-//        getDataSlot();
-//        firstRun = false;
-//    }
-
-//    else if(! isConnect)
-//    {
-//        initConnection(isConnect);
-//        firstRun = true;
-//    }
-//}
-
-
+/**
+ * @brief Establishes low-level connection to ADRV9009 hardware device.
+ */
 void Exciter::connectToDevice()
 {
-    //    isConnect = adrvObj->connect(ipAddress);
-    //globals::ctx=adrvObj->ctx;
+    // isConnect = adrvObj->connect(ipAddress);
 }
 
-
-
+/**
+ * @brief Packages and emits functional telemetry report to Joshan controller.
+ */
 void Exciter::joshanFuncDataSlot()
 {
     QJsonObject exciterData;
@@ -393,42 +384,50 @@ void Exciter::joshanFuncDataSlot()
         exciterData["exciter_mode"] = "null";
     }
 
-    //    exciterData["mode"] = val;
     exciterData["device"] = EXCITER_DEVICE_NAME;
-
     emit sendFuncDataToJoshanSignal(exciterData);
 }
 
+/**
+ * @brief Requests operational status report for Joshan controller.
+ */
 void Exciter::joshanStatusDataSlot()
 {
-
 }
 
-
+/**
+ * @brief Updates Exciter connection status and button indicators.
+ * @param val True if connected.
+ */
 void Exciter::initConnection(bool val)
 {
-
     isConnect = val;
     ui->btnConnect->setStyleSheet(val?"background-color:"+QString(YELLOW_GREEN) :"background-color:"+QString(RED));
     ui->btnConnect->setText(val?"Connected":"Disconnect");
     ui->btnConnect->setVisible(false);
-    //    emit connectionStatusSignal(val);
-    //    ui->tabWidget->setEnabled(val);
 }
 
+/**
+ * @brief Layout helper adding dynamic receiver controls to exciter form.
+ */
 void Exciter::addingCartElementsToExciter()
 {
-    //    QGroupBox *grbRX1 = ui->groupBox_2;
-    //    QGridLayout *gridRX2 = grbRX1->findChild<QGridLayout *>();
-
-    //    gridRX2->addWidget( , 0 , 1)             ;
 }
 
+/**
+ * @brief Displays status message from DAC DMA buffer loader.
+ * @param dacMsg Status description string.
+ * @param mode Waveform mode label.
+ */
 void Exciter::changingDacMsg(QString dacMsg,QString mode)
 {
     ui->lblDacMsg->setText(mode  + " " + dacMsg);
 }
 
+/**
+ * @brief Slot processing remote control commands received from Joshan controller.
+ * @param val JSON control object containing target frequency, power, and waveform parameters.
+ */
 void Exciter::joshanControlDataSlot(QJsonObject val)
 {
     QJsonObject value = val["parameters"].toObject();
@@ -591,17 +590,23 @@ void Exciter::joshanControlDataSlot(QJsonObject val)
     }
 }
 
+/**
+ * @brief Slot displaying smart noise active status.
+ */
 void Exciter::smartNoiseIsActiveSlot()
 {
     ui->lblDacMsg->setText("Smart noise is active.");
 }
 
+/**
+ * @brief Updates waveform generation button access based on user authorization state.
+ * @param state 1.0 if logged in, 0.0 if guest.
+ */
 void Exciter::isUserLoggedInSlot(double state)
 {
     isUserLoggedIn = state;
     for(int i{}; i < 5; i++)
     {
-//         setBtn[i]->setEnabled(true ? state==true: false);
         ui->btnSetCW->setEnabled(state);
         ui->btnSetWB->setEnabled(state);
         ui->btnLoadSpot->setEnabled(state);
@@ -610,14 +615,10 @@ void Exciter::isUserLoggedInSlot(double state)
     }
 }
 
-//void Exciter::limitationValueSlot(double minFrq, double maxFrq)
-//{
-//    minFrqLimit = minFrq;
-//    maxFrqLimit = maxFrq;
-//}
-
-// Developer builds keep using their source-tree files/ directory. Packaged
-// builds use a writable per-user location, never the read-only /opt tree.
+/**
+ * @brief Resolves target runtime directory for waveform sample files.
+ * @return Directory path string.
+ */
 static QString projectFilesDir()
 {
 #ifndef ELYNXSDR_PACKAGED
@@ -628,6 +629,11 @@ static QString projectFilesDir()
     return userFilesDirectory();
 }
 
+/**
+ * @brief Resolves relative waveform filename into absolute filesystem path and checks existence.
+ * @param fileName In/out filename reference.
+ * @return True if file exists and is readable.
+ */
 bool Exciter::returnfilePath(QString &fileName)
 {
     fullPath = QDir(projectFilesDir()).filePath(fileName);
@@ -640,67 +646,66 @@ bool Exciter::returnfilePath(QString &fileName)
         return false;
     }
 
-    // Hand the resolved absolute path back to the caller so the DAC
-    // loader gets the full path into the runtime waveform directory.
     fileName = fullPath;
-
-    // The one folder the exciter plays waveform files from.
     qInfo() << "Exciter waveform file:" << fullPath;
-
-    return  true;
+    return true;
 }
 
-
-
+/**
+ * @brief Queries current hardware frequency and power telemetry.
+ */
 void Exciter::getDataSlot()
 {
-    //set frq
-    //    ui->spnCWFrq->setValue(adrvObj->GetFrequency());
-    //    ui->spnSpotFrq->setValue(adrvObj->GetFrequency());
-    //    ui->spnImpulseFrq->setValue(adrvObj->GetFrequency());
-    //    ui->lblCurrentFrq->setText("Current Frq: " + QString::number(adrvObj->GetFrequency()));
-
-    //    //set power
-    //    ui->spnCWPower->setValue(adrvObj->GetPower());
-    //    ui->spnWBPower->setValue(adrvObj->GetPower());
-    //    ui->spnSpotPower->setValue(adrvObj->GetPower());
-    //    ui->spnSweepPower->setValue(adrvObj->GetPower());
-    //    ui->spnImpulsePower->setValue(adrvObj->GetPower());
-    //    ui->lblCurrentPower->setText("Current Power: " + QString::number(adrvObj->GetPower()));
 }
 
-
+/**
+ * @brief Checks file existence via POSIX stat.
+ * @param name File path string.
+ * @return True if file exists.
+ */
 bool Exciter::existsFile (const std::string& name)
 {
     struct stat buffer;
     return (stat (name.c_str(), &buffer) == 0);
 }
 
+/**
+ * @brief Resolves relative file path inside application runtime files directory.
+ * @param relPath Relative path.
+ * @return Absolute path if file exists, empty string otherwise.
+ */
 QString Exciter::resolveFileInAppFolders(const QString &relPath)
 {
-    // Only the runtime waveform directory selected by projectFilesDir() is
-    // searched, so waveforms cannot leak between checkouts or other folders.
     const QString full = QDir(projectFilesDir()).absoluteFilePath(relPath);
     if (existsFile(full.toStdString()))
         return full;
     return QString();
 }
 
+/**
+ * @brief Checks if Voltage 0/1 (TX1) is selected for transmission.
+ * @return True if checked.
+ */
 bool Exciter::voltage01Selected() const
 {
     return ui->chbVoltage01 && ui->chbVoltage01->isChecked();
 }
 
+/**
+ * @brief Checks if Voltage 2/3 (TX2) is selected for transmission.
+ * @return True if checked.
+ */
 bool Exciter::voltage23Selected() const
 {
     return ui->chbVoltage23 && ui->chbVoltage23->isChecked();
 }
 
+/**
+ * @brief Updates active profile bandwidth and updates placeholder limits.
+ * @param bwMHz Bandwidth in MHz (100, 200, 400).
+ */
 void Exciter::setProfileBw(int bwMHz)
 {
-    // Phase 5: active ADRV9009 profile from the receiver Profile tab.
-    // The spot BW box is free-typed 1 .. profileBw (100/200/400 MHz),
-    // so keep the placeholder in sync with the active profile.
     if (bwMHz > 0)
     {
         profileBw = bwMHz;
@@ -710,7 +715,11 @@ void Exciter::setProfileBw(int bwMHz)
     }
 }
 
-
+/**
+ * @brief Records active/inactive state of a waveform mode and broadcasts activity signal.
+ * @param mode Mode identifier string.
+ * @param on True if transmitting.
+ */
 void Exciter::setModeActive(const QString &mode, bool on)
 {
     if (on)
@@ -721,6 +730,9 @@ void Exciter::setModeActive(const QString &mode, bool on)
     emit modeActivitySignal(!activeModes.isEmpty());
 }
 
+/**
+ * @brief Central slot triggered by waveform 'Set' buttons to synthesize and load IQ samples into DAC.
+ */
 void Exciter::setDataSlot()
 {
 
@@ -1097,6 +1109,13 @@ void Exciter::setDataSlot()
 }
 
 
+/**
+ * @brief Synthesizes pulsed RF IQ samples and writes them to a formatted text file.
+ * @param pri Pulse Repetition Interval in microseconds.
+ * @param pw Pulse Width in microseconds.
+ * @param impulseFileName Destination text file name.
+ * @param fs_msps Sampling rate in MSPS.
+ */
 void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName, double fs_msps)
 {
     uint iValue{}, qValue{};
@@ -1151,59 +1170,66 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
     }
 }
 
-
+/**
+ * @brief Handles Stop button click on Sweep tab to disable frequency sweeping.
+ */
 void Exciter::on_btnStopSweep_clicked()
 {
     if (isExciterOn) emit changeDacSignal("Sweep");
     setModeActive("sweep", false);
 }
 
-
+/**
+ * @brief Handles Disable button click on Spot noise tab.
+ */
 void Exciter::on_btnDisableSpot_clicked()
 {
-
-    //    adrvObj->DisableDac();
     if (isExciterOn) emit changeDacSignal("Spot");
     setModeActive("spot", false);
-    //    ui->lblSpotStatus->setText("Status: disable");
-    //    ui->btnDisableSpot->setStyleSheet("background-color:#186a3b");
-    //    ui->btnLoadSpot->setStyleSheet("background-color:#d30000");
-    //    ui->btnLoadSpot->setStyleSheet("background-color:");
 }
 
+/**
+ * @brief Handles Disable button click on Impulse tab.
+ */
 void Exciter::on_btnDisImpulse_clicked()
-{    if (isExciterOn) emit changeDacSignal("Impulse");
+{
+    if (isExciterOn) emit changeDacSignal("Impulse");
     setModeActive("impulse", false);
-    //     ui->lblImpulseStatus->setText("Status: disable");
-    //     ui->btnDisImpulse->setStyleSheet("background-color:#186a3b");
-    //     ui->btnLoadImpulse->setStyleSheet("background-color:red");
 }
 
-
+/**
+ * @brief Handles Disable button click on CW tab.
+ * @param checked Unused button toggle parameter.
+ */
 void Exciter::on_btnDisableCW_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("CW");
     setModeActive("cw", false);
 }
 
+/**
+ * @brief Handles Disable button click on WideBand noise tab.
+ * @param checked Unused button toggle parameter.
+ */
 void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");
     setModeActive("wb", false);
 }
 
-// ---------------------------------------------------------------------------
-// Phase 6: Multi Target tab
-// ---------------------------------------------------------------------------
-
+/**
+ * @brief Updates calibrated TX power readout label using calibration tables.
+ */
 void Exciter::refreshTxPowerDisplay()
 {
-    // Phase 6: the "Current P (attenuation)" readout shows Pb = Pa + Pc -
-    // the calibrated power sent to the board and used everywhere in the
-    // software (constants/tx_calibration.h, default Pc = 0 dB).
     ui->lblCurrentPower->setNum(TxCalibration::boardP(ui->spnCWPower->value()));
 }
 
+/**
+ * @brief Updates UI controls and input limits for a specific Multi-Target channel row.
+ * @param row Target channel row index (0 to 4).
+ * @param applyDefaults Whether to populate default parameters.
+ */
 void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
 {
     // Per-type specification fields: label / min / max / decimals / default.
@@ -1263,6 +1289,14 @@ void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
     mtShiftLbl[row]->setVisible(hasShift);
 }
 
+/**
+ * @brief Reads space/tab-separated I/Q float samples from an analytical text file.
+ * @param path File path to sample text file.
+ * @param ti Output vector for In-phase (I) floating-point samples.
+ * @param tq Output vector for Quadrature (Q) floating-point samples.
+ * @param nMax Maximum number of samples to parse.
+ * @return Count of successfully parsed sample pairs.
+ */
 int Exciter::loadIqTextSamples(const QString &path,
                                QVector<double> &ti, QVector<double> &tq,
                                int nMax)
@@ -1277,10 +1311,6 @@ int Exciter::loadIqTextSamples(const QString &path,
     QString header;
     r >> header; // "TEXT" header token
     int n2 = 0;
-    // Whitespace-agnostic I/Q extraction (spaces, tabs, CR/LF all work).
-    // The old line splitting used a C string literal whose "\s+" escape
-    // was broken (the regex was really "s+"), so it never matched a data
-    // line and every spot row read zero samples.
     while (n2 < nMax && !r.atEnd())
     {
         double a, b;
@@ -1295,6 +1325,10 @@ int Exciter::loadIqTextSamples(const QString &path,
     return n2;
 }
 
+/**
+ * @brief Synthesizes and sums up to 5 concurrent independent radar targets into MultiTarget.txt.
+ * @return True if multi-target waveform file was successfully synthesized.
+ */
 bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;
@@ -1516,6 +1550,17 @@ bool Exciter::buildMultiTargetWaveform()
 // Phase 6: LFM / NLFM tabs
 // ---------------------------------------------------------------------------
 
+/**
+ * @brief Computes analytical LFM/NLFM chirp baseband IQ samples.
+ * @param ti Output vector for In-phase (I) samples.
+ * @param tq Output vector for Quadrature (Q) samples.
+ * @param n Total sample count.
+ * @param fsMhz Sample rate in MHz.
+ * @param nlfm If true, applies raised-cosine amplitude shaping (Non-Linear FM).
+ * @param f0Mhz Start frequency offset in MHz.
+ * @param bwMhz Chirp bandwidth in MHz.
+ * @param tUs Pulse duration in microseconds.
+ */
 void Exciter::fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
                                double fsMhz, bool nlfm,
                                double f0Mhz, double bwMhz, double tUs)
@@ -1543,6 +1588,15 @@ void Exciter::fillChirpSamples(QVector<double> &ti, QVector<double> &tq, int n,
     }
 }
 
+/**
+ * @brief Synthesizes an LFM/NLFM chirp waveform file ready for DAC DMA upload.
+ * @param fileName Output file name (e.g. "Lfm.txt" or "Nlfm.txt").
+ * @param nlfm Non-linear FM flag.
+ * @param f0Mhz Start frequency in MHz.
+ * @param bwMhz Chirp bandwidth in MHz.
+ * @param tUs Pulse duration in microseconds.
+ * @return True if successfully generated.
+ */
 bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
                              double f0Mhz, double bwMhz, double tUs)
 {
@@ -1589,6 +1643,14 @@ bool Exciter::buildChirpFile(const QString &fileName, bool nlfm,
 // Phase 6: Sweep tab - stepped-sine I/Q synthesis
 // ---------------------------------------------------------------------------
 
+/**
+ * @brief Synthesizes a discrete stepped-frequency sweep waveform file into Sweep.txt.
+ * @param fileName Output file name ("Sweep.txt").
+ * @param fStartMhz Sweep start frequency in MHz.
+ * @param fStopMhz Sweep stop frequency in MHz.
+ * @param fStepMhz Frequency step in MHz.
+ * @return True if successfully generated.
+ */
 bool Exciter::buildSweepFile(const QString &fileName,
                              double fStartMhz, double fStopMhz, double fStepMhz)
 {

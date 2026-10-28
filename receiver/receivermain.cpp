@@ -37,6 +37,10 @@
 #include <receiver/plugins/drfmregisterio.h>
 
 
+/**
+ * @brief Constructs ReceiverMain widget, builds plotting layouts, and initializes DRFM controls.
+ * @param parent Optional parent QWidget pointer.
+ */
 ReceiverMain::ReceiverMain(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ReceiverMain)
@@ -593,6 +597,9 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
 }
 
 
+/**
+ * @brief Initializes frequency calibration timers and loads calibration table from disk.
+ */
 void ReceiverMain::calibInitial()
 {
     //-------------- calibratio -----------------------
@@ -647,8 +654,10 @@ void ReceiverMain::calibInitial()
     //-------------- calibratio -----------------------
 }
 
-
-
+/**
+ * @brief Generates or verifies existence of 4-sample dummy zero DAC buffer file ('0 0 0 0').
+ * @return Absolute file path to zero DAC buffer file.
+ */
 QString ReceiverMain::ensureZeroDacBufferFile()
 {
     QString zeroPath = dataFilePath(QStringLiteral("drfm_zero.txt"));
@@ -677,6 +686,9 @@ QString ReceiverMain::ensureZeroDacBufferFile()
     return zeroPath;
 }
 
+/**
+ * @brief Ensures DAC DMA buffer clock is running on DRFM startup without interrupting active exciter.
+ */
 void ReceiverMain::ensureDrfmDacBufferRunning()
 {
     if (!oscMain || !oscMain->_adrv9009)
@@ -693,6 +705,9 @@ void ReceiverMain::ensureDrfmDacBufferRunning()
     oscMain->_adrv9009->setFile(zeroFile, 0, true, true);
 }
 
+/**
+ * @brief Configures DRFM GUI controls and binds events to non-blocking AXI register updates.
+ */
 void ReceiverMain::setupDrfmControlTab()
 {
     // Hardware mapping is taken from the supplied Vivado/HDL sources:

@@ -45,15 +45,30 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
+/**
+ * @class delay
+ * @brief Utility class wrapping QThread::msleep for microsecond/millisecond UI delays.
+ */
 class delay:public QThread
 {
 public:
+    /**
+     * @brief Pauses execution for a specified duration in milliseconds.
+     * @param msc Duration to sleep in milliseconds.
+     */
     static void msleep(unsigned long msc)
     {
         QThread::msleep(msc);
     }
 };
 
+/**
+ * @brief Initializes peripheral communications, embedded Exciter tab, and hardware clients.
+ *
+ * Instantiates the ReceiverMain window, moves the Exciter tab inside it to form a unified UI,
+ * creates TCP/UDP client workers for peripheral modules (RFF, Calibration, Tuner, Servo,
+ * Solid State Amplifier, Cooling, Joshan), and configures watchdog intervals.
+ */
 void MainWindow::init()
 {
 
@@ -112,6 +127,16 @@ void MainWindow::init()
 }
 
 
+/**
+ * @brief Establishes all Signal/Slot connections between UI controls, hardware sockets, and subsystems.
+ *
+ * Configures:
+ * 1. Communication telemetry between peripheral TCP/UDP clients and their UI panels.
+ * 2. Cross-module status LED synchronization on the main status bar.
+ * 3. Joshan electronic protection commands, functional reports, and status queries.
+ * 4. Bi-directional synchronization between Receiver tabs and Exciter parameters (Power, Freq, BW).
+ * 5. Waveform generation triggering and cyclic DAC DMA file playback.
+ */
 void MainWindow::connections()
 {
     //    connect(this,        &MainWindow::sendIpAddressToExciterSignal,ui->exiter, &Exciter::receiveIpAddressSlot);
@@ -467,6 +492,10 @@ void MainWindow::connections()
 }
 
 
+/**
+ * @brief Slot handling telemetry data frames received from external subsystems.
+ * @param dataReceive Raw comma-separated ASCII telemetry payload string.
+ */
 void MainWindow::receiveDataFromSubSystemSlot(QString dataReceive)
 {
     QStringList frame;
@@ -484,6 +513,9 @@ void MainWindow::receiveDataFromSubSystemSlot(QString dataReceive)
     }
 }
 
+/**
+ * @brief Destructor for MainWindow. Cleans up peripheral socket workers and UI memory.
+ */
 MainWindow::~MainWindow()
 {
     delete ui;
