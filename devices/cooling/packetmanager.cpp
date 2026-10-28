@@ -1,11 +1,8 @@
-/**
- * @file packetmanager.cpp
- * @brief Subsystem module for cooling in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: packetmanager.cpp
+// Subsystem: eLynxSDR cooling
+// Description: Subsystem implementation and interface guidance for packetmanager.cpp.
+// ============================================================================
 
 #include "packetmanager.h"
 //#include "tcpclient.h"
@@ -14,18 +11,13 @@
 uint8_t packetManager::LT[50]={};
 packetManager::CoolingBoard_t packetManager::CoolingBoard={};
 
-/**
- * @brief Constructs a new packetManager instance and initializes subsystem components and UI state.
- */
+// Constructor: Initializes packetManager subsystem components, default parameters, and state.
 packetManager::packetManager()
 {
 
 }
 
-/**
- * @brief Executes the packet received procedure for packetManager.
- * @param dataReceiced Input parameter specifying dataReceiced (QByteArray).
- */
+// Executes packet received routine.
 void packetManager::packetReceived(QByteArray dataReceiced)
 {
     dataReceiced = dataReceiced.toHex();
@@ -50,6 +42,7 @@ void packetManager::packetReceived(QByteArray dataReceiced)
 }
 
 
+// Executes check input packet routine.
 void packetManager::checkInputPacket(uint8_t *inPack)
 {
     uint8_t dataType_;
@@ -60,11 +53,7 @@ void packetManager::checkInputPacket(uint8_t *inPack)
     }
 }
 
-/**
- * @brief Executes the validation input packet procedure for packetManager.
- * @param inPack Input parameter specifying inPack (uint8_t).
- * @return Output value of type uint8_t.
- */
+// Executes validation input packet routine.
 uint8_t packetManager::validationInputPacket(uint8_t *inPack)
 {
     uint8_t result=0;
@@ -88,10 +77,7 @@ uint8_t packetManager::validationInputPacket(uint8_t *inPack)
 }
 
 
-/**
- * @brief Executes the f c  read mult reg  fun procedure for packetManager.
- * @param data Input parameter specifying data (uint8_t).
- */
+// Executes f c  read mult reg  fun routine.
 void packetManager::FC_ReadMultReg_Fun(uint8_t *data)
 {
     uint8_t DatapackLen=data[0];
@@ -116,9 +102,7 @@ void packetManager::FC_ReadMultReg_Fun(uint8_t *data)
     fillModel();
 }
 
-/**
- * @brief Executes the fill model procedure for packetManager.
- */
+// Executes fill model routine.
 void packetManager::fillModel()
 {
     int index=3;

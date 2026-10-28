@@ -1,19 +1,14 @@
-/**
- * @file osc.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: osc.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for osc.cpp.
+// ============================================================================
 
 #include "osc.h"
 #include <receiver/plot.h>
 #include <receiver/oscmain.h>
 
-/**
- * @brief Constructs a new osc instance and initializes subsystem components and UI state.
- */
+// Constructor: Initializes osc subsystem components, default parameters, and state.
 osc::osc()
 {
 }
@@ -99,6 +94,7 @@ static double read_sampling_frequency(const struct iio_device *dev)
  * @param freq
  * @return
  */
+// Executes rx update device sampling freq routine.
 bool osc::rx_update_device_sampling_freq(const char *device, double freq)
 {
     struct iio_device *dev;
@@ -152,6 +148,7 @@ bool osc::rx_update_device_sampling_freq(const char *device, double freq)
  * @param lo_freq
  * @return
  */
+// Executes rx update channel lo freq routine.
 bool osc::rx_update_channel_lo_freq(const char *device, const char *channel, double lo_freq)
 {
     struct iio_device *dev;

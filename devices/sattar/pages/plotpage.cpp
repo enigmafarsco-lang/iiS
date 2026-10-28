@@ -1,11 +1,8 @@
-/**
- * @file plotpage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: plotpage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for plotpage.cpp.
+// ============================================================================
 
 #include "plotpage.h"
 #include "ui_plotpage.h"
@@ -18,17 +15,13 @@ PlotPage::PlotPage(QWidget *parent) :
     testPlot();
 }
 
-/**
- * @brief Destructor for PlotPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up PlotPage resources, timers, and allocated memory.
 PlotPage::~PlotPage()
 {
     delete ui;
 }
 
-/**
- * @brief Executes the test plot procedure for PlotPage.
- */
+// Executes test plot routine.
 void PlotPage::testPlot()
 {
     plotCustom = new QCustomPlot;

@@ -1,19 +1,14 @@
-/**
- * @file iio_widget.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: iio_widget.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for iio_widget.cpp.
+// ============================================================================
 
 #include "iio_widget.h"
 
 #include <QTimer>
 
-/**
- * @brief Constructs a new IIO_Widget instance and initializes subsystem components and UI state.
- */
+// Constructor: Initializes IIO_Widget subsystem components, default parameters, and state.
 IIO_Widget::IIO_Widget()
 {
 }
@@ -231,15 +226,7 @@ static void iio_toggle_button_update(struct iio_widget *widget)
         ((QWidget*)(widget->widget))->setVisible(false);
 }
 
-/**
- * @brief Executes the iio toggle button init procedure for IIO_Widget.
- * @param widget Input parameter specifying widget (iio_widget).
- * @param dev Input parameter specifying dev (iio_device).
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr_name Input parameter specifying attr_name (const char).
- * @param toggle_button Input parameter specifying toggle_button (QWidget).
- * @param invert Input parameter specifying invert (const bool).
- */
+// Executes iio toggle button init routine.
 void IIO_Widget::iio_toggle_button_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, QWidget *toggle_button, const bool invert)
 {
     iio_widget_init(widget, dev, chn, attr_name, NULL, toggle_button,
@@ -271,14 +258,7 @@ void iio_button_update(struct iio_widget *widget)
 
 }
 
-/**
- * @brief Executes the iio button init procedure for IIO_Widget.
- * @param widget Input parameter specifying widget (iio_widget).
- * @param dev Input parameter specifying dev (iio_device).
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr_name Input parameter specifying attr_name (const char).
- * @param button Input parameter specifying button (QWidget).
- */
+// Executes iio button init routine.
 void IIO_Widget::iio_button_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, QWidget *button)
 {
     iio_widget_init(widget, dev, chn, attr_name, NULL, button,
@@ -379,15 +359,7 @@ void iio_spin_button_save(struct iio_widget *widget)
     return spin_button_save(widget, false);
 }
 
-/**
- * @brief Executes the iio spin button init procedure for IIO_Widget.
- * @param widget Input parameter specifying widget (iio_widget).
- * @param dev Input parameter specifying dev (iio_device).
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr_name Input parameter specifying attr_name (const char).
- * @param spin_button Input parameter specifying spin_button (QWidget).
- * @param scale Input parameter specifying scale (const gdouble).
- */
+// Executes iio spin button init routine.
 void IIO_Widget::iio_spin_button_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, QWidget *spin_button, const gdouble *scale)
 {
     iio_widget_init(widget, dev, chn, attr_name, NULL, spin_button,
@@ -420,10 +392,7 @@ void IIO_Widget::iio_spin_button_set_convert_function(struct iio_widget *iio_w,
     iio_w->priv_convert_function = (void*)convert;
 }
 
-/**
- * @brief Executes the iio spin button add progress procedure for IIO_Widget.
- * @param iio_w Input parameter specifying iio_w (iio_widget).
- */
+// Executes iio spin button add progress routine.
 void IIO_Widget::iio_spin_button_add_progress(iio_widget *iio_w)
 {
     struct progress_data *pdata;
@@ -451,15 +420,7 @@ void IIO_Widget::iio_spin_button_add_progress(iio_widget *iio_w)
     iio_w->priv_progress = pdata;
 }
 
-/**
- * @brief Executes the iio spin button s64 init procedure for IIO_Widget.
- * @param widget Input parameter specifying widget (iio_widget).
- * @param dev Input parameter specifying dev (iio_device).
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr_name Input parameter specifying attr_name (const char).
- * @param spin_button Input parameter specifying spin_button (QWidget).
- * @param scale Input parameter specifying scale (const gdouble).
- */
+// Executes iio spin button s64 init routine.
 void IIO_Widget::iio_spin_button_s64_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, QWidget *spin_button, const gdouble *scale)
 {
     iio_widget_init(widget, dev, chn, attr_name, NULL, spin_button,
@@ -467,15 +428,7 @@ void IIO_Widget::iio_spin_button_s64_init(iio_widget *widget, iio_device *dev, i
                     iio_spin_button_update_value, iio_spin_button_save);
 }
 
-/**
- * @brief Executes the iio spin button int init procedure for IIO_Widget.
- * @param widget Input parameter specifying widget (iio_widget).
- * @param dev Input parameter specifying dev (iio_device).
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr_name Input parameter specifying attr_name (const char).
- * @param spin_button Input parameter specifying spin_button (QWidget).
- * @param scale Input parameter specifying scale (const gdouble).
- */
+// Executes iio spin button int init routine.
 void IIO_Widget::iio_spin_button_int_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, QWidget *spin_button, const gdouble *scale)
 {
     iio_widget_init(widget, dev, chn, attr_name, NULL, spin_button,
@@ -522,12 +475,7 @@ static int __cb_chn_update(struct iio_channel *chn, const char *attr,
     return 0;
 }
 
-/**
- * @brief Executes the iio update widgets of device procedure for IIO_Widget.
- * @param widgets Input parameter specifying widgets (iio_widget).
- * @param num_widgets Input parameter specifying num_widgets (unsigned int).
- * @param dev Input parameter specifying dev (iio_device).
- */
+// Executes iio update widgets of device routine.
 void IIO_Widget::iio_update_widgets_of_device(iio_widget *widgets, unsigned int num_widgets, iio_device *dev)
 {
 
@@ -545,11 +493,7 @@ void IIO_Widget::iio_update_widgets_of_device(iio_widget *widgets, unsigned int 
                                   __cb_chn_update, params);
 }
 
-/**
- * @brief Executes the iio update widgets procedure for IIO_Widget.
- * @param widgets Input parameter specifying widgets (iio_widget).
- * @param num_widgets Input parameter specifying num_widgets (unsigned int).
- */
+// Executes iio update widgets routine.
 void IIO_Widget::iio_update_widgets(iio_widget *widgets, unsigned int num_widgets)
 {
     unsigned int i;
@@ -624,6 +568,7 @@ static void delayed_spin_button_update_cb(struct iio_widget *iio_w)
 }
 
 
+// Executes iio spin button progress activate routine.
 void IIO_Widget::iio_spin_button_progress_activate(iio_widget *iio_w)
 {
     struct progress_data *pdata =(struct progress_data *) iio_w->priv_progress;

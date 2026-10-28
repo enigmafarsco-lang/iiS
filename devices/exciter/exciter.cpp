@@ -1,3 +1,9 @@
+// ============================================================================
+// File: exciter.cpp
+// Subsystem: eLynxSDR exciter
+// Description: Subsystem implementation and interface guidance for exciter.cpp.
+// ============================================================================
+
 
 /**
  * @file exciter.cpp
@@ -331,6 +337,7 @@ Exciter::Exciter(QWidget *parent) :
 /**
  * @brief Destructor releasing UI resources.
  */
+// Destructor: Cleans up Exciter resources, timers, and allocated memory.
 Exciter::~Exciter()
 {
     delete ui;
@@ -339,6 +346,7 @@ Exciter::~Exciter()
 /**
  * @brief Establishes low-level connection to ADRV9009 hardware device.
  */
+// Executes connect to device routine.
 void Exciter::connectToDevice()
 {
     //    isConnect = adrvObj->connect(ipAddress);
@@ -348,6 +356,7 @@ void Exciter::connectToDevice()
 /**
  * @brief Packages and emits functional telemetry report to Joshan controller.
  */
+// Executes joshan func data slot routine.
 void Exciter::joshanFuncDataSlot()
 {
     QJsonObject exciterData;
@@ -394,19 +403,14 @@ void Exciter::joshanFuncDataSlot()
     emit sendFuncDataToJoshanSignal(exciterData);
 }
 
-/**
- * @brief Executes the joshan status data slot procedure for Exciter.
- */
+// Executes joshan status data slot routine.
 void Exciter::joshanStatusDataSlot()
 {
 
 }
 
 
-/**
- * @brief Initializes and configures the init connection for the Exciter subsystem.
- * @param val Input parameter specifying val (bool).
- */
+// Initializes init connection for Exciter.
 void Exciter::initConnection(bool val)
 {
 
@@ -418,6 +422,7 @@ void Exciter::initConnection(bool val)
     //    ui->tabWidget->setEnabled(val);
 }
 
+// Executes adding cart elements to exciter routine.
 void Exciter::addingCartElementsToExciter()
 {
     //    QGroupBox *grbRX1 = ui->groupBox_2;
@@ -426,15 +431,13 @@ void Exciter::addingCartElementsToExciter()
     //    gridRX2->addWidget( , 0 , 1)             ;
 }
 
+// Executes changing dac msg routine.
 void Exciter::changingDacMsg(QString dacMsg,QString mode)
 {
     ui->lblDacMsg->setText(mode  + " " + dacMsg);
 }
 
-/**
- * @brief Executes the joshan control data slot procedure for Exciter.
- * @param val Input parameter specifying val (QJsonObject).
- */
+// Executes joshan control data slot routine.
 void Exciter::joshanControlDataSlot(QJsonObject val)
 {
     QJsonObject value = val["parameters"].toObject();
@@ -597,18 +600,13 @@ void Exciter::joshanControlDataSlot(QJsonObject val)
     }
 }
 
-/**
- * @brief Executes the smart noise is active slot procedure for Exciter.
- */
+// Executes smart noise is active slot routine.
 void Exciter::smartNoiseIsActiveSlot()
 {
     ui->lblDacMsg->setText("Smart noise is active.");
 }
 
-/**
- * @brief Retrieves the current ser logged in slot value.
- * @param state Input parameter specifying state (double).
- */
+// Retrieves current ser logged in slot state.
 void Exciter::isUserLoggedInSlot(double state)
 {
     isUserLoggedIn = state;
@@ -648,6 +646,7 @@ static QString projectFilesDir()
  * @param fileName In/out filename reference.
  * @return True if file exists and is readable.
  */
+// Executes returnfile path routine.
 bool Exciter::returnfilePath(QString &fileName)
 {
     fullPath = QDir(projectFilesDir()).filePath(fileName);
@@ -672,9 +671,7 @@ bool Exciter::returnfilePath(QString &fileName)
 
 
 
-/**
- * @brief Retrieves the current data slot value.
- */
+// Retrieves current data slot state.
 void Exciter::getDataSlot()
 {
     //set frq
@@ -693,17 +690,14 @@ void Exciter::getDataSlot()
 }
 
 
+// Executes exists file routine.
 bool Exciter::existsFile (const std::string& name)
 {
     struct stat buffer;
     return (stat (name.c_str(), &buffer) == 0);
 }
 
-/**
- * @brief Executes the resolve file in app folders procedure for Exciter.
- * @param relPath Input parameter specifying relPath (const QString).
- * @return Output value of type QString.
- */
+// Executes resolve file in app folders routine.
 QString Exciter::resolveFileInAppFolders(const QString &relPath)
 {
     // Only the runtime waveform directory selected by projectFilesDir() is
@@ -714,28 +708,19 @@ QString Exciter::resolveFileInAppFolders(const QString &relPath)
     return QString();
 }
 
-/**
- * @brief Executes the voltage01 selected procedure for Exciter.
- * @return Output value of type bool.
- */
+// Executes voltage01 selected routine.
 bool Exciter::voltage01Selected() const
 {
     return ui->chbVoltage01 && ui->chbVoltage01->isChecked();
 }
 
-/**
- * @brief Executes the voltage23 selected procedure for Exciter.
- * @return Output value of type bool.
- */
+// Executes voltage23 selected routine.
 bool Exciter::voltage23Selected() const
 {
     return ui->chbVoltage23 && ui->chbVoltage23->isChecked();
 }
 
-/**
- * @brief Sets the profile bw parameter and updates internal state.
- * @param bwMHz Input parameter specifying bwMHz (int).
- */
+// Sets profile bw value and updates internal subsystem configuration.
 void Exciter::setProfileBw(int bwMHz)
 {
     // Phase 5: active ADRV9009 profile from the receiver Profile tab.
@@ -751,11 +736,7 @@ void Exciter::setProfileBw(int bwMHz)
 }
 
 
-/**
- * @brief Sets the mode active parameter and updates internal state.
- * @param mode Input parameter specifying mode (const QString).
- * @param on Input parameter specifying on (bool).
- */
+// Sets mode active value and updates internal subsystem configuration.
 void Exciter::setModeActive(const QString &mode, bool on)
 {
     if (on)
@@ -766,9 +747,7 @@ void Exciter::setModeActive(const QString &mode, bool on)
     emit modeActivitySignal(!activeModes.isEmpty());
 }
 
-/**
- * @brief Sets the data slot parameter and updates internal state.
- */
+// Sets data slot value and updates internal subsystem configuration.
 void Exciter::setDataSlot()
 {
 
@@ -1145,13 +1124,7 @@ void Exciter::setDataSlot()
 }
 
 
-/**
- * @brief Executes the create impulse file procedure for Exciter.
- * @param pri Input parameter specifying pri (double).
- * @param pw Input parameter specifying pw (double).
- * @param impulseFileName Input parameter specifying impulseFileName (QString).
- * @param fs_msps Input parameter specifying fs_msps (double).
- */
+// Executes create impulse file routine.
 void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName, double fs_msps)
 {
     uint iValue{}, qValue{};
@@ -1207,9 +1180,7 @@ void Exciter::createImpulseFile(double pri, double pw, QString &impulseFileName,
 }
 
 
-/**
- * @brief Slot handler responding to on btn stop sweep clicked event.
- */
+// Event/Signal handler for on btn stop sweep clicked.
 void Exciter::on_btnStopSweep_clicked()
 {
     if (isExciterOn) emit changeDacSignal("Sweep");
@@ -1217,9 +1188,7 @@ void Exciter::on_btnStopSweep_clicked()
 }
 
 
-/**
- * @brief Slot handler responding to on btn disable spot clicked event.
- */
+// Event/Signal handler for on btn disable spot clicked.
 void Exciter::on_btnDisableSpot_clicked()
 {
 
@@ -1232,6 +1201,7 @@ void Exciter::on_btnDisableSpot_clicked()
     //    ui->btnLoadSpot->setStyleSheet("background-color:");
 }
 
+// Event/Signal handler for on btn dis impulse clicked.
 void Exciter::on_btnDisImpulse_clicked()
 {    if (isExciterOn) emit changeDacSignal("Impulse");
     setModeActive("impulse", false);
@@ -1241,16 +1211,14 @@ void Exciter::on_btnDisImpulse_clicked()
 }
 
 
+// Event/Signal handler for on btn disable c w clicked.
 void Exciter::on_btnDisableCW_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("CW");
     setModeActive("cw", false);
 }
 
-/**
- * @brief Slot handler responding to on btn disable w b clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn disable w b clicked.
 void Exciter::on_btnDisableWB_clicked(bool checked)
 {
     if (isExciterOn) emit changeDacSignal("WB");
@@ -1261,6 +1229,7 @@ void Exciter::on_btnDisableWB_clicked(bool checked)
 // Phase 6: Multi Target tab
 // ---------------------------------------------------------------------------
 
+// Updates and synchronizes refresh tx power display data stream.
 void Exciter::refreshTxPowerDisplay()
 {
     // Phase 6: the "Current P (attenuation)" readout shows Pb = Pa + Pc -
@@ -1274,6 +1243,7 @@ void Exciter::refreshTxPowerDisplay()
  * @param row Target channel row index (0 to 4).
  * @param applyDefaults Whether to populate default parameters.
  */
+// Updates and synchronizes update multi target row data stream.
 void Exciter::updateMultiTargetRow(int row, bool applyDefaults)
 {
     // Per-type specification fields: label / min / max / decimals / default.
@@ -1377,6 +1347,7 @@ int Exciter::loadIqTextSamples(const QString &path,
  * @brief Synthesizes and sums up to 5 concurrent independent radar targets into MultiTarget.txt.
  * @return True if multi-target waveform file was successfully synthesized.
  */
+// Executes build multi target waveform routine.
 bool Exciter::buildMultiTargetWaveform()
 {
     const int N = 262144;

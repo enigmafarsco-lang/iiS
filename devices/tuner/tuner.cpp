@@ -1,11 +1,8 @@
-/**
- * @file tuner.cpp
- * @brief Subsystem module for tuner in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tuner.cpp
+// Subsystem: eLynxSDR tuner
+// Description: Subsystem implementation and interface guidance for tuner.cpp.
+// ============================================================================
 
 #include "tuner.h"
 #include "ui_tuner.h"
@@ -30,9 +27,7 @@ Tuner::Tuner(QWidget *parent) :
 }
 
 
-/**
- * @brief Executes the plot init procedure for Tuner.
- */
+// Executes plot init routine.
 void Tuner::plotInit()
 {
     //================== one plot ==========================
@@ -162,11 +157,7 @@ void Tuner::plotInit()
 
 
 
-/**
- * @brief Sets the q glcharts parameters parameter and updates internal state.
- * @param glChart Input parameter specifying glChart (QGLchart).
- * @param glChartType Input parameter specifying glChartType (ChartType).
- */
+// Sets q glcharts parameters value and updates internal subsystem configuration.
 void Tuner::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
 //    glChart->setMinimumSize(QSize(50, 50));
@@ -198,6 +189,7 @@ void Tuner::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
     //    glChart->zoomEnable(true);
 }
 
+// Initializes init for Tuner.
 void Tuner::init()
 {
     //    vector1.setX(0);
@@ -215,6 +207,7 @@ void Tuner::init()
     //    series11;
 }
 
+// Executes remove all points routine.
 void Tuner::removeAllPoints()
 {
 
@@ -236,6 +229,7 @@ void Tuner::removeAllPoints()
 //i have     int plottingValues( const double *, QCustomPlot * , QVector<double> *, QVector<double> *, double min, double max,int);
 // function now i want to make optional QCustomPlot *
 
+// Executes emit to plot routine.
 void Tuner::emitToPlot()
 {
     emit createPlotSignal1(series1);
@@ -250,6 +244,7 @@ void Tuner::emitToPlot()
     emit createPlotSignal10(series10);
 }
 
+// Executes filling plot vector routine.
 void Tuner::fillingPlotVector(QStringList &frame)
 {
     for (int i{}; i < frame.size(); i ++)
@@ -342,12 +337,7 @@ void Tuner::fillingPlotVector(QStringList &frame)
     }
 }
 
-/**
- * @brief Sets the vector to qcustom parameter and updates internal state.
- * @param vec Input parameter specifying vec (QVector2D &).
- * @param QCustom Input parameter specifying QCustom (QCustomSeries &).
- * @param data Input parameter specifying data (int).
- */
+// Sets vector to qcustom value and updates internal subsystem configuration.
 void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int data)
 {
     vec.setX(yAxiosCounter);
@@ -355,10 +345,7 @@ void Tuner::setVectorToQcustom(QVector2D & vec, QCustomSeries & QCustom, int dat
     QCustom.addPoints(vec);
 }
 
-/**
- * @brief Slot handler responding to on  device response slot event.
- * @param response Input parameter specifying response (QByteArray).
- */
+// Event/Signal handler for on  device response slot.
 void Tuner::on_DeviceResponseSlot(QByteArray response)
 {
 //    qDebug ()<<"tuner ---> "  <<response;
@@ -395,28 +382,20 @@ void Tuner::on_DeviceResponseSlot(QByteArray response)
     yAxiosCounter++;
 }
 
-/**
- * @brief Retrieves the current evice connected slot value.
- * @param val Input parameter specifying val (bool).
- */
+// Retrieves current evice connected slot state.
 void Tuner::isDeviceConnectedSlot(bool val)
 {
     isConnect = val;
     ui->btnConnect->setStyleSheet(isConnect?"background-color:"+QString(YELLOW_GREEN)+";color:"+QString(BLACK):"background-color:#"+QString(RED)+";color:white");
 }
 
-/**
- * @brief Executes the joshan func data slot procedure for Tuner.
- * @param QString Input parameter specifying QString (QString).
- */
+// Executes joshan func data slot routine.
 void Tuner::joshanFuncDataSlot(QString)
 {
 
 }
 
-/**
- * @brief Slot handler responding to on push button 5 clicked event.
- */
+// Event/Signal handler for on push button 5 clicked.
 void Tuner::on_pushButton_5_clicked()
 {
     if(isConnect){
@@ -432,9 +411,7 @@ void Tuner::on_pushButton_5_clicked()
     }
 }
 
-/**
- * @brief Updates and synchronizes the update auto send data stream and visual indicators.
- */
+// Updates and synchronizes update auto send data stream.
 void Tuner::updateAutoSend()
 {
     if(timerCount == temp.size())
@@ -455,9 +432,7 @@ void Tuner::updateAutoSend()
 
 
 
-/**
- * @brief Destructor for Tuner, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up Tuner resources, timers, and allocated memory.
 Tuner::~Tuner()
 {
     //    delete vBox1       ;
@@ -514,9 +489,7 @@ Tuner::~Tuner()
 
 }
 
-/**
- * @brief Slot handler responding to on btn start clicked event.
- */
+// Event/Signal handler for on btn start clicked.
 void Tuner::on_btnStart_clicked()
 {
     if(isConnect){
@@ -527,9 +500,7 @@ void Tuner::on_btnStart_clicked()
     }
 }
 
-/**
- * @brief Slot handler responding to on btn set frq clicked event.
- */
+// Event/Signal handler for on btn set frq clicked.
 void Tuner::on_btnSetFrq_clicked()
 {
 

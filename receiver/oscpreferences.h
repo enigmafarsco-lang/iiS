@@ -1,11 +1,8 @@
-/**
- * @file oscpreferences.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: oscpreferences.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for oscpreferences.h.
+// ============================================================================
 
 #ifndef OSCPREFERENCES_H
 #define OSCPREFERENCES_H
@@ -36,45 +33,26 @@ struct iio_device_preferences {
 };
 
 
-/**
- * @class OscPreferences
- * @brief High-level controller class for OscPreferences.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class OscPreferences
 {
 public:
-    /**
-     * @brief Constructs a new OscPreferences instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes OscPreferences subsystem components, default parameters, and state.
     OscPreferences();
 
     IioChnPreferences *iio_chn_preferences_new(const char *chn_name);
-    /**
-     * @brief Executes the iio chn preferences free procedure for OscPreferences.
-     * @param pref Input parameter specifying pref (IioChnPreferences).
-     */
+    // Executes iio chn preferences free routine.
     void iio_chn_preferences_free(IioChnPreferences *pref);
 
     IioDevPreferences *iio_dev_preferences_new(const char *dev_name);
-    /**
-     * @brief Executes the iio dev preferences free procedure for OscPreferences.
-     * @param pref Input parameter specifying pref (IioDevPreferences).
-     */
+    // Executes iio dev preferences free routine.
     void iio_dev_preferences_free(IioDevPreferences *pref);
 
     OscPlotPreferences *osc_plot_preferences_new();
-    /**
-     * @brief Executes the osc plot preferences free procedure for OscPreferences.
-     * @param pref Input parameter specifying pref (OscPlotPreferences).
-     */
+    // Executes osc plot preferences free routine.
     void osc_plot_preferences_free(OscPlotPreferences *pref);
 
     OscPreferences *osc_preferences_new();
-    /**
-     * @brief Executes the osc preferences delete procedure for OscPreferences.
-     * @param pref Input parameter specifying pref (OscPreferences).
-     */
+    // Executes osc preferences delete routine.
     void osc_preferences_delete(OscPreferences *pref);
 
     struct oscplot_preferences *plot_preferences;

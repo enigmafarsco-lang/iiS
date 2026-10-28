@@ -1,17 +1,12 @@
-/**
- * @file enumerations.cpp
- * @brief Subsystem module for clustring in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: enumerations.cpp
+// Subsystem: eLynxSDR clustring
+// Description: Subsystem implementation and interface guidance for enumerations.cpp.
+// ============================================================================
 
 #include "enumerations.h"
 
-/**
- * @brief Constructs a new Enumerations instance and initializes subsystem components and UI state.
- */
+// Constructor: Initializes Enumerations subsystem components, default parameters, and state.
 Enumerations::Enumerations()
 {
 

@@ -1,11 +1,8 @@
-/**
- * @file osc_plugin.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: osc_plugin.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for osc_plugin.h.
+// ============================================================================
 
 #ifndef OSC_PLUGIN
 #define OSC_PLUGIN
@@ -28,48 +25,24 @@ struct osc_plugin {
     QThread *thd;
     bool dynamically_created;
 
-    /**
-     * @brief Executes the bool procedure for the module.
-     * @param identify Input parameter specifying identify (*identify).
-     */
+    // Executes bool routine.
     bool (*identify)(const struct osc_plugin *plugin);
     QWidget * (*init)(struct osc_plugin *plugin, QWidget *notebook, const char *ini_fn);
-    /**
-     * @brief Executes the int procedure for the module.
-     * @param handle_item Input parameter specifying handle_item (*handle_item).
-     */
+    // Executes int routine.
     int (*handle_item) (struct osc_plugin *plugin, int line, const char *attrib, const char *value);
-    /**
-     * @brief Executes the int procedure for the module.
-     * @param handle_external_request Input parameter specifying handle_external_request (*handle_external_request).
-     */
+    // Executes int routine.
     int (*handle_external_request) (struct osc_plugin *plugin, const char *request);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param update_active_page Input parameter specifying update_active_page (*update_active_page).
-     */
+    // Executes void routine.
     void (*update_active_page)(struct osc_plugin *plugin, gint active_page, gboolean is_detached);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param get_preferred_size Input parameter specifying get_preferred_size (*get_preferred_size).
-     */
+    // Executes void routine.
     void (*get_preferred_size)(const struct osc_plugin *plugin, int *width, int *size);
     OscPreferences *(*get_preferences_for_osc)(const osc_plugin *plugin);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param destroy Input parameter specifying destroy (*destroy).
-     */
+    // Executes void routine.
     void (*destroy)(struct osc_plugin *plugin, const char *ini_fn);
 
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param save_profile Input parameter specifying save_profile (*save_profile).
-     */
+    // Executes void routine.
     void (*save_profile)(const struct osc_plugin *plugin, const char *ini_fn);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param load_profile Input parameter specifying load_profile (*load_profile).
-     */
+    // Executes void routine.
     void (*load_profile)(struct osc_plugin *plugin, const char *ini_fn);
     GSList* (*get_dac_dev_names)(const struct osc_plugin *plugin);
     struct plugin_private *priv;

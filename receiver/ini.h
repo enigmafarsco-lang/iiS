@@ -1,11 +1,8 @@
-/**
- * @file ini.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ini.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for ini.h.
+// ============================================================================
 
 #ifndef __INI_H
 #define __INI_H
@@ -21,41 +18,23 @@ struct _INI {
     bool free_buf_on_exit;
 };
 
-/**
- * @class ini
- * @brief High-level controller class for ini.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ini
 {
 
 private:
-    /**
-     * @brief Executes the skip line procedure for ini.
-     * @param ini Input parameter specifying ini (INI).
-     * @return Output value of type static bool.
-     */
+    // Executes skip line routine.
     static bool skip_line(INI *ini);
-    /**
-     * @brief Executes the skip comments procedure for ini.
-     * @param ini Input parameter specifying ini (INI).
-     * @return Output value of type static bool.
-     */
+    // Executes skip comments routine.
     static bool skip_comments(INI *ini);
     static INI *_ini_open_mem(const char *buf,
                 size_t len, bool free_buf_on_exit);
 
 public:
-    /**
-     * @brief Constructs a new ini instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes ini subsystem components, default parameters, and state.
     ini();
     INI *ini_open(const char *file);
     INI *ini_open_mem(const char *buf, size_t len);
-    /**
-     * @brief Executes the ini close procedure for ini.
-     * @param ini Input parameter specifying ini (INI).
-     */
+    // Executes ini close routine.
     void ini_close(INI *ini);
 
     /* Jump to the next section.
@@ -69,6 +48,7 @@ public:
      * 	0 if no more section can be found,
      * 	1 otherwise.
      */
+    // Executes ini next section routine.
     int ini_next_section(INI *ini, const char **name, size_t *name_len);
 
     /* Read a key/value pair.
@@ -87,6 +67,7 @@ public:
                       const char **value, size_t *value_len);
 
     /* Set the read head to a specified offset. */
+    // Executes ini set read pointer routine.
     void ini_set_read_pointer(INI *ini,const char *pointer);
 
     /* Get the number of the line that contains the specified address.
@@ -95,6 +76,7 @@ public:
      * -EINVAL if the pointer points outside the INI string,
      *  The line number otherwise.
      */
+    // Executes ini get line number routine.
     int ini_get_line_number(INI *ini,const char *pointer);
 
 

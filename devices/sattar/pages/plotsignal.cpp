@@ -1,11 +1,8 @@
-/**
- * @file plotsignal.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: plotsignal.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for plotsignal.cpp.
+// ============================================================================
 
 ﻿#include "plotsignal.h"
 #include "ui_plotsignal.h"
@@ -20,9 +17,7 @@ PlotSignal::PlotSignal(QWidget *parent) :
 
 
 
-/**
- * @brief Destructor for PlotSignal, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up PlotSignal resources, timers, and allocated memory.
 PlotSignal::~PlotSignal()
 {
     delete ui;
@@ -33,6 +28,7 @@ PlotSignal::~PlotSignal()
 }
 
 
+// Executes plot file routine.
 void PlotSignal::plotFile()
 {
     //------ firsr plot ----------------
@@ -73,11 +69,7 @@ void PlotSignal::plotFile()
 
 
 
-/**
- * @brief Sets the q glcharts parameters parameter and updates internal state.
- * @param glChart Input parameter specifying glChart (QGLchart).
- * @param glChartType Input parameter specifying glChartType (ChartType).
- */
+// Sets q glcharts parameters value and updates internal subsystem configuration.
 void PlotSignal::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
     glChart->setMinimumSize(QSize(200, 140));
@@ -108,6 +100,7 @@ void PlotSignal::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType
     //    glChart->zoomEnable(true);
 }
 
+// Event/Signal handler for on push button clicked.
 void PlotSignal::on_pushButton_clicked()
 {
 
@@ -159,10 +152,7 @@ void PlotSignal::on_pushButton_clicked()
 
 }
 
-/**
- * @brief Calculates and returns the mathematical calculate f f t w formulation.
- * @return Output value of type QCustomSeries.
- */
+// Computes mathematical calculate f f t w calculation.
 QCustomSeries PlotSignal::calculateFFTW()
 {
     QCustomSeries fftSeriesVal;
@@ -190,10 +180,7 @@ QCustomSeries PlotSignal::calculateFFTW()
 }
 
 
-/**
- * @brief Executes the zoom plot procedure for PlotSignal.
- * @param >&vectorOfCharts Input parameter specifying >&vectorOfCharts (QVector<QGLchart).
- */
+// Executes zoom plot routine.
 void PlotSignal::zoomPlot(QVector<QGLchart *>&vectorOfCharts)
 {
     for(int i = 0; i < vectorOfCharts.length(); i++)

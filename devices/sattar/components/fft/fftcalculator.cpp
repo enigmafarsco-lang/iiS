@@ -1,18 +1,12 @@
-/**
- * @file fftcalculator.cpp
- * @brief Subsystem module for fft in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: fftcalculator.cpp
+// Subsystem: eLynxSDR fft
+// Description: Subsystem implementation and interface guidance for fftcalculator.cpp.
+// ============================================================================
 
 #include "fftcalculator.h"
 
-/**
- * @brief Constructs a new fftCalculator instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QObject).
- */
+// Constructor: Initializes fftCalculator subsystem components, default parameters, and state.
 fftCalculator::fftCalculator(QObject *parent) : QObject(parent)
 {
 
@@ -79,12 +73,7 @@ void fftCalculator::transform(complex<double>* f, int N) //
   free(W);
 }
 
-/**
- * @brief Executes the f f t procedure for fftCalculator.
- * @param f Input parameter specifying f (complex<double>*).
- * @param N Input parameter specifying N (int).
- * @param d Input parameter specifying d (double).
- */
+// Executes f f t routine.
 void fftCalculator::FFT(complex<double>* f, int N, double d)
 {
   transform(f, N);

@@ -1,11 +1,8 @@
-/**
- * @file settings.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: settings.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for settings.h.
+// ============================================================================
 
 #ifndef SETTINGS_H
 #define SETTINGS_H
@@ -19,26 +16,14 @@
 #include <QJsonObject>
 
 namespace Ui {
-/**
- * @class Settings
- * @brief High-level controller class for Settings.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Settings;
 }
 
-/**
- * @class Settings
- * @brief High-level controller class for Settings.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Settings
 {
 
 public:
-    /**
-     * @brief Constructs a new Settings instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes Settings subsystem components, default parameters, and state.
     explicit Settings();
 
     //saeid raziani
@@ -52,47 +37,26 @@ public:
         TOA,
         CHANNEL
     } ;
-    /**
-     * @brief Executes the read setting file procedure for Settings.
-     */
+    // Executes read setting file routine.
     void ReadSettingFile();
-    /**
-     * @brief Executes the read json procedure for Settings.
-     */
+    // Executes read json routine.
     void ReadJson();
-    /**
-     * @brief Executes the save to file procedure for Settings.
-     */
+    // Executes save to file routine.
     void SaveToFile();
 
     const QString &getIp() const;
-    /**
-     * @brief Sets the ip parameter and updates internal state.
-     * @param newIp Input parameter specifying newIp (const QString).
-     */
+    // Sets ip value and updates internal subsystem configuration.
     void setIp(const QString &newIp);
     const QString &getPort() const;
-    /**
-     * @brief Sets the port parameter and updates internal state.
-     * @param newPort Input parameter specifying newPort (const QString).
-     */
+    // Sets port value and updates internal subsystem configuration.
     void setPort(const QString &newPort);
     const QString &getMode() const;
-    /**
-     * @brief Sets the mode parameter and updates internal state.
-     * @param newMode Input parameter specifying newMode (const QString).
-     */
+    // Sets mode value and updates internal subsystem configuration.
     void setMode(const QString &newMode);
 
-    /**
-     * @brief Retrieves the current last filter value.
-     * @return Output value of type QString.
-     */
+    // Retrieves current last filter state.
     QString getLastFilter() const;
-    /**
-     * @brief Sets the last filter parameter and updates internal state.
-     * @param newLastFilter Input parameter specifying newLastFilter (const QString).
-     */
+    // Sets last filter value and updates internal subsystem configuration.
     void setLastFilter(const QString &newLastFilter);
 
 private:

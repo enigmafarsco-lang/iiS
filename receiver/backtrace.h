@@ -1,11 +1,8 @@
-/**
- * @file backtrace.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: backtrace.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for backtrace.h.
+// ============================================================================
 
 #ifndef BACKTRACE_H
 #define BACKTRACE_H
@@ -89,24 +86,19 @@ void handle_crash_data()
         int total_bytes = 0;
 
         /* Get everything the parent process sends */
+        // Executes close routine.
         close(fd[1]);
 
+        // Executes memset routine.
         memset(readbuffer, 0, sizeof(readbuffer));
 
         while (1) {
             nbytes = read(fd[0], readbuffer + total_bytes,
-                    /**
-                     * @brief Executes the sizeof procedure for the module.
-                     * @param readbuffer Input parameter specifying readbuffer (readbuffer).
-                     */
+                    // Executes sizeof routine.
                     sizeof(readbuffer) - total_bytes);
 
             if (nbytes < 0) {
-                /**
-                 * @brief Executes the fprintf procedure for the module.
-                 * @param stderr Input parameter specifying stderr (stderr).
-                 * @param error\n" Input parameter specifying error\n" ("read).
-                 */
+                // Executes fprintf routine.
                 fprintf(stderr, "read error\n");
                 break;
             }
@@ -135,12 +127,7 @@ void handle_crash_data()
             return;
         }
         creport = (struct crash_report *)creport_buf;
-        /**
-         * @brief Executes the memcpy procedure for the module.
-         * @param creport_buf Input parameter specifying creport_buf (creport_buf).
-         * @param readbuffer Input parameter specifying readbuffer (readbuffer).
-         * @param crash_report Input parameter specifying crash_report (sizeof(struct).
-         */
+        // Executes memcpy routine.
         memcpy(creport_buf, readbuffer, sizeof(struct crash_report));
 
         /* Store the crash report in a file */
@@ -152,15 +139,9 @@ void handle_crash_data()
                 CRASH_REPORT_FILENAME,
                 __FILE__, __func__, __LINE__);
 
-            /**
-             * @brief Executes the free procedure for the module.
-             * @param creport_buf Input parameter specifying creport_buf (creport_buf).
-             */
+            // Executes free routine.
             free(creport_buf);
-            /**
-             * @brief Executes the g free procedure for the module.
-             * @param creport_filename Input parameter specifying creport_filename (creport_filename).
-             */
+            // Executes g free routine.
             g_free(creport_filename);
             return;
         }
@@ -180,25 +161,19 @@ void handle_crash_data()
             strerror(creport->err_no),
             ctime(&creport->time)
         );
-        /**
-         * @brief Executes the fprintf procedure for the module.
-         * @param fp Input parameter specifying fp (fp).
-         * @param Backtrace\n" Input parameter specifying Backtrace\n" ("\nIIO-Oscilloscope).
-         */
+        // Executes fprintf routine.
         fprintf(fp, "\nIIO-Oscilloscope Backtrace\n");
-        /**
-         * @brief Executes the fprintf procedure for the module.
-         * @param fp Input parameter specifying fp (fp).
-         * @param "%s" Input parameter specifying "%s" ("%s").
-         * @param crash_report Input parameter specifying crash_report (readbuffer + sizeof(struct).
-         */
+        // Executes fprintf routine.
         fprintf(fp, "%s", readbuffer + sizeof(struct crash_report));
         fprintf(stderr, "A crash report file has been created at: %s\n",
                 creport_filename);
 
         /* Free resources */
+        // Executes fclose routine.
         fclose(fp);
+        // Executes free routine.
         free(creport_buf);
+        // Executes g free routine.
         g_free(creport_filename);
 }
 
@@ -225,22 +200,20 @@ void init_signal_handlers()
     stackParserPID = fork();
 
     if (stackParserPID == 0) {
-        /**
-         * @brief Executes the handle crash data procedure for the module.
-         */
+        // Executes handle crash data routine.
         handle_crash_data();
-        /**
-         * @brief Executes the exit procedure for the module.
-         * @param EXIT_SUCCESS Input parameter specifying EXIT_SUCCESS (EXIT_SUCCESS).
-         */
+        // Executes exit routine.
         _exit(EXIT_SUCCESS);
     }
 
     /* Send a crash report when a crash occurs */
+    // Executes memset routine.
     memset(&osc_backtrace, 0, sizeof(osc_backtrace));
     osc_backtrace.sa_sigaction = obtainBacktrace;
 
+    // Executes sigaction routine.
     sigaction(SIGSEGV, &osc_backtrace, nullptr);
+    // Executes sigaction routine.
     sigaction(SIGABRT, &osc_backtrace, nullptr);
 #endif
 }

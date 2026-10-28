@@ -1,11 +1,8 @@
-/**
- * @file qmeterdrawfunctions_tilt.cpp
- * @brief Subsystem module for Tilt in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: qmeterdrawfunctions_tilt.cpp
+// Subsystem: eLynxSDR Tilt
+// Description: Subsystem implementation and interface guidance for qmeterdrawfunctions_tilt.cpp.
+// ============================================================================
 
 /*
  *   Copyright (C) 2016 by P. Sereno
@@ -24,10 +21,7 @@
 #define PI 3.1415926535
 
 
-/**
- * @brief Executes the draw crown procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw crown routine.
 void BTiltGauge::drawCrown(QPainter *painter)
 {
 
@@ -47,20 +41,14 @@ void BTiltGauge::drawCrown(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw background procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw background routine.
 void BTiltGauge::drawBackground(QPainter *painter)
 {
     painter->setBrush(m_background);
     painter->drawEllipse(-45, -45, 90, 90);
 }
 
-/**
- * @brief Executes the draw ticks procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw ticks routine.
 void BTiltGauge::drawTicks(QPainter *painter)
 {
     painter->save();
@@ -109,10 +97,7 @@ void BTiltGauge::drawScale(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw units procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw units routine.
 void BTiltGauge::drawUnits(QPainter *painter)
 {
     painter->setPen(m_foreground);
@@ -122,10 +107,7 @@ void BTiltGauge::drawUnits(QPainter *painter)
     painter->drawText(labelRect,Qt::AlignCenter, m_units);
 }
 
-/**
- * @brief Executes the draw numeric value procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw numeric value routine.
 void BTiltGauge::drawNumericValue(QPainter *painter)
 {
     if( (!enableNumericIndicator()) )
@@ -156,10 +138,7 @@ void BTiltGauge::drawNumericValue(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw needle procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw needle routine.
 void BTiltGauge::drawNeedle(QPainter *painter)
 {
     painter->save();
@@ -197,10 +176,7 @@ void BTiltGauge::drawNeedle(QPainter *painter)
     painter->drawEllipse(-7, -7, 14, 14);
 }
 
-/**
- * @brief Executes the draw threshold line procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw threshold line routine.
 void BTiltGauge::drawThresholdLine(QPainter *painter)
 {
     if( (!enableThreshold()) )
@@ -221,10 +197,7 @@ void BTiltGauge::drawThresholdLine(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw cover glass procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw cover glass routine.
 void BTiltGauge::drawCoverGlass(QPainter *painter)
 {
     painter->save();
@@ -242,10 +215,7 @@ void BTiltGauge::drawCoverGlass(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw label procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw label routine.
 void BTiltGauge::drawLabel(QPainter *painter)
 {
     painter->save();
@@ -271,10 +241,7 @@ void BTiltGauge::drawLabel(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw warning window procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw warning window routine.
 void BTiltGauge::drawWarningWindow(QPainter *painter)
 {
     if(enableWarningWindow())
@@ -295,10 +262,7 @@ void BTiltGauge::drawWarningWindow(QPainter *painter)
     }
 }
 
-/**
- * @brief Executes the draw valid window procedure for BTiltGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw valid window routine.
 void BTiltGauge::drawValidWindow(QPainter *painter)
 {
     if(enableValidWindow())

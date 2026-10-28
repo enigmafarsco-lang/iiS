@@ -1,11 +1,8 @@
-/**
- * @file cooling3.cpp
- * @brief Subsystem module for cooling in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: cooling3.cpp
+// Subsystem: eLynxSDR cooling
+// Description: Subsystem implementation and interface guidance for cooling3.cpp.
+// ============================================================================
 
 #include "cooling3.h"
 #include "ui_cooling3.h"
@@ -41,6 +38,7 @@ Cooling3::Cooling3(QWidget *parent) :
 
 }
 
+// Destructor: Cleans up Cooling3 resources, timers, and allocated memory.
 Cooling3::~Cooling3()
 {
     delete ui;
@@ -48,10 +46,7 @@ Cooling3::~Cooling3()
 
 
 
-/**
- * @brief Retrieves the current evice connected slot value.
- * @param val Input parameter specifying val (bool).
- */
+// Retrieves current evice connected slot state.
 void Cooling3::isDeviceConnectedSlot(bool val)
 {
 
@@ -79,6 +74,7 @@ void Cooling3::isDeviceConnectedSlot(bool val)
     creatPacket(1,data,4,FC_WriteMultReg);
 }
 
+// Executes joshan func data slot routine.
 void Cooling3::joshanFuncDataSlot()
 {
     QJsonObject coolingData;
@@ -89,9 +85,7 @@ void Cooling3::joshanFuncDataSlot()
 
 }
 
-/**
- * @brief Executes the joshan status data slot procedure for Cooling3.
- */
+// Executes joshan status data slot routine.
 void Cooling3::joshanStatusDataSlot()
 {
 
@@ -109,10 +103,7 @@ void Cooling3::joshanStatusDataSlot()
     emit sendStatusDataToJoshanSignal(coolingData);
 }
 
-/**
- * @brief Executes the joshan control data slot procedure for Cooling3.
- * @param val Input parameter specifying val (QJsonObject).
- */
+// Executes joshan control data slot routine.
 void Cooling3::joshanControlDataSlot(QJsonObject val)
 {
 
@@ -138,10 +129,7 @@ void Cooling3::joshanControlDataSlot(QJsonObject val)
 
 }
 
-/**
- * @brief Retrieves the current solid temp slot value.
- * @param temp Input parameter specifying temp (int).
- */
+// Retrieves current solid temp slot state.
 void Cooling3::getSolidTempSlot(int temp)
 {
     if (!autoMode) return;
@@ -153,9 +141,7 @@ void Cooling3::getSolidTempSlot(int temp)
 }
 
 
-/**
- * @brief Slot handler responding to on  btn auto clicked event.
- */
+// Event/Signal handler for on  btn auto clicked.
 void Cooling3::on_BtnAuto_clicked()
 {
     autoMode = true;
@@ -166,6 +152,7 @@ void Cooling3::on_BtnAuto_clicked()
     //emit sendCommandToDeviceSignal("");
 }
 
+// Event/Signal handler for on  btn manual clicked.
 void Cooling3::on_BtnManual_clicked()
 {
     autoMode = false;
@@ -182,6 +169,7 @@ void Cooling3::on_BtnManual_clicked()
 
 }
 
+// Event/Signal handler for on  btn turn on cooling clicked.
 void Cooling3::on_BtnTurnOnCooling_clicked()
 {
     status_mode = Cooler_On;
@@ -193,14 +181,7 @@ void Cooling3::on_BtnTurnOnCooling_clicked()
 }
 
 
-/**
- * @brief Executes the creat packet procedure for Cooling3.
- * @param slaveNumber Input parameter specifying slaveNumber (uint8_t).
- * @param data Input parameter specifying data (uint8_t).
- * @param dataLen Input parameter specifying dataLen (uint8_t).
- * @param fc Input parameter specifying fc (FC_t).
- * @return Output value of type bool.
- */
+// Executes creat packet routine.
 bool Cooling3::creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t dataLen,FC_t fc)
 {
     // QByteArray::operator[] past the current size only warns (QByteRef) and
@@ -232,9 +213,7 @@ bool Cooling3::creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t dataLen,FC_
 }
 
 
-/**
- * @brief Slot handler responding to on  btn turn off cooling clicked event.
- */
+// Event/Signal handler for on  btn turn off cooling clicked.
 void Cooling3::on_BtnTurnOffCooling_clicked()
 {
     status_mode = Cooler_Off;
@@ -247,10 +226,7 @@ void Cooling3::on_BtnTurnOffCooling_clicked()
 
 
 
-/**
- * @brief Executes the gui update procedure for Cooling3.
- * @param CoolingBoard Input parameter specifying CoolingBoard (packetManager::CoolingBoard_t).
- */
+// Executes gui update routine.
 void Cooling3::GuiUpdate(packetManager::CoolingBoard_t CoolingBoard)
 {
     // ui->lblComp_2->setText(QString::number(0));

@@ -1,11 +1,8 @@
-/**
- * @file plotsignal.h
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: plotsignal.h
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for plotsignal.h.
+// ============================================================================
 
 #ifndef PLOTSIGNAL_H
 #define PLOTSIGNAL_H
@@ -29,39 +26,22 @@
 
 using namespace std;
 namespace Ui {
-/**
- * @class PlotSignal
- * @brief High-level controller class for PlotSignal.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PlotSignal;
 }
 
-/**
- * @class PlotSignal
- * @brief High-level controller class for PlotSignal.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PlotSignal : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new PlotSignal instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes PlotSignal subsystem components, default parameters, and state.
     explicit PlotSignal(QWidget *parent = nullptr);
 
-    /**
-     * @brief Destructor for PlotSignal, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up PlotSignal resources, timers, and allocated memory.
     ~PlotSignal();
 
 private slots:
-    /**
-     * @brief Slot handler responding to on push button clicked event.
-     */
+    // Event/Signal handler for on push button clicked.
     void on_pushButton_clicked();
 
 
@@ -69,29 +49,15 @@ private:
     Ui::PlotSignal *ui;
     fftCalculator * fftInstance = new fftCalculator;
 
-    /**
-     * @brief Initializes and configures the init for the PlotSignal subsystem.
-     */
+    // Initializes init for PlotSignal.
     void init();
-    /**
-     * @brief Executes the zoom plot procedure for PlotSignal.
-     * @param  Input parameter specifying  (QVector<QGLchart *>).
-     */
+    // Executes zoom plot routine.
     void zoomPlot(QVector<QGLchart *> &);
-    /**
-     * @brief Sets the q glcharts parameters parameter and updates internal state.
-     * @param glChart Input parameter specifying glChart (QGLchart).
-     * @param glChartType Input parameter specifying glChartType (ChartType).
-     */
+    // Sets q glcharts parameters value and updates internal subsystem configuration.
     void setQGlchartsParameters(QGLchart *glChart, ChartType glChartType);
-    /**
-     * @brief Calculates and returns the mathematical calculate f f t w formulation.
-     * @return Output value of type QCustomSeries.
-     */
+    // Computes mathematical calculate f f t w calculation.
     QCustomSeries calculateFFTW();
-    /**
-     * @brief Executes the plot file procedure for PlotSignal.
-     */
+    // Executes plot file routine.
     void plotFile();
     QGLchart *panoramaChart;
     QGLchart *panoramaChart2;
@@ -113,11 +79,9 @@ private:
 
 
 signals:
+    // Executes create plot signal routine.
     void createPlotSignal(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal2 procedure for PlotSignal.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal2 routine.
     void createPlotSignal2(QCustomSeries);
 
 };

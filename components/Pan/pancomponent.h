@@ -1,11 +1,8 @@
-/**
- * @file pancomponent.h
- * @brief Subsystem module for Pan in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pancomponent.h
+// Subsystem: eLynxSDR Pan
+// Description: Subsystem implementation and interface guidance for pancomponent.h.
+// ============================================================================
 
 #ifndef PANCOMPONENT_H
 #define PANCOMPONENT_H
@@ -20,44 +17,24 @@
 #include "pangauge.h"
 #include "constants/project_constans.h"
 
-/**
- * @class BPanComponent
- * @brief High-level controller class for BPanComponent.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class BPanComponent : public QWidget
 {
     Q_OBJECT
 public:
-    /**
-     * @brief Constructs a new BPanComponent instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes BPanComponent subsystem components, default parameters, and state.
     explicit BPanComponent(QWidget *parent = nullptr);
 
-    /**
-     * @brief Initializes and configures the init labels for the BPanComponent subsystem.
-     */
+    // Initializes init labels for BPanComponent.
     void init_labels();
-    /**
-     * @brief Initializes and configures the init double spin boxes for the BPanComponent subsystem.
-     */
+    // Initializes init double spin boxes for BPanComponent.
     void init_doubleSpinBoxes();
-    /**
-     * @brief Initializes and configures the init buttons for the BPanComponent subsystem.
-     */
+    // Initializes init buttons for BPanComponent.
     void init_buttons();
-    /**
-     * @brief Initializes and configures the init progress bar for the BPanComponent subsystem.
-     */
+    // Initializes init progress bar for BPanComponent.
     void init_progressBar();
-    /**
-     * @brief Initializes and configures the init pan for the BPanComponent subsystem.
-     */
+    // Initializes init pan for BPanComponent.
     void init_pan();
-    /**
-     * @brief Sets the components_arrangements parameter and updates internal state.
-     */
+    // Sets components_arrangements value and updates internal subsystem configuration.
     void set_components_arrangements();
 
     QGridLayout *grdMainLayout;

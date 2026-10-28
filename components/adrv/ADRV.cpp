@@ -1,11 +1,8 @@
-/**
- * @file ADRV.cpp
- * @brief Subsystem module for adrv in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ADRV.cpp
+// Subsystem: eLynxSDR adrv
+// Description: Subsystem implementation and interface guidance for ADRV.cpp.
+// ============================================================================
 
 #include "ADRV.h"
 #include <QtConcurrent>
@@ -15,6 +12,7 @@
 /**
  * @brief adrv::adrv
  */
+// Constructor: Initializes adrv subsystem components, default parameters, and state.
 adrv::adrv()
 {
 
@@ -29,6 +27,7 @@ adrv::adrv()
  * @param ip : Board Ip
  * @return true if no problem detect
  */
+// Executes connect routine.
 bool adrv::connect(QString ip)
 {
 //    ctx = GetContext("ip:"+ip);
@@ -66,6 +65,7 @@ bool adrv::SetFrequency(double freq){
  * @param freq
  * @return
  */
+// Executes set frequency hopping routine.
 bool adrv::SetFrequencyHopping(double start, double stop, double step)
 {
     struct iio_device *dev;
@@ -108,6 +108,7 @@ bool adrv::SetFrequencyHopping(double start, double stop, double step)
  * @brief Get current frequency
  * @return frequency Changed status
  */
+// Executes get frequency routine.
 double adrv::GetFrequency()
 {
     struct iio_device *dev;
@@ -138,10 +139,7 @@ double adrv::GetFrequency()
 }
 
 
-/**
- * @brief Executes the get power procedure for adrv.
- * @return Output value of type double.
- */
+// Executes get power routine.
 double adrv::GetPower()
 {
     struct iio_device *dev;
@@ -168,11 +166,7 @@ double adrv::GetPower()
     return power;
 }
 
-/**
- * @brief Executes the set power procedure for adrv.
- * @param power Input parameter specifying power (double).
- * @return Output value of type bool.
- */
+// Executes set power routine.
 bool adrv::SetPower(double power)
 {
     struct iio_device *dev;
@@ -205,21 +199,14 @@ QHBoxLayout *adrv::InitializeDacBuffer()
 }
 
 
-/**
- * @brief Executes the set file procedure for adrv.
- * @param fileName Input parameter specifying fileName (QString).
- * @param scale Input parameter specifying scale (double).
- * @return Output value of type QString.
- */
+// Executes set file routine.
 QString adrv::SetFile(QString fileName, double scale)
 {
     return dac_data_manager->setFile(fileName,scale);
 }
 
 
-/**
- * @brief Executes the disable dac procedure for adrv.
- */
+// Executes disable dac routine.
 void adrv::DisableDac()
 {
     dac_data_manager->DisableDac();

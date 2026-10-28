@@ -1,11 +1,8 @@
-/**
- * @file sattarutils.h
- * @brief Subsystem module for components in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: sattarutils.h
+// Subsystem: eLynxSDR components
+// Description: Subsystem implementation and interface guidance for sattarutils.h.
+// ============================================================================
 
 #ifndef SATTARUTILS_H
 #define SATTARUTILS_H
@@ -52,11 +49,6 @@
 #include <cstring>
 
 
-/**
- * @class SattarUtils
- * @brief High-level controller class for SattarUtils.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class SattarUtils : public QObject
 {
     Q_OBJECT
@@ -77,10 +69,7 @@ private:
     QVBoxLayout                 * s           = new QVBoxLayout;
 
 public:
-    /**
-     * @brief Constructs a new SattarUtils instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QObject).
-     */
+    // Constructor: Initializes SattarUtils subsystem components, default parameters, and state.
     explicit SattarUtils(QObject *parent = nullptr);
 
     //Configs ==================================================================================================
@@ -95,204 +84,75 @@ public:
     //==========================================================================================================
 
 
+    // Executes spure generate date routine.
     bool  spureGenerateDate( spureSpace::spureStruct &spurData,modulSpace::modulDataStruct&, radarSpace::radarDataStruct&, frqSpace::frqDataStruct &, priSpace::priDataStruct &, pwSpace::pwDataStruct &);
+    // Executes generate spure data routine.
     bool  generateSpureData(uint&,float&, modulSpace::modulDataStruct &,spureSpace::spureStruct &);
+    // Executes min max p r i routine.
     void  minMaxPRI(priSpace::priDataStruct &, float&, float&, double&, double&, double&);
-    /**
-     * @brief Executes the generate spure data procedure for SattarUtils.
-     * @param uint& Input parameter specifying uint& (uint&).
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @param  Input parameter specifying  (spureSpace::spureStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate spure data routine.
     bool  generateSpureData(uint&, priSpace::priDataStruct &,spureSpace::spureStruct &);
-    /**
-     * @brief Executes the generate spure data procedure for SattarUtils.
-     * @param  Input parameter specifying  (frqSpace::frqDataStruct).
-     * @param  Input parameter specifying  (spureSpace::spureStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate spure data routine.
     bool  generateSpureData(frqSpace::frqDataStruct &,spureSpace::spureStruct &);
-    /**
-     * @brief Executes the generate spure data procedure for SattarUtils.
-     * @param  Input parameter specifying  (pwSpace::pwDataStruct).
-     * @param  Input parameter specifying  (spureSpace::spureStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate spure data routine.
     bool  generateSpureData(pwSpace::pwDataStruct &,spureSpace::spureStruct &);
     typedef enum{pulsePage, priPage,pwPage,frqPage,modulPage} colorStatus;
-    /**
-     * @brief Executes the check error procedure for SattarUtils.
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @param  Input parameter specifying  (pwSpace::pwDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes check error routine.
     bool  checkError(priSpace::priDataStruct &, pwSpace::pwDataStruct & );
-    /**
-     * @brief Executes the min max p r i dwell procedure for SattarUtils.
-     * @param data Input parameter specifying data (priSpace::priDataStruct).
-     * @param pris Input parameter specifying pris (float).
-     */
+    // Executes min max p r i dwell routine.
     void  minMaxPRIDwell(priSpace::priDataStruct &data, float &pris);
-    /**
-     * @brief Sets the max pulse count parameter and updates internal state.
-     * @param uint Input parameter specifying uint (uint).
-     * @param  Input parameter specifying  (radarSpace::radarDataStruct).
-     * @return Output value of type bool.
-     */
+    // Sets max pulse count value and updates internal subsystem configuration.
     bool  setMaxPulseCount(uint, radarSpace::radarDataStruct & );
-    /**
-     * @brief Executes the regenerate pulse p r i procedure for SattarUtils.
-     * @param uint Input parameter specifying uint (uint).
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @return Output value of type int.
-     */
+    // Executes regenerate pulse p r i routine.
     int  regeneratePulsePRI(uint, priSpace::priDataStruct & );
-    /**
-     * @brief Executes the generate data procedure for SattarUtils.
-     * @param uint Input parameter specifying uint (uint).
-     * @param uint Input parameter specifying uint (uint).
-     * @param  Input parameter specifying  (frqSpace::frqDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate data routine.
     bool  generateData(uint,uint, frqSpace::frqDataStruct & );
-    /**
-     * @brief Executes the regenerate pulse frq procedure for SattarUtils.
-     * @param uint Input parameter specifying uint (uint).
-     * @param  Input parameter specifying  (frqSpace::frqDataStruct).
-     * @return Output value of type uint.
-     */
+    // Executes regenerate pulse frq routine.
     uint  regeneratePulseFrq(uint, frqSpace::frqDataStruct &);
-    /**
-     * @brief Retrieves the current total pulse count value.
-     * @param  Input parameter specifying  (radarSpace::radarDataStruct).
-     * @return Output value of type int.
-     */
+    // Retrieves current total pulse count state.
     int  getTotalPulseCount(radarSpace::radarDataStruct & );
-    /**
-     * @brief Executes the regenerate pulse p w procedure for SattarUtils.
-     * @param uint Input parameter specifying uint (uint).
-     * @param  Input parameter specifying  (pwSpace::pwDataStruct).
-     * @return Output value of type int.
-     */
+    // Executes regenerate pulse p w routine.
     int  regeneratePulsePW(uint, pwSpace::pwDataStruct & );
-    /**
-     * @brief Executes the min max p r i procedure for SattarUtils.
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @param float& Input parameter specifying float& (float&).
-     */
+    // Executes min max p r i routine.
     void  minMaxPRI(priSpace::priDataStruct &, float&);
-    /**
-     * @brief Executes the time to u long procedure for SattarUtils.
-     * @param  Input parameter specifying  (const uint).
-     * @param  Input parameter specifying  (const QString).
-     * @return Output value of type ulong.
-     */
+    // Executes time to u long routine.
     ulong timeToULong(const uint &, const QString &);
-    /**
-     * @brief Executes the generate p r i data procedure for SattarUtils.
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate p r i data routine.
     bool  generatePRIData(priSpace::priDataStruct &);
-    /**
-     * @brief Executes the time to int procedure for SattarUtils.
-     * @param  Input parameter specifying  (const uint).
-     * @param  Input parameter specifying  (const QString).
-     * @return Output value of type uint.
-     */
+    // Executes time to int routine.
     uint  timeToInt(const uint &, const QString &);
-    /**
-     * @brief Executes the generate p w data procedure for SattarUtils.
-     * @param  Input parameter specifying  (pwSpace::pwDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate p w data routine.
     bool  generatePWData(pwSpace::pwDataStruct &);
-    /**
-     * @brief Executes the else function procedure for SattarUtils.
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes else function routine.
     bool  elseFunction(priSpace::priDataStruct &);
-    /**
-     * @brief Executes the gen procedure for SattarUtils.
-     * @param float& Input parameter specifying float& (float&).
-     * @param double& Input parameter specifying double& (double&).
-     * @param double& Input parameter specifying double& (double&).
-     * @param double& Input parameter specifying double& (double&).
-     * @return Output value of type float.
-     */
+    // Executes gen routine.
     float Gen(float&, double&, double&, double&);
-    /**
-     * @brief Initializes and configures the init p r i val for the SattarUtils subsystem.
-     * @param  Input parameter specifying  (priSpace::priDataStruct).
-     */
+    // Initializes init p r i val for SattarUtils.
     void  initPRIVal(priSpace::priDataStruct &);
-    /**
-     * @brief Executes the simplified i q procedure for SattarUtils.
-     * @param  Input parameter specifying  (std::vector <int16_t>).
-     */
+    // Executes simplified i q routine.
     void simplifiedIQ(std::vector <int16_t> &);
-    /**
-     * @brief Executes the normal iq procedure for SattarUtils.
-     * @param  Input parameter specifying  (std::vector <int16_t>).
-     */
+    // Executes normal iq routine.
     void normalIq(std::vector <int16_t> &);
-    /**
-     * @brief Executes the color state procedure for SattarUtils.
-     * @param colorStatus Input parameter specifying colorStatus (colorStatus).
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes color state routine.
     void colorState(colorStatus,bool);
-    /**
-     * @brief Executes the remove iq file procedure for SattarUtils.
-     * @param  Input parameter specifying  (QJsonObject).
-     */
+    // Executes remove iq file routine.
     void removeIqFile(QJsonObject &);
-    /**
-     * @brief Executes the save project procedure for SattarUtils.
-     * @param QJsonObject& Input parameter specifying QJsonObject& (QJsonObject&).
-     * @return Output value of type bool.
-     */
+    // Executes save project routine.
     bool  saveProject(QJsonObject&);
     static bool isBtnColorGreen[4];
-    /**
-     * @brief Executes the float to time procedure for SattarUtils.
-     * @param float& Input parameter specifying float& (float&).
-     * @return Output value of type QString.
-     */
+    // Executes float to time routine.
     QString floatToTime(float&);
-    /**
-     * @brief Executes the msg function procedure for SattarUtils.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes msg function routine.
     void  msgFunction(QString);
-    /**
-     * @brief Executes the time to float procedure for SattarUtils.
-     * @param QString Input parameter specifying QString (QString).
-     * @return Output value of type float.
-     */
+    // Executes time to float routine.
     float timeToFloat(QString);
-    /**
-     * @brief Executes the show loading bar procedure for SattarUtils.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes show loading bar routine.
     void showLoadingBar(bool);
-    /**
-     * @brief Executes the frq to u long procedure for SattarUtils.
-     * @param QString Input parameter specifying QString (QString).
-     * @return Output value of type ulong.
-     */
+    // Executes frq to u long routine.
     ulong frqToULong(QString);
-    /**
-     * @brief Executes the frq to time procedure for SattarUtils.
-     * @param QString Input parameter specifying QString (QString).
-     * @return Output value of type float.
-     */
+    // Executes frq to time routine.
     float frqToTime(QString);
-    /**
-     * @brief Executes the minimized iq file procedure for SattarUtils.
-     */
+    // Executes minimized iq file routine.
     void minimizedIqFile();
     bool isSendToCard{};
     QString radarName;
@@ -302,11 +162,7 @@ public:
 
 
 private slots:
-    /**
-     * @brief Executes the create iq is done procedure for SattarUtils.
-     * @param int Input parameter specifying int (int).
-     * @param QProcess::ExitStatus Input parameter specifying QProcess::ExitStatus (QProcess::ExitStatus).
-     */
+    // Executes create iq is done routine.
     void createIqIsDone(int,QProcess::ExitStatus);
 
 
@@ -333,12 +189,7 @@ public slots:
 
 
 signals:
-    /**
-     * @brief Executes the load sattar file to cart procedure for SattarUtils.
-     * @param QString Input parameter specifying QString (QString).
-     * @param double Input parameter specifying double (double).
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes load sattar file to cart routine.
     void loadSattarFileToCart(QString, double,QString);
 
 };

@@ -1,11 +1,8 @@
-/**
- * @file globals.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: globals.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for globals.cpp.
+// ============================================================================
 
 #include "globals.h"
 
@@ -25,6 +22,7 @@ double globals::temp9009=0;
 /**
  * @brief globals::globals
  */
+// Constructor: Initializes globals subsystem components, default parameters, and state.
 globals::globals()
 {
 }
@@ -32,6 +30,7 @@ globals::globals()
 /**
  * @brief globals::osc_destroy_context
  */
+// Executes osc destroy context routine.
 void globals::osc_destroy_context()
 {
     iio_context_destroy(ctx);
@@ -44,6 +43,7 @@ void globals::osc_destroy_context()
  * @param val
  * @return
  */
+// Sets widget_value value and updates internal subsystem configuration.
 char * globals::set_widget_value(QWidget *widget, struct w_info *item, long long val)
 {
     QString className=widget->metaObject()->className();
@@ -121,6 +121,7 @@ char * globals::set_widget_value(QWidget *widget, struct w_info *item, long long
  * @param item
  * @param val
  */
+// Executes connect widget routine.
 void globals::connect_widget(QWidget *widget, struct w_info *item, long long val)
 {
     set_widget_value(widget, item, val);
@@ -168,6 +169,7 @@ int globals::__connect_widget(struct iio_device *dev, const char *attr,
  * @param builder
  * @return
  */
+// Executes connect widgets routine.
 int globals::connect_widgets(QWidget *builder)
 {
     return iio_device_debug_attr_read_all(dev, __connect_widget, builder);
@@ -180,6 +182,7 @@ int globals::connect_widgets(QWidget *builder)
  * (/sys/bus/i2c/devices/0-0050/eeprom) with a key-authenticated ssh exec
  * (BatchMode: never prompts for a password).
  */
+// Executes board serial number routine.
 QString globals::boardSerialNumber()
 {
     QString sn;
@@ -220,11 +223,7 @@ QString globals::boardSerialNumber()
     return sn;
 }
 
-/**
- * @brief Executes the serial is sn001 procedure for globals.
- * @param sn Input parameter specifying sn (const QString).
- * @return Output value of type bool.
- */
+// Executes serial is sn001 routine.
 bool globals::serialIsSn001(const QString &sn)
 {
     const QString snUp = sn.trimmed().toUpper();
@@ -232,11 +231,7 @@ bool globals::serialIsSn001(const QString &sn)
            snUp.endsWith(QLatin1String("001"));
 }
 
-/**
- * @brief Executes the serial is sn003 procedure for globals.
- * @param sn Input parameter specifying sn (const QString).
- * @return Output value of type bool.
- */
+// Executes serial is sn003 routine.
 bool globals::serialIsSn003(const QString &sn)
 {
     const QString snUp = sn.trimmed().toUpper();

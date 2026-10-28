@@ -1,11 +1,8 @@
-/**
- * @file menupage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: menupage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for menupage.cpp.
+// ============================================================================
 
 #include "menupage.h"
 #include "ui_menupage.h"
@@ -20,10 +17,7 @@ MenuPage::MenuPage(QWidget *parent) :
 }
 
 
-/**
- * @brief Executes the show menu option slot procedure for MenuPage.
- * @param isEnable Input parameter specifying isEnable (bool).
- */
+// Executes show menu option slot routine.
 void MenuPage::showMenuOptionSlot(bool isEnable)
 {
     menuSimulateRadar->setEnabled(isEnable);
@@ -108,9 +102,7 @@ void MenuPage::newProject()
 
 }
 
-/**
- * @brief Executes the save project procedure for MenuPage.
- */
+// Executes save project routine.
 void MenuPage::saveProject()
 {
     if (curFile.isEmpty())
@@ -128,10 +120,7 @@ void MenuPage::saveProject()
 
 }
 
-/**
- * @brief Executes the save file procedure for MenuPage.
- * @return Output value of type bool.
- */
+// Executes save file routine.
 bool MenuPage::saveFile()
 {
     //curFile is the neme of our file and it must be selected by user
@@ -148,24 +137,20 @@ bool MenuPage::saveFile()
     return true;
 }
 
+// Executes generate radar routine.
 void MenuPage::generateRadar()
 {
 
     menuGenerateSignal();
 }
 
-/**
- * @brief Executes the save project as procedure for MenuPage.
- */
+// Executes save project as routine.
 void MenuPage::saveProjectAs()
 {
     std::cout<<" this works" << std::endl;
 }
 
-/**
- * @brief Executes the load project procedure for MenuPage.
- * @return Output value of type bool.
- */
+// Executes load project routine.
 bool MenuPage::loadProject()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
@@ -195,17 +180,13 @@ bool MenuPage::loadProject()
 
 }
 
-/**
- * @brief Executes the close procedure for MenuPage.
- */
+// Executes close routine.
 void MenuPage::close()
 {
     std::cout<<" this works" << std::endl;
 }
 
-/**
- * @brief Destructor for MenuPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up MenuPage resources, timers, and allocated memory.
 MenuPage::~MenuPage()
 {
     delete ui;

@@ -1,18 +1,12 @@
-/**
- * @file tcpclient.cpp
- * @brief Subsystem module for cooling in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tcpclient.cpp
+// Subsystem: eLynxSDR cooling
+// Description: Subsystem implementation and interface guidance for tcpclient.cpp.
+// ============================================================================
 
 #include "tcpclient.h"
 #include <QDebug>
-/**
- * @brief Constructs a new TCPClient instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QObject).
- */
+// Constructor: Initializes TCPClient subsystem components, default parameters, and state.
 TCPClient::TCPClient(QObject *parent) : QObject(parent)
 {
 //    connect(&socket_tcp,&QTcpSocket::connected,this,&TCPClient::connected);
@@ -28,6 +22,7 @@ TCPClient::TCPClient(QObject *parent) : QObject(parent)
 
 }
 
+// Executes connet to host routine.
 void TCPClient::connetToHost(QString host,quint16 port)
 {
 //    /*
@@ -44,6 +39,7 @@ void TCPClient::connetToHost(QString host,quint16 port)
 /*
  * Fire this  when connected socket want to be closed
 */
+// Executes disconnect routine.
 void TCPClient::disconnect()
 {
 //    socket_tcp.close();
@@ -52,6 +48,7 @@ void TCPClient::disconnect()
 
 }
 
+// Transmits write command/packet over communication interface.
 void TCPClient::write(const QByteArray &data)
 {
 //    socket_tcp.write(data);
@@ -60,6 +57,7 @@ void TCPClient::write(const QByteArray &data)
 /*
  * Fire this  when client connected
 */
+// Executes connected routine.
 void TCPClient::connected()
 {
 //    qInfo()<< "Connected";
@@ -71,6 +69,7 @@ void TCPClient::connected()
 /*
  * Fire this  when client disconnected
 */
+// Executes disconnected routine.
 void TCPClient::disconnected()
 {
 //    qInfo()<< "Disconnected";
@@ -78,6 +77,7 @@ void TCPClient::disconnected()
 /*
  * Fire this when connecting to socket has an error
 */
+// Executes error routine.
 void TCPClient::error(QAbstractSocket::SocketError socketError)
 {
 //    qCritical()<< "Error:"<<socketError<<" "<<socket_tcp.errorString();
@@ -85,6 +85,7 @@ void TCPClient::error(QAbstractSocket::SocketError socketError)
 /*
  * Fire this  when the state of connection is changed
 */
+// Executes state changed routine.
 void TCPClient::stateChanged(QAbstractSocket::SocketState socketState)
 {
 //    QMetaEnum metaEnum=QMetaEnum::fromType<QAbstractSocket::SocketState>();
@@ -95,6 +96,7 @@ void TCPClient::stateChanged(QAbstractSocket::SocketState socketState)
 /*
 *Fire this signal  once every time new data is available for reading from the device
 */
+// Reads and parses incoming ready read data.
 void TCPClient::readyRead()
 {
 //    QByteArray datagram;

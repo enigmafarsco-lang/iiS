@@ -1,11 +1,8 @@
-/**
- * @file camera3d.cpp
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: camera3d.cpp
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for camera3d.cpp.
+// ============================================================================
 
 #include "camera3d.h"
 
@@ -23,10 +20,7 @@ const QMatrix4x4 &Camera3D::toMatrix()
     return m_world;
 }
 
-/**
- * @brief Executes the rotate procedure for Camera3D.
- * @param dr Input parameter specifying dr (const QQuaternion).
- */
+// Executes rotate routine.
 void Camera3D::rotate(const QQuaternion &dr)
 {
   m_dirty = true;

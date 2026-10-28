@@ -1,11 +1,8 @@
-/**
- * @file ADRV.h
- * @brief Subsystem module for adrv in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ADRV.h
+// Subsystem: eLynxSDR adrv
+// Description: Subsystem implementation and interface guidance for ADRV.h.
+// ============================================================================
 
 #ifndef ADRV_H
 #define ADRV_H
@@ -25,72 +22,34 @@
 #define PHY_DEVICE "adrv9009-phy"
 #define DDS_DEVICE "axi-adrv9009-tx-hpc"
 
-/**
- * @class adrv
- * @brief High-level controller class for adrv.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class adrv : public QObject
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * @brief Constructs a new adrv instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes adrv subsystem components, default parameters, and state.
     explicit adrv();
-    /**
-     * @brief Executes the connect procedure for adrv.
-     * @param ip Input parameter specifying ip (QString).
-     * @return Output value of type bool.
-     */
+    // Executes connect routine.
     bool connect(QString ip);
 
-    /**
-     * @brief Executes the get frequency procedure for adrv.
-     * @return Output value of type double.
-     */
+    // Executes get frequency routine.
     double GetFrequency();
-    /**
-     * @brief Executes the set frequency procedure for adrv.
-     * @param freq Input parameter specifying freq (double).
-     * @return Output value of type bool.
-     */
+    // Executes set frequency routine.
     bool SetFrequency(double freq);
-    /**
-     * @brief Executes the set frequency hopping procedure for adrv.
-     * @param start Input parameter specifying start (double).
-     * @param stop Input parameter specifying stop (double).
-     * @param step Input parameter specifying step (double).
-     * @return Output value of type bool.
-     */
+    // Executes set frequency hopping routine.
     bool SetFrequencyHopping(double start,double stop,double step);
 
-    /**
-     * @brief Executes the get power procedure for adrv.
-     * @return Output value of type double.
-     */
+    // Executes get power routine.
     double GetPower();
-    /**
-     * @brief Executes the set power procedure for adrv.
-     * @param freq Input parameter specifying freq (double).
-     * @return Output value of type bool.
-     */
+    // Executes set power routine.
     bool SetPower(double freq);
 
     QHBoxLayout *InitializeDacBuffer();
 
-    /**
-     * @brief Executes the set file procedure for adrv.
-     * @param fileName Input parameter specifying fileName (QString).
-     * @param scale Input parameter specifying scale (double).
-     * @return Output value of type QString.
-     */
+    // Executes set file routine.
     QString SetFile(QString fileName,double scale);
-    /**
-     * @brief Executes the disable dac procedure for adrv.
-     */
+    // Executes disable dac routine.
     void DisableDac();
 
     bool hopping=false;
@@ -120,14 +79,9 @@ private:
     struct dac_data_manager *dac_tx_manager;
 
 signals:
- /**
-  * @brief Executes the progress procedure for adrv.
-  * @param int Input parameter specifying int (int).
-  */
+ // Executes progress routine.
  void progress(int);
- /**
-  * @brief Executes the frequency changed procedure for adrv.
-  */
+ // Executes frequency changed routine.
  void frequencyChanged();
 // void thisIsTest( struct iio_context *x);
 

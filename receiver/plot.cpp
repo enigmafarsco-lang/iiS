@@ -1,11 +1,8 @@
-/**
- * @file plot.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: plot.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for plot.cpp.
+// ============================================================================
 
 #include "ui_plot.h"
 #include "plot.h"
@@ -585,6 +582,7 @@ Plot::Plot(QApplication *app,QString name,QWidget *parent) :
 //}
 
 
+// Executes waterfall update routine.
 void Plot::waterfallUpdate()
 {
     //    QCustomSeries a;
@@ -610,6 +608,7 @@ void Plot::waterfallUpdate()
     //    }
 }
 
+// Sets q glcharts parameters value and updates internal subsystem configuration.
 void Plot::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 {
     //    glChart->setMinimumSize(QSize(2000, 300));
@@ -652,15 +651,13 @@ void Plot::setQGlchartsParameters(QGLchart *glChart, ChartType glChartType)
 
 
 
+// Destructor: Cleans up Plot resources, timers, and allocated memory.
 Plot::~Plot()
 {
     delete ui;
 }
 
-/**
- * @brief Executes the frq value is changed procedure for Plot.
- * @param state Input parameter specifying state (bool).
- */
+// Executes frq value is changed routine.
 void Plot::frqValueIsChanged(bool state)
 {
     ui->prgWaitingFrq->setVisible(state);
@@ -1253,9 +1250,7 @@ static void disable_all_channels(struct iio_device *dev)
         iio_channel_disable(iio_device_get_channel(dev, i));
 }
 
-/**
- * @brief Executes the close active buffers procedure for Plot.
- */
+// Executes close active buffers routine.
 void Plot::close_active_buffers(void)
 {
     unsigned int i;
@@ -1272,9 +1267,7 @@ void Plot::close_active_buffers(void)
     }
 }
 
-/**
- * @brief Executes the stop sampling procedure for Plot.
- */
+// Executes stop sampling routine.
 void Plot::stop_sampling(void)
 {
     stop_capture = TRUE;
@@ -1646,9 +1639,7 @@ void Plot::getFFTMin(Transform *tr,bool is_seek){
 
 }
 
-/**
- * @brief Executes the draw f f t plot procedure for Plot.
- */
+// Executes draw f f t plot routine.
 void Plot::DrawFFTPlot()
 {
 
@@ -2341,9 +2332,7 @@ void Plot::DrawFFTPlot()
 
 #pragma region Menu Actions {
 
-/**
- * @brief Slot handler responding to on action save as triggered event.
- */
+// Event/Signal handler for on action save as triggered.
 void Plot::on_actionSaveAs_triggered()
 {
     QPixmap pixmap(ui->timeChart->rect().size());
@@ -2355,9 +2344,7 @@ void Plot::on_actionSaveAs_triggered()
 
 }
 
-/**
- * @brief Slot handler responding to on action save  whole  page triggered event.
- */
+// Event/Signal handler for on action save  whole  page triggered.
 void Plot::on_actionSave_Whole_Page_triggered()
 {
     QPixmap pixmap(ui->centralwidget->rect().size());
@@ -2368,32 +2355,24 @@ void Plot::on_actionSave_Whole_Page_triggered()
     pixmap.save(filename);
 }
 
-/**
- * @brief Slot handler responding to on action close triggered event.
- */
+// Event/Signal handler for on action close triggered.
 void Plot::on_actionClose_triggered()
 {
     this->close();
 }
 
-/**
- * @brief Slot handler responding to on action quit triggered event.
- */
+// Event/Signal handler for on action quit triggered.
 void Plot::on_actionQuit_triggered()
 {
     QApplication::quit();
 }
 
-/**
- * @brief Slot handler responding to on action plot  title triggered event.
- */
+// Event/Signal handler for on action plot  title triggered.
 void Plot::on_actionPlot_Title_triggered()
 {
 }
 
-/**
- * @brief Slot handler responding to on action show  settings triggered event.
- */
+// Event/Signal handler for on action show  settings triggered.
 void Plot::on_actionShow_Settings_triggered()
 {
     if(ui->settingsMenu->isVisible())
@@ -2402,9 +2381,7 @@ void Plot::on_actionShow_Settings_triggered()
         ui->settingsMenu->setVisible(true);
 }
 
-/**
- * @brief Slot handler responding to on action full  screen triggered event.
- */
+// Event/Signal handler for on action full  screen triggered.
 void Plot::on_actionFull_Screen_triggered()
 {
     if(this->isFullScreen())
@@ -2821,11 +2798,7 @@ void Plot::fillingTable()
 
 
 
-/**
- * @brief Executes the select channel with frq procedure for Plot.
- * @param val Input parameter specifying val (double).
- * @return Output value of type int.
- */
+// Executes select channel with frq routine.
 int Plot::selectChannelWithFrq(double val)
 {
     double step{15};
@@ -3052,11 +3025,7 @@ int Plot::selectChannelWithFrq(double val)
 
 
 
-/**
- * @brief Executes the calculating p r i procedure for Plot.
- * @param pls Input parameter specifying pls (Pulse *).
- * @param channel Input parameter specifying channel (double).
- */
+// Executes calculating p r i routine.
 void Plot::calculatingPRI(Pulse * pls, double channel)
 {
     cnt ++;
@@ -3111,9 +3080,7 @@ void Plot::calculatingPRI(Pulse * pls, double channel)
     }
 }
 
-/**
- * @brief Executes the remove unupdated row procedure for Plot.
- */
+// Executes remove unupdated row routine.
 void Plot::removeUnupdatedRow()
 {
     for(int i{}; i < ui->timeDataTable->rowCount(); i++)
@@ -3141,9 +3108,7 @@ void Plot::removeUnupdatedRow()
 }
 
 
-/**
- * @brief Executes the create plot procedure for Plot.
- */
+// Executes create plot routine.
 void Plot::create_plot()
 {
 
@@ -3429,6 +3394,7 @@ void Plot::create_plot()
 /**
  * @brief Initialize plots
  */
+// Executes initialize plots routine.
 void Plot::InitializePlots()
 {
     // Hold count of checked channels
@@ -3480,6 +3446,7 @@ void Plot::ChangeFrequencyHopping(iio_channel *ch1,double freq){
  * @brief Get current frequency
  * @return freqChanged status
  */
+// Executes get base freq routine.
 bool Plot::GetBaseFreq()
 {
     //    qInfo() << "GetBaseFreq" ;
@@ -3679,10 +3646,7 @@ void Plot::stopCapture(){
     if(Mode == SMART_TIME_DOMAIN) sendTimeDataToCardTimer.stop();
 }
 
-/**
- * @brief Retrieves the current delta time value.
- * @return Output value of type double.
- */
+// Retrieves current delta time state.
 double Plot::getDeltaTime()
 {
     return dltValue;
@@ -3693,6 +3657,7 @@ double Plot::getDeltaTime()
  * @brief Plot::capture_setup
  * @return
  */
+// Executes capture setup routine.
 int Plot::capture_setup(void)
 {
     int i, j;
@@ -3811,6 +3776,7 @@ int Plot::capture_setup(void)
  * @brief Plot::start
  * @param start_event
  */
+// Executes start routine.
 void Plot::start(gboolean start_event)
 {
 
@@ -3855,6 +3821,7 @@ void Plot::start(gboolean start_event)
 /**
  * @brief Plot::capture_process
  */
+// Executes capture process routine.
 void Plot::capture_process()
 {
     unsigned int i;
@@ -4029,6 +3996,7 @@ capture_stop_check:
 /**
  * @brief Plot::capture_start
  */
+// Executes capture start routine.
 void Plot::capture_start()
 {
     if (!priv->redraw_function) {
@@ -4045,6 +4013,7 @@ void Plot::capture_start()
 /**
  * @brief Plot::capture_process_ended
  */
+// Executes capture process ended routine.
 void Plot::capture_process_ended()
 {
     if (restart_capture == true) {
@@ -4064,10 +4033,7 @@ void Plot::capture_process_ended()
 
 #pragma region Ungrouped {
 
-/**
- * @brief Executes the osc plot get buffer procedure for Plot.
- * @return Output value of type iio_buffer *.
- */
+// Executes osc plot get buffer routine.
 iio_buffer * Plot::osc_plot_get_buffer()
 {
     struct extra_dev_info *dev_info;
@@ -4093,6 +4059,7 @@ double Plot::osc_plot_get_sample_count () {
     return count;
 }
 
+// Executes plot get sample count of device routine.
 int Plot::plot_get_sample_count_of_device(const char *device)
 {
     iio_device *iio_dev;
@@ -4137,6 +4104,7 @@ int Plot::plot_get_sample_count_of_device(const char *device)
 /**
  * @brief Plot::plot_channels_update
  */
+// Executes plot channels update routine.
 void Plot::plot_channels_update()
 {
     GSList *node;
@@ -4163,9 +4131,7 @@ void Plot::plot_channels_update()
     }
 }
 
-/**
- * @brief Executes the collect parameters from plot procedure for Plot.
- */
+// Executes collect parameters from plot routine.
 void Plot::collect_parameters_from_plot()
 {
     plot_params *prms;
@@ -4190,10 +4156,7 @@ void Plot::collect_parameters_from_plot()
 
 }
 
-/**
- * @brief Executes the remove transform from list procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- */
+// Executes remove transform from list routine.
 void Plot::remove_transform_from_list(Transform *tr)
 {
     QList<Transform*> *list = priv->transform_list;
@@ -4217,21 +4180,14 @@ void Plot::remove_transform_from_list(Transform *tr)
     }
 }
 
-/**
- * @brief Executes the remove all transforms procedure for Plot.
- */
+// Executes remove all transforms routine.
 void Plot::remove_all_transforms()
 {
     while (priv->transform_list->size())
         remove_transform_from_list(priv->transform_list->at(0));
 }
 
-/**
- * @brief Executes the plot channels get nth data ref procedure for Plot.
- * @param list Input parameter specifying list (GSList).
- * @param n Input parameter specifying n (guint).
- * @return Output value of type QVector<double> *.
- */
+// Executes plot channels get nth data ref routine.
 QVector<double> * Plot::plot_channels_get_nth_data_ref(GSList *list, guint n)
 {
     GSList *nth_node;
@@ -4264,10 +4220,7 @@ QVector<double> * Plot::plot_channels_get_nth_data_ref(GSList *list, guint n)
     return data;
 }
 
-/**
- * @brief Executes the do fft procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- */
+// Executes do fft routine.
 void Plot::do_fft(Transform *tr)
 {
     if(globals::hopping) return;
@@ -4642,6 +4595,7 @@ void Plot::do_fft(Transform *tr)
 
 }
 
+// Executes time transform function routine.
 bool Plot::time_transform_function(Transform *tr, gboolean init_transform)
 {
     struct _time_settings *settings =static_cast<_time_settings *>(tr->settings);
@@ -4710,12 +4664,7 @@ bool Plot::time_transform_function(Transform *tr, gboolean init_transform)
 
 }
 
-/**
- * @brief Executes the cross correlation transform function procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- * @param init_transform Input parameter specifying init_transform (gboolean).
- * @return Output value of type bool.
- */
+// Executes cross correlation transform function routine.
 bool Plot::cross_correlation_transform_function(Transform *tr, gboolean init_transform)
 {
     //    struct _cross_correlation_settings *settings =(_cross_correlation_settings *) tr->settings;
@@ -4875,6 +4824,7 @@ bool Plot::cross_correlation_transform_function(Transform *tr, gboolean init_tra
     return true;
 }
 
+// Executes freq spectrum transform function routine.
 bool Plot::freq_spectrum_transform_function(Transform *tr, gboolean init_transform)
 {
     struct iio_channel *chn;
@@ -4968,12 +4918,7 @@ bool Plot::freq_spectrum_transform_function(Transform *tr, gboolean init_transfo
 }
 
 
-/**
- * @brief Executes the fft transform function procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- * @param init_transform Input parameter specifying init_transform (gboolean).
- * @return Output value of type bool.
- */
+// Executes fft transform function routine.
 bool Plot::fft_transform_function(Transform *tr, gboolean init_transform)
 {
     struct iio_device *dev;
@@ -5093,12 +5038,7 @@ bool Plot::fft_transform_function(Transform *tr, gboolean init_transform)
     return true;
 }
 
-/**
- * @brief Executes the constellation transform function procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- * @param init_transform Input parameter specifying init_transform (gboolean).
- * @return Output value of type bool.
- */
+// Executes constellation transform function routine.
 bool Plot::constellation_transform_function(Transform *tr, gboolean init_transform)
 {
     struct _constellation_settings *settings =(_constellation_settings *) tr->settings;
@@ -5130,11 +5070,7 @@ bool Plot::constellation_transform_function(Transform *tr, gboolean init_transfo
     return true;
 }
 
-/**
- * @brief Executes the plot get sample count for transform procedure for Plot.
- * @param transform Input parameter specifying transform (Transform).
- * @return Output value of type int.
- */
+// Executes plot get sample count for transform routine.
 int Plot::plot_get_sample_count_for_transform(Transform *transform)
 {
     struct iio_device *iio_dev = transform_get_device_parent(transform);
@@ -5147,10 +5083,7 @@ int Plot::plot_get_sample_count_for_transform(Transform *transform)
                                               iio_device_get_id(iio_dev));
 }
 
-/**
- * @brief Updates and synchronizes the update_transform_settings data stream and visual indicators.
- * @param transform Input parameter specifying transform (Transform).
- */
+// Updates and synchronizes update_transform_settings data stream.
 void Plot::update_transform_settings(Transform *transform)
 {
     unsigned i;
@@ -5240,12 +5173,7 @@ void Plot::update_transform_settings(Transform *transform)
     }
 }
 
-/**
- * @brief Executes the add transform to list procedure for Plot.
- * @param tr_type Input parameter specifying tr_type (int).
- * @param channels Input parameter specifying channels (GSList).
- * @return Output value of type Transform*.
- */
+// Executes add transform to list routine.
 Transform* Plot::add_transform_to_list( int tr_type, GSList *channels)
 {
     Transform *transform;
@@ -5321,11 +5249,7 @@ Transform* Plot::add_transform_to_list( int tr_type, GSList *channels)
     return transform;
 }
 
-/**
- * @brief Executes the channels transform assignment procedure for Plot.
- * @param chn Input parameter specifying chn (PlotChn *).
- * @param user_data Input parameter specifying user_data (ch_tr_params).
- */
+// Executes channels transform assignment routine.
 void Plot::channels_transform_assignment(PlotChn * chn,ch_tr_params *user_data)
 {
     struct ch_tr_params *prm =(ch_tr_params *) user_data;
@@ -5382,9 +5306,7 @@ void Plot::channels_transform_assignment(PlotChn * chn,ch_tr_params *user_data)
     }
 }
 
-/**
- * @brief Executes the devices transform assignment procedure for Plot.
- */
+// Executes devices transform assignment routine.
 void Plot::devices_transform_assignment()
 {
     struct ch_tr_params prm;
@@ -5419,9 +5341,7 @@ void Plot::devices_transform_assignment()
 
 }
 
-/**
- * @brief Executes the markers init procedure for Plot.
- */
+// Executes markers init routine.
 void Plot::markers_init()
 {
     //    GtkDatabox *databox = GTK_DATABOX(plot->priv->databox);
@@ -5467,6 +5387,7 @@ void Plot::markers_init()
 
 }
 
+// Executes device rx info update routine.
 void Plot::device_rx_info_update()
 {
     //    GtkTextIter iter;
@@ -5534,11 +5455,7 @@ void Plot::device_rx_info_update()
     }
 }
 
-/**
- * @brief Updates and synchronizes the update_grid data stream and visual indicators.
- * @param left Input parameter specifying left (gfloat).
- * @param right Input parameter specifying right (gfloat).
- */
+// Updates and synchronizes update_grid data stream.
 void Plot::update_grid(gfloat left, gfloat right)
 {
     if (priv->active_transform_type == FFT_TRANSFORM ||
@@ -5553,10 +5470,7 @@ void Plot::update_grid(gfloat left, gfloat right)
     }
 }
 
-/**
- * @brief Executes the osc plot update rx lbl procedure for Plot.
- * @param initial_update Input parameter specifying initial_update (bool).
- */
+// Executes osc plot update rx lbl routine.
 void Plot::osc_plot_update_rx_lbl(bool initial_update)
 {
     QList<Transform*> *tr_list = priv->transform_list;
@@ -5626,10 +5540,7 @@ bool Plot:: is_frequency_transform()
             priv->active_transform_type == FREQ_SPECTRUM_TRANSFORM;
 }
 
-/**
- * @brief Executes the transform add plot markers procedure for Plot.
- * @param transform Input parameter specifying transform (Transform).
- */
+// Executes transform add plot markers routine.
 void Plot::transform_add_plot_markers( Transform *transform)
 {
     transform->has_the_marker = true;
@@ -5653,10 +5564,7 @@ void Plot::transform_add_plot_markers( Transform *transform)
     }
 }
 
-/**
- * @brief Executes the transform add own markers procedure for Plot.
- * @param transform Input parameter specifying transform (Transform).
- */
+// Executes transform add own markers routine.
 void Plot::transform_add_own_markers(Transform *transform)
 {
     struct marker_type *markers;
@@ -5685,9 +5593,7 @@ void Plot::transform_add_own_markers(Transform *transform)
     }
 }
 
-/**
- * @brief Executes the plot setup procedure for Plot.
- */
+// Executes plot setup routine.
 void Plot::plot_setup()
 {
     QList<Transform*> *tr_list = priv->transform_list;
@@ -5772,6 +5678,7 @@ void Plot::plot_setup()
 
 }
 
+// Updates and synchronizes update_plot data stream.
 void Plot::update_plot(struct iio_buffer *buf)
 {
 
@@ -5780,9 +5687,7 @@ void Plot::update_plot(struct iio_buffer *buf)
     }
 }
 
-/**
- * @brief Executes the fps counter procedure for Plot.
- */
+// Executes fps counter routine.
 void Plot::fps_counter()
 {
     struct timeval now, diff;
@@ -5813,11 +5718,7 @@ void Plot::fps_counter()
     }
 }
 
-/**
- * @brief Executes the transform get device parent procedure for Plot.
- * @param transform Input parameter specifying transform (Transform).
- * @return Output value of type iio_device *.
- */
+// Executes transform get device parent routine.
 iio_device * Plot::transform_get_device_parent(Transform *transform)
 {
     struct iio_device *iio_dev = NULL;
@@ -5834,10 +5735,7 @@ iio_device * Plot::transform_get_device_parent(Transform *transform)
     return iio_dev;
 }
 
-/**
- * @brief Executes the draw marker values procedure for Plot.
- * @param tr Input parameter specifying tr (Transform).
- */
+// Executes draw marker values routine.
 void Plot::draw_marker_values(Transform *tr)
 {
 
@@ -5927,6 +5825,7 @@ void Plot::draw_marker_values(Transform *tr)
     }
 }
 
+// Executes markers phase diff show routine.
 void Plot::markers_phase_diff_show()
 {
     static float avg[MAX_MARKERS] = {NAN};
@@ -6019,10 +5918,7 @@ void Plot::markers_phase_diff_show()
     }
 }
 
-/**
- * @brief Executes the call all transform functions procedure for Plot.
- * @return Output value of type bool.
- */
+// Executes call all transform functions routine.
 bool Plot::call_all_transform_functions()
 {
     QList<Transform*> *tr_list = priv->transform_list;
@@ -6046,9 +5942,7 @@ bool Plot::call_all_transform_functions()
     return valid;
 }
 
-/**
- * @brief Executes the osc plot data update procedure for Plot.
- */
+// Executes osc plot data update routine.
 void Plot::osc_plot_data_update ()
 {
     if (call_all_transform_functions())
@@ -6060,10 +5954,7 @@ void Plot::osc_plot_data_update ()
     }
 }
 
-/**
- * @brief Executes the plot redraw procedure for Plot.
- * @return Output value of type gboolean.
- */
+// Executes plot redraw routine.
 gboolean Plot::plot_redraw()
 {
     QList<Transform*> *tr_list = priv->transform_list;
@@ -6097,9 +5988,7 @@ gboolean Plot::plot_redraw()
     return !priv->stop_redraw;
 }
 
-/**
- * @brief Executes the dispose parameters from plot procedure for Plot.
- */
+// Executes dispose parameters from plot routine.
 void Plot::dispose_parameters_from_plot()
 {
     plot_params *prms;
@@ -6129,9 +6018,7 @@ void Plot::dispose_parameters_from_plot()
     }
 }
 
-/**
- * @brief Executes the deassert used channels procedure for Plot.
- */
+// Executes deassert used channels routine.
 void Plot::deassert_used_channels()
 {
     Transform *tr;
@@ -6151,10 +6038,7 @@ void Plot::deassert_used_channels()
     }
 }
 
-/**
- * @brief Executes the check valid setup procedure for Plot.
- * @return Output value of type gboolean.
- */
+// Executes check valid setup routine.
 gboolean Plot::check_valid_setup()
 {
     if (!check_valid_setup_of_all_devices())
@@ -6190,25 +6074,20 @@ capture_button_err:
     return false;
 }
 
-/**
- * @brief Slot handler responding to single shot clicked cb event.
- * @param data Input parameter specifying data (gpointer).
- */
+// Event/Signal handler for single shot clicked cb.
 void Plot::single_shot_clicked_cb(gpointer data)
 {
     priv->single_shot_mode = true;
     //	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(priv->capture_button), true);
 }
 
+// Executes osc plot set visible routine.
 void Plot::osc_plot_set_visible (Plot *plot, bool visible)
 {
     plot->setVisible (visible);
 }
 
-/**
- * @brief Executes the osc plot new procedure for Plot.
- * @return Output value of type Plot *.
- */
+// Executes osc plot new routine.
 Plot * Plot::osc_plot_new()
 {
     create_plot();
@@ -6226,11 +6105,7 @@ Plot * Plot::osc_plot_new()
     return this;
 }
 
-/**
- * @brief Executes the osc plot new with pref procedure for Plot.
- * @param pref Input parameter specifying pref (OscPlotPreferences).
- * @return Output value of type Plot *.
- */
+// Executes osc plot new with pref routine.
 Plot * Plot::osc_plot_new_with_pref(OscPlotPreferences *pref)
 {
     priv->preferences = pref;
@@ -6409,10 +6284,7 @@ void Plot::reScale_plot(int type){
 
 
 
-/**
- * @brief Executes the create text on plot procedure for Plot.
- * @return Output value of type QCPItemText *.
- */
+// Executes create text on plot routine.
 QCPItemText * Plot::createTextOnPlot()
 {
     QCPItemText * txtLbl = new QCPItemText(ui->fftChart);
@@ -6424,9 +6296,7 @@ QCPItemText * Plot::createTextOnPlot()
     txtLbl->setText("");
     return txtLbl;
 }
-/**
- * @brief Slot handler responding to count changed cb event.
- */
+// Event/Signal handler for count changed cb.
 void Plot::count_changed_cb()
 {
     extra_dev_info *dev_info;
@@ -6458,6 +6328,7 @@ void Plot::count_changed_cb()
  * @param name
  * @return
  */
+// Executes num of channels of device routine.
 int Plot::num_of_channels_of_device(const char *name)
 {
 
@@ -6484,6 +6355,7 @@ int Plot::num_of_channels_of_device(const char *name)
  * @param enabled_mask
  * @return
  */
+// Executes enabled channels of device routine.
 int Plot::enabled_channels_of_device(QString name, unsigned *enabled_mask)
 {
     int num_enabled = 0;
@@ -6507,6 +6379,7 @@ int Plot::enabled_channels_of_device(QString name, unsigned *enabled_mask)
  * @brief Plot::enabled_channels_count
  * @return
  */
+// Executes enabled channels count routine.
 int Plot::enabled_channels_count()
 {
     gboolean next_iter;
@@ -6535,6 +6408,7 @@ int Plot::enabled_channels_count()
  * @param name
  * @return
  */
+// Executes check valid setup of device routine.
 gboolean Plot::check_valid_setup_of_device(const char *name)
 {
 
@@ -6651,6 +6525,7 @@ gboolean Plot::check_valid_setup_of_device(const char *name)
  * @brief Plot::check_valid_setup_of_all_devices
  * @return
  */
+// Executes check valid setup of all devices routine.
 gboolean Plot::check_valid_setup_of_all_devices()
 {
     gboolean valid=false;
@@ -6679,6 +6554,7 @@ gboolean Plot::check_valid_setup_of_all_devices()
 /**
  * @brief Plot::treeview_expand_update
  */
+// Executes treeview expand update routine.
 void Plot::treeview_expand_update()
 {
     //	GtkTreeIter dev_iter;
@@ -6701,6 +6577,7 @@ void Plot::treeview_expand_update()
  * @param pathStr
  * @param plot
  */
+// Executes channel toggled routine.
 void Plot::channel_toggled( gchar* pathStr, gpointer plot)
 {
     gboolean active;
@@ -6715,6 +6592,7 @@ void Plot::channel_toggled( gchar* pathStr, gpointer plot)
  */
 
 
+// Executes on item clicked routine.
 void Plot::onItemClicked()
 {
     //    QString itemName=item->text (0);
@@ -6958,6 +6836,7 @@ void Plot::onItemClicked()
 /**
  * Add channels to devices
  */
+// Executes plot channels add channel routine.
 void Plot::plot_channels_add_channel(PlotChn *pchn)
 {
 
@@ -7029,6 +6908,7 @@ void Plot::plot_channels_add_channel(PlotChn *pchn)
 /**
  * Add The Devices to tree view
  */
+// Executes plot channels add device routine.
 void Plot::plot_channels_add_device(const char *dev_name)
 {
     priv->deviceList.append (dev_name);
@@ -7047,6 +6927,7 @@ void Plot::plot_channels_add_device(const char *dev_name)
  * @brief Plot::plot_channel_add_to_plot
  * @param settings
  */
+// Executes plot channel add to plot routine.
 void Plot::plot_channel_add_to_plot(PlotChn *settings)
 {
     GSList *list = priv->ch_settings_list;
@@ -7066,6 +6947,7 @@ void Plot::plot_channel_add_to_plot(PlotChn *settings)
 /**
  * Initialize The Devices Tree view
  */
+// Executes device list treeview init routine.
 void Plot::device_list_treeview_init()
 {
     unsigned int i, j;
@@ -7161,10 +7043,7 @@ math_channels:
 
 #pragma region Side Panel {
 
-/**
- * @brief Slot handler responding to on cmb plot type current index changed event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on cmb plot type current index changed.
 void Plot::on_cmb_plot_type_currentIndexChanged(int index)
 {
     count_changed_cb();
@@ -7172,10 +7051,7 @@ void Plot::on_cmb_plot_type_currentIndexChanged(int index)
     device_list_treeview_init();
 }
 
-/**
- * @brief Slot handler responding to on cmb graph type current index changed event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on cmb graph type current index changed.
 void Plot::on_cmb_graph_type_currentIndexChanged(int index)
 {
 
@@ -7201,9 +7077,7 @@ void Plot::setActiveBandwidth(double bwMHz)
     applyBandwidthWindow();
 }
 
-/**
- * @brief Executes the apply bandwidth window procedure for Plot.
- */
+// Executes apply bandwidth window routine.
 void Plot::applyBandwidthWindow()
 {
     if (activeBandwidthMHz <= 0.0 || !ui || !ui->fftChart ||
@@ -7229,6 +7103,7 @@ void Plot::applyBandwidthWindow()
     ui->fftChart->replot();
 }
 
+// Event/Signal handler for on txt selected freq value changed.
 void Plot::on_txtSelectedFreq_valueChanged(double value)
 {
     // Remember the entered frequency; the marker itself is drawn in
@@ -7378,9 +7253,7 @@ void Plot::ShowControls(int index){
 
 #pragma region Time Domain Top Panel {
 
-/**
- * @brief Slot handler responding to on btn capture clicked event.
- */
+// Event/Signal handler for on btn capture clicked.
 void Plot::on_btn_capture_clicked()
 {
     //    qInfo()<<"dddddddddddddddddddddd";
@@ -7494,9 +7367,7 @@ void Plot::on_btn_capture_clicked()
 
 }
 
-/**
- * @brief Executes the exciter mode on procedure for Plot.
- */
+// Executes exciter mode on routine.
 void Plot::exciterModeOn()
 {
     isCaptureOn = true;
@@ -7533,9 +7404,7 @@ void Plot::exciterModeOn()
     });
 }
 
-/**
- * @brief Slot handler responding to on btn select clicked event.
- */
+// Event/Signal handler for on btn select clicked.
 void Plot::on_btn_select_clicked()
 {
     rangeYTimeChart.lower=ui->txt_y_axis_min->value();
@@ -7543,9 +7412,7 @@ void Plot::on_btn_select_clicked()
     selectTimeChart=false;
 }
 
-/**
- * @brief Slot handler responding to on btn new plot clicked event.
- */
+// Event/Signal handler for on btn new plot clicked.
 void Plot::on_btn_new_plot_clicked()
 {
     //    Plot *plot=new Plot(mApp,"newPlot");
@@ -7556,9 +7423,7 @@ void Plot::on_btn_new_plot_clicked()
     osc.new_plot_cb();
 }
 
-/**
- * @brief Slot handler responding to on btn zoom in clicked event.
- */
+// Event/Signal handler for on btn zoom in clicked.
 void Plot::on_btn_zoom_in_clicked()
 {
     if(rangeXTimeChart.lower==rangeXTimeChart.upper)
@@ -7571,9 +7436,7 @@ void Plot::on_btn_zoom_in_clicked()
     selectTimeChart=true;
 }
 
-/**
- * @brief Slot handler responding to on btn zoom out clicked event.
- */
+// Event/Signal handler for on btn zoom out clicked.
 void Plot::on_btn_zoom_out_clicked()
 {
     if(rangeXTimeChart.lower==rangeXTimeChart.upper)
@@ -7586,10 +7449,7 @@ void Plot::on_btn_zoom_out_clicked()
     selectTimeChart=true;
 }
 
-/**
- * @brief Slot handler responding to on chk auto scale state changed event.
- * @param arg1 Input parameter specifying arg1 (int).
- */
+// Event/Signal handler for on chk auto scale state changed.
 void Plot::on_chk_auto_scale_stateChanged(int arg1)
 {
 
@@ -7621,9 +7481,7 @@ void Plot::on_chk_auto_scale_stateChanged(int arg1)
 
 #pragma region Frequency Domain Top Panel  {
 
-/**
- * @brief Slot handler responding to on btn select fft clicked event.
- */
+// Event/Signal handler for on btn select fft clicked.
 void Plot::on_btn_select_fft_clicked()
 {
 
@@ -7646,9 +7504,7 @@ void Plot::on_btn_select_fft_clicked()
     }
 }
 
-/**
- * @brief Slot handler responding to on btn zoom in fft clicked event.
- */
+// Event/Signal handler for on btn zoom in fft clicked.
 void Plot::on_btn_zoom_in_fft_clicked()
 {
     //    if(rangeXFFTChart.lower==rangeXFFTChart.upper)
@@ -7661,6 +7517,7 @@ void Plot::on_btn_zoom_in_fft_clicked()
     //    selectFFTChart=true;
 }
 
+// Event/Signal handler for on btn zoom out fft clicked.
 void Plot::on_btn_zoom_out_fft_clicked()
 {
     if(rangeXFFTChart.lower==rangeXFFTChart.upper)
@@ -7673,10 +7530,7 @@ void Plot::on_btn_zoom_out_fft_clicked()
     selectFFTChart=true;
 }
 
-/**
- * @brief Slot handler responding to on chk auto scale fft state changed event.
- * @param arg1 Input parameter specifying arg1 (int).
- */
+// Event/Signal handler for on chk auto scale fft state changed.
 void Plot::on_chk_auto_scale_fft_stateChanged(int arg1)
 {
 
@@ -7698,18 +7552,13 @@ void Plot::on_chk_auto_scale_fft_stateChanged(int arg1)
 
 #pragma endregion }
 
-/**
- * @brief Slot handler responding to on btn capture triggered event.
- * @param arg1 Input parameter specifying arg1 (QAction).
- */
+// Event/Signal handler for on btn capture triggered.
 void Plot::on_btn_capture_triggered(QAction *arg1)
 {
 
 }
 
-/**
- * @brief Slot handler responding to on btnfftcapture clicked event.
- */
+// Event/Signal handler for on btnfftcapture clicked.
 void Plot::on_btnfftcapture_clicked()
 {
     on_btn_capture_clicked();
@@ -7726,17 +7575,13 @@ void Plot::frqValueChangedSlot(QString val)
 
 
 
-/**
- * @brief Slot handler responding to on btn plot frq clicked event.
- */
+// Event/Signal handler for on btn plot frq clicked.
 void Plot::on_btn_plot_frq_clicked()
 {
 
 }
 
-/**
- * @brief Slot handler responding to on btn clear clicked event.
- */
+// Event/Signal handler for on btn clear clicked.
 void Plot::on_btnClear_clicked()
 {
     ui->timeDataTable->clearContents();
@@ -7745,29 +7590,20 @@ void Plot::on_btnClear_clicked()
 }
 
 
-/**
- * @brief Slot handler responding to on btn hidden clicked event.
- */
+// Event/Signal handler for on btn hidden clicked.
 void Plot::on_btnHidden_clicked()
 {
 
 }
 
-/**
- * @brief Slot handler responding to on btn hidden clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn hidden clicked.
 void Plot::on_btnHidden_clicked(bool checked)
 {
     ui->wdgWaterFall->setVisible(!ui->wdgWaterFall->isVisible());
 }
 
 
-/**
- * @brief Slot handler responding to on time data table cell clicked event.
- * @param row Input parameter specifying row (int).
- * @param column Input parameter specifying column (int).
- */
+// Event/Signal handler for on time data table cell clicked.
 void Plot::on_timeDataTable_cellClicked(int row, int column)
 {
     for(int i{}; i < ui->timeDataTable->rowCount(); i++)
@@ -7793,6 +7629,7 @@ void Plot::on_timeDataTable_cellClicked(int row, int column)
     //    if (column != 12) return;
 }
 
+// Event/Signal handler for on time data table item clicked.
 void Plot::on_timeDataTable_itemClicked(QTableWidgetItem *item)
 {
     // item->setBackground(Qt::green);
@@ -7800,6 +7637,7 @@ void Plot::on_timeDataTable_itemClicked(QTableWidgetItem *item)
 
 
 
+// Event/Signal handler for on btn hide show clicked.
 void Plot::on_btnHideShow_clicked(bool checked)
 {
     //    qInfo() << Mode;
@@ -7862,9 +7700,7 @@ void Plot::saveToCSVInThread(QTableWidget *tableWidget, const QString &fileName)
 
     thread->start();
 }
-/**
- * @brief Slot handler responding to on btn save table data clicked event.
- */
+// Event/Signal handler for on btn save table data clicked.
 void Plot::on_btnSaveTableData_clicked()
 {
     //    QString fileName = QFileDialog::getSaveFileName(this, "Save CSV File", "", "CSV Files (*.csv)");
@@ -7881,6 +7717,7 @@ void Plot::on_btnSaveTableData_clicked()
 
 }
 
+// Event/Signal handler for on chk max hold clicked.
 void Plot::on_chk_maxHold_clicked(bool checked)
 {
 

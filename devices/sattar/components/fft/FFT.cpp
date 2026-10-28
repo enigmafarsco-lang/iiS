@@ -1,11 +1,8 @@
-/**
- * @file FFT.cpp
- * @brief Subsystem module for fft in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: FFT.cpp
+// Subsystem: eLynxSDR fft
+// Description: Subsystem implementation and interface guidance for FFT.cpp.
+// ============================================================================
 
 #include <iostream>
 #include <complex>

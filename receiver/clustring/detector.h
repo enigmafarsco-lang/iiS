@@ -1,11 +1,8 @@
-/**
- * @file detector.h
- * @brief Subsystem module for clustring in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: detector.h
+// Subsystem: eLynxSDR clustring
+// Description: Subsystem implementation and interface guidance for detector.h.
+// ============================================================================
 
 #ifndef DETECTOR_H
 #define DETECTOR_H
@@ -24,40 +21,21 @@
 #include "QDebug"
 
 
-/**
- * @class Detector
- * @brief High-level controller class for Detector.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Detector:public QThread
 {
     Q_OBJECT
 public:
-    /**
-     * @brief Constructs a new Detector instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes Detector subsystem components, default parameters, and state.
     Detector();
-    /**
-     * @brief Executes the add to queue procedure for Detector.
-     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
-     */
+    // Executes add to queue routine.
     void AddToQueue(QVector<double>);
-    /**
-     * @brief Executes the read block data x procedure for Detector.
-     * @param yItems Input parameter specifying yItems (QVector<double>).
-     */
+    // Executes read block data x routine.
     void ReadBlockDataX(QVector<double> yItems);
-    /**
-     * @brief Sets the tuner frequency parameter and updates internal state.
-     * @param newTunerFrequency Input parameter specifying newTunerFrequency (double).
-     */
+    // Sets tuner frequency value and updates internal subsystem configuration.
     void setTunerFrequency(double newTunerFrequency);
 
     int cnt{};
-    /**
-     * @brief Sets the stop parameter and updates internal state.
-     * @param newStop Input parameter specifying newStop (bool).
-     */
+    // Sets stop value and updates internal subsystem configuration.
     void setStop(bool newStop);
 
 private:
@@ -103,33 +81,21 @@ private:
     double pulseIndicator=-24576;
     double cwIndicator=-24319;
 
-    /**
-     * @brief Executes the check pulse procedure for Detector.
-     * @param Pulse* Input parameter specifying Pulse* (Pulse*).
-     * @param bool Input parameter specifying bool (bool).
-     * @return Output value of type bool.
-     */
+    // Executes check pulse routine.
     bool CheckPulse(Pulse*,bool);
 
-    /**
-     * @brief Executes the clear unused freqs procedure for Detector.
-     */
+    // Executes clear unused freqs routine.
     void ClearUnusedFreqs();
 
 signals:
-    /**
-     * @brief Executes the new list procedure for Detector.
-     * @param >* Input parameter specifying >* (QList<Pulse).
-     */
+    // Executes new list routine.
     void newList(QList<Pulse *>*);
-    /**
-     * @brief Executes the show list procedure for Detector.
-     * @param >* Input parameter specifying >* (QList<Pulse).
-     */
+    // Executes show list routine.
     void showList(QList<Pulse *>*);
 
     // QThread interface
 protected:
+    // Executes run routine.
     void run();
 
 };

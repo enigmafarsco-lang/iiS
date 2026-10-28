@@ -1,11 +1,8 @@
-/**
- * @file newType.h
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: newType.h
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for newType.h.
+// ============================================================================
 
 #pragma once
 
@@ -69,11 +66,6 @@ typedef struct {
 //	quint16			tunerStopFreq;
 //
 //}frequencyRangeParameters;
-/**
- * @class Status
- * @brief High-level controller class for Status.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Status
 {
 public:
@@ -131,18 +123,11 @@ public:
 	bool	powerJupiterIsReset;
 	bool	powerAmpIsReset;
 
-	/**
-	 * @brief Executes the to json procedure for Status.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
 	
 };
 
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param Status Input parameter specifying Status (Status).
- */
 Q_DECLARE_METATYPE(Status);
 typedef struct
 {
@@ -156,10 +141,6 @@ typedef struct
 	int alphaRabbitMA3;
 	int alpha024MA;
 }hardwarePulseData;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param hardwarePulseData Input parameter specifying hardwarePulseData (hardwarePulseData).
- */
 Q_DECLARE_METATYPE(hardwarePulseData);
 typedef struct {
 	quint16 BW;
@@ -223,10 +204,6 @@ typedef struct
 	double SNR_Pulse_12;
 	/*bool operator<(const interPulseSignalInfo &other)
 	{
-		/**
-		 * @brief Executes the return procedure for Status.
-		 * @param other.TOA Input parameter specifying other.TOA (TOA <).
-		 */
 		return (TOA < other.TOA);
 	}*/
 
@@ -238,15 +215,7 @@ typedef enum
 	Seraj14_WaitForConnecting = 1,
 	Seraj14_Disconnected = 2,
 }CONNECTION_STATUS;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param CONNECTION_STATUS Input parameter specifying CONNECTION_STATUS (CONNECTION_STATUS).
- */
 Q_DECLARE_METATYPE(CONNECTION_STATUS);
-/**
- * @brief Executes the q  e n u m s procedure for Status.
- * @param CONNECTION_STATUS Input parameter specifying CONNECTION_STATUS (CONNECTION_STATUS).
- */
 Q_ENUMS(CONNECTION_STATUS);
 typedef enum
 {
@@ -257,10 +226,6 @@ typedef enum
 	PRF_JITTERED = 4
 	
 }PRF_TYPE;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param PRF_TYPE Input parameter specifying PRF_TYPE (PRF_TYPE).
- */
 Q_DECLARE_METATYPE(PRF_TYPE);
 typedef enum
 {
@@ -271,10 +236,6 @@ typedef enum
 	FREQUENCY_DIVERSITY = 4
 
 }FREQUENCY_TYPE;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param FREQUENCY_TYPE Input parameter specifying FREQUENCY_TYPE (FREQUENCY_TYPE).
- */
 Q_DECLARE_METATYPE(FREQUENCY_TYPE);
 typedef enum
 {
@@ -282,10 +243,6 @@ typedef enum
 	FORCE_NAVY = 1,
 	FORCE_AIRBORN = 2
 }FORCE_TYPE;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param FORCE_TYPE Input parameter specifying FORCE_TYPE (FORCE_TYPE).
- */
 Q_DECLARE_METATYPE(FORCE_TYPE);
 typedef enum
 {
@@ -295,10 +252,6 @@ typedef enum
 	MODULATION_SIMPLE = 3,
 	MODULATION_LFM = 4
 }MODULATION_TYPE;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param MODULATION_TYPE Input parameter specifying MODULATION_TYPE (MODULATION_TYPE).
- */
 Q_DECLARE_METATYPE(MODULATION_TYPE);
 typedef enum
 {
@@ -309,16 +262,7 @@ typedef enum
 	SCAN_SPIRAL = 4,
 	SCAN_RASTER = 5
 }SCAN_TYPE;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for Status.
- * @param SCAN_TYPE Input parameter specifying SCAN_TYPE (SCAN_TYPE).
- */
 Q_DECLARE_METATYPE(SCAN_TYPE);
-/**
- * @class EdwType
- * @brief High-level controller class for EdwType.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class EdwType
 {
 public:
@@ -350,22 +294,11 @@ public:
 	double							Amp_root_mean;
 	double							Freq_std;
 
-	/**
-	 * @brief Executes the to json procedure for EdwType.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
-	/**
-	 * @brief Executes the from json procedure for EdwType.
-	 * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-	 * @return Output value of type bool.
-	 */
+	// Executes from json routine.
 	bool fromJson(QJsonObject);
 };
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for EdwType.
- * @param EdwType Input parameter specifying EdwType (EdwType).
- */
 Q_DECLARE_METATYPE(EdwType);
 
 typedef struct
@@ -442,10 +375,6 @@ typedef struct
 	
 
 }ClusteringAlgorithmParameters;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for EdwType.
- * @param ClusteringAlgorithmParameters Input parameter specifying ClusteringAlgorithmParameters (ClusteringAlgorithmParameters).
- */
 Q_DECLARE_METATYPE(ClusteringAlgorithmParameters);
 
 //Q_DECLARE_METATYPE(arma::vec);
@@ -457,18 +386,9 @@ typedef struct
 	quint16      command;
 	quint8      packetNumber;
 }PacketMessageType;
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for EdwType.
- * @param PacketMessageType Input parameter specifying PacketMessageType (PacketMessageType).
- */
 Q_DECLARE_METATYPE(PacketMessageType);
 
 
-/**
- * @class TunerSetting
- * @brief High-level controller class for TunerSetting.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class TunerSetting
 {
 public:
@@ -482,16 +402,9 @@ public:
 	quint32					m_lockTime;
 	quint32					m_processTime;
 	quint16				    m_tunerFilter;
-	/**
-	 * @brief Executes the to json procedure for TunerSetting.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
 };
-/**
- * @brief Executes the q  d e c l a r e  m e t a t y p e procedure for TunerSetting.
- * @param TunerSetting Input parameter specifying TunerSetting (TunerSetting).
- */
 Q_DECLARE_METATYPE(TunerSetting);
 typedef struct {
 	bool				containsPulseData;
@@ -584,11 +497,6 @@ typedef struct
 //	arma::mat stft;
 }intraPulsePlotData;
 
-/**
- * @class InputSpectrumData
- * @brief High-level controller class for InputSpectrumData.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class InputSpectrumData
 {
 public:
@@ -610,15 +518,9 @@ public:
 	quint32			tunerStopFreq;
 	bool			isPanorama;
 	bool			isTunerConnected;
-	/**
-	 * @brief Executes the to json procedure for InputSpectrumData.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
-	/**
-	 * @brief Executes the from json procedure for InputSpectrumData.
-	 * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-	 */
+	// Executes from json routine.
 	void fromJson(QJsonObject);
 };
 
@@ -736,11 +638,6 @@ typedef struct
 	quint8 direction;
 }SweepLfmMode;
 
-/**
- * @class NoiseGeneratorParameters
- * @brief High-level controller class for NoiseGeneratorParameters.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class NoiseGeneratorParameters
 {
 public:
@@ -758,15 +655,9 @@ public:
 		SweepSpotMode       ssnj;
 		SweepLfmMode        slfmnj;
 	};
-	/**
-	 * @brief Executes the to json procedure for NoiseGeneratorParameters.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
-	/**
-	 * @brief Executes the from json procedure for NoiseGeneratorParameters.
-	 * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-	 */
+	// Executes from json routine.
 	void fromJson(QJsonObject);
 };
 
@@ -819,11 +710,6 @@ typedef struct
 	double endTime;
 }detectedSignalInfoType;
 
-/**
- * @class maskingInfoType
- * @brief High-level controller class for maskingInfoType.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class maskingInfoType
 {
 public:
@@ -831,16 +717,9 @@ public:
 	bool outerRange;
 	qreal centerFrequency;
 	qreal BW;
-	/**
-	 * @brief Executes the to json procedure for maskingInfoType.
-	 * @return Output value of type QJsonObject.
-	 */
+	// Executes to json routine.
 	QJsonObject toJson();
-	/**
-	 * @brief Executes the from json procedure for maskingInfoType.
-	 * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-	 * @return Output value of type bool.
-	 */
+	// Executes from json routine.
 	bool fromJson(QJsonObject);
 };
 

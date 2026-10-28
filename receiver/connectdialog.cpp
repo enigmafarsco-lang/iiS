@@ -1,11 +1,8 @@
-/**
- * @file connectdialog.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: connectdialog.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for connectdialog.cpp.
+// ============================================================================
 
 #include "connectdialog.h"
 #include "ui_connectdialog.h"
@@ -35,15 +32,13 @@ connectDialog::connectDialog(QDialog *parent) :
     syncOrxChoices();
 }
 
+// Destructor: Cleans up connectDialog resources, timers, and allocated memory.
 connectDialog::~connectDialog()
 {
     delete ui;
 }
 
-/**
- * @brief Executes the initialize procedure for connectDialog.
- * @return Output value of type bool.
- */
+// Executes initialize routine.
 bool connectDialog::Initialize()
 {
     /* Do not create an IIO context while the dialog is being initialized:
@@ -73,10 +68,7 @@ bool connectDialog::Initialize()
 
 #pragma region Profile Selection {
 
-/**
- * @brief Executes the selected tx bw procedure for connectDialog.
- * @return Output value of type int.
- */
+// Executes selected tx bw routine.
 int connectDialog::selectedTxBw() const
 {
     if (ui->radTx400->isChecked())
@@ -86,10 +78,7 @@ int connectDialog::selectedTxBw() const
     return 100;
 }
 
-/**
- * @brief Executes the selected orx bw procedure for connectDialog.
- * @return Output value of type int.
- */
+// Executes selected orx bw routine.
 int connectDialog::selectedOrxBw() const
 {
     if (ui->radOrx400->isChecked())
@@ -103,6 +92,7 @@ int connectDialog::selectedOrxBw() const
  * @brief connectDialog::txBwToggled
  * @param checked
  */
+// Executes tx bw toggled routine.
 void connectDialog::txBwToggled(bool checked)
 {
     if (!checked)
@@ -118,6 +108,7 @@ void connectDialog::txBwToggled(bool checked)
  * If the currently checked ORx is not allowed any more, fall back to the
  * first allowed choice (ORx 100 for TX 100/200, ORx 200 for TX 400).
  */
+// Executes sync orx choices routine.
 void connectDialog::syncOrxChoices()
 {
     // SN001 boards have no ORx 400: keep the option disabled (100/200
@@ -152,6 +143,7 @@ void connectDialog::syncOrxChoices()
  * Read the board serial number into the form and re-gate the ORx 400
  * option (SN001 boards get ORx 100/200 only).
  */
+// Updates and synchronizes update board serial data stream.
 void connectDialog::updateBoardSerial()
 {
     boardSerial = globals::boardSerialNumber();
@@ -170,6 +162,7 @@ void connectDialog::updateBoardSerial()
 /**
  * @brief connectDialog::btn_cancel_clicked
  */
+// Event/Signal handler for btn cancel clicked.
 void connectDialog::btn_cancel_clicked()
 {
     this->close();
@@ -179,6 +172,7 @@ void connectDialog::btn_cancel_clicked()
  * @brief connectDialog::btn_refresh_clicked
  * Refresh the IIO Context Information panels from the entered IP address.
  */
+// Event/Signal handler for btn refresh clicked.
 void connectDialog::btn_refresh_clicked()
 {
     ReloadConnectDialog();
@@ -187,6 +181,7 @@ void connectDialog::btn_refresh_clicked()
 /**
  * @brief connectDialog::btn_connect_clicked
  */
+// Event/Signal handler for btn connect clicked.
 void connectDialog::btn_connect_clicked()
 {
     /* Accept both "192.168.1.10" and "ip:192.168.1.10" from the user. */
@@ -278,6 +273,7 @@ iio_context *connectDialog::GetContext()
  * @brief refresh connect dialog attributes
  * @return true if context found
  */
+// Executes reload connect dialog routine.
 bool connectDialog::ReloadConnectDialog()
 {
     QString text;

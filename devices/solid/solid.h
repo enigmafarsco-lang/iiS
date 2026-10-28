@@ -1,11 +1,8 @@
-/**
- * @file solid.h
- * @brief Subsystem module for solid in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: solid.h
+// Subsystem: eLynxSDR solid
+// Description: Subsystem implementation and interface guidance for solid.h.
+// ============================================================================
 
 #ifndef SOLID_H
 #define SOLID_H
@@ -22,163 +19,89 @@
 
 
 namespace Ui {
-/**
- * @class Solid
- * @brief High-level controller class for Solid.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Solid;
 }
 
-/**
- * @class Solid
- * @brief High-level controller class for Solid.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Solid : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new Solid instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes Solid subsystem components, default parameters, and state.
     explicit Solid(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for Solid, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up Solid resources, timers, and allocated memory.
     ~Solid();
 
 public slots:
-    /**
-     * @brief Slot handler responding to on  device response slot event.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
-    /**
-     * @brief Executes the joshan func data slot procedure for Solid.
-     */
+    // Executes joshan func data slot routine.
     void joshanFuncDataSlot();
-    /**
-     * @brief Executes the joshan status data slot procedure for Solid.
-     */
+    // Executes joshan status data slot routine.
     void joshanStatusDataSlot();
 
 
 signals:
-    /**
-     * @brief Transmits send command to device signal command/packet over the communication bus.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
 
 public:
-    /**
-     * @brief Executes the handle info procedure for Solid.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Executes handle info routine.
     void handle_info(QByteArray);
 
 
 signals:
-    /**
-     * @brief Transmits send command to other object signal command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send command to other object signal command/packet over communication interface.
     void sendCommandToOtherObjectSignal(QString);
 
 public slots:
-    /**
-     * @brief Reads, parses, and decodes incoming receive command from other object slot data buffer.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Reads and parses incoming receive command from other object slot data.
     void receiveCommandFromOtherObjectSlot(QString);
-    /**
-     * @brief Retrieves the current evice connected slot value.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Retrieves current evice connected slot state.
     void isDeviceConnectedSlot(bool);
-    /**
-     * @brief Executes the joshan control data slot procedure for Solid.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan control data slot routine.
     void joshanControlDataSlot(QJsonObject);
 
-    /**
-     * @brief Slot handler responding to timeout event.
-     */
+    // Event/Signal handler for timeout.
     void timeout();
 
 private slots:
-    /**
-     * @brief Slot handler responding to on chk alc mode clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on chk alc mode clicked.
     void on_chkAlcMode_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn enable clicked event.
-     */
+    // Event/Signal handler for on btn enable clicked.
     void on_btnEnable_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn disable clicked event.
-     */
+    // Event/Signal handler for on btn disable clicked.
     void on_btnDisable_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn reset clicked event.
-     */
+    // Event/Signal handler for on btn reset clicked.
     void on_btnReset_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn solid status clicked event.
-     */
+    // Event/Signal handler for on btn solid status clicked.
     void on_btnSolidStatus_clicked();
 
-    /**
-     * @brief Slot handler responding to on rdb high clicked event.
-     */
+    // Event/Signal handler for on rdb high clicked.
     void on_rdbHigh_clicked();
 
-    /**
-     * @brief Slot handler responding to on rdb medium clicked event.
-     */
+    // Event/Signal handler for on rdb medium clicked.
     void on_rdbMedium_clicked();
 
-    /**
-     * @brief Slot handler responding to on rdb low clicked event.
-     */
+    // Event/Signal handler for on rdb low clicked.
     void on_rdbLow_clicked();
 
 
-    /**
-     * @brief Slot handler responding to on chk err lacth mode clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on chk err lacth mode clicked.
     void on_chkErrLacthMode_clicked(bool checked);
 
 signals:
-    /**
-     * @brief Transmits send status to outer node signal command/packet over the communication bus.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Transmits send status to outer node signal command/packet over communication interface.
     void sendStatusToOuterNodeSignal(QJsonObject);
-    /**
-     * @brief Transmits send func data to joshan signal command/packet over the communication bus.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Transmits send func data to joshan signal command/packet over communication interface.
     void sendFuncDataToJoshanSignal(QJsonObject);
-    /**
-     * @brief Transmits send status data to joshan signal command/packet over the communication bus.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Transmits send status data to joshan signal command/packet over communication interface.
     void sendStatusDataToJoshanSignal(QJsonObject);
-    /**
-     * @brief Transmits send status temp signal command/packet over the communication bus.
-     * @param int Input parameter specifying int (int).
-     */
+    // Transmits send status temp signal command/packet over communication interface.
     void sendStatusTempSignal(int);
 
 private:

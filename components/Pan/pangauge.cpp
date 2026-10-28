@@ -1,11 +1,8 @@
-/**
- * @file pangauge.cpp
- * @brief Subsystem module for Pan in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pangauge.cpp
+// Subsystem: eLynxSDR Pan
+// Description: Subsystem implementation and interface guidance for pangauge.cpp.
+// ============================================================================
 
 #include "pangauge.h"
 #include <QtGlobal>
@@ -14,19 +11,14 @@
 #include <QFont>
 #include "constants/project_constans.h"
 
-/**
- * @brief Constructs a new BPanGauge instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QWidget).
- */
+// Constructor: Initializes BPanGauge subsystem components, default parameters, and state.
 BPanGauge::BPanGauge(QWidget *parent)
     : QWidget(parent)
 {
     init_panGauge();
 }
 
-/**
- * @brief Initializes and configures the init pan gauge for the BPanGauge subsystem.
- */
+// Initializes init pan gauge for BPanGauge.
 void BPanGauge::init_panGauge()
 {
     m_precision=0;
@@ -60,6 +52,7 @@ void BPanGauge::init_panGauge()
 //    setEndWarningValue(100);
 }
 
+// Sets value value and updates internal subsystem configuration.
 void BPanGauge::setValue(double value)
 {
     if(value>m_maxValue)
@@ -81,40 +74,28 @@ void BPanGauge::setValue(double value)
     update();
 }
 
-/**
- * @brief Sets the value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets value value and updates internal subsystem configuration.
 void BPanGauge::setValue(int value)
 {
    setValue((double)value);
    update();
 }
 
-/**
- * @brief Sets the min value parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets min value value and updates internal subsystem configuration.
 void BPanGauge::setMinValue(double value)
 {
    m_minValue=value;
    update();
 }
 
-/**
- * @brief Sets the min value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets min value value and updates internal subsystem configuration.
 void BPanGauge::setMinValue(int value)
 {
   setMinValue((double)value);
 }
 
 
-/**
- * @brief Sets the max value parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets max value value and updates internal subsystem configuration.
 void BPanGauge::setMaxValue(double value)
 {
     if(value > m_minValue)
@@ -126,20 +107,14 @@ void BPanGauge::setMaxValue(double value)
         emit errorSignal(MaxValueError);
 }
 
-/**
- * @brief Sets the max value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets max value value and updates internal subsystem configuration.
 void BPanGauge::setMaxValue(int value)
 {
   setMaxValue((double)value);
 }
 
 
-/**
- * @brief Sets the threshold parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets threshold value and updates internal subsystem configuration.
 void BPanGauge::setThreshold(double value)
 {
     if(value > m_minValue && value < m_maxValue)
@@ -151,58 +126,40 @@ void BPanGauge::setThreshold(double value)
         emit errorSignal(ThresholdError);
 }
 
-/**
- * @brief Sets the threshold parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets threshold value and updates internal subsystem configuration.
 void BPanGauge::setThreshold(int value)
 {
   setThreshold((double)value);
 }
 
-/**
- * @brief Sets the precision parameter and updates internal state.
- * @param precision Input parameter specifying precision (int).
- */
+// Sets precision value and updates internal subsystem configuration.
 void BPanGauge::setPrecision(int precision)
 {
    m_precision=precision;
    update();
 }
 
-/**
- * @brief Sets the precision numeric parameter and updates internal state.
- * @param precision Input parameter specifying precision (int).
- */
+// Sets precision numeric value and updates internal subsystem configuration.
 void BPanGauge::setPrecisionNumeric(int precision)
 {
    m_precisionNumeric=precision;
    update();
 }
 
-/**
- * @brief Sets the units parameter and updates internal state.
- * @param units Input parameter specifying units (QString).
- */
+// Sets units value and updates internal subsystem configuration.
 void BPanGauge::setUnits(QString units)
 {
   m_units=units;
   update();
 }
 
-/**
- * @brief Sets the label parameter and updates internal state.
- * @param label Input parameter specifying label (QString).
- */
+// Sets label value and updates internal subsystem configuration.
 void BPanGauge::setLabel(QString label)
 {
     m_label=label;
 }
 
-/**
- * @brief Executes the paint event procedure for BPanGauge.
- * @param event Input parameter specifying event (QPaintEvent).
- */
+// Executes paint event routine.
 void BPanGauge::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -228,50 +185,35 @@ void BPanGauge::paintEvent(QPaintEvent *event)
     drawCrown(&painter);
 }
 
-/**
- * @brief Sets the steps parameter and updates internal state.
- * @param nSteps Input parameter specifying nSteps (int).
- */
+// Sets steps value and updates internal subsystem configuration.
 void BPanGauge::setSteps(int nSteps)
 {
     m_steps=nSteps;
     update();
 }
 
-/**
- * @brief Sets the start angle parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets start angle value and updates internal subsystem configuration.
 void BPanGauge::setStartAngle(double value)
 {
     m_startAngle=value;
     update();
 }
 
-/**
- * @brief Sets the end angle parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets end angle value and updates internal subsystem configuration.
 void BPanGauge::setEndAngle(double value)
 {
     m_endAngle=value;
     update();
 }
 
-/**
- * @brief Sets the foreground parameter and updates internal state.
- * @param newForeColor Input parameter specifying newForeColor (QColor).
- */
+// Sets foreground value and updates internal subsystem configuration.
 void BPanGauge::setForeground(QColor newForeColor)
 {
     m_foreground=newForeColor;
     update();
 }
 
-/**
- * @brief Sets the background parameter and updates internal state.
- * @param newBackColor Input parameter specifying newBackColor (QColor).
- */
+// Sets background value and updates internal subsystem configuration.
 void BPanGauge::setBackground(QColor newBackColor)
 {
     m_background=newBackColor;
@@ -279,9 +221,7 @@ void BPanGauge::setBackground(QColor newBackColor)
 }
 
 
-/**
- * @brief Executes the threshold manager procedure for BPanGauge.
- */
+// Executes threshold manager routine.
 void BPanGauge::thresholdManager()
 {
     if(m_value > m_threshold && (!m_thresholdFlag) )
@@ -297,60 +237,42 @@ void BPanGauge::thresholdManager()
      }
 }
 
-/**
- * @brief Sets the threshold enabled parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets threshold enabled value and updates internal subsystem configuration.
 void BPanGauge::setThresholdEnabled(bool enable)
 {
   m_thresholdEnabled=enable;
   update();
 }
 
-/**
- * @brief Sets the numeric indicator enabled parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets numeric indicator enabled value and updates internal subsystem configuration.
 void BPanGauge::setNumericIndicatorEnabled(bool enable)
 {
   m_numericIndicatorEnabled=enable;
   update();
 }
 
-/**
- * @brief Sets the begin valid value parameter and updates internal state.
- * @param beginValue Input parameter specifying beginValue (double).
- */
+// Sets begin valid value value and updates internal subsystem configuration.
 void BPanGauge::setBeginValidValue(double beginValue)
 {
     m_beginValidValue=beginValue;
     update();
 }
 
-/**
- * @brief Sets the end valid value parameter and updates internal state.
- * @param endValue Input parameter specifying endValue (double).
- */
+// Sets end valid value value and updates internal subsystem configuration.
 void BPanGauge::setEndValidValue(double endValue)
 {
     m_endValidValue=endValue;
     update();
 }
 
-/**
- * @brief Sets the enable valid window parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets enable valid window value and updates internal subsystem configuration.
 void BPanGauge::setEnableValidWindow(bool enable)
 {
     m_enableValidWindow=enable;
     update();
 }
 
-/**
- * @brief Sets the begin warning value parameter and updates internal state.
- * @param beginValue Input parameter specifying beginValue (double).
- */
+// Sets begin warning value value and updates internal subsystem configuration.
 void BPanGauge::setBeginWarningValue(double beginValue)
 {
     m_beginWarningValue=beginValue;
@@ -358,20 +280,14 @@ void BPanGauge::setBeginWarningValue(double beginValue)
 
 }
 
-/**
- * @brief Sets the end warning value parameter and updates internal state.
- * @param endValue Input parameter specifying endValue (double).
- */
+// Sets end warning value value and updates internal subsystem configuration.
 void BPanGauge::setEndWarningValue(double endValue)
 {
     m_endWarningValue=endValue;
     update();
 }
 
-/**
- * @brief Sets the enable warning window parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets enable warning window value and updates internal subsystem configuration.
 void BPanGauge::setEnableWarningWindow(bool enable)
 {
     m_enableWarningWindow=enable;

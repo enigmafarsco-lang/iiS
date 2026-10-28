@@ -1,11 +1,8 @@
-/**
- * @file ad9371.h
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ad9371.h
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for ad9371.h.
+// ============================================================================
 
 #ifndef AD9371_H
 #define AD9371_H
@@ -35,87 +32,46 @@
 #include <QTimer>
 
 namespace Ui {
-/**
- * @class AD9371
- * @brief High-level controller class for AD9371.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class AD9371;
 }
 
-/**
- * @class AD9371
- * @brief High-level controller class for AD9371.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class AD9371 : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new AD9371 instance and initializes subsystem components and UI state.
-     * @param mainApp Input parameter specifying mainApp (QApplication).
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes AD9371 subsystem components, default parameters, and state.
     explicit AD9371(QApplication *mainApp,QWidget *parent = 0);
-    /**
-     * @brief Destructor for AD9371, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up AD9371 resources, timers, and allocated memory.
     ~AD9371();
 
     QWidget *init();
 
-    /**
-     * @brief Retrieves the current gui_tx_sampling_freq value.
-     * @return Output value of type double.
-     */
+    // Retrieves current gui_tx_sampling_freq state.
     double get_gui_tx_sampling_freq();
 
 private slots:
-    /**
-     * @brief Slot handler responding to reload button clicked event.
-     */
+    // Event/Signal handler for reload button clicked.
     void reload_button_clicked();
-    /**
-     * @brief Executes the glb settings update labels procedure for AD9371.
-     */
+    // Executes glb settings update labels routine.
     void glb_settings_update_labels(void);
-    /**
-     * @brief Executes the save widget value procedure for AD9371.
-     * @param iio_w Input parameter specifying iio_w (iio_widget).
-     */
+    // Executes save widget value routine.
     void save_widget_value(iio_widget *iio_w);
-    /**
-     * @brief Executes the log value procedure for AD9371.
-     * @param value Input parameter specifying value (QString).
-     */
+    // Executes log value routine.
     void LogValue(QString value);
-    /**
-     * @brief Slot handler responding to on btn reload settings clicked event.
-     */
+    // Event/Signal handler for on btn reload settings clicked.
     void on_btnReloadSettings_clicked();
 
 private:
     Ui::AD9371 *ui;
     QSignalMapper *signalMapper;
-    /**
-     * @brief Executes the profile update labels procedure for AD9371.
-     */
+    // Executes profile update labels routine.
     void profile_update_labels();
-    /**
-     * @brief Executes the rx freq info update procedure for AD9371.
-     */
+    // Executes rx freq info update routine.
     void rx_freq_info_update();
-    /**
-     * @brief Executes the rssi update labels procedure for AD9371.
-     */
+    // Executes rssi update labels routine.
     void rssi_update_labels();
-    /**
-     * @brief Executes the make widget update signal based procedure for AD9371.
-     * @param widgets Input parameter specifying widgets (iio_widget).
-     * @param num_widgets Input parameter specifying num_widgets (unsigned int).
-     */
+    // Executes make widget update signal based routine.
     void make_widget_update_signal_based(iio_widget *widgets, unsigned int num_widgets);
 
     QTimer refreshTimer;
@@ -123,45 +79,24 @@ private:
     int interval=500;
     bool refreshMode=false;
 
-    /**
-     * @brief Executes the profile update procedure for AD9371.
-     */
+    // Executes profile update routine.
     void profile_update();
-    /**
-     * @brief Executes the rx phase rotation update procedure for AD9371.
-     */
+    // Executes rx phase rotation update routine.
     void rx_phase_rotation_update();
-    /**
-     * @brief Executes the rx phase rotation set procedure for AD9371.
-     * @param spinbutton Input parameter specifying spinbutton (QDoubleSpinBox).
-     * @param user_data Input parameter specifying user_data (gpointer).
-     */
+    // Executes rx phase rotation set routine.
     void rx_phase_rotation_set(QDoubleSpinBox *spinbutton, gpointer user_data);
-    /**
-     * @brief Executes the int dec update cb procedure for AD9371.
-     */
+    // Executes int dec update cb routine.
     void int_dec_update_cb();
-    /**
-     * @brief Executes the int dec freq update procedure for AD9371.
-     */
+    // Executes int dec freq update routine.
     void int_dec_freq_update();
-    /**
-     * @brief Slot handler responding to tx sample rate changed event.
-     * @param spinbutton Input parameter specifying spinbutton (QDoubleSpinBox).
-     */
+    // Event/Signal handler for tx sample rate changed.
     void tx_sample_rate_changed(QDoubleSpinBox *spinbutton);
 signals:
-    /**
-     * @brief Executes the change widget procedure for AD9371.
-     * @param QWidget* Input parameter specifying QWidget* (QWidget*).
-     * @param  Input parameter specifying  (struct iio_widget).
-     */
+    // Executes change widget routine.
     void change_widget(QWidget*,struct iio_widget *);
 
 public slots:
-    /**
-     * @brief Updates and synchronizes the refresh timer started data stream and visual indicators.
-     */
+    // Updates and synchronizes refresh timer started data stream.
     void refreshTimerStarted();
 
 };

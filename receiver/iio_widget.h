@@ -1,11 +1,8 @@
-/**
- * @file iio_widget.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: iio_widget.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for iio_widget.h.
+// ============================================================================
 
 #ifndef IIO_WIDGET_H
 #define IIO_WIDGET_H
@@ -32,20 +29,11 @@ struct iio_widget {
     void *priv_progress;
     void *priv_convert_function;
 
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param save Input parameter specifying save (*save).
-     */
+    // Executes void routine.
     void (*save)(struct iio_widget *);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param update Input parameter specifying update (*update).
-     */
+    // Executes void routine.
     void (*update)(struct iio_widget *);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param update_value Input parameter specifying update_value (*update_value).
-     */
+    // Executes void routine.
     void (*update_value)(struct iio_widget *, const char *, size_t);
     void *sig_handler_data;
 };
@@ -62,41 +50,19 @@ struct progress_data {
     gint value_changed_hid;
     gboolean skip_widget_save;
     void *on_complete_data;
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param on_complete Input parameter specifying on_complete (*on_complete).
-     */
+    // Executes void routine.
     void (*on_complete)(void *data);
 };
 
 
-/**
- * @class IIO_Widget
- * @brief High-level controller class for IIO_Widget.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class IIO_Widget
 {
 public:
-    /**
-     * @brief Constructs a new IIO_Widget instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes IIO_Widget subsystem components, default parameters, and state.
     IIO_Widget();
-    /**
-     * @brief Executes the iio widget update procedure for IIO_Widget.
-     * @param widget Input parameter specifying widget (iio_widget).
-     */
+    // Executes iio widget update routine.
     void iio_widget_update(iio_widget *widget);
-    /**
-     * @brief Executes the iio combo box init procedure for IIO_Widget.
-     * @param widget Input parameter specifying widget (iio_widget).
-     * @param dev Input parameter specifying dev (iio_device).
-     * @param chn Input parameter specifying chn (iio_channel).
-     * @param attr_name Input parameter specifying attr_name (const char).
-     * @param attr_name_avail Input parameter specifying attr_name_avail (const char).
-     * @param combo_box Input parameter specifying combo_box (QWidget).
-     * @param (*compare Input parameter specifying (*compare (int).
-     */
+    // Executes iio combo box init routine.
     void iio_combo_box_init(iio_widget *widget, iio_device *dev, iio_channel *chn, const char *attr_name, const char *attr_name_avail, QWidget *combo_box, int (*compare)(const char *, const char *));
     void iio_toggle_button_init(struct iio_widget *widget,
         struct iio_device *dev, struct iio_channel *chn, const char *attr_name,
@@ -107,10 +73,7 @@ public:
     void iio_spin_button_init(struct iio_widget *widget, struct iio_device *dev,
         struct iio_channel *chn, const char *attr_name,
         QWidget *spin_button, const gdouble *scale);
-    /**
-     * @brief Executes the iio spin button add progress procedure for IIO_Widget.
-     * @param iio_w Input parameter specifying iio_w (struct iio_widget).
-     */
+    // Executes iio spin button add progress routine.
     void iio_spin_button_add_progress(struct iio_widget *iio_w);
     void iio_spin_button_s64_init(struct iio_widget *widget, struct iio_device *dev,
         struct iio_channel *chn, const char *attr_name,
@@ -120,34 +83,15 @@ public:
         QWidget *spin_button, const gdouble *scale);
     void iio_update_widgets_of_device(struct iio_widget *widgets,
             unsigned int num_widgets, struct iio_device *dev);
-    /**
-     * @brief Executes the iio update widgets procedure for IIO_Widget.
-     * @param widgets Input parameter specifying widgets (struct iio_widget).
-     * @param num_widgets Input parameter specifying num_widgets (unsigned int).
-     */
+    // Executes iio update widgets routine.
     void iio_update_widgets(struct iio_widget *widgets, unsigned int num_widgets);
-    /**
-     * @brief Executes the iio spin button progress activate procedure for IIO_Widget.
-     * @param iio_w Input parameter specifying iio_w (struct iio_widget).
-     */
+    // Executes iio spin button progress activate routine.
     void iio_spin_button_progress_activate(struct iio_widget *iio_w);
-    /**
-     * @brief Executes the iio spin button skip save on complete procedure for IIO_Widget.
-     * @param iio_w Input parameter specifying iio_w (iio_widget).
-     * @param skip Input parameter specifying skip (gboolean).
-     */
+    // Executes iio spin button skip save on complete routine.
     void iio_spin_button_skip_save_on_complete(iio_widget *iio_w, gboolean skip);
-    /**
-     * @brief Executes the iio spin button set on complete function procedure for IIO_Widget.
-     * @param iio_w Input parameter specifying iio_w (iio_widget).
-     * @param (*on_complete Input parameter specifying (*on_complete (void).
-     */
+    // Executes iio spin button set on complete function routine.
     void iio_spin_button_set_on_complete_function(iio_widget *iio_w, void (*on_complete)(void *), void *data);
-    /**
-     * @brief Executes the iio spin button set convert function procedure for IIO_Widget.
-     * @param iio_w Input parameter specifying iio_w (iio_widget).
-     * @param (*convert Input parameter specifying (*convert (double).
-     */
+    // Executes iio spin button set convert function routine.
     void iio_spin_button_set_convert_function(iio_widget *iio_w, double (*convert)(double, bool));
 private:
 };

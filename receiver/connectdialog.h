@@ -1,11 +1,8 @@
-/**
- * @file connectdialog.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: connectdialog.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for connectdialog.h.
+// ============================================================================
 
 #ifndef CONNECTDIALOG_H
 #define CONNECTDIALOG_H
@@ -19,64 +16,38 @@
 #include <receiver/settings.h>
 
 namespace Ui {
-/**
- * @class connectDialog
- * @brief High-level controller class for connectDialog.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class connectDialog;
 }
 
-/**
- * @class connectDialog
- * @brief High-level controller class for connectDialog.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class connectDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new connectDialog instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QDialog).
-     */
+    // Constructor: Initializes connectDialog subsystem components, default parameters, and state.
     explicit connectDialog(QDialog *parent = nullptr);
-    /**
-     * @brief Destructor for connectDialog, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up connectDialog resources, timers, and allocated memory.
     ~connectDialog();
 
-    /**
-     * @brief Executes the initialize procedure for connectDialog.
-     * @return Output value of type bool.
-     */
+    // Executes initialize routine.
     bool Initialize();
 
     // TX bandwidth (100/200/400) and ORx bandwidth selected in the
     // first-start form.  The startup profile assertion composes the
     // Talise profile from these two choices (general + orx + tx + </profile>).
     int selectedTxBw() const;
+    // Executes selected orx bw routine.
     int selectedOrxBw() const;
 
 private slots:
 
-    /**
-     * @brief Slot handler responding to btn cancel clicked event.
-     */
+    // Event/Signal handler for btn cancel clicked.
     void btn_cancel_clicked();
-    /**
-     * @brief Slot handler responding to btn refresh clicked event.
-     */
+    // Event/Signal handler for btn refresh clicked.
     void btn_refresh_clicked();
-    /**
-     * @brief Slot handler responding to btn connect clicked event.
-     */
+    // Event/Signal handler for btn connect clicked.
     void btn_connect_clicked();
-    /**
-     * @brief Executes the tx bw toggled procedure for connectDialog.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Executes tx bw toggled routine.
     void txBwToggled(bool checked);
 
 private:
@@ -105,6 +76,7 @@ private:
     void updateBoardSerial();
 
 signals:
+    // Executes connect signal routine.
     void connectSignal();
 };
 

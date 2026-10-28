@@ -1,11 +1,8 @@
-/**
- * @file targetdetector.h
- * @brief Subsystem module for targetDetector in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: targetdetector.h
+// Subsystem: eLynxSDR targetDetector
+// Description: Subsystem implementation and interface guidance for targetdetector.h.
+// ============================================================================
 
 #ifndef TARGETDETECTOR_H
 #define TARGETDETECTOR_H
@@ -14,68 +11,35 @@
 #include "utils.h"
 #include "../../usertype.h"
 namespace Ui {
-/**
- * @class TargetDetector
- * @brief High-level controller class for TargetDetector.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class TargetDetector;
 }
 
-/**
- * @class TargetDetector
- * @brief High-level controller class for TargetDetector.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class TargetDetector : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new TargetDetector instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes TargetDetector subsystem components, default parameters, and state.
     explicit TargetDetector(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for TargetDetector, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up TargetDetector resources, timers, and allocated memory.
     ~TargetDetector();
 
 private slots:
-    /**
-     * @brief Slot handler responding to on chb auto set clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on chb auto set clicked.
     void on_chbAutoSet_clicked(bool checked);
 
 public slots:
-    /**
-     * @brief Reads, parses, and decodes incoming receive command from object slot data buffer.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Reads and parses incoming receive command from object slot data.
     void receiveCommandFromObjectSlot(QString);
-    /**
-     * @brief Executes the udp device response slot procedure for TargetDetector.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Executes udp device response slot routine.
     void udpDeviceResponseSlot(QByteArray);
-    /**
-     * @brief Executes the tcp device response slot procedure for TargetDetector.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Executes tcp device response slot routine.
     void tcpDeviceResponseSlot(QByteArray);
 
 signals:
-    /**
-     * @brief Transmits send command to object signal command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send command to object signal command/packet over communication interface.
     void sendCommandToObjectSignal(QString);
-    /**
-     * @brief Transmits send command to device signal command/packet over the communication bus.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
 
 

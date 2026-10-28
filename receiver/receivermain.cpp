@@ -1,11 +1,8 @@
-/**
- * @file receivermain.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: receivermain.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for receivermain.cpp.
+// ============================================================================
 
 #include "receivermain.h"
 #include "ui_receivermain.h"
@@ -603,9 +600,7 @@ ReceiverMain::ReceiverMain(QWidget *parent) :
 }
 
 
-/**
- * @brief Executes the calib initial procedure for ReceiverMain.
- */
+// Executes calib initial routine.
 void ReceiverMain::calibInitial()
 {
     //-------------- calibratio -----------------------
@@ -662,6 +657,7 @@ void ReceiverMain::calibInitial()
 
 
 
+// Executes ensure zero dac buffer file routine.
 QString ReceiverMain::ensureZeroDacBufferFile()
 {
     QString zeroPath = dataFilePath(QStringLiteral("drfm_zero.txt"));
@@ -690,9 +686,7 @@ QString ReceiverMain::ensureZeroDacBufferFile()
     return zeroPath;
 }
 
-/**
- * @brief Executes the ensure drfm dac buffer running procedure for ReceiverMain.
- */
+// Executes ensure drfm dac buffer running routine.
 void ReceiverMain::ensureDrfmDacBufferRunning()
 {
     if (!oscMain || !oscMain->_adrv9009)
@@ -709,6 +703,7 @@ void ReceiverMain::ensureDrfmDacBufferRunning()
     oscMain->_adrv9009->setFile(zeroFile, 0, true, true);
 }
 
+// Initializes setup drfm control tab for ReceiverMain.
 void ReceiverMain::setupDrfmControlTab()
 {
     // Hardware mapping is taken from the supplied Vivado/HDL sources:
@@ -1403,6 +1398,7 @@ void ReceiverMain::setupDrfmControlTab()
 /**
  * @brief Configures Built-In Test (BIT) tab under DRFM for automated hardware & software diagnostics.
  */
+// Initializes setup bit control tab for ReceiverMain.
 void ReceiverMain::setupBitControlTab()
 {
     QWidget *bitPage = new QWidget(ui->tabWidgetSetting);
@@ -1680,20 +1676,14 @@ void ReceiverMain::setupBitControlTab()
     });
 }
 
-/**
- * @brief Executes the show noise status procedure for ReceiverMain.
- * @param activeMode Input parameter specifying activeMode (QString).
- * @param msg Input parameter specifying msg (QString).
- */
+// Executes show noise status routine.
 void ReceiverMain::showNoiseStatus(QString activeMode= "",QString msg="")
 {
 
     whichNoiseModeIsActive = activeMode;
     ui->lblActiveNoise->setText(msg);
 }
-/**
- * @brief Executes the smart noise procedure for ReceiverMain.
- */
+// Executes smart noise routine.
 void ReceiverMain::smartNoise()
 {
     smartInit();
@@ -1873,10 +1863,7 @@ void ReceiverMain::smartNoise()
     smartSelectedNoise();
 }
 
-/**
- * @brief Sets the auto amp value parameter and updates internal state.
- * @param ampVal Input parameter specifying ampVal (double).
- */
+// Sets auto amp value value and updates internal subsystem configuration.
 void ReceiverMain::setAutoAmpValue(double ampVal)
 {
     if (!ui->chbAutoAmp->isChecked()) return;
@@ -1893,10 +1880,7 @@ void ReceiverMain::setAutoAmpValue(double ampVal)
     }
 }
 
-/**
- * @brief Executes the stop smart noise procedure for ReceiverMain.
- * @param mode Input parameter specifying mode (QString).
- */
+// Executes stop smart noise routine.
 void ReceiverMain::stopSmartNoise(QString mode)
 {
 
@@ -1928,9 +1912,7 @@ void ReceiverMain::stopSmartNoise(QString mode)
 
 
 
-/**
- * @brief Executes the smart table noise procedure for ReceiverMain.
- */
+// Executes smart table noise routine.
 void ReceiverMain::smartTableNoise()
 {
 
@@ -1968,9 +1950,7 @@ void ReceiverMain::smartTableNoise()
 
 
 
-/**
- * @brief Executes the smart selected noise procedure for ReceiverMain.
- */
+// Executes smart selected noise routine.
 void ReceiverMain::smartSelectedNoise()
 {
     //get max frq and send channel to card
@@ -2013,9 +1993,7 @@ void ReceiverMain::smartSelectedNoise()
 
 
 
-/**
- * @brief Executes the smart time domain noise procedure for ReceiverMain.
- */
+// Executes smart time domain noise routine.
 void ReceiverMain::smartTimeDomainNoise()
 {
     //smart time domain
@@ -2070,9 +2048,7 @@ void ReceiverMain::smartTimeDomainNoise()
 
 
 
-/**
- * @brief Executes the smart init procedure for ReceiverMain.
- */
+// Executes smart init routine.
 void ReceiverMain::smartInit()
 {
     ui->spnSmartNoise->setEnabled(false);
@@ -2098,11 +2074,7 @@ void ReceiverMain::smartInit()
 
 
 
-/**
- * @brief Executes the select channel with frq procedure for ReceiverMain.
- * @param val Input parameter specifying val (double).
- * @return Output value of type int.
- */
+// Executes select channel with frq routine.
 int ReceiverMain::selectChannelWithFrq(double val)
 {
     double step{15};
@@ -2329,10 +2301,7 @@ int ReceiverMain::selectChannelWithFrq(double val)
 
 
 
-/**
- * @brief Executes the value slot procedure for ReceiverMain.
- * @param val Input parameter specifying val (Pulse).
- */
+// Executes value slot routine.
 void ReceiverMain::ValueSlot( Pulse val)
 {
 
@@ -2367,10 +2336,7 @@ void ReceiverMain::ValueSlot( Pulse val)
 }
 
 
-/**
- * @brief Executes the creating time plot procedure for ReceiverMain.
- * @param customPlot Input parameter specifying customPlot (QCustomPlot *).
- */
+// Executes creating time plot routine.
 void ReceiverMain::creatingTimePlot(QCustomPlot * customPlot)
 {
     if(!customPlot) return;
@@ -2394,13 +2360,7 @@ void ReceiverMain::creatingTimePlot(QCustomPlot * customPlot)
     connect(customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->yAxis2, SLOT(setRange(QCPRange)));
 }
 
-/**
- * @brief Executes the creating histogram plot procedure for ReceiverMain.
- * @param histo Input parameter specifying histo (QCustomPlot).
- * @param wideAxisRect Input parameter specifying wideAxisRect (QCPAxisRect).
- * @param bars1 Input parameter specifying bars1 (QCPBars).
- * @param mainGraph Input parameter specifying mainGraph (QCPGraph).
- */
+// Executes creating histogram plot routine.
 void ReceiverMain::creatingHistogramPlot(QCustomPlot *histo , QCPAxisRect *wideAxisRect, QCPBars *bars1,  QCPGraph *mainGraph)
 {
     histo->plotLayout()->clear();
@@ -2425,6 +2385,7 @@ void ReceiverMain::creatingHistogramPlot(QCustomPlot *histo , QCPAxisRect *wideA
     //===================================================================================================================
 }
 
+// Initializes init g l plot for ReceiverMain.
 void ReceiverMain::initGLPlot(QGLchart *scatterChart, ChartType glChartType)
 {
     //    QCustomAxis *verticalAxis = new QCustomAxis(this);
@@ -2489,9 +2450,7 @@ void ReceiverMain::initGLPlot(QGLchart *scatterChart, ChartType glChartType)
 }
 
 
-/**
- * @brief Executes the connection procedure for ReceiverMain.
- */
+// Executes connection routine.
 void ReceiverMain::connection()
 {
 
@@ -2620,6 +2579,7 @@ void ReceiverMain::connection()
 }
 
 
+// Sets prv frq value and updates internal subsystem configuration.
 void ReceiverMain::setPrvFrq(double val)
 {
     QTimer::singleShot(800, [&]{
@@ -2634,37 +2594,24 @@ void ReceiverMain::setPrvFrq(double val)
     });
 }
 
-/**
- * @brief Initializes and configures the setup realtime data demo for the ReceiverMain subsystem.
- * @param customPlot Input parameter specifying customPlot (QCustomPlot).
- */
+// Initializes setup realtime data demo for ReceiverMain.
 void ReceiverMain::setupRealtimeDataDemo(QCustomPlot *customPlot)
 {
 
 
 }
-/**
- * @brief Executes the realtime data slot procedure for ReceiverMain.
- */
+// Executes realtime data slot routine.
 void ReceiverMain::realtimeDataSlot()
 {
 
 }
 
-/**
- * @brief Executes the plot histogram procedure for ReceiverMain.
- * @param plot Input parameter specifying plot (QCustomPlot *).
- * @param std::unordered_map<double Input parameter specifying std::unordered_map<double (std::unordered_map<double).
- * @param histogramData Input parameter specifying histogramData (double> *).
- */
+// Executes plot histogram routine.
 void ReceiverMain::plotHistogram(QCustomPlot * plot, std::unordered_map<double, double> * histogramData)
 {
 }
 
-/**
- * @brief Executes the real time plot procedure for ReceiverMain.
- * @param customPlot Input parameter specifying customPlot (QCustomPlot).
- */
+// Executes real time plot routine.
 void ReceiverMain::realTimePlot(QCustomPlot *customPlot)
 {
 
@@ -2674,23 +2621,14 @@ void ReceiverMain::realTimePlot(QCustomPlot *customPlot)
 
 
 
-/**
- * @brief Executes the fill historam array procedure for ReceiverMain.
- * @param type Input parameter specifying type (int).
- * @param plot Input parameter specifying plot (QCustomPlot *).
- * @param val Input parameter specifying val (double *).
- * @param cnt Input parameter specifying cnt (int).
- */
+// Executes fill historam array routine.
 void ReceiverMain::fillHistoramArray(int type, QCustomPlot * plot, double * val,int cnt)
 {
 
 }
 
 
-/**
- * @brief Executes the add exciter tab procedure for ReceiverMain.
- * @param exciter Input parameter specifying exciter (QWidget).
- */
+// Executes add exciter tab routine.
 void ReceiverMain::addExciterTab(QWidget *exciter)
 {
     if (!exciter)
@@ -2702,6 +2640,7 @@ void ReceiverMain::addExciterTab(QWidget *exciter)
     ui->tabWidget->insertTab(1, exciter, tr("Exciter"));
 }
 
+// Initializes init for ReceiverMain.
 void ReceiverMain::init()
 {
 
@@ -3065,6 +3004,7 @@ void ReceiverMain::init()
     }
 }
 
+// Destructor: Cleans up ReceiverMain resources, timers, and allocated memory.
 ReceiverMain::~ReceiverMain()
 {
 
@@ -3220,11 +3160,7 @@ void ReceiverMain::on_btnDefaultIioOsc_clicked()
     qInfo() << "default iio-osc: file applied over the LAN:" << iniPath;
 }
 
-/**
- * @brief Executes the apply profile bw procedure for ReceiverMain.
- * @param bw Input parameter specifying bw (int).
- * @return Output value of type bool.
- */
+// Executes apply profile bw routine.
 bool ReceiverMain::applyProfileBw(int bw)
 {
     // The Profile tab radios select the diagonal combinations
@@ -3307,30 +3243,21 @@ void ReceiverMain::syncProfileOrxChoices()
     }
 }
 
-/**
- * @brief Slot handler responding to on rdo profile100 toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on rdo profile100 toggled.
 void ReceiverMain::on_rdoProfile100_toggled(bool checked)
 {
     if (checked)
         syncProfileOrxChoices();
 }
 
-/**
- * @brief Slot handler responding to on rdo profile200 toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on rdo profile200 toggled.
 void ReceiverMain::on_rdoProfile200_toggled(bool checked)
 {
     if (checked)
         syncProfileOrxChoices();
 }
 
-/**
- * @brief Slot handler responding to on rdo profile400 toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on rdo profile400 toggled.
 void ReceiverMain::on_rdoProfile400_toggled(bool checked)
 {
     if (checked)
@@ -3461,9 +3388,7 @@ bool ReceiverMain::applyComposedProfile(int txBw, int orxBw)
 
     return true;
 }
-/**
- * @brief Slot handler responding to on btn profile set clicked event.
- */
+// Event/Signal handler for on btn profile set clicked.
 void ReceiverMain::on_btnProfileSet_clicked()
 {
     // The Profile tab selects the TX and ORx bandwidths of the composed
@@ -3492,6 +3417,7 @@ QString ReceiverMain::boardSerialNumber()
     return globals::boardSerialNumber();
 }
 
+// Updates and synchronizes update serial number data stream.
 void ReceiverMain::updateSerialNumber()
 {
     const QString sn = boardSerialNumber();
@@ -3501,9 +3427,7 @@ void ReceiverMain::updateSerialNumber()
     qInfo() << "Board serial number:" << (sn.isEmpty() ? "(not found)" : sn);
 }
 
-/**
- * @brief Executes the default parameters procedure for ReceiverMain.
- */
+// Executes default parameters routine.
 void ReceiverMain::defaultParameters()
 {
 
@@ -3601,6 +3525,7 @@ void ReceiverMain::defaultParameters()
     //    isFrqBtnOn = true;
 }
 
+// Executes changing plot mode routine.
 void ReceiverMain::changingPlotMode(int selectedMode)
 {
     if (selectedMode > 3 || selectedMode < 0)
@@ -3665,10 +3590,7 @@ void ReceiverMain::changingPlotMode(int selectedMode)
 }
 
 
-/**
- * @brief Executes the frq and seek stop capturing procedure for ReceiverMain.
- * @param val Input parameter specifying val (bool).
- */
+// Executes frq and seek stop capturing routine.
 void ReceiverMain::frqAndSeekStopCapturing(bool val)
 {
     isExciterOn = val;
@@ -3737,6 +3659,7 @@ void ReceiverMain::frqAndSeekStopCapturing(bool val)
 
 //================================================================================
 
+// Event/Signal handler for on btn set clicked.
 void ReceiverMain::on_btnSet_clicked()
 {
     //    if(ui->spnFrq->value() < 8000 or ui->spnFrq->value() > 12000) return;
@@ -3763,6 +3686,7 @@ void ReceiverMain::on_btnSet_clicked()
     settingMinMaxBand();
 }
 
+// Executes maximum finder routine.
 double ReceiverMain::maximumFinder(double * newVal,double * max)
 {
 
@@ -3773,12 +3697,7 @@ double ReceiverMain::maximumFinder(double * newVal,double * max)
     return *max;
 }
 
-/**
- * @brief Executes the minimum finder procedure for ReceiverMain.
- * @param newVal Input parameter specifying newVal (double *).
- * @param min Input parameter specifying min (double *).
- * @return Output value of type double.
- */
+// Executes minimum finder routine.
 double ReceiverMain::minimumFinder(double * newVal,double * min)
 {
     if(*newVal < *min)
@@ -3790,9 +3709,7 @@ double ReceiverMain::minimumFinder(double * newVal,double * min)
 }
 
 
-/**
- * @brief Slot handler responding to on btn set band select clicked event.
- */
+// Event/Signal handler for on btn set band select clicked.
 void ReceiverMain::on_btnSetBandSelect_clicked()
 {
     //    ui->chbSmartNoise->setChecked(false);
@@ -3897,10 +3814,7 @@ void ReceiverMain::on_btnSetBandSelect_clicked()
 
 }
 
-/**
- * @brief Executes the frq value chenged procedure for ReceiverMain.
- * @param val Input parameter specifying val (QString).
- */
+// Executes frq value chenged routine.
 void ReceiverMain::frqValueChenged(QString val)
 {
     //    Q_UNUSED(val);
@@ -3916,15 +3830,14 @@ void ReceiverMain::frqValueChenged(QString val)
     //    }
 }
 
+// Transmits send spot file to cart command/packet over communication interface.
 void ReceiverMain::sendSpotFileToCart(QString path)
 {
 
 
 }
 
-/**
- * @brief Retrieves the current plot data from thread value.
- */
+// Retrieves current plot data from thread state.
 void ReceiverMain::getPlotDataFromThread()
 {
     //    double key = timeStart.msecsTo(QTime::currentTime())/1000.0;
@@ -3934,6 +3847,7 @@ void ReceiverMain::getPlotDataFromThread()
     //    customPlot->replot();
 }
 
+// Executes histo main plot slot routine.
 void ReceiverMain::histoMainPlotSlot(double key, double val)
 {
     //    customPlot->graph(0)->addData(key, val);
@@ -4149,9 +4063,7 @@ void ReceiverMain::calculatingCwTableSlot(QVector<double> frqVal,
 
 
 
-/**
- * @brief Executes the frq mode is selected procedure for ReceiverMain.
- */
+// Executes frq mode is selected routine.
 void ReceiverMain::frqModeIsSelected()
 {
     changingPlotMode(1);
@@ -4176,6 +4088,7 @@ void ReceiverMain::frqModeIsSelected()
     //    QTimer::singleShot(800, [&]{timeDomainPlot->btn_capt->click();});
 }
 
+// Event/Signal handler for on btn frq seek clicked.
 void ReceiverMain::on_btnFrqSeek_clicked()
 {
     changingPlotMode(2);
@@ -4200,6 +4113,7 @@ void ReceiverMain::on_btnFrqSeek_clicked()
     //    QTimer::singleShot(800, [&]{timeDomainPlot->btn_capt->click();});
 }
 
+// Sets ting min max band value and updates internal subsystem configuration.
 void ReceiverMain::settingMinMaxBand()
 {
     centerFrq =  abs(DC_6_UPTO_8_12 - frqSpn->value());
@@ -4207,9 +4121,7 @@ void ReceiverMain::settingMinMaxBand()
     ui->spnMin->setValue(centerFrq -250);
 }
 
-/**
- * @brief Executes the rebout with s s n procedure for ReceiverMain.
- */
+// Executes rebout with s s n routine.
 void ReceiverMain::reboutWithSSN()
 {
     QProcess prc;
@@ -4220,9 +4132,7 @@ void ReceiverMain::reboutWithSSN()
     prc.start();
 }
 
-/**
- * @brief Initializes and configures the init plot for the ReceiverMain subsystem.
- */
+// Initializes init plot for ReceiverMain.
 void ReceiverMain::initPlot()
 {
 
@@ -4299,9 +4209,7 @@ void ReceiverMain::initPlot()
 
 
 
-/**
- * @brief Slot handler responding to on btn set t h clicked event.
- */
+// Event/Signal handler for on btn set t h clicked.
 void ReceiverMain::on_btnSetTH_clicked()
 {
     oscMain->_adrv9009controlUnit->btnTh1->clicked();
@@ -4310,9 +4218,7 @@ void ReceiverMain::on_btnSetTH_clicked()
 
 }
 
-/**
- * @brief Slot handler responding to on btn set t h c w clicked event.
- */
+// Event/Signal handler for on btn set t h c w clicked.
 void ReceiverMain::on_btnSetTHCW_clicked()
 {
     oscMain->_adrv9009controlUnit->btnThCw1->clicked();
@@ -4322,10 +4228,7 @@ void ReceiverMain::on_btnSetTHCW_clicked()
     oscMain->_adrv9009controlUnit->btnThCw3->clicked();
 }
 
-/**
- * @brief Slot handler responding to on tab widget current changed event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on tab widget current changed.
 void ReceiverMain::on_tabWidget_currentChanged(int index)
 {
     currentTabState = index;
@@ -4337,20 +4240,14 @@ void ReceiverMain::on_tabWidget_currentChanged(int index)
 
 
 
-/**
- * @brief Slot handler responding to on label 43 link activated event.
- * @param link Input parameter specifying link (const QString).
- */
+// Event/Signal handler for on label 43 link activated.
 void ReceiverMain::on_label_43_linkActivated(const QString &link)
 {
 
 }
 
 
-/**
- * @brief Slot handler responding to on cmb transmit activated event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on cmb transmit activated.
 void ReceiverMain::on_cmbTransmit_activated(int index)
 {
     int i = index;
@@ -4655,6 +4552,7 @@ void ReceiverMain::on_cmbTransmit_activated(int index)
 //}
 
 
+// Event/Signal handler for on chb en  p a t t e r n clicked.
 void ReceiverMain::on_chbEn_PATTERN_clicked(bool checked)
 {
     if(checked)
@@ -4698,6 +4596,7 @@ void ReceiverMain::on_chbEn_PATTERN_clicked(bool checked)
 //    ui->grpSetting->setVisible(false);
 //}
 
+// Event/Signal handler for on btn reboot clicked.
 void ReceiverMain::on_btnReboot_clicked(bool checked)
 {
     //ssh config in order to reboot card
@@ -4779,6 +4678,7 @@ void ReceiverMain::on_btnReboot_clicked(bool checked)
     //    Permission denied, please try ag"
 }
 
+// Event/Signal handler for on table widget 2 cell clicked.
 void ReceiverMain::on_tableWidget_2_cellClicked(int row, int column)
 {
 
@@ -4805,26 +4705,21 @@ void ReceiverMain::on_tableWidget_2_cellClicked(int row, int column)
 
 
 
+// Event/Signal handler for on push button clicked.
 void ReceiverMain::on_pushButton_clicked()
 {
 
 
 }
 
-/**
- * @brief Slot handler responding to on tbl c w cell clicked event.
- * @param row Input parameter specifying row (int).
- * @param column Input parameter specifying column (int).
- */
+// Event/Signal handler for on tbl c w cell clicked.
 void ReceiverMain::on_tblCW_cellClicked(int row, int column)
 {
 
 }
 
 
-/**
- * @brief Slot handler responding to on btn new user clicked event.
- */
+// Event/Signal handler for on btn new user clicked.
 void ReceiverMain::on_btnNewUser_clicked()
 {
 
@@ -4841,6 +4736,7 @@ void ReceiverMain::on_btnNewUser_clicked()
     //    writeToFile(fileAuth, usrName,hashPassword(password));
 }
 
+// Transmits write to file command/packet over communication interface.
 bool ReceiverMain::writeToFile(QString fileName,QString userName, QString password, QString role)
 {
 
@@ -4886,11 +4782,7 @@ bool ReceiverMain::writeToFile(QString fileName,QString userName, QString passwo
 
 
 
-/**
- * @brief Executes the input is not empty procedure for ReceiverMain.
- * @param inputVal Input parameter specifying inputVal (QString).
- * @return Output value of type bool.
- */
+// Executes input is not empty routine.
 bool ReceiverMain::inputIsNotEmpty(QString inputVal)
 {
 
@@ -4903,11 +4795,7 @@ bool ReceiverMain::inputIsNotEmpty(QString inputVal)
     return true;
 }
 
-/**
- * @brief Executes the length checker procedure for ReceiverMain.
- * @param inputVal Input parameter specifying inputVal (QString).
- * @return Output value of type bool.
- */
+// Executes length checker routine.
 bool ReceiverMain::lengthChecker(QString inputVal)
 {
     if(     inputVal.length() > 20 and
@@ -4918,10 +4806,7 @@ bool ReceiverMain::lengthChecker(QString inputVal)
     }
     return true;
 }
-/**
- * @brief Executes the message for auth procedure for ReceiverMain.
- * @param msg Input parameter specifying msg (QString).
- */
+// Executes message for auth routine.
 void ReceiverMain::messageForAuth(QString msg)
 {
     QMessageBox msgBox;
@@ -4932,10 +4817,7 @@ void ReceiverMain::messageForAuth(QString msg)
 
 
 
-/**
- * @brief Slot handler responding to on tab widget tab bar clicked event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on tab widget tab bar clicked.
 void ReceiverMain::on_tabWidget_tabBarClicked(int index)
 {
     tabPress ++;
@@ -4963,11 +4845,7 @@ void ReceiverMain::on_tabWidget_tabBarClicked(int index)
 
 
 
-/**
- * @brief Executes the hash password procedure for ReceiverMain.
- * @param pass Input parameter specifying pass (const QString).
- * @return Output value of type QString.
- */
+// Executes hash password routine.
 QString ReceiverMain::hashPassword(const QString &pass)
 {
     QByteArray hashedPass = QCryptographicHash::hash(pass.toUtf8(),QCryptographicHash::Sha256);
@@ -4975,13 +4853,7 @@ QString ReceiverMain::hashPassword(const QString &pass)
 }
 
 
-/**
- * @brief Executes the verify user procedure for ReceiverMain.
- * @param filePath Input parameter specifying filePath (const QString).
- * @param password Input parameter specifying password (const QString).
- * @param userName Input parameter specifying userName (const QString).
- * @return Output value of type bool.
- */
+// Executes verify user routine.
 bool ReceiverMain::verifyUser(const QString filePath,const QString &password, const QString &userName)
 {
 
@@ -5018,9 +4890,7 @@ bool ReceiverMain::verifyUser(const QString filePath,const QString &password, co
     return false;
 }
 
-/**
- * @brief Slot handler responding to on btn login clicked event.
- */
+// Event/Signal handler for on btn login clicked.
 void ReceiverMain::on_btnLogin_clicked()
 {
 
@@ -5071,10 +4941,7 @@ void ReceiverMain::on_btnLogin_clicked()
     }
 }
 
-/**
- * @brief Slot handler responding to on btn logout clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn logout clicked.
 void ReceiverMain::on_btnLogout_clicked(bool checked)
 {
     if(isUserLoggedin)
@@ -5091,10 +4958,7 @@ void ReceiverMain::on_btnLogout_clicked(bool checked)
     }
 }
 
-/**
- * @brief Slot handler responding to on btn recovery clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn recovery clicked.
 void ReceiverMain::on_btnRecovery_clicked(bool checked)
 {
     QString recUser = ui->linRecUser->text();
@@ -5116,10 +4980,7 @@ void ReceiverMain::on_btnRecovery_clicked(bool checked)
 
 
 
-/**
- * @brief Slot handler responding to on btn new admin clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn new admin clicked.
 void ReceiverMain::on_btnNewAdmin_clicked(bool checked)
 {
     if(userRole != "super"  ) return;
@@ -5151,10 +5012,7 @@ void ReceiverMain::on_btnNewAdmin_clicked(bool checked)
     return;
 }
 
-/**
- * @brief Executes the hidden ui elements procedure for ReceiverMain.
- * @param state Input parameter specifying state (bool).
- */
+// Executes hidden ui elements routine.
 void ReceiverMain::hiddenUiElements(bool state)
 {
     //-------
@@ -5172,6 +5030,7 @@ void ReceiverMain::hiddenUiElements(bool state)
     //-------
 }
 
+// Event/Signal handler for on btn save limit clicked.
 void ReceiverMain::on_btnSaveLimit_clicked(bool checked)
 {
     QFile file(fileAuth);
@@ -5211,6 +5070,7 @@ void ReceiverMain::on_btnSaveLimit_clicked(bool checked)
     //    }
 }
 
+// Event/Signal handler for on btn show user clicked.
 void ReceiverMain::on_btnShowUser_clicked(bool checked)
 {
     isShow = !isShow;
@@ -5412,9 +5272,7 @@ void ReceiverMain::on_btnCalib_clicked(bool checked)
 }
 
 
-/**
- * @brief Executes the start calib sending procedure for ReceiverMain.
- */
+// Executes start calib sending routine.
 void ReceiverMain::startCalibSending()
 {
     QString frqStr = "FREQ:CW"+QString(" ")+QString::number(calibVal)+ "MHZ";
@@ -5424,9 +5282,7 @@ void ReceiverMain::startCalibSending()
 }
 
 
-/**
- * @brief Transmits send power to calib device command/packet over the communication bus.
- */
+// Transmits send power to calib device command/packet over communication interface.
 void ReceiverMain::sendPowerToCalibDevice()
 {
     powNw = -30 - (cntCalib * 10 );
@@ -5454,10 +5310,7 @@ void ReceiverMain::sendPowerToCalibDevice()
 
 
 
-/**
- * @brief Slot handler responding to on  device response slot event.
- * @param val Input parameter specifying val (QByteArray).
- */
+// Event/Signal handler for on  device response slot.
 void ReceiverMain::on_DeviceResponseSlot(QByteArray val)
 {
     if( modeCalib=="frq")
@@ -5503,9 +5356,7 @@ void ReceiverMain::on_DeviceResponseSlot(QByteArray val)
     }
 }
 
-/**
- * @brief Executes the calib managment procedure for ReceiverMain.
- */
+// Executes calib managment routine.
 void ReceiverMain::calibManagment()
 {
 
@@ -5513,11 +5364,7 @@ void ReceiverMain::calibManagment()
 }
 
 
-/**
- * @brief Executes the checking calib response in spectrom slot procedure for ReceiverMain.
- * @param frq Input parameter specifying frq (double).
- * @param powerValue Input parameter specifying powerValue (double).
- */
+// Executes checking calib response in spectrom slot routine.
 void ReceiverMain::checkingCalibResponseInSpectromSlot(double frq, double powerValue)
 {
 
@@ -5571,9 +5418,7 @@ void ReceiverMain::checkingCalibResponseInSpectromSlot(double frq, double powerV
     }
 }
 
-/**
- * @brief Executes the save calibr to file procedure for ReceiverMain.
- */
+// Executes save calibr to file routine.
 void ReceiverMain::saveCalibrToFile()
 {
     QFile file(calibFile);
@@ -5592,9 +5437,7 @@ void ReceiverMain::saveCalibrToFile()
 }
 
 
-/**
- * @brief Slot handler responding to on btn stop calib clicked event.
- */
+// Event/Signal handler for on btn stop calib clicked.
 void ReceiverMain::on_btnStopCalib_clicked()
 {
     cntVecCalib = 0;
@@ -5608,10 +5451,7 @@ void ReceiverMain::on_btnStopCalib_clicked()
 
 
 
-/**
- * @brief Slot handler responding to on btn calib rff clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on btn calib rff clicked.
 void ReceiverMain::on_btnCalibRff_clicked(bool checked)
 {
     //    OUTP:MOD?

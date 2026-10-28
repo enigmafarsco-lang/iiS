@@ -1,11 +1,8 @@
-/**
- * @file pulsePage.h
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pulsePage.h
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for pulsePage.h.
+// ============================================================================
 
 ﻿#ifndef PULSEPAGE_H
 #define PULSEPAGE_H
@@ -17,37 +14,21 @@
 
 
 namespace Ui {
-/**
- * @class PulsePage
- * @brief High-level controller class for PulsePage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PulsePage;
 }
 
 
 
-/**
- * @class PulsePage
- * @brief High-level controller class for PulsePage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PulsePage : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * @brief Constructs a new PulsePage instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     * @param radarData Input parameter specifying radarData (radarSpace::radarDataStruct *).
-     */
+    // Constructor: Initializes PulsePage subsystem components, default parameters, and state.
     explicit PulsePage(QWidget *parent = nullptr, radarSpace::radarDataStruct * radarData= nullptr);
     radarSpace::radarDataStruct * radarData;
-    /**
-     * @brief Destructor for PulsePage, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up PulsePage resources, timers, and allocated memory.
     ~PulsePage();
 
 
@@ -58,47 +39,26 @@ private:
 
 
 private slots:
-    /**
-     * @brief Slot handler responding to on btn ok clicked event.
-     */
+    // Event/Signal handler for on btn ok clicked.
     void on_btnOk_clicked();
-    /**
-     * @brief Executes the btn green procedure for PulsePage.
-     */
+    // Executes btn green routine.
     void btnGreen();
-    /**
-     * @brief Executes the btn red procedure for PulsePage.
-     */
+    // Executes btn red routine.
     void btnRed();
 
 public slots:
 
 
 signals:
-    /**
-     * @brief Executes the period type signal procedure for PulsePage.
-     * @param priSpace::periodicTypeEnum Input parameter specifying priSpace::periodicTypeEnum (priSpace::periodicTypeEnum).
-     */
+    // Executes period type signal routine.
     void periodTypeSignal(priSpace::periodicTypeEnum);
-    /**
-     * @brief Executes the modul type signal procedure for PulsePage.
-     * @param modulSpace::modeTypeEnum Input parameter specifying modulSpace::modeTypeEnum (modulSpace::modeTypeEnum).
-     */
+    // Executes modul type signal routine.
     void modulTypeSignal(modulSpace::modeTypeEnum);
-    /**
-     * @brief Executes the pri type signal procedure for PulsePage.
-     * @param priSpace::priTypeEnum Input parameter specifying priSpace::priTypeEnum (priSpace::priTypeEnum).
-     */
+    // Executes pri type signal routine.
     void priTypeSignal(priSpace::priTypeEnum);
-    /**
-     * @brief Executes the frq type signal procedure for PulsePage.
-     * @param frqSpace::typeEnum Input parameter specifying frqSpace::typeEnum (frqSpace::typeEnum).
-     */
+    // Executes frq type signal routine.
     void frqTypeSignal(frqSpace::typeEnum);
-    /**
-     * @brief Executes the pw type signal procedure for PulsePage.
-     * @param pwSpace::pwTypeEnum Input parameter specifying pwSpace::pwTypeEnum (pwSpace::pwTypeEnum).
-     */
+    // Executes pw type signal routine.
     void pwTypeSignal(pwSpace::pwTypeEnum);
 };
 

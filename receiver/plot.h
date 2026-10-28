@@ -1,11 +1,8 @@
-/**
- * @file plot.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: plot.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for plot.h.
+// ============================================================================
 
 #ifndef PLOT_H
 #define PLOT_H
@@ -132,27 +129,15 @@ struct _OscPlotClass
 {
     QWidget parent_class;
 
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param capture_event Input parameter specifying capture_event (*).
-     */
+    // Executes void routine.
     void (* capture_event) (OscPlot *plot, gboolean start_event);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param destroy_event Input parameter specifying destroy_event (*).
-     */
+    // Executes void routine.
     void (* destroy_event) (OscPlot *plot);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param newplot_event Input parameter specifying newplot_event (*).
-     */
+    // Executes void routine.
     void (* newplot_event) (OscPlot *plot, OscPlot *new_plot);
 };
 
-/**
- * @brief Executes the osc plot get type procedure for the module.
- * @return Output value of type GType.
- */
+// Executes osc plot get type routine.
 GType osc_plot_get_type (void);
 
 G_END_DECLS
@@ -265,15 +250,9 @@ struct channel_settings {
 
     struct iio_device * (*get_iio_parent)(PlotChn *);
     QVector<double> * (*get_data_ref)(PlotChn *);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param assert_used_iio_channels Input parameter specifying assert_used_iio_channels (*assert_used_iio_channels).
-     */
+    // Executes void routine.
     void (*assert_used_iio_channels)(PlotChn *, bool);
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param destroy Input parameter specifying destroy (*destroy).
-     */
+    // Executes void routine.
     void (*destroy)(PlotChn *);
 };
 
@@ -294,10 +273,7 @@ struct math_channel_settings {
     int num_channels;
     char *iio_device_name;
     char *txt_math_expression;
-    /**
-     * @brief Executes the void procedure for the module.
-     * @param math_expression Input parameter specifying math_expression (*math_expression).
-     */
+    // Executes void routine.
     void (*math_expression)(float ***channels_data, float *out_data, unsigned long long chn_sample_cnt);
     void *math_lib_handler;
     float *data_ref;
@@ -370,35 +346,18 @@ static int tblRowNum{};
 
 namespace Ui {
 
-/**
- * @class Plot
- * @brief High-level controller class for Plot.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Plot;
 }
 
-/**
- * @class Plot
- * @brief High-level controller class for Plot.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Plot : public QMainWindow
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * @brief Constructs a new Plot instance and initializes subsystem components and UI state.
-     * @param app Input parameter specifying app (QApplication).
-     * @param name Input parameter specifying name (QString).
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes Plot subsystem components, default parameters, and state.
     explicit Plot(QApplication *app,QString name="",QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for Plot, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up Plot resources, timers, and allocated memory.
     ~Plot();
     double dltTime{};
     //saeid raziani
@@ -448,10 +407,7 @@ public:
     double tmpVal{500};
     QDoubleSpinBox * deltaValue ;
     QString userName{};
-    /**
-     * @brief Executes the frq value is changed procedure for Plot.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes frq value is changed routine.
     void frqValueIsChanged(bool);
 
     QString Mode{};
@@ -462,9 +418,7 @@ public:
     bool isCaptureOn{false};
     double holdPreFrq{};
 
-    /**
-     * @brief Executes the stop capture procedure for Plot.
-     */
+    // Executes stop capture routine.
     void stopCapture();
     bool isExciterOn{true}; //it is set by exciter and when it is true, plot doesnt show
     bool isSeekClicked{false};
@@ -478,10 +432,7 @@ public:
     bool isSmartNoisetOn{};
     QString frqValueStr;
     std::string ipCard {};
-    /**
-     * @brief Retrieves the current delta time value.
-     * @return Output value of type double.
-     */
+    // Retrieves current delta time state.
     double getDeltaTime();
 
 
@@ -489,26 +440,20 @@ public:
 
     //waterfal
     QVector<QGLchart *> vectorOfCharts;
+    // Sets q glcharts parameters value and updates internal subsystem configuration.
     void setQGlchartsParameters(QGLchart *glChart, ChartType glChartType);
     UpdateData *waterfallUpdateData;
     QGLchart *waterfallChart ;
 
-    /**
-     * @brief Executes the waterfall update procedure for Plot.
-     */
+    // Executes waterfall update routine.
     void waterfallUpdate();
 
     QVector<double> maxHold_X, maxHold_Y;
 
-    /**
-     * @brief Executes the exciter mode on procedure for Plot.
-     */
+    // Executes exciter mode on routine.
     void exciterModeOn();
 
-    /**
-     * @brief Executes the create text on plot procedure for Plot.
-     * @return Output value of type QCPItemText *.
-     */
+    // Executes create text on plot routine.
     QCPItemText * createTextOnPlot();
     double maximumFrq{};
     QTimer sendMaximumFrqTimer;
@@ -536,13 +481,16 @@ public:
     //void osc_plot_draw_stop(OscPlot *plot);
     //void osc_plot_destroy(OscPlot *plot);
     Plot * osc_plot_new_with_pref(OscPlotPreferences *pref);
+    // Executes osc plot new routine.
     Plot * osc_plot_new();
+    // Executes osc plot set visible routine.
     void osc_plot_set_visible (Plot *plot, bool visible);
 
     //    void osc_plot_update_rx_lbl(OscPlot *plot, bool initial_update);
     //    static ssize_t demux_sample(const iio_channel *chn, void *sample, size_t size, void *d);
     void DrawPlot();
     bool isFrqClicked{false};
+    // Executes do fft routine.
     static void do_fft(Transform *tr);
 
     QPushButton * selectedBtn = new QPushButton;
@@ -554,195 +502,116 @@ public:
     // Phase 5: spectrum x-axis window = selected freq +/- active bandwidth/2
     // (called from the receiver Profile tab "Set" handler).
     void setActiveBandwidth(double bwMHz);
+    // Executes apply bandwidth window routine.
     void applyBandwidthWindow();
 
 public slots:
+    // Executes on item clicked routine.
     void onItemClicked();
     //    void onItemClicked(QTreeWidgetItem *item, int column);
     void on_btn_capture_clicked();
+    // Event/Signal handler for on btnfftcapture clicked.
     void on_btnfftcapture_clicked();
+    // Executes frq value changed slot routine.
     void frqValueChangedSlot(QString);
+    // Event/Signal handler for on btn select fft clicked.
     void on_btn_select_fft_clicked();
 
-    /**
-     * @brief Executes the check box unched procedure for Plot.
-     */
+    // Executes check box unched routine.
     void checkBoxUnched();
 private slots:
-    /**
-     * @brief Slot handler responding to on action save as triggered event.
-     */
+    // Event/Signal handler for on action save as triggered.
     void on_actionSaveAs_triggered();
-    /**
-     * @brief Slot handler responding to on action save  whole  page triggered event.
-     */
+    // Event/Signal handler for on action save  whole  page triggered.
     void on_actionSave_Whole_Page_triggered();
-    /**
-     * @brief Slot handler responding to on action close triggered event.
-     */
+    // Event/Signal handler for on action close triggered.
     void on_actionClose_triggered();
-    /**
-     * @brief Slot handler responding to on action quit triggered event.
-     */
+    // Event/Signal handler for on action quit triggered.
     void on_actionQuit_triggered();
-    /**
-     * @brief Slot handler responding to on action plot  title triggered event.
-     */
+    // Event/Signal handler for on action plot  title triggered.
     void on_actionPlot_Title_triggered();
-    /**
-     * @brief Slot handler responding to on action show  settings triggered event.
-     */
+    // Event/Signal handler for on action show  settings triggered.
     void on_actionShow_Settings_triggered();
-    /**
-     * @brief Slot handler responding to on action full  screen triggered event.
-     */
+    // Event/Signal handler for on action full  screen triggered.
     void on_actionFull_Screen_triggered();
-    /**
-     * @brief Slot handler responding to on btn new plot clicked event.
-     */
+    // Event/Signal handler for on btn new plot clicked.
     void on_btn_new_plot_clicked();
-    /**
-     * @brief Slot handler responding to on chk auto scale state changed event.
-     * @param arg1 Input parameter specifying arg1 (int).
-     */
+    // Event/Signal handler for on chk auto scale state changed.
     void on_chk_auto_scale_stateChanged(int arg1);
     //    void on_btn_fullscreen_clicked();
 
+    // Event/Signal handler for on cmb plot type current index changed.
     void on_cmb_plot_type_currentIndexChanged(int index);
+    // Executes channel toggled routine.
     void channel_toggled(gchar *pathStr, gpointer plot);
 
+    // Event/Signal handler for on btn zoom in clicked.
     void on_btn_zoom_in_clicked();
-    /**
-     * @brief Slot handler responding to on btn zoom out clicked event.
-     */
+    // Event/Signal handler for on btn zoom out clicked.
     void on_btn_zoom_out_clicked();
-    /**
-     * @brief Slot handler responding to on chk auto scale fft state changed event.
-     * @param arg1 Input parameter specifying arg1 (int).
-     */
+    // Event/Signal handler for on chk auto scale fft state changed.
     void on_chk_auto_scale_fft_stateChanged(int arg1);
-    /**
-     * @brief Slot handler responding to on btn zoom in fft clicked event.
-     */
+    // Event/Signal handler for on btn zoom in fft clicked.
     void on_btn_zoom_in_fft_clicked();
-    /**
-     * @brief Slot handler responding to on btn zoom out fft clicked event.
-     */
+    // Event/Signal handler for on btn zoom out fft clicked.
     void on_btn_zoom_out_fft_clicked();
-    /**
-     * @brief Slot handler responding to on txt selected freq value changed event.
-     * @param arg1 Input parameter specifying arg1 (double).
-     */
+    // Event/Signal handler for on txt selected freq value changed.
     void on_txtSelectedFreq_valueChanged(double arg1);
-    /**
-     * @brief Slot handler responding to on btn select clicked event.
-     */
+    // Event/Signal handler for on btn select clicked.
     void on_btn_select_clicked();
 
-    /**
-     * @brief Slot handler responding to on cmb graph type current index changed event.
-     * @param index Input parameter specifying index (int).
-     */
+    // Event/Signal handler for on cmb graph type current index changed.
     void on_cmb_graph_type_currentIndexChanged(int index);
 
-    /**
-     * @brief Slot handler responding to on btn capture triggered event.
-     * @param arg1 Input parameter specifying arg1 (QAction).
-     */
+    // Event/Signal handler for on btn capture triggered.
     void on_btn_capture_triggered(QAction *arg1);
-    /**
-     * @brief Slot handler responding to on btn plot frq clicked event.
-     */
+    // Event/Signal handler for on btn plot frq clicked.
     void on_btn_plot_frq_clicked();
-    /**
-     * @brief Slot handler responding to on btn clear clicked event.
-     */
+    // Event/Signal handler for on btn clear clicked.
     void on_btnClear_clicked();
-    /**
-     * @brief Slot handler responding to on btn hidden clicked event.
-     */
+    // Event/Signal handler for on btn hidden clicked.
     void on_btnHidden_clicked();
-    /**
-     * @brief Slot handler responding to on btn hidden clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn hidden clicked.
     void on_btnHidden_clicked(bool checked);
-    /**
-     * @brief Slot handler responding to on time data table cell clicked event.
-     * @param row Input parameter specifying row (int).
-     * @param column Input parameter specifying column (int).
-     */
+    // Event/Signal handler for on time data table cell clicked.
     void on_timeDataTable_cellClicked(int row, int column);
-    /**
-     * @brief Slot handler responding to on time data table item clicked event.
-     * @param item Input parameter specifying item (QTableWidgetItem).
-     */
+    // Event/Signal handler for on time data table item clicked.
     void on_timeDataTable_itemClicked(QTableWidgetItem *item);
 
 
-    /**
-     * @brief Slot handler responding to on btn hide show clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn hide show clicked.
     void on_btnHideShow_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn save table data clicked event.
-     */
+    // Event/Signal handler for on btn save table data clicked.
     void on_btnSaveTableData_clicked();
 
-    /**
-     * @brief Slot handler responding to on chk max hold clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on chk max hold clicked.
     void on_chk_maxHold_clicked(bool checked);
-    /**
-     * @brief Executes the select channel with frq procedure for Plot.
-     * @param double Input parameter specifying double (double).
-     * @return Output value of type int.
-     */
+    // Executes select channel with frq routine.
     int selectChannelWithFrq(double);
 
 signals:
     //-------------- [saeid raziani] -----------------
     void ValueSignal(Pulse);
+    // Executes frq domain is selected signal routine.
     void frqDomainIsSelectedSignal();
+    // Executes seek is selected signal routine.
     void seekIsSelectedSignal();
+    // Updates and synchronizes update data data stream.
     void updateData(QCustomSeries a);
+    // Transmits send max frq to card signal command/packet over communication interface.
     void sendMaxFrqToCardSignal(double);
-    /**
-     * @brief Executes the amp value signal procedure for Plot.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes amp value signal routine.
     void ampValueSignal(double);
-    /**
-     * @brief Transmits send time domain to card signal command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send time domain to card signal command/packet over communication interface.
     void sendTimeDomainToCardSignal(QString);
-    /**
-     * @brief Executes the selected smart noise status signal procedure for Plot.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes selected smart noise status signal routine.
     void selectedSmartNoiseStatusSignal(bool);
-    /**
-     * @brief Sets the ting hide show signal parameter and updates internal state.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Sets ting hide show signal value and updates internal subsystem configuration.
     void settingHideShowSignal(bool);
-    /**
-     * @brief Executes the cw table value signal procedure for Plot.
-     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
-     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
-     * @param QVector<QString> Input parameter specifying QVector<QString> (QVector<QString>).
-     * @param int> Input parameter specifying int> (QVector<long long).
-     */
+    // Executes cw table value signal routine.
     void cwTableValueSignal(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
-    /**
-     * @brief Retrieves the current max value signal value.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Retrieves current max value signal state.
     void getMaxValueSignal(double,double);
     //    void test(modes);
 
@@ -774,312 +643,149 @@ private:
     std::vector<std::vector<long double>> toaChannel1;
     std::vector<std::vector<int>> toaChannel;
     std::vector<std::vector<long double>> deltaTime;
+    // Executes calculating p r i routine.
     void calculatingPRI(Pulse*, double);
     int cnt{0};
 
     int countArray[32] ={};
-    /**
-     * @brief Executes the remove unupdated row procedure for Plot.
-     */
+    // Executes remove unupdated row routine.
     void removeUnupdatedRow();
     QTimer selectedSmartNoiseTimer;
 
     QMap<int, QString> timeMap;
-    /**
-     * @brief Executes the save to c s v in thread procedure for Plot.
-     * @param tableWidget Input parameter specifying tableWidget (QTableWidget).
-     * @param fileName Input parameter specifying fileName (const QString).
-     */
+    // Executes save to c s v in thread routine.
     void saveToCSVInThread(QTableWidget *tableWidget, const QString &fileName) ;
 
 
     QList<ChannelItemData*> ChannelItemDataList;
     gboolean stop_capture;
 
-    /**
-     * @brief Executes the create plot procedure for Plot.
-     */
+    // Executes create plot routine.
     void create_plot();
     //static void osc_plot_class_init(OscPlotClass *klass);
     //void osc_plot_data_update (OscPlot *plot);
     //static bool call_all_transform_functions(OscPlotPrivate *priv);
     //void osc_plot_restart (OscPlot *plot);
     void device_list_treeview_init();
+    // Event/Signal handler for single shot clicked cb.
     void single_shot_clicked_cb(gpointer data);
+    // Executes plot channels add device routine.
     void plot_channels_add_device( const char *dev_name);
+    // Executes plot channel add to plot routine.
     void plot_channel_add_to_plot(PlotChn *settings);
+    // Executes plot channels add channel routine.
     void plot_channels_add_channel(PlotChn *pchn);
-    /**
-     * @brief Executes the treeview expand update procedure for Plot.
-     */
+    // Executes treeview expand update routine.
     void treeview_expand_update();
-    /**
-     * @brief Executes the saveas channels list fill procedure for Plot.
-     */
+    // Executes saveas channels list fill routine.
     void saveas_channels_list_fill();
-    /**
-     * @brief Executes the check valid setup procedure for Plot.
-     * @return Output value of type gboolean.
-     */
+    // Executes check valid setup routine.
     gboolean check_valid_setup();
-    /**
-     * @brief Executes the check valid setup of all devices procedure for Plot.
-     * @return Output value of type gboolean.
-     */
+    // Executes check valid setup of all devices routine.
     gboolean check_valid_setup_of_all_devices();
-    /**
-     * @brief Executes the check valid setup of device procedure for Plot.
-     * @param name Input parameter specifying name (const char).
-     * @return Output value of type gboolean.
-     */
+    // Executes check valid setup of device routine.
     gboolean check_valid_setup_of_device(const char *name);
-    /**
-     * @brief Executes the num of channels of device procedure for Plot.
-     * @param name Input parameter specifying name (const char).
-     * @return Output value of type int.
-     */
+    // Executes num of channels of device routine.
     int num_of_channels_of_device(const char *name);
-    /**
-     * @brief Executes the enabled channels count procedure for Plot.
-     * @return Output value of type int.
-     */
+    // Executes enabled channels count routine.
     int enabled_channels_count();
-    /**
-     * @brief Executes the enabled channels of device procedure for Plot.
-     * @param name Input parameter specifying name (QString).
-     * @param enabled_mask Input parameter specifying enabled_mask (unsigned).
-     * @return Output value of type int.
-     */
+    // Executes enabled channels of device routine.
     int enabled_channels_of_device(QString name, unsigned *enabled_mask);
-    /**
-     * @brief Executes the plot channels update procedure for Plot.
-     */
+    // Executes plot channels update routine.
     void plot_channels_update();
-    /**
-     * @brief Executes the plot get sample count of device procedure for Plot.
-     * @param device Input parameter specifying device (const char).
-     * @return Output value of type int.
-     */
+    // Executes plot get sample count of device routine.
     int plot_get_sample_count_of_device(const char *device);
-    /**
-     * @brief Executes the osc plot get sample count procedure for Plot.
-     * @return Output value of type double.
-     */
+    // Executes osc plot get sample count routine.
     double osc_plot_get_sample_count();
-    /**
-     * @brief Executes the collect parameters from plot procedure for Plot.
-     */
+    // Executes collect parameters from plot routine.
     void collect_parameters_from_plot();
-    /**
-     * @brief Executes the remove all transforms procedure for Plot.
-     */
+    // Executes remove all transforms routine.
     void remove_all_transforms();
-    /**
-     * @brief Executes the remove transform from list procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes remove transform from list routine.
     void remove_transform_from_list(Transform *tr);
-    /**
-     * @brief Executes the devices transform assignment procedure for Plot.
-     */
+    // Executes devices transform assignment routine.
     void devices_transform_assignment();
-    /**
-     * @brief Executes the plot setup procedure for Plot.
-     */
+    // Executes plot setup routine.
     void plot_setup();
-    /**
-     * @brief Executes the markers init procedure for Plot.
-     */
+    // Executes markers init routine.
     void markers_init();
-    /**
-     * @brief Executes the capture start procedure for Plot.
-     */
+    // Executes capture start routine.
     void capture_start();
-    /**
-     * @brief Executes the dispose parameters from plot procedure for Plot.
-     */
+    // Executes dispose parameters from plot routine.
     void dispose_parameters_from_plot();
-    /**
-     * @brief Executes the plot redraw procedure for Plot.
-     * @return Output value of type gboolean.
-     */
+    // Executes plot redraw routine.
     gboolean plot_redraw();
-    /**
-     * @brief Executes the deassert used channels procedure for Plot.
-     */
+    // Executes deassert used channels routine.
     void deassert_used_channels();
-    /**
-     * @brief Executes the osc plot update rx lbl procedure for Plot.
-     * @param initial_update Input parameter specifying initial_update (bool).
-     */
+    // Executes osc plot update rx lbl routine.
     void osc_plot_update_rx_lbl(bool initial_update);
-    /**
-     * @brief Executes the device rx info update procedure for Plot.
-     */
+    // Executes device rx info update routine.
     void device_rx_info_update();
-    /**
-     * @brief Executes the fps counter procedure for Plot.
-     */
+    // Executes fps counter routine.
     void fps_counter();
-    /**
-     * @brief Executes the draw marker values procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes draw marker values routine.
     void draw_marker_values(Transform *tr);
     static iio_device *transform_get_device_parent(Transform *transform);
-    /**
-     * @brief Executes the markers phase diff show procedure for Plot.
-     */
+    // Executes markers phase diff show routine.
     void markers_phase_diff_show();
-    /**
-     * @brief Retrieves the current frequency_transform value.
-     * @return Output value of type bool.
-     */
+    // Retrieves current frequency_transform state.
     bool is_frequency_transform();
-    /**
-     * @brief Executes the transform add plot markers procedure for Plot.
-     * @param transform Input parameter specifying transform (Transform).
-     */
+    // Executes transform add plot markers routine.
     void transform_add_plot_markers(Transform *transform);
-    /**
-     * @brief Executes the transform add own markers procedure for Plot.
-     * @param transform Input parameter specifying transform (Transform).
-     */
+    // Executes transform add own markers routine.
     void transform_add_own_markers(Transform *transform);
-    /**
-     * @brief Updates and synchronizes the update_grid data stream and visual indicators.
-     * @param left Input parameter specifying left (gfloat).
-     * @param right Input parameter specifying right (gfloat).
-     */
+    // Updates and synchronizes update_grid data stream.
     void update_grid(gfloat left, gfloat right);
-    /**
-     * @brief Executes the show controls procedure for Plot.
-     * @param index Input parameter specifying index (int).
-     */
+    // Executes show controls routine.
     void ShowControls(int index);
-    /**
-     * @brief Slot handler responding to count changed cb event.
-     */
+    // Event/Signal handler for count changed cb.
     void count_changed_cb();
-    /**
-     * @brief Executes the call all transform functions procedure for Plot.
-     * @return Output value of type bool.
-     */
+    // Executes call all transform functions routine.
     bool call_all_transform_functions();
-    /**
-     * @brief Executes the osc plot data update procedure for Plot.
-     */
+    // Executes osc plot data update routine.
     void osc_plot_data_update();
-    /**
-     * @brief Executes the start procedure for Plot.
-     * @param start_event Input parameter specifying start_event (gboolean).
-     */
+    // Executes start routine.
     void start(gboolean start_event);
-    /**
-     * @brief Executes the capture setup procedure for Plot.
-     * @return Output value of type int.
-     */
+    // Executes capture setup routine.
     int capture_setup();
-    /**
-     * @brief Executes the channels transform assignment procedure for Plot.
-     * @param chn Input parameter specifying chn (PlotChn *).
-     * @param user_data Input parameter specifying user_data (ch_tr_params).
-     */
+    // Executes channels transform assignment routine.
     void channels_transform_assignment(PlotChn * chn,ch_tr_params *user_data);
     Transform *add_transform_to_list(int tr_type, GSList *channels);
-    /**
-     * @brief Updates and synchronizes the update_transform_settings data stream and visual indicators.
-     * @param transform Input parameter specifying transform (Transform).
-     */
+    // Updates and synchronizes update_transform_settings data stream.
     void update_transform_settings(Transform *transform);
-    /**
-     * @brief Executes the plot get sample count for transform procedure for Plot.
-     * @param transform Input parameter specifying transform (Transform).
-     * @return Output value of type int.
-     */
+    // Executes plot get sample count for transform routine.
     int plot_get_sample_count_for_transform(Transform *transform);
-    /**
-     * @brief Executes the xcorr procedure for Plot.
-     * @param signala Input parameter specifying signala (fftw_complex).
-     * @param signalb Input parameter specifying signalb (fftw_complex).
-     * @param result Input parameter specifying result (fftw_complex).
-     * @param N Input parameter specifying N (int).
-     * @param avg Input parameter specifying avg (double).
-     */
+    // Executes xcorr routine.
     void xcorr(fftw_complex *signala, fftw_complex *signalb, fftw_complex *result, int N, double avg);
-    /**
-     * @brief Executes the cross correlation transform function procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param init_transform Input parameter specifying init_transform (gboolean).
-     * @return Output value of type bool.
-     */
+    // Executes cross correlation transform function routine.
     bool cross_correlation_transform_function(Transform *tr, gboolean init_transform);
     static QVector<double> *plot_channels_get_nth_data_ref(GSList *list, guint n);
-    /**
-     * @brief Executes the time transform function procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param init_transform Input parameter specifying init_transform (gboolean).
-     * @return Output value of type static bool.
-     */
+    // Executes time transform function routine.
     static bool time_transform_function(Transform *tr, gboolean init_transform);
-    /**
-     * @brief Executes the freq spectrum transform function procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param init_transform Input parameter specifying init_transform (gboolean).
-     * @return Output value of type static bool.
-     */
+    // Executes freq spectrum transform function routine.
     static bool freq_spectrum_transform_function(Transform *tr, gboolean init_transform);
-    /**
-     * @brief Executes the fft transform function procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param init_transform Input parameter specifying init_transform (gboolean).
-     * @return Output value of type static bool.
-     */
+    // Executes fft transform function routine.
     static bool fft_transform_function(Transform *tr, gboolean init_transform);
-    /**
-     * @brief Executes the constellation transform function procedure for Plot.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param init_transform Input parameter specifying init_transform (gboolean).
-     * @return Output value of type static bool.
-     */
+    // Executes constellation transform function routine.
     static bool constellation_transform_function(Transform *tr, gboolean init_transform);
-    /**
-     * @brief Executes the capture process procedure for Plot.
-     */
+    // Executes capture process routine.
     void capture_process();
     iio_buffer *osc_plot_get_buffer();
-    /**
-     * @brief Updates and synchronizes the update_plot data stream and visual indicators.
-     * @param buf Input parameter specifying buf (iio_buffer).
-     */
+    // Updates and synchronizes update_plot data stream.
     void update_plot(iio_buffer *buf);
-    /**
-     * @brief Executes the capture process ended procedure for Plot.
-     */
+    // Executes capture process ended routine.
     void capture_process_ended();
 
-    /**
-     * @brief Executes the initialize plots procedure for Plot.
-     */
+    // Executes initialize plots routine.
     void InitializePlots();
 
-    /**
-     * @brief Executes the get base freq procedure for Plot.
-     * @return Output value of type bool.
-     */
+    // Executes get base freq routine.
     bool GetBaseFreq();
-    /**
-     * @brief Executes the re scale plot procedure for Plot.
-     * @param type Input parameter specifying type (int).
-     */
+    // Executes re scale plot routine.
     void reScale_plot(int type);
-    /**
-     * @brief Executes the draw f f t plot procedure for Plot.
-     */
+    // Executes draw f f t plot routine.
     void DrawFFTPlot();
-    /**
-     * @brief Executes the start capture procedure for Plot.
-     */
+    // Executes start capture routine.
     void startCapture();
 
     //saeid raziani
@@ -1100,52 +806,21 @@ private:
 
 
 
-    /**
-     * @brief Executes the change frequency hopping procedure for Plot.
-     * @param ch1 Input parameter specifying ch1 (iio_channel).
-     * @param freq Input parameter specifying freq (double).
-     */
+    // Executes change frequency hopping routine.
     void ChangeFrequencyHopping(iio_channel *ch1,double freq);
-    /**
-     * @brief Executes the demux sample procedure for Plot.
-     * @param chn Input parameter specifying chn (const iio_channel).
-     * @param sample Input parameter specifying sample (void).
-     * @param size Input parameter specifying size (size_t).
-     * @param d Input parameter specifying d (void).
-     * @return Output value of type static ssize_t.
-     */
+    // Executes demux sample routine.
     static ssize_t demux_sample(const iio_channel *chn, void *sample, size_t size, void *d);
-    /**
-     * @brief Retrieves the current max value.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Retrieves current max state.
     void getMax(Transform *tr);
-    /**
-     * @brief Retrieves the current min value.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Retrieves current min state.
     void getMin(Transform *tr);
-    /**
-     * @brief Retrieves the current f f t max value.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param is_seek Input parameter specifying is_seek (bool).
-     * @return Output value of type static void.
-     */
+    // Retrieves current f f t max state.
     static void getFFTMax(Transform *tr,bool is_seek=false);
-    /**
-     * @brief Retrieves the current f f t min value.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param is_seek Input parameter specifying is_seek (bool).
-     * @return Output value of type static void.
-     */
+    // Retrieves current f f t min state.
     static void getFFTMin(Transform *tr,bool is_seek=false);
-    /**
-     * @brief Executes the stop sampling procedure for Plot.
-     */
+    // Executes stop sampling routine.
     void stop_sampling();
-    /**
-     * @brief Executes the close active buffers procedure for Plot.
-     */
+    // Executes close active buffers routine.
     void close_active_buffers();
     double y{};
     std::vector<double> tableData;
@@ -1154,55 +829,29 @@ private:
 
     //    bool isFrqClicked{false};
 
+    // Executes save y axis to file routine.
     void saveYAxisToFile(const QVector<double> &, const QVector<double> &,const QString &filename);
     QVector<double>  timeDataYaxis_i;
     QVector<double>  timeDataYaxis_q;
 
-    /**
-     * @brief Executes the smart time domain procedure for Plot.
-     */
+    // Executes smart time domain routine.
     void smartTimeDomain();
 
 
 signals:
-    /**
-     * @brief Executes the hopping signal procedure for Plot.
-     * @param bool Input parameter specifying bool (bool).
-     * @param min Input parameter specifying min (double).
-     * @param max Input parameter specifying max (double).
-     * @param step Input parameter specifying step (double).
-     * @param delay Input parameter specifying delay (int).
-     */
+    // Executes hopping signal routine.
     void HoppingSignal(bool,double min=0,double max=0,double step=0,int delay=0);
-    /**
-     * @brief Executes the seeking is off procedure for Plot.
-     */
+    // Executes seeking is off routine.
     void seekingIsOff();
-    /**
-     * @brief Transmits send channel to card signal command/packet over the communication bus.
-     * @param double Input parameter specifying double (double).
-     */
+    // Transmits send channel to card signal command/packet over communication interface.
     void sendChannelToCardSignal(double);
-    /**
-     * @brief Executes the t h switch signal procedure for Plot.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes t h switch signal routine.
     void THSwitchSignal(bool);
-    /**
-     * @brief Executes the check box status procedure for Plot.
-     * @param int Input parameter specifying int (int).
-     */
+    // Executes check box status routine.
     void checkBoxStatus(int);
-    /**
-     * @brief Executes the selected frq min max signal procedure for Plot.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes selected frq min max signal routine.
     void selectedFrqMinMaxSignal(double, double);
-    /**
-     * @brief Executes the clean time signal procedure for Plot.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes clean time signal routine.
     void cleanTimeSignal(double);
 
 

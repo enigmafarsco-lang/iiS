@@ -1,11 +1,8 @@
-/**
- * @file frqPage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: frqPage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for frqPage.cpp.
+// ============================================================================
 
 ﻿#include "frqPage.h"
 #include "ui_frqPage.h"
@@ -59,10 +56,7 @@ FrqPage::FrqPage(QWidget *parent,
 }
 
 
-/**
- * @brief Executes the frq type slot procedure for FrqPage.
- * @param type Input parameter specifying type (frqSpace::typeEnum).
- */
+// Executes frq type slot routine.
 void FrqPage::frqTypeSlot(frqSpace::typeEnum type)
 {
     if(frqData->frqType != type || firstRun)
@@ -92,9 +86,7 @@ void FrqPage::frqTypeSlot(frqSpace::typeEnum type)
     }
 }
 
-/**
- * @brief Executes the change lable procedure for FrqPage.
- */
+// Executes change lable routine.
 void FrqPage::changeLable()
 {
     QString tmp ;
@@ -106,10 +98,7 @@ void FrqPage::changeLable()
     ui->totalPulse->setText("PRI/PRF Pulse Count: " + tmp );
 }
 
-/**
- * @brief Sets the frq center slot parameter and updates internal state.
- * @param frqCenter Input parameter specifying frqCenter (double).
- */
+// Sets frq center slot value and updates internal subsystem configuration.
 void FrqPage::setFrqCenterSlot(double frqCenter)
 {
     ui->lblFrqCenter->setText("Center frq:"+QString::number(frqCenter));
@@ -120,9 +109,7 @@ void FrqPage::setFrqCenterSlot(double frqCenter)
     ui->lblEndFrq->setText("Band End Frequency: "+QString::number(frqCenter+250));
 }
 
-/**
- * @brief Slot handler responding to on btn ok clicked event.
- */
+// Event/Signal handler for on btn ok clicked.
 void FrqPage::on_btnOk_clicked()
 {
     float frq{};
@@ -197,9 +184,7 @@ void FrqPage::on_btnOk_clicked()
     }
 }
 
-/**
- * @brief Slot handler responding to on btn add clicked event.
- */
+// Event/Signal handler for on btn add clicked.
 void FrqPage::on_btnAdd_clicked()
 {
     btnRed();
@@ -222,9 +207,7 @@ void FrqPage::on_btnAdd_clicked()
 }
 
 
-/**
- * @brief Executes the btn slot procedure for FrqPage.
- */
+// Executes btn slot routine.
 void FrqPage::btnSlot()
 {
     row--;
@@ -233,11 +216,7 @@ void FrqPage::btnSlot()
 }
 
 
-/**
- * @brief Slot handler responding to on tbl frq cell changed event.
- * @param row Input parameter specifying row (int).
- * @param column Input parameter specifying column (int).
- */
+// Event/Signal handler for on tbl frq cell changed.
 void FrqPage::on_tblFrq_cellChanged(int row, int column)
 {
     Q_UNUSED(row);
@@ -276,9 +255,7 @@ void FrqPage::on_tblFrq_cellChanged(int row, int column)
 }
 
 
-/**
- * @brief Slot handler responding to on btn clear clicked event.
- */
+// Event/Signal handler for on btn clear clicked.
 void FrqPage::on_btnClear_clicked()
 {
     row =0;
@@ -288,10 +265,7 @@ void FrqPage::on_btnClear_clicked()
     frqData->frq.clear();
 }
 
-/**
- * @brief Executes the frq table value procedure for FrqPage.
- * @return Output value of type bool.
- */
+// Executes frq table value routine.
 bool FrqPage::frqTableValue()
 {
     if(ui->tblFrq->rowCount()== 0)
@@ -346,11 +320,7 @@ bool FrqPage::frqTableValue()
     return  res;
 }
 
-/**
- * @brief Executes the agile calc procedure for FrqPage.
- * @param frq Input parameter specifying frq (float).
- * @return Output value of type bool.
- */
+// Executes agile calc routine.
 bool FrqPage::agileCalc(float &frq)
 {
     double diff = ui->spnBase_3->value() - frqCenter;
@@ -372,9 +342,7 @@ bool FrqPage::agileCalc(float &frq)
     return true;
 }
 
-/**
- * @brief Destructor for FrqPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up FrqPage resources, timers, and allocated memory.
 FrqPage::~FrqPage()
 {
     delete ui;
@@ -392,13 +360,7 @@ void FrqPage::btnGreen(){
 }
 
 
-/**
- * @brief Executes the generate data procedure for FrqPage.
- * @param startBand Input parameter specifying startBand (uint).
- * @param bw Input parameter specifying bw (uint).
- * @param frqData Input parameter specifying frqData (frqSpace::frqDataStruct).
- * @return Output value of type bool.
- */
+// Executes generate data routine.
 bool FrqPage::generateData(uint startBand, uint bw, frqSpace::frqDataStruct &frqData)
 {
     frqData.isError = false;
@@ -493,12 +455,7 @@ bool FrqPage::generateData(uint startBand, uint bw, frqSpace::frqDataStruct &frq
 }
 
 
-/**
- * @brief Executes the regenerate pulse frq procedure for FrqPage.
- * @param count Input parameter specifying count (uint).
- * @param frqData Input parameter specifying frqData (frqSpace::frqDataStruct &).
- * @return Output value of type int.
- */
+// Executes regenerate pulse frq routine.
 int FrqPage::regeneratePulseFrq(uint count, frqSpace::frqDataStruct & frqData)
 {
 

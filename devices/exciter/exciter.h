@@ -1,3 +1,9 @@
+// ============================================================================
+// File: exciter.h
+// Subsystem: eLynxSDR exciter
+// Description: Subsystem implementation and interface guidance for exciter.h.
+// ============================================================================
+
 /**
  * @file exciter.h
  * @brief Multi-Waveform Signal Generation & Exciter Engine for eLynxSDR.
@@ -37,32 +43,17 @@
 
 
 namespace Ui {
-/**
- * @class exciter
- * @brief High-level controller class for exciter.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class exciter;
 }
 
-/**
- * @class Exciter
- * @brief High-level controller class for Exciter.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Exciter : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new Exciter instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes Exciter subsystem components, default parameters, and state.
     explicit Exciter(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for Exciter, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up Exciter resources, timers, and allocated memory.
     ~Exciter();
     QDoubleSpinBox * spnCWPower;
     QDoubleSpinBox * spnSweepPower;
@@ -115,11 +106,7 @@ private:
 
     bool isExciterOn{false};
     QSet<QString> activeModes;
-    /**
-     * @brief Sets the mode active parameter and updates internal state.
-     * @param mode Input parameter specifying mode (const QString).
-     * @param on Input parameter specifying on (bool).
-     */
+    // Sets mode active value and updates internal subsystem configuration.
     void setModeActive(const QString &mode, bool on);
 
     // Phase 5: active ADRV9009 profile bandwidth (100/200/400 MHz)
@@ -129,25 +116,11 @@ private:
         CW,Spot,Sweep,Impulse,WB
     };
 
-    /**
-     * @brief Executes the create impulse file procedure for Exciter.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     * @param QString& Input parameter specifying QString& (QString&).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes create impulse file routine.
     void createImpulseFile(double, double, QString&, double);
-    /**
-     * @brief Executes the exists file procedure for Exciter.
-     * @param name Input parameter specifying name (const std::string&).
-     * @return Output value of type bool.
-     */
+    // Executes exists file routine.
     bool existsFile (const std::string& name);
-    /**
-     * @brief Executes the returnfile path procedure for Exciter.
-     * @param QString& Input parameter specifying QString& (QString&).
-     * @return Output value of type bool.
-     */
+    // Executes returnfile path routine.
     bool returnfilePath(QString&);
 
     // Phase 6: search the plausible folders (app start dir, application
@@ -174,16 +147,9 @@ private:
     QDoubleSpinBox *mtSpec[5][3]{};
     QLabel *mtShiftLbl[5]{};
     QDoubleSpinBox *mtShift[5]{};
-    /**
-     * @brief Updates and synchronizes the update multi target row data stream and visual indicators.
-     * @param row Input parameter specifying row (int).
-     * @param applyDefaults Input parameter specifying applyDefaults (bool).
-     */
+    // Updates and synchronizes update multi target row data stream.
     void updateMultiTargetRow(int row, bool applyDefaults);
-    /**
-     * @brief Executes the build multi target waveform procedure for Exciter.
-     * @return Output value of type bool.
-     */
+    // Executes build multi target waveform routine.
     bool buildMultiTargetWaveform();
     // Load a TEXT-header I/Q pair file (files/spot/generate.py and
     // files/bridge/generate_bridge.py format) into the sample buffers.
@@ -233,37 +199,26 @@ private:
 //    QPushButton * btnPtr ;
 
 private slots:
+    // Event/Signal handler for on btn disable spot clicked.
     void on_btnDisableSpot_clicked();
+    // Event/Signal handler for on btn dis impulse clicked.
     void on_btnDisImpulse_clicked();
+    // Event/Signal handler for on btn stop sweep clicked.
     void on_btnStopSweep_clicked();
-    /**
-     * @brief Retrieves the current data slot value.
-     */
+    // Retrieves current data slot state.
     void getDataSlot();
-    /**
-     * @brief Sets the data slot parameter and updates internal state.
-     */
+    // Sets data slot value and updates internal subsystem configuration.
     void setDataSlot();
 
-    /**
-     * @brief Slot handler responding to on btn disable c w clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn disable c w clicked.
     void on_btnDisableCW_clicked(bool checked);
-    /**
-     * @brief Slot handler responding to on btn disable w b clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn disable w b clicked.
     void on_btnDisableWB_clicked(bool checked);
 
 public slots:
-    /**
-     * @brief Executes the joshan func data slot procedure for Exciter.
-     */
+    // Executes joshan func data slot routine.
     void joshanFuncDataSlot();
-    /**
-     * @brief Executes the joshan status data slot procedure for Exciter.
-     */
+    // Executes joshan status data slot routine.
     void joshanStatusDataSlot();
 
     // Phase 6: refresh the "Current P (attenuation)" readout - it shows
@@ -278,105 +233,57 @@ public slots:
     // DAC-buffer channel pair selection (the Voltage 0/1 and Voltage 2/3
     // checkboxes): true when that pair should transmit the loaded file.
     bool voltage01Selected() const;
+    // Executes voltage23 selected routine.
     bool voltage23Selected() const;
     //    void receiveIpAddressSlot(bool);
     void connectToDevice();
+    // Initializes init connection for Exciter.
     void initConnection(bool);
+    // Executes adding cart elements to exciter routine.
     void addingCartElementsToExciter();
+    // Executes changing dac msg routine.
     void changingDacMsg(QString,QString);
+    // Executes joshan control data slot routine.
     void joshanControlDataSlot(QJsonObject);
-    /**
-     * @brief Executes the smart noise is active slot procedure for Exciter.
-     */
+    // Executes smart noise is active slot routine.
     void smartNoiseIsActiveSlot();
-    /**
-     * @brief Retrieves the current ser logged in slot value.
-     * @param double Input parameter specifying double (double).
-     */
+    // Retrieves current ser logged in slot state.
     void isUserLoggedInSlot(double);
 
 
 
 signals:
-    /**
-     * @brief Executes the connection status signal procedure for Exciter.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes connection status signal routine.
     void connectionStatusSignal(bool);
-    /**
-     * @brief Transmits send func data to joshan signal command/packet over the communication bus.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Transmits send func data to joshan signal command/packet over communication interface.
     void sendFuncDataToJoshanSignal(QJsonObject);
-    /**
-     * @brief Transmits send status data to joshan signal command/packet over the communication bus.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Transmits send status data to joshan signal command/packet over communication interface.
     void sendStatusDataToJoshanSignal(QJsonObject);
-    /**
-     * @brief Transmits send frq data signal command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send frq data signal command/packet over communication interface.
     void sendFrqDataSignal(QString);
-    /**
-     * @brief Transmits send power to cart command/packet over the communication bus.
-     * @param double Input parameter specifying double (double).
-     */
+    // Transmits send power to cart command/packet over communication interface.
     void sendPowerToCart(double);
-    /**
-     * @brief Transmits send sweep to cart command/packet over the communication bus.
-     */
+    // Transmits send sweep to cart command/packet over communication interface.
     void sendSweepToCart();
-    /**
-     * @brief Transmits send start frq to cart command/packet over the communication bus.
-     * @param double Input parameter specifying double (double).
-     */
+    // Transmits send start frq to cart command/packet over communication interface.
     void sendStartFrqToCart(double);
-    /**
-     * @brief Transmits send stopt frq to cart command/packet over the communication bus.
-     * @param double Input parameter specifying double (double).
-     */
+    // Transmits send stopt frq to cart command/packet over communication interface.
     void sendStoptFrqToCart(double);
-    /**
-     * @brief Transmits send step frq to cart command/packet over the communication bus.
-     * @param double Input parameter specifying double (double).
-     */
+    // Transmits send step frq to cart command/packet over communication interface.
     void sendStepFrqToCart(double);
-    /**
-     * @brief Executes the start hopp procedure for Exciter.
-     */
+    // Executes start hopp routine.
     void startHopp();
-    /**
-     * @brief Executes the stopt hopp procedure for Exciter.
-     */
+    // Executes stopt hopp routine.
     void stoptHopp();
-    /**
-     * @brief Transmits send file to card signal command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     * @param double Input parameter specifying double (double).
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send file to card signal command/packet over communication interface.
     void sendFileToCardSignal(QString, double,QString);
-    /**
-     * @brief Executes the cw dds params signal procedure for Exciter.
-     * @param freqMhz Input parameter specifying freqMhz (double).
-     * @param scaleDbfs Input parameter specifying scaleDbfs (double).
-     * @param phaseDeg Input parameter specifying phaseDeg (double).
-     */
+    // Executes cw dds params signal routine.
     void cwDdsParamsSignal(double freqMhz, double scaleDbfs, double phaseDeg);
-    /**
-     * @brief Executes the change dac signal procedure for Exciter.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes change dac signal routine.
     void changeDacSignal(QString);
-    /**
-     * @brief Executes the mode activity signal procedure for Exciter.
-     * @param anyModeActive Input parameter specifying anyModeActive (bool).
-     */
+    // Executes mode activity signal routine.
     void modeActivitySignal(bool anyModeActive);
-    /**
-     * @brief Executes the turn off smart noise signal procedure for Exciter.
-     */
+    // Executes turn off smart noise signal routine.
     void turnOffSmartNoiseSignal();
 };
 

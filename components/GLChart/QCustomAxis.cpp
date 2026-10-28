@@ -1,18 +1,12 @@
-/**
- * @file QCustomAxis.cpp
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: QCustomAxis.cpp
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for QCustomAxis.cpp.
+// ============================================================================
 
 #include "QCustomAxis.h"
 
-/**
- * @brief Constructs a new QCustomAxis instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QObject).
- */
+// Constructor: Initializes QCustomAxis subsystem components, default parameters, and state.
 QCustomAxis::QCustomAxis(QObject *parent)
     : QObject(parent)
 {
@@ -33,17 +27,12 @@ QCustomAxis::QCustomAxis(QObject *parent)
     m_upperPartialRangeSet = false;
 }
 
-/**
- * @brief Destructor for QCustomAxis, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up QCustomAxis resources, timers, and allocated memory.
 QCustomAxis::~QCustomAxis()
 {
 }
 
-/**
- * @brief Sets the alignment parameter and updates internal state.
- * @param alignment Input parameter specifying alignment (const Qt::Alignment).
- */
+// Sets alignment value and updates internal subsystem configuration.
 void QCustomAxis::setAlignment(const Qt::Alignment &alignment)
 {
     if (m_alignment != alignment)
@@ -53,19 +42,13 @@ void QCustomAxis::setAlignment(const Qt::Alignment &alignment)
     }
 }
 
-/**
- * @brief Executes the alignment procedure for QCustomAxis.
- * @return Output value of type Qt::Alignment.
- */
+// Executes alignment routine.
 Qt::Alignment QCustomAxis::alignment() const
 {
     return m_alignment;
 }
 
-/**
- * @brief Sets the orientation parameter and updates internal state.
- * @param orientation Input parameter specifying orientation (const Qt::Orientation).
- */
+// Sets orientation value and updates internal subsystem configuration.
 void QCustomAxis::setOrientation(const Qt::Orientation &orientation)
 {
     if (m_orientation != orientation)
@@ -75,19 +58,13 @@ void QCustomAxis::setOrientation(const Qt::Orientation &orientation)
     }
 }
 
-/**
- * @brief Executes the orientation procedure for QCustomAxis.
- * @return Output value of type Qt::Orientation.
- */
+// Executes orientation routine.
 Qt::Orientation QCustomAxis::orientation() const
 {
     return m_orientation;
 }
 
-/**
- * @brief Sets the max parameter and updates internal state.
- * @param max Input parameter specifying max (const double).
- */
+// Sets max value and updates internal subsystem configuration.
 void QCustomAxis::setMax(const double &max)
 {
     m_upperPartialRangeSet = true;
@@ -97,10 +74,7 @@ void QCustomAxis::setMax(const double &max)
     }
 }
 
-/**
- * @brief Sets the min parameter and updates internal state.
- * @param min Input parameter specifying min (const double).
- */
+// Sets min value and updates internal subsystem configuration.
 void QCustomAxis::setMin(const double &min)
 {
     m_lowerPartialRangeSet = true;
@@ -110,47 +84,31 @@ void QCustomAxis::setMin(const double &min)
     }
 }
 
-/**
- * @brief Executes the visibility procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes visibility routine.
 bool QCustomAxis::visibility() const
 {
     return m_axisVisibility;
 }
 
-/**
- * @brief Sets the visible parameter and updates internal state.
- * @param on Input parameter specifying on (bool).
- */
+// Sets visible value and updates internal subsystem configuration.
 void QCustomAxis::setVisible(bool on)
 {
     m_axisVisibility = on;
 }
 
-/**
- * @brief Executes the range reversed procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes range reversed routine.
 bool QCustomAxis::rangeReversed() const
 {
     return m_reverseRange;
 }
 
-/**
- * @brief Sets the range reversed parameter and updates internal state.
- * @param reversed Input parameter specifying reversed (bool).
- */
+// Sets range reversed value and updates internal subsystem configuration.
 void QCustomAxis::setRangeReversed(bool reversed)
 {
     m_reverseRange = reversed;
 }
 
-/**
- * @brief Sets the range parameter and updates internal state.
- * @param min Input parameter specifying min (const double).
- * @param max Input parameter specifying max (const double).
- */
+// Sets range value and updates internal subsystem configuration.
 void QCustomAxis::setRange(const double &min, const double &max)
 {
     setMin(min);
@@ -159,47 +117,32 @@ void QCustomAxis::setRange(const double &min, const double &max)
     m_upperPartialRangeSet = false;
 }
 
-/**
- * @brief Retrieves the current artial range set value.
- * @return Output value of type QPair<bool, bool>.
- */
+// Retrieves current artial range set state.
 QPair<bool, bool> QCustomAxis::isPartialRangeSet() const
 {
     return QPair<bool, bool>(m_lowerPartialRangeSet, m_upperPartialRangeSet);
 }
 
-/**
- * @brief Retrieves the current max value.
- * @return Output value of type double.
- */
+// Retrieves current max state.
 double QCustomAxis::getMax() const
 {
     return m_max;
 }
 
-/**
- * @brief Retrieves the current min value.
- * @return Output value of type double.
- */
+// Retrieves current min state.
 double QCustomAxis::getMin() const
 {
     return m_min;
 }
 
-/**
- * @brief Retrieves the current range value.
- * @return Output value of type QPair<qreal, qreal>.
- */
+// Retrieves current range state.
 QPair<qreal, qreal> QCustomAxis::getRange() const
 {
     QPair<qreal, qreal> range(m_min, m_max);
     return range;
 }
 
-/**
- * @brief Sets the labels angle parameter and updates internal state.
- * @param angle Input parameter specifying angle (const qint32).
- */
+// Sets labels angle value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsAngle(const qint32 &angle)
 {
     if (m_labelsAngle != angle)
@@ -209,10 +152,7 @@ void QCustomAxis::setLabelsAngle(const qint32 &angle)
     }
 }
 
-/**
- * @brief Sets the labels brush parameter and updates internal state.
- * @param brush Input parameter specifying brush (const QBrush).
- */
+// Sets labels brush value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsBrush(const QBrush &brush)
 {
     if (m_labelsBrush != brush)
@@ -222,10 +162,7 @@ void QCustomAxis::setLabelsBrush(const QBrush &brush)
     }
 }
 
-/**
- * @brief Sets the labels color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets labels color value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsColor(const QColor &color)
 {
     if (m_labelsColor != color)
@@ -235,10 +172,7 @@ void QCustomAxis::setLabelsColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the labels font parameter and updates internal state.
- * @param font Input parameter specifying font (const QFont).
- */
+// Sets labels font value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsFont(const QFont &font)
 {
     if (m_labelsFont != font)
@@ -248,10 +182,7 @@ void QCustomAxis::setLabelsFont(const QFont &font)
     }
 }
 
-/**
- * @brief Sets the labels text parameter and updates internal state.
- * @param text Input parameter specifying text (const QString).
- */
+// Sets labels text value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsText(const QString &text)
 {
     if (m_labelsText != text)
@@ -261,10 +192,7 @@ void QCustomAxis::setLabelsText(const QString &text)
     }
 }
 
-/**
- * @brief Sets the labels visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets labels visible value and updates internal subsystem configuration.
 void QCustomAxis::setLabelsVisible(bool visible)
 {
     if (m_labelsVisibility != visible)
@@ -274,64 +202,43 @@ void QCustomAxis::setLabelsVisible(bool visible)
     }
 }
 
-/**
- * @brief Executes the labels angle procedure for QCustomAxis.
- * @return Output value of type qint32.
- */
+// Executes labels angle routine.
 qint32 QCustomAxis::labelsAngle() const
 {
     return m_labelsAngle;
 }
 
-/**
- * @brief Executes the labels brush procedure for QCustomAxis.
- * @return Output value of type QBrush.
- */
+// Executes labels brush routine.
 QBrush QCustomAxis::labelsBrush() const
 {
     return m_labelsBrush;
 }
 
-/**
- * @brief Executes the labels color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes labels color routine.
 QColor QCustomAxis::labelsColor() const
 {
     return m_labelsColor;
 }
 
-/**
- * @brief Executes the labels font procedure for QCustomAxis.
- * @return Output value of type QFont.
- */
+// Executes labels font routine.
 QFont QCustomAxis::labelsFont() const
 {
     return m_labelsFont;
 }
 
-/**
- * @brief Executes the labels text procedure for QCustomAxis.
- * @return Output value of type QString.
- */
+// Executes labels text routine.
 QString QCustomAxis::labelsText() const
 {
     return m_labelsText;
 }
 
-/**
- * @brief Executes the labels visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes labels visible routine.
 bool QCustomAxis::labelsVisible() const
 {
     return m_labelsVisibility;
 }
 
-/**
- * @brief Sets the line pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets line pen value and updates internal subsystem configuration.
 void QCustomAxis::setLinePen(const QPen &pen)
 {
     if (m_linePen != pen)
@@ -341,10 +248,7 @@ void QCustomAxis::setLinePen(const QPen &pen)
     }
 }
 
-/**
- * @brief Sets the line pen color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets line pen color value and updates internal subsystem configuration.
 void QCustomAxis::setLinePenColor(const QColor &color)
 {
     if (m_linePenColor != color)
@@ -354,10 +258,7 @@ void QCustomAxis::setLinePenColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the line visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets line visible value and updates internal subsystem configuration.
 void QCustomAxis::setLineVisible(bool visible)
 {
     if (m_lineVisible != visible)
@@ -367,37 +268,25 @@ void QCustomAxis::setLineVisible(bool visible)
     }
 }
 
-/**
- * @brief Executes the line pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes line pen routine.
 QPen QCustomAxis::linePen() const
 {
     return m_linePen;
 }
 
-/**
- * @brief Executes the line pen color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes line pen color routine.
 QColor QCustomAxis::linePenColor() const
 {
     return m_linePenColor;
 }
 
-/**
- * @brief Executes the line visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes line visible routine.
 bool QCustomAxis::lineVisible() const
 {
     return m_lineVisible;
 }
 
-/**
- * @brief Sets the shades border color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets shades border color value and updates internal subsystem configuration.
 void QCustomAxis::setShadesBorderColor(const QColor &color)
 {
     if (m_shadesBorderColor != color)
@@ -407,10 +296,7 @@ void QCustomAxis::setShadesBorderColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the shades brush parameter and updates internal state.
- * @param brush Input parameter specifying brush (const QBrush).
- */
+// Sets shades brush value and updates internal subsystem configuration.
 void QCustomAxis::setShadesBrush(const QBrush &brush)
 {
     if (m_shadesBrush != brush)
@@ -420,10 +306,7 @@ void QCustomAxis::setShadesBrush(const QBrush &brush)
     }
 }
 
-/**
- * @brief Sets the shades color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets shades color value and updates internal subsystem configuration.
 void QCustomAxis::setShadesColor(const QColor &color)
 {
     if (m_shadesColor != color)
@@ -433,10 +316,7 @@ void QCustomAxis::setShadesColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the shades pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets shades pen value and updates internal subsystem configuration.
 void QCustomAxis::setShadesPen(const QPen &pen)
 {
     if (m_shadesPen != pen)
@@ -446,10 +326,7 @@ void QCustomAxis::setShadesPen(const QPen &pen)
     }
 }
 
-/**
- * @brief Sets the shades visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets shades visible value and updates internal subsystem configuration.
 void QCustomAxis::setShadesVisible(bool visible)
 {
     if (m_shadesVisible != visible)
@@ -459,55 +336,37 @@ void QCustomAxis::setShadesVisible(bool visible)
     }
 }
 
-/**
- * @brief Executes the shades border color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes shades border color routine.
 QColor QCustomAxis::shadesBorderColor() const
 {
     return m_shadesBorderColor;
 }
 
-/**
- * @brief Executes the shades brush procedure for QCustomAxis.
- * @return Output value of type QBrush.
- */
+// Executes shades brush routine.
 QBrush QCustomAxis::shadesBrush() const
 {
     return m_shadesBrush;
 }
 
-/**
- * @brief Executes the shades color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes shades color routine.
 QColor QCustomAxis::shadesColor() const
 {
     return m_shadesColor;
 }
 
-/**
- * @brief Executes the shades pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes shades pen routine.
 QPen QCustomAxis::shadesPen() const
 {
     return m_shadesPen;
 }
 
-/**
- * @brief Executes the shades visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes shades visible routine.
 bool QCustomAxis::shadesVisible() const
 {
     return m_shadesVisible;
 }
 
-/**
- * @brief Sets the title brush parameter and updates internal state.
- * @param brush Input parameter specifying brush (const QBrush).
- */
+// Sets title brush value and updates internal subsystem configuration.
 void QCustomAxis::setTitleBrush(const QBrush &brush)
 {
     if (m_titleBrush != brush)
@@ -517,10 +376,7 @@ void QCustomAxis::setTitleBrush(const QBrush &brush)
     }
 }
 
-/**
- * @brief Sets the titles font parameter and updates internal state.
- * @param font Input parameter specifying font (const QFont).
- */
+// Sets titles font value and updates internal subsystem configuration.
 void QCustomAxis::setTitlesFont(const QFont &font)
 {
     if (m_titleFont != font)
@@ -530,10 +386,7 @@ void QCustomAxis::setTitlesFont(const QFont &font)
     }
 }
 
-/**
- * @brief Sets the title text parameter and updates internal state.
- * @param text Input parameter specifying text (const QString).
- */
+// Sets title text value and updates internal subsystem configuration.
 void QCustomAxis::setTitleText(const QString &text)
 {
     if (m_titleText != text)
@@ -543,10 +396,7 @@ void QCustomAxis::setTitleText(const QString &text)
     }
 }
 
-/**
- * @brief Sets the title visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets title visible value and updates internal subsystem configuration.
 void QCustomAxis::setTitleVisible(bool visible)
 {
     if (m_titleVisible != visible)
@@ -556,46 +406,31 @@ void QCustomAxis::setTitleVisible(bool visible)
     }
 }
 
-/**
- * @brief Executes the title brush procedure for QCustomAxis.
- * @return Output value of type QBrush.
- */
+// Executes title brush routine.
 QBrush QCustomAxis::titleBrush() const
 {
     return m_titleBrush;
 }
 
-/**
- * @brief Executes the title font procedure for QCustomAxis.
- * @return Output value of type QFont.
- */
+// Executes title font routine.
 QFont QCustomAxis::titleFont() const
 {
     return m_titleFont;
 }
 
-/**
- * @brief Executes the title text procedure for QCustomAxis.
- * @return Output value of type QString.
- */
+// Executes title text routine.
 QString QCustomAxis::titleText() const
 {
     return m_titleText;
 }
 
-/**
- * @brief Executes the title visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes title visible routine.
 bool QCustomAxis::titleVisible() const
 {
     return m_titleVisible;
 }
 
-/**
- * @brief Sets the ticks parameter and updates internal state.
- * @param show Input parameter specifying show (bool).
- */
+// Sets ticks value and updates internal subsystem configuration.
 void QCustomAxis::setTicks(bool show)
 {
     m_showTicks = show;
@@ -605,6 +440,7 @@ void QCustomAxis::setTicks(bool show)
 /***----- Grid related functions -----***/
 /****************************************/
 
+// Sets grid line pen value and updates internal subsystem configuration.
 void QCustomAxis::setGridLinePen(const QPen &pen)
 {
     if (m_gridLinePen != pen)
@@ -614,10 +450,7 @@ void QCustomAxis::setGridLinePen(const QPen &pen)
     }
 }
 
-/**
- * @brief Sets the grid line color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets grid line color value and updates internal subsystem configuration.
 void QCustomAxis::setGridLineColor(const QColor &color)
 {
     if (m_gridLineColor != color)
@@ -627,10 +460,7 @@ void QCustomAxis::setGridLineColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the grid line visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets grid line visible value and updates internal subsystem configuration.
 void QCustomAxis::setGridLineVisible(bool visible)
 {
     if (m_gridLineVisible != visible)
@@ -640,55 +470,37 @@ void QCustomAxis::setGridLineVisible(bool visible)
     }
 }
 
-/**
- * @brief Sets the grid line count parameter and updates internal state.
- * @param count Input parameter specifying count (int).
- */
+// Sets grid line count value and updates internal subsystem configuration.
 void QCustomAxis::setGridLineCount(int count)
 {
     m_gridLineCount = count;
 }
 
-/**
- * @brief Executes the grid line pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes grid line pen routine.
 QPen QCustomAxis::gridLinePen() const
 {
     return m_gridLinePen;
 }
 
-/**
- * @brief Executes the grid line color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes grid line color routine.
 QColor QCustomAxis::gridLineColor() const
 {
     return m_gridLineColor;
 }
 
-/**
- * @brief Executes the grid line visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes grid line visible routine.
 bool QCustomAxis::gridLineVisible() const
 {
     return m_gridLineVisible;
 }
 
-/**
- * @brief Executes the grid line count procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes grid line count routine.
 int QCustomAxis::gridLineCount() const
 {
     return m_gridLineCount;
 }
 
-/**
- * @brief Sets the minor grid line pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets minor grid line pen value and updates internal subsystem configuration.
 void QCustomAxis::setMinorGridLinePen(const QPen &pen)
 {
     if (m_minorGridLinePen != pen)
@@ -698,10 +510,7 @@ void QCustomAxis::setMinorGridLinePen(const QPen &pen)
     }
 }
 
-/**
- * @brief Sets the minor grid line color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets minor grid line color value and updates internal subsystem configuration.
 void QCustomAxis::setMinorGridLineColor(const QColor &color)
 {
     if (m_minorGridLineColor != color)
@@ -711,10 +520,7 @@ void QCustomAxis::setMinorGridLineColor(const QColor &color)
     }
 }
 
-/**
- * @brief Sets the minor grid line visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets minor grid line visible value and updates internal subsystem configuration.
 void QCustomAxis::setMinorGridLineVisible(bool visible)
 {
     if (m_minorGridLineVisible != visible)
@@ -724,28 +530,19 @@ void QCustomAxis::setMinorGridLineVisible(bool visible)
     }
 }
 
-/**
- * @brief Executes the minor grid line pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes minor grid line pen routine.
 QPen QCustomAxis::minorGridLinePen() const
 {
     return m_minorGridLinePen;
 }
 
-/**
- * @brief Executes the minor grid line color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes minor grid line color routine.
 QColor QCustomAxis::minorGridLineColor() const
 {
     return m_minorGridLineColor;
 }
 
-/**
- * @brief Executes the minor grid line visible procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes minor grid line visible routine.
 bool QCustomAxis::minorGridLineVisible() const
 {
     return m_minorGridLineVisible;
@@ -755,152 +552,104 @@ bool QCustomAxis::minorGridLineVisible() const
 /***----- Tick related functions -----***/
 /****************************************/
 
+// Sets tick labels value and updates internal subsystem configuration.
 void QCustomAxis::setTickLabels(bool show)
 {
     m_showTickLabels = show;
 }
 
-/**
- * @brief Sets the tick label padding parameter and updates internal state.
- * @param padding Input parameter specifying padding (int).
- */
+// Sets tick label padding value and updates internal subsystem configuration.
 void QCustomAxis::setTickLabelPadding(int padding)
 {
     m_tickLabelPadding = padding;
 }
 
-/**
- * @brief Sets the tick label font parameter and updates internal state.
- * @param font Input parameter specifying font (const QFont).
- */
+// Sets tick label font value and updates internal subsystem configuration.
 void QCustomAxis::setTickLabelFont(const QFont &font)
 {
     m_tickLabelFont = font;
 }
 
-/**
- * @brief Sets the tick label color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets tick label color value and updates internal subsystem configuration.
 void QCustomAxis::setTickLabelColor(const QColor &color)
 {
     m_tickLabelColor = color;
 }
 
-/**
- * @brief Sets the tick length parameter and updates internal state.
- * @param inside Input parameter specifying inside (int).
- * @param outside Input parameter specifying outside (int).
- */
+// Sets tick length value and updates internal subsystem configuration.
 void QCustomAxis::setTickLength(int inside, int outside)
 {
     m_tickLengthIn = inside;
     m_tickLengthOut = outside;
 }
 
-/**
- * @brief Sets the tick length in parameter and updates internal state.
- * @param inside Input parameter specifying inside (int).
- */
+// Sets tick length in value and updates internal subsystem configuration.
 void QCustomAxis::setTickLengthIn(int inside)
 {
     m_tickLengthIn = inside;
 }
 
-/**
- * @brief Sets the tick length out parameter and updates internal state.
- * @param outside Input parameter specifying outside (int).
- */
+// Sets tick length out value and updates internal subsystem configuration.
 void QCustomAxis::setTickLengthOut(int outside)
 {
     m_tickLengthOut = outside;
 }
 
-/**
- * @brief Sets the tick pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets tick pen value and updates internal subsystem configuration.
 void QCustomAxis::setTickPen(const QPen &pen)
 {
     m_tickPen = pen;
 }
 
-/**
- * @brief Executes the ticks procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes ticks routine.
 bool QCustomAxis::ticks() const
 {
     return m_showTicks;
 }
 
-/**
- * @brief Executes the ticks labels procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes ticks labels routine.
 bool QCustomAxis::ticksLabels() const
 {
     return m_showTickLabels;
 }
 
-/**
- * @brief Executes the tick label padding procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes tick label padding routine.
 int QCustomAxis::tickLabelPadding() const
 {
     return m_tickLabelPadding;
 }
 
-/**
- * @brief Executes the tick label font procedure for QCustomAxis.
- * @return Output value of type QFont.
- */
+// Executes tick label font routine.
 QFont QCustomAxis::tickLabelFont() const
 {
     return m_tickLabelFont;
 }
 
-/**
- * @brief Executes the tick label color procedure for QCustomAxis.
- * @return Output value of type QColor.
- */
+// Executes tick label color routine.
 QColor QCustomAxis::tickLabelColor() const
 {
     return m_tickLabelColor;
 }
 
-/**
- * @brief Executes the tick length procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes tick length routine.
 int QCustomAxis::tickLength() const
 {
     return (m_tickLengthIn + m_tickLengthOut);
 }
 
-/**
- * @brief Executes the tick length in procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes tick length in routine.
 int QCustomAxis::tickLengthIn() const
 {
     return m_tickLengthIn;
 }
 
-/**
- * @brief Executes the tick length out procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes tick length out routine.
 int QCustomAxis::tickLengthOut() const
 {
     return m_tickLengthOut;
 }
 
-/**
- * @brief Executes the tick pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes tick pen routine.
 QPen QCustomAxis::tickPen() const
 {
     return m_tickPen;
@@ -910,89 +659,62 @@ QPen QCustomAxis::tickPen() const
 /***----- Sub tick related functions -----***/
 /********************************************/
 
+// Sets sub ticks value and updates internal subsystem configuration.
 void QCustomAxis::setSubTicks(bool show)
 {
     m_showSubTicks = show;
 }
 
-/**
- * @brief Sets the sub tick length parameter and updates internal state.
- * @param inside Input parameter specifying inside (int).
- * @param outside Input parameter specifying outside (int).
- */
+// Sets sub tick length value and updates internal subsystem configuration.
 void QCustomAxis::setSubTickLength(int inside, int outside)
 {
     m_subTickLengthIn = inside;
     m_subTickLengthOut = outside;
 }
 
-/**
- * @brief Sets the sub tick length in parameter and updates internal state.
- * @param inside Input parameter specifying inside (int).
- */
+// Sets sub tick length in value and updates internal subsystem configuration.
 void QCustomAxis::setSubTickLengthIn(int inside)
 {
     m_subTickLengthIn = inside;
 }
 
-/**
- * @brief Sets the sub tick length out parameter and updates internal state.
- * @param outside Input parameter specifying outside (int).
- */
+// Sets sub tick length out value and updates internal subsystem configuration.
 void QCustomAxis::setSubTickLengthOut(int outside)
 {
     m_subTickLengthOut = outside;
 }
 
-/**
- * @brief Sets the sub tick pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets sub tick pen value and updates internal subsystem configuration.
 void QCustomAxis::setSubTickPen(const QPen &pen)
 {
     m_subTickPen = pen;
 }
 
-/**
- * @brief Executes the sub ticks procedure for QCustomAxis.
- * @return Output value of type bool.
- */
+// Executes sub ticks routine.
 bool QCustomAxis::subTicks() const
 {
     return m_showSubTicks;
 }
 
-/**
- * @brief Executes the sub tick length procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes sub tick length routine.
 int QCustomAxis::subTickLength() const
 {
     return (m_subTickLengthIn + m_subTickLengthOut);
 }
 
-/**
- * @brief Executes the sub tick length in procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes sub tick length in routine.
 int QCustomAxis::subTickLengthIn() const
 {
     return m_subTickLengthIn;
 }
 
-/**
- * @brief Executes the sub tick length out procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes sub tick length out routine.
 int QCustomAxis::subTickLengthOut() const
 {
     return m_subTickLengthOut;
 }
 
-/**
- * @brief Executes the sub tick pen procedure for QCustomAxis.
- * @return Output value of type QPen.
- */
+// Executes sub tick pen routine.
 QPen QCustomAxis::subTickPen() const
 {
     return m_subTickPen;
@@ -1002,15 +724,13 @@ QPen QCustomAxis::subTickPen() const
 /***----- Number Precision related functions -----***/
 /****************************************************/
 
+// Sets number precision value and updates internal subsystem configuration.
 void QCustomAxis::setNumberPrecision(int precision)
 {
     m_numberPrecision = precision;
 }
 
-/**
- * @brief Executes the number precision procedure for QCustomAxis.
- * @return Output value of type int.
- */
+// Executes number precision routine.
 int QCustomAxis::numberPrecision() const
 {
     return m_numberPrecision;
@@ -1020,15 +740,13 @@ int QCustomAxis::numberPrecision() const
 /***----- Scale related functions -----***/
 /*****************************************/
 
+// Sets scale type value and updates internal subsystem configuration.
 void QCustomAxis::setScaleType(ScaleType scaleType)
 {
     m_scaleType = scaleType;
 }
 
-/**
- * @brief Executes the scale type procedure for QCustomAxis.
- * @return Output value of type ScaleType.
- */
+// Executes scale type routine.
 ScaleType QCustomAxis::scaleType() const
 {
     return m_scaleType;

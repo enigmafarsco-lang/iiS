@@ -1,11 +1,8 @@
-/**
- * @file priPage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: priPage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for priPage.cpp.
+// ============================================================================
 
 ﻿#include "priPage.h"
 #include "ui_priPage.h"
@@ -115,10 +112,7 @@ void PRIPage::enableDisablePRIPageSlot(priSpace::priTypeEnum typeVal)
 
 }
 
-/**
- * @brief Executes the period type slot procedure for PRIPage.
- * @param periodType Input parameter specifying periodType (priSpace::periodicTypeEnum).
- */
+// Executes period type slot routine.
 void PRIPage::periodTypeSlot(priSpace::periodicTypeEnum periodType)
 {
     if(priData->prifType != periodType || firstRun )
@@ -161,9 +155,7 @@ void PRIPage::periodTypeSlot(priSpace::periodicTypeEnum periodType)
     }
 }
 
-/**
- * @brief Slot handler responding to on btn ok clicked event.
- */
+// Event/Signal handler for on btn ok clicked.
 void PRIPage::on_btnOk_clicked()
 {
     QString tmp1;
@@ -227,17 +219,13 @@ void PRIPage::on_btnOk_clicked()
     }
 }
 
-/**
- * @brief Executes the reset max pulse count procedure for PRIPage.
- */
+// Executes reset max pulse count routine.
 void PRIPage::resetMaxPulseCount()
 {
     radarData->maxPulseCount = priData->pri.count();
 }
 
-/**
- * @brief Slot handler responding to on btn add clicked event.
- */
+// Event/Signal handler for on btn add clicked.
 void PRIPage::on_btnAdd_clicked()
 {
 
@@ -268,9 +256,7 @@ void PRIPage::on_btnAdd_clicked()
 
 }
 
-/**
- * @brief Executes the btn slot procedure for PRIPage.
- */
+// Executes btn slot routine.
 void PRIPage::btnSlot()
 {
     row--;
@@ -279,9 +265,7 @@ void PRIPage::btnSlot()
     btnRed();
 }
 
-/**
- * @brief Slot handler responding to on btn clear clicked event.
- */
+// Event/Signal handler for on btn clear clicked.
 void PRIPage::on_btnClear_clicked()
 {
     row =0;
@@ -363,9 +347,7 @@ bool PRIPage::priTableValue()
     return  res;
 }
 
-/**
- * @brief Destructor for PRIPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up PRIPage resources, timers, and allocated memory.
 PRIPage::~PRIPage()
 {
     delete ui;
@@ -373,6 +355,7 @@ PRIPage::~PRIPage()
     //    delete radarData;
 }
 
+// Event/Signal handler for on tbl p r i one cell changed.
 void PRIPage::on_tblPRIOne_cellChanged(int row, int column)
 {
     Q_UNUSED(row);
@@ -410,18 +393,14 @@ void PRIPage::on_tblPRIOne_cellChanged(int row, int column)
 
 }
 
-/**
- * @brief Executes the btn red procedure for PRIPage.
- */
+// Executes btn red routine.
 void PRIPage::btnRed()
 {
     ui->btnOk->setStyleSheet("background-color:red");
     utils->colorState(SattarUtils::colorStatus::priPage,false);
 }
 
-/**
- * @brief Executes the btn green procedure for PRIPage.
- */
+// Executes btn green routine.
 void PRIPage::btnGreen()
 {
     if(utils->isBtnColorGreen[1] && isPeriodChanged== false && isPriTypeChanged==false)
@@ -437,6 +416,7 @@ void PRIPage::btnGreen()
 
 //=======================================================================================
 
+// Executes generate p r i data routine.
 bool PRIPage::generatePRIData(priSpace::priDataStruct & data)
 {
     data.isError = false;
@@ -719,11 +699,7 @@ bool PRIPage::generatePRIData(priSpace::priDataStruct & data)
     return  true;
 }
 
-/**
- * @brief Executes the else function procedure for PRIPage.
- * @param data Input parameter specifying data (priSpace::priDataStruct).
- * @return Output value of type bool.
- */
+// Executes else function routine.
 bool PRIPage::elseFunction(priSpace::priDataStruct &data)
 {
     data.isError = true;
@@ -731,10 +707,7 @@ bool PRIPage::elseFunction(priSpace::priDataStruct &data)
     return false;
 }
 
-/**
- * @brief Initializes and configures the init p r i val for the PRIPage subsystem.
- * @param data Input parameter specifying data (priSpace::priDataStruct &).
- */
+// Initializes init p r i val for PRIPage.
 void PRIPage::initPRIVal(priSpace::priDataStruct & data)
 {
     data.CountPri = 0;
@@ -742,11 +715,7 @@ void PRIPage::initPRIVal(priSpace::priDataStruct & data)
     data.maxPri = 0;
 }
 
-/**
- * @brief Executes the min max p r i dwell procedure for PRIPage.
- * @param data Input parameter specifying data (priSpace::priDataStruct).
- * @param pris Input parameter specifying pris (float&).
- */
+// Executes min max p r i dwell routine.
 void PRIPage::minMaxPRIDwell(priSpace::priDataStruct &data, float& pris)
 {
     if (data.minPri > pris) data.minPri = pris;
@@ -755,15 +724,7 @@ void PRIPage::minMaxPRIDwell(priSpace::priDataStruct &data, float& pris)
     if (data.maxPri > data.maxPriValue) pris = data.maxPriValue;
 }
 
-/**
- * @brief Executes the min max p r i procedure for PRIPage.
- * @param data Input parameter specifying data (priSpace::priDataStruct).
- * @param priVal Input parameter specifying priVal (float&).
- * @param float&amplitude Input parameter specifying float&amplitude (float&amplitude).
- * @param double&phaseAngle Input parameter specifying double&phaseAngle (double&phaseAngle).
- * @param double&frq Input parameter specifying double&frq (double&frq).
- * @param double&sampleRate Input parameter specifying double&sampleRate (double&sampleRate).
- */
+// Executes min max p r i routine.
 void PRIPage::minMaxPRI(priSpace::priDataStruct &data, float& priVal, float&amplitude , double&phaseAngle, double&frq, double&sampleRate)
 {
     float periodicVal = Gen(amplitude, phaseAngle, frq, sampleRate);
@@ -777,11 +738,7 @@ void PRIPage::minMaxPRI(priSpace::priDataStruct &data, float& priVal, float&ampl
     data.CountPri ++;
 }
 
-/**
- * @brief Executes the min max p r i procedure for PRIPage.
- * @param data Input parameter specifying data (priSpace::priDataStruct).
- * @param pris Input parameter specifying pris (float&).
- */
+// Executes min max p r i routine.
 void PRIPage::minMaxPRI(priSpace::priDataStruct &data, float& pris)
 {
     if (data.minPri > pris) data.minPri = pris;
@@ -792,14 +749,7 @@ void PRIPage::minMaxPRI(priSpace::priDataStruct &data, float& pris)
     data.CountPri ++;
 }
 
-/**
- * @brief Executes the gen procedure for PRIPage.
- * @param amp Input parameter specifying amp (float &).
- * @param phaseAng Input parameter specifying phaseAng (double).
- * @param frq Input parameter specifying frq (double).
- * @param sampleRate Input parameter specifying sampleRate (double).
- * @return Output value of type float.
- */
+// Executes gen routine.
 float PRIPage::Gen(float & amp, double &phaseAng, double &frq, double &sampleRate)
 {
     float val = amp * static_cast<float>(sin(phaseAng));

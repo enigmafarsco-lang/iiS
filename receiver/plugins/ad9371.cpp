@@ -1,11 +1,8 @@
-/**
- * @file ad9371.cpp
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ad9371.cpp
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for ad9371.cpp.
+// ============================================================================
 
 #include "ad9371.h"
 #include <receiver/osc.h>
@@ -209,9 +206,7 @@ AD9371::AD9371(QApplication *app,QWidget *parent) :
     ui->setupUi(this);
 }
 
-/**
- * @brief Destructor for AD9371, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up AD9371 resources, timers, and allocated memory.
 AD9371::~AD9371()
 {
     delete ui;
@@ -416,6 +411,7 @@ void AD9371::make_widget_update_signal_based(struct iio_widget *widgets,
 /**
  * @brief AD9371::refreshTimerStarted
  */
+// Updates and synchronizes refresh timer started data stream.
 void AD9371::refreshTimerStarted()
 {
     qInfo()<<"refreshTimer started on "<<refreshTimer.thread();
@@ -425,6 +421,7 @@ void AD9371::refreshTimerStarted()
  * @brief rx_phase_rotation_set
  * @param user_data 
  */
+// Executes rx phase rotation set routine.
 void AD9371::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_data)
 {    
     uintptr_t offset = (uintptr_t) user_data;
@@ -460,6 +457,7 @@ void AD9371::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_data
 /**
  * @brief AD9371::reload_button_clicked
  */
+// Event/Signal handler for reload button clicked.
 void AD9371::reload_button_clicked()
 {
     update_widgets();
@@ -857,10 +855,7 @@ QWidget *AD9371::init()
 }
 
 
-/**
- * @brief Slot handler responding to tx sample rate changed event.
- * @param spinbutton Input parameter specifying spinbutton (QDoubleSpinBox).
- */
+// Event/Signal handler for tx sample rate changed.
 void AD9371::tx_sample_rate_changed(QDoubleSpinBox *spinbutton)
 {
     gdouble rate;
@@ -871,9 +866,7 @@ void AD9371::tx_sample_rate_changed(QDoubleSpinBox *spinbutton)
 }
 
 
-/**
- * @brief Executes the int dec freq update procedure for AD9371.
- */
+// Executes int dec freq update routine.
 void AD9371::int_dec_freq_update(void)
 {
     struct iio_channel *ch;
@@ -896,9 +889,7 @@ void AD9371::int_dec_freq_update(void)
 }
 
 
-/**
- * @brief Executes the int dec update cb procedure for AD9371.
- */
+// Executes int dec update cb routine.
 void AD9371::int_dec_update_cb()
 {
     int_dec_freq_update();
@@ -906,10 +897,7 @@ void AD9371::int_dec_update_cb()
 }
 
 
-/**
- * @brief Retrieves the current gui_tx_sampling_freq value.
- * @return Output value of type double.
- */
+// Retrieves current gui_tx_sampling_freq state.
 double AD9371::get_gui_tx_sampling_freq()
 {
     if(tx_widgets[tx_sample_freq].widget)
@@ -980,6 +968,7 @@ void AD9371::profile_update_labels(void) {
 /**
  * @brief AD9371::glb_settings_update_labels
  */
+// Executes glb settings update labels routine.
 void AD9371::glb_settings_update_labels()
 {
 
@@ -1030,9 +1019,7 @@ void AD9371::glb_settings_update_labels()
 
 }
 
-/**
- * @brief Executes the rx phase rotation update procedure for AD9371.
- */
+// Executes rx phase rotation update routine.
 void AD9371::rx_phase_rotation_update()
 {
     struct iio_channel *out[4];
@@ -1097,9 +1084,7 @@ void AD9371::rx_phase_rotation_update()
 }
 
 
-/**
- * @brief Executes the profile update procedure for AD9371.
- */
+// Executes profile update routine.
 void AD9371::profile_update(void)
 {
     //    if (plugin_osc_running_state() == true) {
@@ -1112,9 +1097,7 @@ void AD9371::profile_update(void)
     rx_freq_info_update();
 }
 
-/**
- * @brief Slot handler responding to on btn reload settings clicked event.
- */
+// Event/Signal handler for on btn reload settings clicked.
 void AD9371::on_btnReloadSettings_clicked()
 {
     update_widgets();

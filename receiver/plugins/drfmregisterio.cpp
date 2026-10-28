@@ -1,11 +1,8 @@
-/**
- * @file drfmregisterio.cpp
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: drfmregisterio.cpp
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for drfmregisterio.cpp.
+// ============================================================================
 
 #include "drfmregisterio.h"
 
@@ -73,6 +70,7 @@ QString stripCountPrefix(const QString &identifier)
 
 } // namespace
 
+// Constructor: Initializes DrfmRegisterIO subsystem components, default parameters, and state.
 DrfmRegisterIO::DrfmRegisterIO()
     : m_ledDev(nullptr)
     , m_legacyDev(nullptr)
@@ -155,34 +153,21 @@ const DrfmRegisterDef *DrfmRegisterIO::defForOffset(quint32 offset)
     return nullptr;
 }
 
-/**
- * @brief Executes the attr names for offset procedure for DrfmRegisterIO.
- * @param offset Input parameter specifying offset (quint32).
- * @return Output value of type QStringList.
- */
+// Executes attr names for offset routine.
 QStringList DrfmRegisterIO::attrNamesForOffset(quint32 offset)
 {
     const DrfmRegisterDef *def = defForOffset(offset);
     return def ? def->attrNames : QStringList();
 }
 
-/**
- * @brief Executes the label for offset procedure for DrfmRegisterIO.
- * @param offset Input parameter specifying offset (quint32).
- * @return Output value of type QString.
- */
+// Executes label for offset routine.
 QString DrfmRegisterIO::labelForOffset(quint32 offset)
 {
     const DrfmRegisterDef *def = defForOffset(offset);
     return def ? def->label : QStringLiteral("register %1").arg(hexText(offset, 3));
 }
 
-/**
- * @brief Executes the value text procedure for DrfmRegisterIO.
- * @param value Input parameter specifying value (quint32).
- * @param isSigned Input parameter specifying isSigned (bool).
- * @return Output value of type QString.
- */
+// Executes value text routine.
 QString DrfmRegisterIO::valueText(quint32 value, bool isSigned)
 {
     if (isSigned)
@@ -290,10 +275,7 @@ struct iio_device *DrfmRegisterIO::legacyBridgeDevice()
     return m_legacyDev;
 }
 
-/**
- * @brief Sets the legacy bridge enabled parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets legacy bridge enabled value and updates internal subsystem configuration.
 void DrfmRegisterIO::setLegacyBridgeEnabled(bool enable)
 {
     struct iio_device *dev = legacyBridgeDevice();
@@ -302,11 +284,7 @@ void DrfmRegisterIO::setLegacyBridgeEnabled(bool enable)
     iio_device_attr_write(dev, "reg_access", enable ? "enabled" : "disabled");
 }
 
-/**
- * @brief Executes the debug attr names procedure for DrfmRegisterIO.
- * @param dev Input parameter specifying dev (struct iio_device).
- * @return Output value of type QStringList.
- */
+// Executes debug attr names routine.
 QStringList DrfmRegisterIO::debugAttrNames(struct iio_device *dev) const
 {
     if (!dev)
@@ -338,11 +316,7 @@ QString DrfmRegisterIO::matchAttrName(const QStringList &available,
     return QString();
 }
 
-/**
- * @brief Executes the channel name candidates procedure for DrfmRegisterIO.
- * @param ch Input parameter specifying ch (struct iio_channel).
- * @return Output value of type QStringList.
- */
+// Executes channel name candidates routine.
 QStringList DrfmRegisterIO::channelNameCandidates(struct iio_channel *ch)
 {
     QStringList candidates;
@@ -656,10 +630,7 @@ bool DrfmRegisterIO::writeRegister(quint32 offset, quint32 value,
     return written;
 }
 
-/**
- * @brief Executes the scan report procedure for DrfmRegisterIO.
- * @return Output value of type QString.
- */
+// Executes scan report routine.
 QString DrfmRegisterIO::scanReport()
 {
     struct iio_device *ledDev = ledCountDevice();
@@ -744,10 +715,7 @@ QString DrfmRegisterIO::scanReport()
     return lines.join(QStringLiteral("\n"));
 }
 
-/**
- * @brief Executes the backend info procedure for DrfmRegisterIO.
- * @return Output value of type QString.
- */
+// Executes backend info routine.
 QString DrfmRegisterIO::backendInfo()
 {
     struct iio_device *ledDev = ledCountDevice();

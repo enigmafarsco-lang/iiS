@@ -1,11 +1,8 @@
-/**
- * @file QGLchart.cpp
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: QGLchart.cpp
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for QGLchart.cpp.
+// ============================================================================
 
 #include "QGLchart.h"
 #include <receiver/datafiles.h>
@@ -18,6 +15,7 @@
 #include FT_FREETYPE_H
 
 
+// Constructor: Initializes QGLchart subsystem components, default parameters, and state.
 QGLchart::QGLchart(QWidget *parent)
     : QOpenGLWidget(parent)
 {
@@ -25,10 +23,7 @@ QGLchart::QGLchart(QWidget *parent)
     SetupUi(this);
 }
 
-/**
- * @brief Executes the setup ui procedure for QGLchart.
- * @param parent Input parameter specifying parent (QWidget).
- */
+// Executes setup ui routine.
 void QGLchart::SetupUi(QWidget *parent)
 {
     qRegisterMetaType<QPair<QVector4D, QString> >("QPair<QVector4D, QString>");
@@ -111,6 +106,7 @@ void QGLchart::SetupUi(QWidget *parent)
 /*                            Mouse and Keyboard events                                 */
 /****************************************************************************************/
 
+// Executes mouse double click event routine.
 void QGLchart::mouseDoubleClickEvent(QMouseEvent *ev)
 {
     m_zoomAreaSelected = false;
@@ -123,10 +119,7 @@ void QGLchart::mouseDoubleClickEvent(QMouseEvent *ev)
     }
 }
 
-/**
- * @brief Executes the mouse press event procedure for QGLchart.
- * @param ev Input parameter specifying ev (QMouseEvent).
- */
+// Executes mouse press event routine.
 void QGLchart::mousePressEvent(QMouseEvent *ev)
 {
     if ((ev->button() == Qt::LeftButton) && (m_zoomState == true))
@@ -264,10 +257,7 @@ void QGLchart::mousePressEvent(QMouseEvent *ev)
     }
 }
 
-/**
- * @brief Executes the mouse move event procedure for QGLchart.
- * @param ev Input parameter specifying ev (QMouseEvent).
- */
+// Executes mouse move event routine.
 void QGLchart::mouseMoveEvent(QMouseEvent *ev)
 {
     if ((ev->buttons() & Qt::LeftButton) && (m_zoomState == true))
@@ -367,10 +357,7 @@ void QGLchart::mouseMoveEvent(QMouseEvent *ev)
     }
 }
 
-/**
- * @brief Executes the mouse release event procedure for QGLchart.
- * @param ev Input parameter specifying ev (QMouseEvent).
- */
+// Executes mouse release event routine.
 void QGLchart::mouseReleaseEvent(QMouseEvent *ev)
 {
     if ((ev->button() == Qt::LeftButton) && (m_zoomState == true) && m_drawRegion.contains(m_firstMousePos))
@@ -478,6 +465,7 @@ void QGLchart::mouseReleaseEvent(QMouseEvent *ev)
     QOpenGLWidget::mouseReleaseEvent(ev);
 }
 
+// Executes event routine.
 bool QGLchart::event(QEvent *event)
 {
     if ((event->type() == QEvent::ToolTip) && (m_ToolTipEnabled))
@@ -579,20 +567,14 @@ bool QGLchart::event(QEvent *event)
     return QWidget::event(event);
 }
 
-/**
- * @brief Executes the key press event procedure for QGLchart.
- * @param ev Input parameter specifying ev (QKeyEvent).
- */
+// Executes key press event routine.
 void QGLchart::keyPressEvent(QKeyEvent *ev)
 {
     if (ev->key() == Qt::Key_Shift)
         ctrlKeyPressed = true;
 }
 
-/**
- * @brief Executes the key release event procedure for QGLchart.
- * @param ev Input parameter specifying ev (QKeyEvent).
- */
+// Executes key release event routine.
 void QGLchart::keyReleaseEvent(QKeyEvent *ev)
 {
     if (ev->key() == Qt::Key_Shift)
@@ -603,16 +585,14 @@ void QGLchart::keyReleaseEvent(QKeyEvent *ev)
 /*                                Add or remove Series                                  */
 /****************************************************************************************/
 
+// Executes add series routine.
 void QGLchart::addSeries(QCustomSeries *inputSeries)
 {
     m_addedSeries.append(inputSeries);
     m_addedSeriesData.append(*inputSeries);
 }
 
-/**
- * @brief Sets the series parameter and updates internal state.
- * @param inputSeries Input parameter specifying inputSeries (QCustomSeries).
- */
+// Sets series value and updates internal subsystem configuration.
 void QGLchart::setSeries(QCustomSeries inputSeries)
 {
     int seriesIndex = -1;
@@ -649,16 +629,14 @@ void QGLchart::setSeries(QCustomSeries inputSeries)
     //m_ChartVerticalRange = getChartVerticalRange();
 }
 
+// Executes remove all series routine.
 void QGLchart::removeAllSeries()
 {
     m_addedSeries.clear();
     m_addedSeriesData.clear();
 }
 
-/**
- * @brief Executes the remove series procedure for QGLchart.
- * @param inputSeries Input parameter specifying inputSeries (QCustomSeries).
- */
+// Executes remove series routine.
 void QGLchart::removeSeries(QCustomSeries *inputSeries)
 {
     if (!m_addedSeries.contains(inputSeries)) {
@@ -673,10 +651,7 @@ void QGLchart::removeSeries(QCustomSeries *inputSeries)
     emit(seriesRemoved(inputSeries));
 }
 
-/**
- * @brief Updates and synchronizes the update series data data stream and visual indicators.
- * @param updatedSeries Input parameter specifying updatedSeries (QCustomSeries).
- */
+// Updates and synchronizes update series data data stream.
 void QGLchart::updateSeriesData(QCustomSeries *updatedSeries)
 {
     if (!updatedSeries->getSeriesName().isEmpty())
@@ -726,10 +701,7 @@ void QGLchart::updateSeriesData(QCustomSeries *updatedSeries)
     }
 }
 
-/**
- * @brief Updates and synchronizes the update series data data stream and visual indicators.
- * @param updatedSeries Input parameter specifying updatedSeries (QCustomSeries).
- */
+// Updates and synchronizes update series data data stream.
 void QGLchart::updateSeriesData(QCustomSeries updatedSeries)
 {
     int seriesIndex = -1;
@@ -763,10 +735,7 @@ void QGLchart::updateSeriesData(QCustomSeries updatedSeries)
 
 }
 
-/**
- * @brief Executes the series procedure for QGLchart.
- * @return Output value of type QVector<QCustomSeries>.
- */
+// Executes series routine.
 QVector<QCustomSeries> QGLchart::series() const
 {
 //    return m_addedSeries;
@@ -777,6 +746,7 @@ QVector<QCustomSeries> QGLchart::series() const
 /*                                   Add or remove Axes                                 */
 /****************************************************************************************/
 
+// Executes add axis routine.
 void QGLchart::addAxis(QCustomAxis *axis, Qt::Alignment alignment)
 {
     // check already existing axes and overwrite in the same alignment
@@ -784,6 +754,7 @@ void QGLchart::addAxis(QCustomAxis *axis, Qt::Alignment alignment)
     m_currentChartAxis.append(axis);
 }
 
+// Executes remove axis routine.
 void QGLchart::removeAxis(QCustomAxis *axis)
 {
     if (!m_currentChartAxis.contains(axis)) {
@@ -795,6 +766,7 @@ void QGLchart::removeAxis(QCustomAxis *axis)
     emit(axisRemoved(axis));		// not yet connected
 }
 
+// Executes create default axes routine.
 void QGLchart::createDefaultAxes()
 {
     QCustomAxis *verticalAxis = new QCustomAxis(this);
@@ -815,12 +787,7 @@ void QGLchart::createDefaultAxes()
     addAxis(horizantalAxis, Qt::AlignBottom);
 }
 
-/**
- * @brief Executes the axes procedure for QGLchart.
- * @param orientation Input parameter specifying orientation (Qt::Orientations).
- * @param series Input parameter specifying series (QCustomSeries).
- * @return Output value of type QList<QCustomAxis*>.
- */
+// Executes axes routine.
 QList<QCustomAxis*> QGLchart::axes(Qt::Orientations orientation, QCustomSeries *series) const
 {
     QList<QCustomAxis *> desiredAxes;
@@ -834,11 +801,7 @@ QList<QCustomAxis*> QGLchart::axes(Qt::Orientations orientation, QCustomSeries *
     return desiredAxes;
 }
 
-/**
- * @brief Executes the axes procedure for QGLchart.
- * @param alignment Input parameter specifying alignment (Qt::Alignment).
- * @return Output value of type QList<QCustomAxis*>.
- */
+// Executes axes routine.
 QList<QCustomAxis*> QGLchart::axes(Qt::Alignment alignment) const
 {
     QList<QCustomAxis *> desiredAxes;
@@ -856,69 +819,49 @@ QList<QCustomAxis*> QGLchart::axes(Qt::Alignment alignment) const
 /*                         Set and get Background Properties                            */
 /****************************************************************************************/
 
+// Sets background brush value and updates internal subsystem configuration.
 void QGLchart::setBackgroundBrush(const QBrush &brush)
 {
     m_background.Brush = brush;
 }
 
-/**
- * @brief Executes the background brush procedure for QGLchart.
- * @return Output value of type QBrush.
- */
+// Executes background brush routine.
 QBrush QGLchart::backgroundBrush() const
 {
     return m_background.Brush;
 }
 
-/**
- * @brief Sets the background pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets background pen value and updates internal subsystem configuration.
 void QGLchart::setBackgroundPen(const QPen &pen)
 {
     m_background.Pen = pen;
 }
 
-/**
- * @brief Executes the background pen procedure for QGLchart.
- * @return Output value of type QPen.
- */
+// Executes background pen routine.
 QPen QGLchart::backgroundPen() const
 {
     return m_background.Pen;
 }
 
-/**
- * @brief Sets the background visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets background visible value and updates internal subsystem configuration.
 void QGLchart::setBackgroundVisible(bool visible)
 {
     m_background.Visibility = visible;
 }
 
-/**
- * @brief Retrieves the current ackground visible value.
- * @return Output value of type bool.
- */
+// Retrieves current ackground visible state.
 bool QGLchart::isBackgroundVisible() const
 {
     return m_background.Visibility;
 }
 
-/**
- * @brief Sets the drop shadow enabled parameter and updates internal state.
- * @param enabled Input parameter specifying enabled (bool).
- */
+// Sets drop shadow enabled value and updates internal subsystem configuration.
 void QGLchart::setDropShadowEnabled(bool enabled)
 {
     m_background.DropShadowEnable = enabled;
 }
 
-/**
- * @brief Retrieves the current rop shadow enabled value.
- * @return Output value of type bool.
- */
+// Retrieves current rop shadow enabled state.
 bool QGLchart::isDropShadowEnabled() const
 {
     return m_background.DropShadowEnable;
@@ -928,51 +871,37 @@ bool QGLchart::isDropShadowEnabled() const
 /*                              Title and it's properties                               */
 /****************************************************************************************/
 
+// Sets title text value and updates internal subsystem configuration.
 void QGLchart::setTitleText(const QString &title)
 {
     m_titleText = title;
 }
 
-/**
- * @brief Executes the title text procedure for QGLchart.
- * @return Output value of type QString.
- */
+// Executes title text routine.
 QString QGLchart::titleText() const
 {
     return m_titleText;
 }
 
-/**
- * @brief Sets the title text font parameter and updates internal state.
- * @param font Input parameter specifying font (const QFont).
- */
+// Sets title text font value and updates internal subsystem configuration.
 void QGLchart::setTitleTextFont(const QFont &font)
 {
     m_titleFont = font;
 }
 
-/**
- * @brief Executes the title text font procedure for QGLchart.
- * @return Output value of type QFont.
- */
+// Executes title text font routine.
 QFont QGLchart::titleTextFont() const
 {
     return m_titleFont;
 }
 
-/**
- * @brief Sets the title text brush parameter and updates internal state.
- * @param brush Input parameter specifying brush (const QBrush).
- */
+// Sets title text brush value and updates internal subsystem configuration.
 void QGLchart::setTitleTextBrush(const QBrush &brush)
 {
     m_titleBrush = brush;
 }
 
-/**
- * @brief Executes the title text brush procedure for QGLchart.
- * @return Output value of type QBrush.
- */
+// Executes title text brush routine.
 QBrush QGLchart::titleTextBrush() const
 {
     return m_titleBrush;
@@ -982,78 +911,55 @@ QBrush QGLchart::titleTextBrush() const
 /*                 Set and get plot area background properties                          */
 /****************************************************************************************/
 
+// Executes plot area routine.
 QRectF QGLchart::plotArea() const
 {
     return m_plotAreaBackground.Area;
 }
 
-/**
- * @brief Sets the plot area background brush parameter and updates internal state.
- * @param brush Input parameter specifying brush (const QBrush).
- */
+// Sets plot area background brush value and updates internal subsystem configuration.
 void QGLchart::setPlotAreaBackgroundBrush(const QBrush &brush)
 {
     m_plotAreaBackground.Brush = brush;
 }
 
-/**
- * @brief Executes the plot area background brush procedure for QGLchart.
- * @return Output value of type QBrush.
- */
+// Executes plot area background brush routine.
 QBrush QGLchart::plotAreaBackgroundBrush() const
 {
     return m_plotAreaBackground.Brush;
 }
 
-/**
- * @brief Sets the plot area background pen parameter and updates internal state.
- * @param pen Input parameter specifying pen (const QPen).
- */
+// Sets plot area background pen value and updates internal subsystem configuration.
 void QGLchart::setPlotAreaBackgroundPen(const QPen &pen)
 {
     m_plotAreaBackground.Pen = pen;
 }
 
-/**
- * @brief Executes the plot area background pen procedure for QGLchart.
- * @return Output value of type QPen.
- */
+// Executes plot area background pen routine.
 QPen QGLchart::plotAreaBackgroundPen() const
 {
     return m_plotAreaBackground.Pen;
 }
 
-/**
- * @brief Sets the plot area background visible parameter and updates internal state.
- * @param enabled Input parameter specifying enabled (bool).
- */
+// Sets plot area background visible value and updates internal subsystem configuration.
 void QGLchart::setPlotAreaBackgroundVisible(bool enabled)
 {
     m_plotAreaBackground.Visibility = enabled;
 }
 
-/**
- * @brief Retrieves the current lot area background visible value.
- * @return Output value of type bool.
- */
+// Retrieves current lot area background visible state.
 bool QGLchart::isPlotAreaBackgroundVisible() const
 {
     return m_plotAreaBackground.Visibility;
 }
 
-/**
- * @brief Executes the geometry procedure for QGLchart.
- * @return Output value of type QRect.
- */
+// Executes geometry routine.
 QRect QGLchart::geometry() const
 {
     return m_geometry;
 }
 
-/**
- * @brief Sets the geometry parameter and updates internal state.
- * @param rect Input parameter specifying rect (const QRect).
- */
+// Sets geometry value and updates internal subsystem configuration.
 void QGLchart::setGeometry(const QRect &rect)
 {
     if (m_geometry != rect)
@@ -1067,6 +973,7 @@ void QGLchart::setGeometry(const QRect &rect)
 /*                           Chart Type Related functions                               */
 /****************************************************************************************/
 
+// Sets chart type value and updates internal subsystem configuration.
 void QGLchart::setChartType(ChartType chartType)
 {
     m_chartType = chartType;
@@ -1080,51 +987,37 @@ void QGLchart::setChartType(ChartType chartType)
 /*                             Masking related functions                                */
 /****************************************************************************************/
 
+// Executes enable masking routine.
 void QGLchart::enableMasking(bool enable)
 {
     m_maskingEnabled = enable;
 }
 
-/**
- * @brief Sets the masking modifiable parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets masking modifiable value and updates internal subsystem configuration.
 void QGLchart::setMaskingModifiable(bool enable)
 {
     m_maskingModifiable = enable;
 }
 
-/**
- * @brief Retrieves the current asking enabled value.
- * @return Output value of type bool.
- */
+// Retrieves current asking enabled state.
 bool QGLchart::isMaskingEnabled() const
 {
     return m_maskingEnabled;
 }
 
-/**
- * @brief Retrieves the current asking modifiable value.
- * @return Output value of type bool.
- */
+// Retrieves current asking modifiable state.
 bool QGLchart::isMaskingModifiable() const
 {
     return m_maskingModifiable;
 }
 
-/**
- * @brief Sets the masking color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets masking color value and updates internal subsystem configuration.
 void QGLchart::setMaskingColor(const QColor &color)
 {
     m_maskingColor = color;
 }
 
-/**
- * @brief Executes the masking color procedure for QGLchart.
- * @return Output value of type QColor.
- */
+// Executes masking color routine.
 QColor QGLchart::maskingColor() const
 {
     return m_maskingColor;
@@ -1134,27 +1027,20 @@ QColor QGLchart::maskingColor() const
    Also the regions are set as center and bandwidth and not as start
    to end.
 */
+// Sets masking regions value and updates internal subsystem configuration.
 void QGLchart::setMaskingRegions(QVector<QVector2D> maskingRegions)
 {
     m_maskingCenterPoints.clear();
     m_maskingCenterPoints = maskingRegions;
 }
 
-/**
- * @brief Executes the masking regions procedure for QGLchart.
- * @return Output value of type QVector<QVector2D>.
- */
+// Executes masking regions routine.
 QVector<QVector2D> QGLchart::maskingRegions() const
 {
     return m_maskingCenterPoints;
 }
 
-/**
- * @brief Executes the check masking boundaries procedure for QGLchart.
- * @param diff Input parameter specifying diff (double).
- * @param maskingType Input parameter specifying maskingType (MaskingModifyType).
- * @return Output value of type bool.
- */
+// Executes check masking boundaries routine.
 bool QGLchart::checkMaskingBoundaries(double diff, MaskingModifyType maskingType)
 {
     bool withinRange = false;
@@ -1192,10 +1078,7 @@ bool QGLchart::checkMaskingBoundaries(double diff, MaskingModifyType maskingType
     return withinRange;
 }
 
-/**
- * @brief Executes the determine half range procedure for QGLchart.
- * @return Output value of type double.
- */
+// Executes determine half range routine.
 double QGLchart::determineHalfRange()
 {
     QVector2D rangeX;
@@ -1222,47 +1105,38 @@ double QGLchart::determineHalfRange()
 /*                               Marker related functions                               */
 /****************************************************************************************/
 
+// Executes enable marker routine.
 void QGLchart::enableMarker(bool enable)
 {
     m_markerEnabled = enable;
     this->setFocusPolicy(Qt::StrongFocus);
 }
 
-/**
- * @brief Retrieves the current arker enabled value.
- * @return Output value of type bool.
- */
+// Retrieves current arker enabled state.
 bool QGLchart::isMarkerEnabled() const
 {
     return m_markerEnabled;
 }
 
-/**
- * @brief Sets the marker color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets marker color value and updates internal subsystem configuration.
 void QGLchart::setMarkerColor(const QColor &color)
 {
     m_markerColor = color;
 }
 
-/**
- * @brief Executes the marker color procedure for QGLchart.
- * @return Output value of type QColor.
- */
+// Executes marker color routine.
 QColor QGLchart::markerColor() const
 {
     return m_markerColor;
 }
 
-/**
- * @brief Initializes and configures the initialize marker position for the QGLchart subsystem.
- */
+// Initializes initialize marker position for QGLchart.
 void QGLchart::initializeMarkerPosition()
 {
     // not sure if its necessary
 }
 
+// Executes info of next marker data routine.
 QVector2D QGLchart::infoOfNextMarkerData(QPoint angleDelta, int inputDataIndex)
 {
     QVector<QVector2D> dataHolder = m_addedSeriesData.at(inputDataIndex).pointsVector();
@@ -1279,11 +1153,7 @@ QVector2D QGLchart::infoOfNextMarkerData(QPoint angleDelta, int inputDataIndex)
     return desiredData;
 }
 
-/**
- * @brief Executes the translate data info to mouse pos procedure for QGLchart.
- * @param dataInfo Input parameter specifying dataInfo (QVector2D).
- * @return Output value of type QPoint.
- */
+// Executes translate data info to mouse pos routine.
 QPoint QGLchart::translateDataInfoToMousePos(QVector2D dataInfo)
 {
     QVector2D rangeX;
@@ -1310,9 +1180,7 @@ QPoint QGLchart::translateDataInfoToMousePos(QVector2D dataInfo)
     return mousePos.toPoint();
 }
 
-/**
- * @brief Updates and synchronizes the update marker center points data stream and visual indicators.
- */
+// Updates and synchronizes update marker center points data stream.
 void QGLchart::updateMarkerCenterPoints()
 {
     int tempDataIndex = 0;
@@ -1345,114 +1213,79 @@ void QGLchart::updateMarkerCenterPoints()
 /*						       Threshold related functions								*/
 /****************************************************************************************/
 
+// Executes enable threshold routine.
 void QGLchart::enableThreshold(bool state)
 {
     m_thresholdEnabled = state;
 }
 
-/**
- * @brief Retrieves the current hreshold enabled value.
- * @return Output value of type bool.
- */
+// Retrieves current hreshold enabled state.
 bool QGLchart::isThresholdEnabled() const
 {
     return m_thresholdModifiable;
 }
 
-/**
- * @brief Sets the threshold points parameter and updates internal state.
- * @param points Input parameter specifying points (QVector<QVector2D>).
- */
+// Sets threshold points value and updates internal subsystem configuration.
 void QGLchart::setThresholdPoints(QVector<QVector2D> points)
 {
     m_thresholdPoints = points;
 }
 
-/**
- * @brief Executes the threshold points procedure for QGLchart.
- * @return Output value of type QVector<QVector2D>.
- */
+// Executes threshold points routine.
 QVector<QVector2D> QGLchart::thresholdPoints() const
 {
     return m_thresholdPoints;
 }
 
-/**
- * @brief Sets the threshold initial level parameter and updates internal state.
- * @param thrLevel Input parameter specifying thrLevel (double).
- */
+// Sets threshold initial level value and updates internal subsystem configuration.
 void QGLchart::setThresholdInitialLevel(double thrLevel)
 {
     m_thresholdInitialLevel = thrLevel;
 }
 
-/**
- * @brief Sets the threshold section number parameter and updates internal state.
- * @param thrSectionNumber Input parameter specifying thrSectionNumber (int).
- */
+// Sets threshold section number value and updates internal subsystem configuration.
 void QGLchart::setThresholdSectionNumber(int thrSectionNumber)
 {
     m_modifiableSectionsNumber = thrSectionNumber;
 }
 
-/**
- * @brief Sets the threshold type parameter and updates internal state.
- * @param thrType Input parameter specifying thrType (ThresholdType).
- */
+// Sets threshold type value and updates internal subsystem configuration.
 void QGLchart::setThresholdType(ThresholdType thrType)
 {
     m_thresholdType = thrType;
 }
 
-/**
- * @brief Executes the threshold initial level procedure for QGLchart.
- * @return Output value of type double.
- */
+// Executes threshold initial level routine.
 double QGLchart::thresholdInitialLevel() const
 {
     return m_thresholdInitialLevel;
 }
 
-/**
- * @brief Executes the threshold section number procedure for QGLchart.
- * @return Output value of type int.
- */
+// Executes threshold section number routine.
 int	QGLchart::thresholdSectionNumber() const
 {
     return m_modifiableSectionsNumber;
 }
 
-/**
- * @brief Executes the threshold type procedure for QGLchart.
- * @return Output value of type ThresholdType.
- */
+// Executes threshold type routine.
 ThresholdType QGLchart::thresholdType() const
 {
     return m_thresholdType;
 }
 
-/**
- * @brief Sets the threshold color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets threshold color value and updates internal subsystem configuration.
 void QGLchart::setThresholdColor(const QColor &color)
 {
     m_thresholdColor = color;
 }
 
-/**
- * @brief Executes the threshold color procedure for QGLchart.
- * @return Output value of type QColor.
- */
+// Executes threshold color routine.
 QColor QGLchart::thresholdColor() const
 {
     return m_thresholdColor;
 }
 
-/**
- * @brief Initializes and configures the initialize threshold points for the QGLchart subsystem.
- * @param thrType Input parameter specifying thrType (ThresholdType).
- */
+// Initializes initialize threshold points for QGLchart.
 void QGLchart::initializeThresholdPoints(ThresholdType thrType)
 {
     if (!m_addedSeriesData.isEmpty())
@@ -1496,25 +1329,19 @@ void QGLchart::initializeThresholdPoints(ThresholdType thrType)
     //}
 }
 
+// Sets threshold modifiable value and updates internal subsystem configuration.
 void QGLchart::setThresholdModifiable(bool state)
 {
     m_thresholdModifiable = state;
 }
 
-/**
- * @brief Retrieves the current hreshold modifiable value.
- * @return Output value of type bool.
- */
+// Retrieves current hreshold modifiable state.
 bool QGLchart::isThresholdModifiable() const
 {
     return m_thresholdModifiable;
 }
 
-/**
- * @brief Executes the translate mouse pos to data range procedure for QGLchart.
- * @param mousePos Input parameter specifying mousePos (QPoint).
- * @return Output value of type QPointF.
- */
+// Executes translate mouse pos to data range routine.
 QPointF QGLchart::translateMousePosToDataRange(QPoint mousePos)
 {
     QVector2D rangeX;
@@ -1541,11 +1368,7 @@ QPointF QGLchart::translateMousePosToDataRange(QPoint mousePos)
     return dataZoomRanges;
 }
 
-/**
- * @brief Executes the index of nearest thr point procedure for QGLchart.
- * @param mousePos Input parameter specifying mousePos (QPointF).
- * @return Output value of type int.
- */
+// Executes index of nearest thr point routine.
 int	QGLchart::indexOfNearestThrPoint(QPointF mousePos)
 {
     int desiredIndex = -1;
@@ -1566,43 +1389,32 @@ int	QGLchart::indexOfNearestThrPoint(QPointF mousePos)
 /*						       Label Position Related functions							*/
 /****************************************************************************************/
 
+// Sets vertical label rel pos value and updates internal subsystem configuration.
 void QGLchart::setVerticalLabelRelPos(QVector2D relPos)
 {
     m_verticalLebelRelPos = relPos;
 }
 
-/**
- * @brief Executes the vertical label rel pos procedure for QGLchart.
- * @return Output value of type QVector2D.
- */
+// Executes vertical label rel pos routine.
 QVector2D QGLchart::verticalLabelRelPos()
 {
     return m_verticalLebelRelPos;
 }
 
-/**
- * @brief Executes the enable vertical label fine tuning procedure for QGLchart.
- * @param labelStatus Input parameter specifying labelStatus (bool).
- */
+// Executes enable vertical label fine tuning routine.
 void QGLchart::enableVerticalLabelFineTuning(bool labelStatus)
 {
     m_applyFineTuning = labelStatus;
 }
 
-/**
- * @brief Sets the manual horz scale rel pos parameter and updates internal state.
- * @param manualHorzScalePos Input parameter specifying manualHorzScalePos (QVector2D).
- */
+// Sets manual horz scale rel pos value and updates internal subsystem configuration.
 void QGLchart::setManualHorzScaleRelPos(QVector2D manualHorzScalePos)
 {
     m_manualHorzScalePosEnabled = true;
     m_manualHorzScalePos = manualHorzScalePos;
 }
 
-/**
- * @brief Retrieves the current manual horz scale rel pos value.
- * @return Output value of type QVector2D.
- */
+// Retrieves current manual horz scale rel pos state.
 QVector2D QGLchart::getManualHorzScaleRelPos() const
 {
     return m_manualHorzScalePos;
@@ -1612,53 +1424,37 @@ QVector2D QGLchart::getManualHorzScaleRelPos() const
 /*						        ToolTip Related functions								*/
 /****************************************************************************************/
 
+// Executes enable tool tip routine.
 void QGLchart::enableToolTip(bool state)
 {
     m_ToolTipEnabled = state;
 }
 
-/**
- * @brief Sets the max acceptable distance parameter and updates internal state.
- * @param distance Input parameter specifying distance (QVector2D).
- */
+// Sets max acceptable distance value and updates internal subsystem configuration.
 void QGLchart::setmaxAcceptableDistance(QVector2D distance)
 {
     m_maxAcceptableDistance = distance;
 }
 
-/**
- * @brief Retrieves the current ool tip enabled value.
- * @return Output value of type bool.
- */
+// Retrieves current ool tip enabled state.
 bool QGLchart::isToolTipEnabled()
 {
     return m_ToolTipEnabled;
 }
 
-/**
- * @brief Executes the max acceptable distance procedure for QGLchart.
- * @return Output value of type QVector2D.
- */
+// Executes max acceptable distance routine.
 QVector2D QGLchart::maxAcceptableDistance()
 {
     return m_maxAcceptableDistance;
 }
 
-/**
- * @brief Retrieves the current chart type value.
- * @return Output value of type ChartType.
- */
+// Retrieves current chart type state.
 ChartType QGLchart::getChartType() const
 {
     return m_chartType;
 }
 
-/**
- * @brief Executes the info of nearest data procedure for QGLchart.
- * @param mousePosPoint Input parameter specifying mousePosPoint (QPointF).
- * @param inputDataIndex Input parameter specifying inputDataIndex (int).
- * @return Output value of type QVector2D.
- */
+// Executes info of nearest data routine.
 QVector2D QGLchart::infoOfNearestData(QPointF mousePosPoint, int inputDataIndex)
 {
     QVector<QVector2D> dataHolder;
@@ -1705,6 +1501,7 @@ QVector2D QGLchart::infoOfNearestData(QPointF mousePosPoint, int inputDataIndex)
 /*						           Zoom Related functions								*/
 /****************************************************************************************/
 
+// Executes zoom enable routine.
 void QGLchart::zoomEnable(bool status)
 {
     m_zoomState = status;
@@ -1714,6 +1511,7 @@ void QGLchart::zoomEnable(bool status)
     }*/
 }
 
+// Executes zoom routine.
 void QGLchart::zoom(qreal factor)
 {
     if (factor <= 0)
@@ -1729,10 +1527,7 @@ void QGLchart::zoom(qreal factor)
         zoomOut(1.0 / factor);
 }
 
-/**
- * @brief Executes the zoom in procedure for QGLchart.
- * @param factor Input parameter specifying factor (qreal).
- */
+// Executes zoom in routine.
 void QGLchart::zoomIn(qreal factor)
 {
     if (factor < 1)
@@ -1752,10 +1547,7 @@ void QGLchart::zoomIn(qreal factor)
     }
 }
 
-/**
- * @brief Executes the zoom in procedure for QGLchart.
- * @param rect Input parameter specifying rect (const QRectF).
- */
+// Executes zoom in routine.
 void QGLchart::zoomIn(const QRectF &rect)
 {
     if (!rect.isValid())
@@ -1765,6 +1557,7 @@ void QGLchart::zoomIn(const QRectF &rect)
     m_zoomState = true;
 }
 
+// Executes zoom out routine.
 void QGLchart::zoomOut(qreal factor)
 {
     if (factor < 1)
@@ -1789,23 +1582,20 @@ void QGLchart::zoomOut(qreal factor)
     }
 }
 
+// Executes zoom reset routine.
 void QGLchart::zoomReset()
 {
     m_drawRegion = m_geometry;  // currently not in use, possibly wrong!
     m_zoomState = false;
 }
 
+// Retrieves current oomed state.
 bool QGLchart::isZoomed()
 {
     return m_zoomState;
 }
 
-/**
- * @brief Executes the wheel zoom data range procedure for QGLchart.
- * @param mousePos Input parameter specifying mousePos (QPoint).
- * @param angleDelta Input parameter specifying angleDelta (QPoint).
- * @return Output value of type QVector4D.
- */
+// Executes wheel zoom data range routine.
 QVector4D QGLchart::wheelZoomDataRange(QPoint mousePos, QPoint angleDelta)
 {
     QVector2D rangeX;
@@ -1849,10 +1639,7 @@ QVector4D QGLchart::wheelZoomDataRange(QPoint mousePos, QPoint angleDelta)
     return dataZoomRanges;
 }
 
-/**
- * @brief Executes the data in zoom area procedure for QGLchart.
- * @return Output value of type QVector4D.
- */
+// Executes data in zoom area routine.
 QVector4D QGLchart::dataInZoomArea()
 {
     QVector2D rangeX;
@@ -1894,12 +1681,7 @@ QVector4D QGLchart::dataInZoomArea()
     return dataZoomRanges;
 }
 
-/**
- * @brief Executes the determine zoom area procedure for QGLchart.
- * @param startPoint Input parameter specifying startPoint (QPoint).
- * @param endPoint Input parameter specifying endPoint (QPoint).
- * @param zoomType Input parameter specifying zoomType (ZoomType).
- */
+// Executes determine zoom area routine.
 void QGLchart::determineZoomArea(QPoint startPoint, QPoint endPoint, ZoomType zoomType)
 {
     if (zoomType == None)		// Could have used switch instead
@@ -1971,6 +1753,7 @@ void QGLchart::determineZoomArea(QPoint startPoint, QPoint endPoint, ZoomType zo
     }
 }
 
+// Executes determine zoom area rectangle routine.
 void QGLchart::determineZoomAreaRectangle(QPoint startPoint, QPoint endPoint, ZoomType zoomType)
 {
     if (zoomType == HorizantalZoom)
@@ -2034,12 +1817,7 @@ void QGLchart::determineZoomAreaRectangle(QPoint startPoint, QPoint endPoint, Zo
     }
 }
 
-/**
- * @brief Executes the determine zoom type procedure for QGLchart.
- * @param startPoint Input parameter specifying startPoint (QPoint).
- * @param endPoint Input parameter specifying endPoint (QPoint).
- * @return Output value of type ZoomType.
- */
+// Executes determine zoom type routine.
 ZoomType QGLchart::determineZoomType(QPoint startPoint, QPoint endPoint)
 {
     ZoomType zoomType;
@@ -2066,11 +1844,7 @@ ZoomType QGLchart::determineZoomType(QPoint startPoint, QPoint endPoint)
     return zoomType;
 }
 
-/**
- * @brief Executes the project point to draw region procedure for QGLchart.
- * @param endPoint Input parameter specifying endPoint (QPoint).
- * @return Output value of type QPoint.
- */
+// Executes project point to draw region routine.
 QPoint QGLchart::projectPointToDrawRegion(QPoint endPoint)
 {
     QPoint projectedPoint;
@@ -2108,28 +1882,19 @@ QPoint QGLchart::projectPointToDrawRegion(QPoint endPoint)
     return projectedPoint;
 }
 
-/**
- * @brief Sets the contents margins parameter and updates internal state.
- * @param margins Input parameter specifying margins (const QMarginsF).
- */
+// Sets contents margins value and updates internal subsystem configuration.
 void QGLchart::setContentsMargins(const QMarginsF &margins)
 {
     m_contentsMargin = margins;
 }
 
-/**
- * @brief Executes the contents margins procedure for QGLchart.
- * @return Output value of type QMarginsF.
- */
+// Executes contents margins routine.
 QMarginsF QGLchart::contentsMargins() const
 {
     return m_contentsMargin;
 }
 
-/**
- * @brief Retrieves the current chart horizantal range value.
- * @return Output value of type QVector2D.
- */
+// Retrieves current chart horizantal range state.
 QVector2D QGLchart::getChartHorizantalRange()
 {
     QVector2D horizantalRange;
@@ -2179,6 +1944,7 @@ QVector2D QGLchart::getChartHorizantalRange()
     return horizantalRange;
 }
 
+// Retrieves current chart vertical range state.
 QVector2D QGLchart::getChartVerticalRange()
 {
     QVector2D verticalRange;
@@ -2249,10 +2015,7 @@ QVector2D QGLchart::getChartVerticalRange()
     }
 }
 
-/**
- * @brief Executes the fine tune vertical range procedure for QGLchart.
- * @param verticalRange Input parameter specifying verticalRange (QVector2D).
- */
+// Executes fine tune vertical range routine.
 void QGLchart::fineTuneVerticalRange(QVector2D verticalRange)
 {
     if (m_previousVerticalRange.isNull())
@@ -2281,84 +2044,55 @@ void QGLchart::fineTuneVerticalRange(QVector2D verticalRange)
         m_previousVerticalRange.setX(verticalRange.x() + m_verticalLowerRangeMargin);
 }
 
-/**
- * @brief Sets the vertical upper range margin parameter and updates internal state.
- * @param margin Input parameter specifying margin (double).
- */
+// Sets vertical upper range margin value and updates internal subsystem configuration.
 void QGLchart::setVerticalUpperRangeMargin(double margin)
 {
     m_verticalUpperRangeMargin = margin;
 }
 
-/**
- * @brief Retrieves the current vertical upper range margin value.
- * @return Output value of type double.
- */
+// Retrieves current vertical upper range margin state.
 double QGLchart::getVerticalUpperRangeMargin()
 {
     return m_verticalUpperRangeMargin;
 }
 
-/**
- * @brief Sets the vertical lower range margin parameter and updates internal state.
- * @param margin Input parameter specifying margin (double).
- */
+// Sets vertical lower range margin value and updates internal subsystem configuration.
 void QGLchart::setVerticalLowerRangeMargin(double margin)
 {
     m_verticalLowerRangeMargin = margin;
 }
 
-/**
- * @brief Retrieves the current vertical lower range margin value.
- * @return Output value of type double.
- */
+// Retrieves current vertical lower range margin state.
 double QGLchart::getVerticalLowerRangeMargin()
 {
     return m_verticalLowerRangeMargin;
 }
 
-/**
- * @brief Sets the scatter upper range margin parameter and updates internal state.
- * @param margin Input parameter specifying margin (double).
- */
+// Sets scatter upper range margin value and updates internal subsystem configuration.
 void QGLchart::setScatterUpperRangeMargin(double margin)
 {
     m_scatterUpperRangeMargin = margin;
 }
 
-/**
- * @brief Sets the scatter lower range margin parameter and updates internal state.
- * @param margin Input parameter specifying margin (double).
- */
+// Sets scatter lower range margin value and updates internal subsystem configuration.
 void QGLchart::setScatterLowerRangeMargin(double margin)
 {
     m_scatterLowerRangeMargin = margin;
 }
 
-/**
- * @brief Retrieves the current scatter upper range margin value.
- * @return Output value of type double.
- */
+// Retrieves current scatter upper range margin state.
 double QGLchart::getScatterUpperRangeMargin()
 {
     return m_scatterUpperRangeMargin;
 }
 
-/**
- * @brief Retrieves the current scatter lower range margin value.
- * @return Output value of type double.
- */
+// Retrieves current scatter lower range margin state.
 double QGLchart::getScatterLowerRangeMargin()
 {
     return m_scatterLowerRangeMargin;
 }
 
-/**
- * @brief Sets the range min value parameter and updates internal state.
- * @param range Input parameter specifying range (QVector2D).
- * @param scaleType Input parameter specifying scaleType (ScaleType).
- * @return Output value of type QVector2D.
- */
+// Sets range min value value and updates internal subsystem configuration.
 QVector2D QGLchart::setRangeMinValue(QVector2D range, ScaleType scaleType)
 {
     QVector2D newRange;
@@ -2395,10 +2129,7 @@ QVector2D QGLchart::setRangeMinValue(QVector2D range, ScaleType scaleType)
     return newRange;
 }
 
-/**
- * @brief Executes the min xvalue in all series procedure for QGLchart.
- * @return Output value of type float.
- */
+// Executes min xvalue in all series routine.
 float QGLchart::minXvalueInAllSeries()
 {
     float m_minX = 1e100;
@@ -2416,10 +2147,7 @@ float QGLchart::minXvalueInAllSeries()
     return m_minX;
 }
 
-/**
- * @brief Executes the max xvalue in all series procedure for QGLchart.
- * @return Output value of type float.
- */
+// Executes max xvalue in all series routine.
 float QGLchart::maxXvalueInAllSeries()
 {
     float m_maxX = -1e100;
@@ -2437,10 +2165,7 @@ float QGLchart::maxXvalueInAllSeries()
     return m_maxX;
 }
 
-/**
- * @brief Executes the min yvalue in all series procedure for QGLchart.
- * @return Output value of type float.
- */
+// Executes min yvalue in all series routine.
 float QGLchart::minYvalueInAllSeries()
 {
     float m_minY = 1e100;
@@ -2458,10 +2183,7 @@ float QGLchart::minYvalueInAllSeries()
     return m_minY;
 }
 
-/**
- * @brief Executes the max yvalue in all series procedure for QGLchart.
- * @return Output value of type float.
- */
+// Executes max yvalue in all series routine.
 float QGLchart::maxYvalueInAllSeries()
 {
     float m_maxY = -1e100;
@@ -2479,55 +2201,38 @@ float QGLchart::maxYvalueInAllSeries()
     return m_maxY;
 }
 
-/**
- * @brief Executes the enable synced zoom procedure for QGLchart.
- * @param syncedZoom Input parameter specifying syncedZoom (bool).
- */
+// Executes enable synced zoom routine.
 void QGLchart::enableSyncedZoom(bool syncedZoom)
 {
     m_SyncedZoom = syncedZoom;
 }
 
-/**
- * @brief Executes the synced zoom procedure for QGLchart.
- * @return Output value of type bool.
- */
+// Executes synced zoom routine.
 bool QGLchart::syncedZoom()
 {
     return m_SyncedZoom;
 }
 
-/**
- * @brief Sets the zoom type parameter and updates internal state.
- * @param zoomType Input parameter specifying zoomType (ZoomType).
- */
+// Sets zoom type value and updates internal subsystem configuration.
 void QGLchart::setZoomType(ZoomType zoomType)
 {
     m_zoomType = zoomType;
     m_manualZoomType = true;
 }
 
-/**
- * @brief Executes the disable manual zoom procedure for QGLchart.
- */
+// Executes disable manual zoom routine.
 void QGLchart::disableManualZoom()
 {
     m_manualZoomType = false;
 }
 
-/**
- * @brief Retrieves the current anual zoom active value.
- * @return Output value of type bool.
- */
+// Retrieves current anual zoom active state.
 bool QGLchart::isManualZoomActive()
 {
     return m_manualZoomType;
 }
 
-/**
- * @brief Retrieves the current zoom type value.
- * @return Output value of type ZoomType.
- */
+// Retrieves current zoom type state.
 ZoomType QGLchart::getZoomType()
 {
     return m_zoomType;
@@ -2535,6 +2240,7 @@ ZoomType QGLchart::getZoomType()
 
 ////////////////// Area Selection Related functions /////////////////
 
+// Executes area selection enable routine.
 void QGLchart::areaSelectionEnable(bool status)
 {
     m_areaSelectionState = status;
@@ -2542,6 +2248,7 @@ void QGLchart::areaSelectionEnable(bool status)
 
 /*----------------------- Spectrum functions ----------------------*/
 
+// Initializes initialize g l for QGLchart.
 void QGLchart::initializeGL()
 {
     makeObject();
@@ -2615,9 +2322,7 @@ void QGLchart::initializeGL()
     doneCurrent();
 }
 
-/**
- * @brief Executes the paint g l procedure for QGLchart.
- */
+// Executes paint g l routine.
 void QGLchart::paintGL()
 {
     /*QTime *runTime = new QTime();
@@ -2848,6 +2553,7 @@ void QGLchart::paintGL()
     //RenderText(QString::number(elapsed).toStdString(), 50.0f, 15.0f, 0.5f, QVector3D(1.0, 1.0f, 0.2f));
 }
 
+// Executes message logged routine.
 void QGLchart::messageLogged(const QOpenGLDebugMessage &msg)
 {
     QString error;
@@ -2907,20 +2613,14 @@ void QGLchart::messageLogged(const QOpenGLDebugMessage &msg)
     qDebug() << qPrintable(error) << "\n" << qPrintable(msg.message()) << "\n";
 }
 
-/**
- * @brief Executes the resize g l procedure for QGLchart.
- * @param w Input parameter specifying w (int).
- * @param h Input parameter specifying h (int).
- */
+// Executes resize g l routine.
 void QGLchart::resizeGL(int w, int h)
 {
     m_geometry.setWidth(w);
     m_geometry.setHeight(h);
 }
 
-/**
- * @brief Executes the teardown g l procedure for QGLchart.
- */
+// Executes teardown g l routine.
 void QGLchart::teardownGL()
 {
     makeCurrent();
@@ -2979,6 +2679,7 @@ void QGLchart::teardownGL()
     doneCurrent();
 }
 
+// Executes make object routine.
 void QGLchart::makeObject()
 {
     m_drawRegion.setTopLeft(QPoint(-1, 1));
@@ -3049,9 +2750,7 @@ void QGLchart::makeObject()
 
 }
 
-/**
- * @brief Initializes and configures the initialize box program for the QGLchart subsystem.
- */
+// Initializes initialize box program for QGLchart.
 void QGLchart::initializeBoxProgram()
 {
     m_boxProgram = new QOpenGLShaderProgram();
@@ -3086,9 +2785,7 @@ void QGLchart::initializeBoxProgram()
     m_boxProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update box program data stream and visual indicators.
- */
+// Updates and synchronizes update box program data stream.
 void QGLchart::updateBoxProgram()
 {
     f->glEnable(GL_BLEND);
@@ -3114,9 +2811,7 @@ void QGLchart::updateBoxProgram()
     m_boxProgram->release();
 }
 
-/**
- * @brief Initializes and configures the initialize grid program for the QGLchart subsystem.
- */
+// Initializes initialize grid program for QGLchart.
 void QGLchart::initializeGridProgram()
 {
     if (!m_currentChartAxis.isEmpty())
@@ -3204,9 +2899,7 @@ void QGLchart::initializeGridProgram()
     }
 }
 
-/**
- * @brief Updates and synchronizes the update grid program data stream and visual indicators.
- */
+// Updates and synchronizes update grid program data stream.
 void QGLchart::updateGridProgram()
 {
     f->glEnable(GL_BLEND);
@@ -3294,9 +2987,7 @@ void QGLchart::updateGridProgram()
 
 }
 
-/**
- * @brief Initializes and configures the initialize spectrum program for the QGLchart subsystem.
- */
+// Initializes initialize spectrum program for QGLchart.
 void QGLchart::initializeSpectrumProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -3353,10 +3044,7 @@ void QGLchart::initializeSpectrumProgram()
     m_spectrumProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update spectrum program data stream and visual indicators.
- * @param series Input parameter specifying series (QCustomSeries*).
- */
+// Updates and synchronizes update spectrum program data stream.
 void QGLchart::updateSpectrumProgram(QCustomSeries* series)
 {
     f->glEnable(GL_BLEND);
@@ -3424,10 +3112,7 @@ void QGLchart::updateSpectrumProgram(QCustomSeries* series)
     f->glViewport(0, 0, m_geometry.width(), m_geometry.height());
 }
 
-/**
- * @brief Updates and synchronizes the update spectrum colorized program data stream and visual indicators.
- * @param series Input parameter specifying series (QCustomSeries*).
- */
+// Updates and synchronizes update spectrum colorized program data stream.
 void QGLchart::updateSpectrumColorizedProgram(QCustomSeries* series)
 {
     f->glViewport(0, 0, m_newWaterfallFrameBuffer->size().width(), m_newWaterfallFrameBuffer->size().height());
@@ -3544,6 +3229,7 @@ void QGLchart::updateSpectrumColorizedProgram(QCustomSeries* series)
 
 ////////////////// Draws the zoom rectangle /////////////////
 
+// Initializes initialize zoom area program for QGLchart.
 void QGLchart::initializeZoomAreaProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -3582,10 +3268,7 @@ void QGLchart::initializeZoomAreaProgram()
 
 }
 
-/**
- * @brief Updates and synchronizes the update zoom area program data stream and visual indicators.
- * @param zoomType Input parameter specifying zoomType (ZoomType).
- */
+// Updates and synchronizes update zoom area program data stream.
 void QGLchart::updateZoomAreaProgram(ZoomType zoomType)
 {
     f->glEnable(GL_BLEND);
@@ -3664,9 +3347,7 @@ void QGLchart::updateZoomAreaProgram(ZoomType zoomType)
     f->glDisable(GL_BLEND);
 }
 
-/**
- * @brief Initializes and configures the initialize text program for the QGLchart subsystem.
- */
+// Initializes initialize text program for QGLchart.
 void QGLchart::initializeTextProgram()
 {
     // Compile and setup the shader
@@ -3771,14 +3452,7 @@ void QGLchart::initializeTextProgram()
     m_textProgram->release();
 }
 
-/**
- * @brief Executes the render text procedure for QGLchart.
- * @param text Input parameter specifying text (std::string).
- * @param x Input parameter specifying x (GLfloat).
- * @param y Input parameter specifying y (GLfloat).
- * @param scale Input parameter specifying scale (GLfloat).
- * @param color Input parameter specifying color (QVector3D).
- */
+// Executes render text routine.
 void QGLchart::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, QVector3D color)
 {
     f->glViewport(0, 0, m_geometry.width(), m_geometry.height());
@@ -3840,15 +3514,7 @@ void QGLchart::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale,
 
 }
 
-/**
- * @brief Executes the render text vertical procedure for QGLchart.
- * @param text Input parameter specifying text (std::string).
- * @param x Input parameter specifying x (GLfloat).
- * @param y Input parameter specifying y (GLfloat).
- * @param scale Input parameter specifying scale (GLfloat).
- * @param color Input parameter specifying color (QVector3D).
- * @param alignment Input parameter specifying alignment (Qt::Alignment).
- */
+// Executes render text vertical routine.
 void QGLchart::RenderTextVertical(std::string text, GLfloat x, GLfloat y, GLfloat scale, QVector3D color, Qt::Alignment alignment)
 {
     f->glViewport(0, 0, m_geometry.width(), m_geometry.height());
@@ -3922,15 +3588,14 @@ void QGLchart::RenderTextVertical(std::string text, GLfloat x, GLfloat y, GLfloa
 /*							   Axis Label Plotting Functions							*/
 /****************************************************************************************/
 
+// Executes draw chart title routine.
 void QGLchart::drawChartTitle()
 {
     RenderText(m_titleText.toLocal8Bit().constData(), m_geometry.width() / 2 - (m_geometry.width() * 0.12),
         (m_geometry.height() * 0.97), 0.42f, qColorToQVector3D(m_titleBrush.color()));
 }
 
-/**
- * @brief Executes the draw horizontal label procedure for QGLchart.
- */
+// Executes draw horizontal label routine.
 void QGLchart::drawHorizontalLabel()
 {
     RenderText(m_horizantalAxes->titleText().toLocal8Bit().constData(), m_geometry.width() / 2 - (m_geometry.width() * 0.12),
@@ -3938,18 +3603,14 @@ void QGLchart::drawHorizontalLabel()
 
 }
 
-/**
- * @brief Executes the draw vertical label procedure for QGLchart.
- */
+// Executes draw vertical label routine.
 void QGLchart::drawVerticalLabel()
 {
     RenderTextVertical(m_verticalAxes->titleText().toLocal8Bit().constData(), m_geometry.height() / 2.0 - (m_geometry.height() * m_verticalLebelRelPos.y()),
         -(m_geometry.width() * m_verticalLebelRelPos.x()), 0.32f, qColorToQVector3D(m_verticalAxes->titleBrush().color()));
 }
 
-/**
- * @brief Executes the draw horizontal scale label procedure for QGLchart.
- */
+// Executes draw horizontal scale label routine.
 void QGLchart::drawHorizontalScaleLabel()
 {
     if (!m_manualHorzScalePosEnabled)
@@ -3967,33 +3628,25 @@ void QGLchart::drawVerticalScaleLabel()		// such as dbm
 /*						   Axis related functions and variables							*/
 /****************************************************************************************/
 
+// Sets horizontal number count value and updates internal subsystem configuration.
 void QGLchart::setHorizontalNumberCount(int hNumberCount)
 {
     m_hNumberCount = hNumberCount;
 }
 
-/**
- * @brief Retrieves the current horizontal number count value.
- * @return Output value of type int.
- */
+// Retrieves current horizontal number count state.
 int QGLchart::getHorizontalNumberCount() const
 {
     return m_hNumberCount;
 }
 
-/**
- * @brief Sets the vertical range offset parameter and updates internal state.
- * @param rangeOffset Input parameter specifying rangeOffset (QVector2D).
- */
+// Sets vertical range offset value and updates internal subsystem configuration.
 void QGLchart::setVerticalRangeOffset(QVector2D rangeOffset)
 {
     m_ChartVerticalRangeOffset = rangeOffset;
 }
 
-/**
- * @brief Retrieves the current vertcial range offset value.
- * @return Output value of type QVector2D.
- */
+// Retrieves current vertcial range offset state.
 QVector2D QGLchart::getVertcialRangeOffset() const
 {
     return m_ChartVerticalRangeOffset;
@@ -4003,6 +3656,7 @@ QVector2D QGLchart::getVertcialRangeOffset() const
 /*								 Masking Plotting Functions								*/
 /****************************************************************************************/
 
+// Initializes initialize masking program for QGLchart.
 void QGLchart::initializeMaskingProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -4049,9 +3703,7 @@ void QGLchart::initializeMaskingProgram()
 
 }
 
-/**
- * @brief Updates and synchronizes the update masking program data stream and visual indicators.
- */
+// Updates and synchronizes update masking program data stream.
 void QGLchart::updateMaskingProgram()
 {
     f->glEnable(GL_BLEND);
@@ -4110,6 +3762,7 @@ void QGLchart::updateMaskingProgram()
 /*								 Threshold Plotting Functions							*/
 /****************************************************************************************/
 
+// Initializes initialize threshold program for QGLchart.
 void QGLchart::initializeThresholdProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -4148,9 +3801,7 @@ void QGLchart::initializeThresholdProgram()
 
 }
 
-/**
- * @brief Updates and synchronizes the update threshold program data stream and visual indicators.
- */
+// Updates and synchronizes update threshold program data stream.
 void QGLchart::updateThresholdProgram()
 {
     f->glEnable(GL_BLEND);
@@ -4243,41 +3894,31 @@ void QGLchart::updateThresholdProgram()
 /*							Drawing and the setup of Axis Numbers						*/
 /****************************************************************************************/
 
+// Sets vertical number precision value and updates internal subsystem configuration.
 void QGLchart::setVerticalNumberPrecision(int precision)
 {
     m_verticalNumberPrecision = precision;
 }
 
-/**
- * @brief Retrieves the current vertical number precision value.
- * @return Output value of type int.
- */
+// Retrieves current vertical number precision state.
 int QGLchart::getVerticalNumberPrecision()
 {
     return m_verticalNumberPrecision;
 }
 
-/**
- * @brief Sets the horizantal number precision parameter and updates internal state.
- * @param precision Input parameter specifying precision (int).
- */
+// Sets horizantal number precision value and updates internal subsystem configuration.
 void QGLchart::setHorizantalNumberPrecision(int precision)
 {
     m_HorizantalNumberPrecision = precision;
 }
 
-/**
- * @brief Retrieves the current horizantal number precision value.
- * @return Output value of type int.
- */
+// Retrieves current horizantal number precision state.
 int QGLchart::getHorizantalNumberPrecision()
 {
     return m_HorizantalNumberPrecision;
 }
 
-/**
- * @brief Executes the draw horizontal numbers procedure for QGLchart.
- */
+// Executes draw horizontal numbers routine.
 void QGLchart::drawHorizontalNumbers()
 {
     float hNumber;
@@ -4308,6 +3949,7 @@ void QGLchart::drawHorizontalNumbers()
     }
 }
 
+// Executes draw vertical numbers routine.
 void QGLchart::drawVerticalNumbers()
 {
     float vNumber;
@@ -4342,11 +3984,7 @@ void QGLchart::drawVerticalNumbers()
     }
 }
 
-/**
- * @brief Executes the y axis number tuner procedure for QGLchart.
- * @param inputNumbers Input parameter specifying inputNumbers (QVector<QString>).
- * @return Output value of type QVector<QPair<QString, qreal> >.
- */
+// Executes y axis number tuner routine.
 QVector<QPair<QString, qreal> > QGLchart::yAxisNumberTuner(QVector<QString> inputNumbers)
 {
     double desiredDistance = m_viewPortBottomLeft.x() - 2 - (m_geometry.width() * m_verticalLebelRelPos.x());
@@ -4402,6 +4040,7 @@ QVector<QPair<QString, qreal> > QGLchart::yAxisNumberTuner(QVector<QString> inpu
 /*								 Yaxis2 Plotting Functions								*/
 /****************************************************************************************/
 
+// Executes draw yaxis2 numbers routine.
 void QGLchart::drawYaxis2Numbers()
 {
     float vNumber;
@@ -4429,18 +4068,14 @@ void QGLchart::drawYaxis2Numbers()
     }
 }
 
-/**
- * @brief Executes the draw yaxis2 text procedure for QGLchart.
- */
+// Executes draw yaxis2 text routine.
 void QGLchart::drawYaxis2Text()
 {
     RenderTextVertical(yAxis2->titleText().toLocal8Bit().constData(), m_geometry.height() / 2.0 - (m_geometry.height() * 0.10),
         -(m_geometry.width() * 0.975), 0.32f, qColorToQVector3D(m_verticalAxes->titleBrush().color()));
 }
 
-/**
- * @brief Executes the draw yaxis2 label text procedure for QGLchart.
- */
+// Executes draw yaxis2 label text routine.
 void QGLchart::drawYaxis2LabelText()
 {
     RenderTextVertical(yAxis2->labelsText().toLocal8Bit().constData(), m_geometry.height() / 2.0 + (m_geometry.height() * 0.05), -(m_geometry.width() * 0.975), 0.32f, QVector3D(0.0, 1.0f, 0.0f));
@@ -4450,6 +4085,7 @@ void QGLchart::drawYaxis2LabelText()
 /*								  Marker Plotting Functions								*/
 /****************************************************************************************/
 
+// Initializes initialize marker program for QGLchart.
 void QGLchart::initializeMarkerProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -4499,9 +4135,7 @@ void QGLchart::initializeMarkerProgram()
     m_markerProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update marker program data stream and visual indicators.
- */
+// Updates and synchronizes update marker program data stream.
 void QGLchart::updateMarkerProgram()
 {
     f->glEnable(GL_BLEND);
@@ -4569,6 +4203,7 @@ void QGLchart::updateMarkerProgram()
 /*								 Waterfall Plotting Functions							*/
 /****************************************************************************************/
 
+// Initializes initialize box water fall program for QGLchart.
 void QGLchart::initializeBoxWaterFallProgram()
 {
     m_boxWaterFallProgram = new QOpenGLShaderProgram();
@@ -4602,9 +4237,7 @@ void QGLchart::initializeBoxWaterFallProgram()
     m_boxWaterFallProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update old box water fall program data stream and visual indicators.
- */
+// Updates and synchronizes update old box water fall program data stream.
 void QGLchart::updateOldBoxWaterFallProgram()
 {
     /*auto t1 = m_newWaterfallFrameBuffer->size().width();
@@ -4658,6 +4291,7 @@ void QGLchart::updateOldBoxWaterFallProgram()
 
 }
 
+// Updates and synchronizes update box water fall program data stream.
 void QGLchart::updateBoxWaterFallProgram()
 {
     f->glEnable(GL_BLEND);
@@ -4691,9 +4325,7 @@ void QGLchart::updateBoxWaterFallProgram()
     f->glDisable(GL_BLEND);
 }
 
-/**
- * @brief Initializes and configures the initialize color palettes program for the QGLchart subsystem.
- */
+// Initializes initialize color palettes program for QGLchart.
 void QGLchart::initializeColorPalettesProgram()
 {
     //Create Shader (DO not release unit VAO is created)
@@ -4730,9 +4362,7 @@ void QGLchart::initializeColorPalettesProgram()
     m_colorPalettesProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update color palettes program data stream and visual indicators.
- */
+// Updates and synchronizes update color palettes program data stream.
 void QGLchart::updateColorPalettesProgram()
 {
     f->glEnable(GL_BLEND);
@@ -4761,9 +4391,7 @@ void QGLchart::updateColorPalettesProgram()
     f->glDisable(GL_BLEND);
 }
 
-/**
- * @brief Initializes and configures the initialize scatter plot program for the QGLchart subsystem.
- */
+// Initializes initialize scatter plot program for QGLchart.
 void QGLchart::initializeScatterPlotProgram()
 {
     m_scatterPlotProgram = new QOpenGLShaderProgram();
@@ -4807,10 +4435,7 @@ void QGLchart::initializeScatterPlotProgram()
     m_scatterPlotProgram->release();
 }
 
-/**
- * @brief Updates and synchronizes the update scatter plot program data stream and visual indicators.
- * @param series Input parameter specifying series (QCustomSeries*).
- */
+// Updates and synchronizes update scatter plot program data stream.
 void QGLchart::updateScatterPlotProgram(QCustomSeries* series)
 {
     f->glEnable(GL_BLEND);
@@ -4875,12 +4500,7 @@ void QGLchart::updateScatterPlotProgram(QCustomSeries* series)
     f->glViewport(0, 0, m_geometry.width(), m_geometry.height());
 }
 
-/**
- * @brief Calculates and returns the mathematical calculate scatter scale formulation.
- * @param windowLength Input parameter specifying windowLength (int).
- * @param axisRange Input parameter specifying axisRange (float).
- * @return Output value of type float.
- */
+// Computes mathematical calculate scatter scale calculation.
 float QGLchart::calculateScatterScale(int windowLength, float axisRange)
 {
     float axisScale;
@@ -4888,11 +4508,7 @@ float QGLchart::calculateScatterScale(int windowLength, float axisRange)
     return axisScale;
 }
 
-/**
- * @brief Executes the rect to vector procedure for QGLchart.
- * @param rect Input parameter specifying rect (const QRectF).
- * @param vector Input parameter specifying vector (QVector<QVector3D>).
- */
+// Executes rect to vector routine.
 void QGLchart::rectToVector(const QRectF &rect, QVector<QVector3D> *vector)
 {
     vector->append(QVector3D(rect.bottomLeft()));
@@ -4901,11 +4517,7 @@ void QGLchart::rectToVector(const QRectF &rect, QVector<QVector3D> *vector)
     vector->append(QVector3D(rect.topRight()));
 }
 
-/**
- * @brief Calculates and returns the mathematical calculate view port formulation.
- * @param geometry Input parameter specifying geometry (const QRect).
- * @param margins Input parameter specifying margins (const QMarginsF).
- */
+// Computes mathematical calculate view port calculation.
 void QGLchart::calculateViewPort(const QRect &geometry, const QMarginsF &margins)
 {
     m_viewPortBottomLeft.setX((int)( ((qreal)geometry.width()) * margins.left()));
@@ -4925,10 +4537,7 @@ void QGLchart::calculateViewPort(const QRect &geometry, const QMarginsF &margins
     m_drawRegion = temp;
 }
 
-/**
- * @brief Executes the max series size procedure for QGLchart.
- * @return Output value of type int.
- */
+// Executes max series size routine.
 int QGLchart::maxSeriesSize()
 {
     int maxSeriesSizeHolder = 0;
@@ -4941,11 +4550,7 @@ int QGLchart::maxSeriesSize()
     return maxSeriesSizeHolder;
 }
 
-/**
- * @brief Executes the q color to q vector3 d procedure for QGLchart.
- * @param color Input parameter specifying color (const QColor).
- * @return Output value of type QVector3D.
- */
+// Executes q color to q vector3 d routine.
 QVector3D QGLchart::qColorToQVector3D(const QColor &color)
 {
     QVector3D colorVector;

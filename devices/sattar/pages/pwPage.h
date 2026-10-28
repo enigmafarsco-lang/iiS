@@ -1,11 +1,8 @@
-/**
- * @file pwPage.h
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pwPage.h
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for pwPage.h.
+// ============================================================================
 
 #ifndef PWPAGE_H
 #define PWPAGE_H
@@ -19,11 +16,6 @@
 #include "../components/sattarutils.h"
 
 namespace Ui {
-/**
- * @class PWPage
- * @brief High-level controller class for PWPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PWPage;
 };
 
@@ -31,11 +23,6 @@ class PWPage;
 enum pwTypeData{};
 
 
-/**
- * @class PWPage
- * @brief High-level controller class for PWPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class PWPage : public QWidget
 {
     Q_OBJECT
@@ -51,35 +38,17 @@ public:
     radarSpace::radarDataStruct * radarData;
     priSpace::priDataStruct     * priData;
 
-    /**
-     * @brief Destructor for PWPage, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up PWPage resources, timers, and allocated memory.
     ~PWPage();
 
 private:
-    /**
-     * @brief Executes the generate p w data procedure for PWPage.
-     * @param data Input parameter specifying data (pwSpace::pwDataStruct).
-     * @return Output value of type bool.
-     */
+    // Executes generate p w data routine.
     bool generatePWData(pwSpace::pwDataStruct &data );
-    /**
-     * @brief Executes the pw table value procedure for PWPage.
-     * @param QString Input parameter specifying QString (QString).
-     * @return Output value of type bool.
-     */
+    // Executes pw table value routine.
     bool pwTableValue(QString);
-    /**
-     * @brief Executes the pw compare procedure for PWPage.
-     * @param float& Input parameter specifying float& (float&).
-     * @return Output value of type bool.
-     */
+    // Executes pw compare routine.
     bool pwCompare(float&);
-    /**
-     * @brief Executes the pw range procedure for PWPage.
-     * @param float& Input parameter specifying float& (float&).
-     * @return Output value of type bool.
-     */
+    // Executes pw range routine.
     bool pwRange(float&);
     SattarUtils * utils;
     bool firstRun{true};
@@ -89,43 +58,31 @@ private:
     int row=0;
 
 public slots:
-    /**
-     * @brief Executes the pw info slot procedure for PWPage.
-     * @param pwSpace::pwTypeEnum Input parameter specifying pwSpace::pwTypeEnum (pwSpace::pwTypeEnum).
-     */
+    // Executes pw info slot routine.
     void pwInfoSlot(pwSpace::pwTypeEnum);
-    /**
-     * @brief Executes the change lable procedure for PWPage.
-     */
+    // Executes change lable routine.
     void changeLable();
-    /**
-     * @brief Executes the btn red procedure for PWPage.
-     */
+    // Executes btn red routine.
     void btnRed();
 //    void changeColor();
 
 private slots:
+    // Event/Signal handler for on tbl p w cell changed.
     void on_tblPW_cellChanged(int row, int column);
+    // Event/Signal handler for on btn clear clicked.
     void on_btnClear_clicked();
+    // Event/Signal handler for on btn add clicked.
     void on_btnAdd_clicked();
-    /**
-     * @brief Slot handler responding to on btn ok clicked event.
-     */
+    // Event/Signal handler for on btn ok clicked.
     void on_btnOk_clicked();
-    /**
-     * @brief Executes the btn green procedure for PWPage.
-     */
+    // Executes btn green routine.
     void btnGreen();
-    /**
-     * @brief Executes the btn slot procedure for PWPage.
-     */
+    // Executes btn slot routine.
     void btnSlot();
 
 
 signals:
-    /**
-     * @brief Executes the enable frq page procedure for PWPage.
-     */
+    // Executes enable frq page routine.
     void enableFrqPage();
 };
 

@@ -1,11 +1,8 @@
-/**
- * @file qmeterdrawfunctions.cpp
- * @brief Subsystem module for Pan in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: qmeterdrawfunctions.cpp
+// Subsystem: eLynxSDR Pan
+// Description: Subsystem implementation and interface guidance for qmeterdrawfunctions.cpp.
+// ============================================================================
 
 /*
  *   Copyright (C) 2016 by P. Sereno
@@ -24,10 +21,7 @@
 #define PI 3.1415926535
 
 
-/**
- * @brief Executes the draw crown procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw crown routine.
 void BPanGauge::drawCrown(QPainter *painter)
 {
 
@@ -47,20 +41,14 @@ void BPanGauge::drawCrown(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw background procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw background routine.
 void BPanGauge::drawBackground(QPainter *painter)
 {
     painter->setBrush(m_background);
     painter->drawEllipse(-45, -45, 90, 90);
 }
 
-/**
- * @brief Executes the draw ticks procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw ticks routine.
 void BPanGauge::drawTicks(QPainter *painter)
 {
     painter->save();
@@ -84,10 +72,7 @@ void BPanGauge::drawTicks(QPainter *painter)
 }
 
 
-/**
- * @brief Executes the draw scale procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw scale routine.
 void BPanGauge::drawScale(QPainter *painter)
 {
     painter->save();
@@ -113,10 +98,7 @@ void BPanGauge::drawScale(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw units procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw units routine.
 void BPanGauge::drawUnits(QPainter *painter)
 {
     painter->setPen(m_foreground);
@@ -126,10 +108,7 @@ void BPanGauge::drawUnits(QPainter *painter)
     painter->drawText(labelRect,Qt::AlignCenter, m_units);
 }
 
-/**
- * @brief Executes the draw numeric value procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw numeric value routine.
 void BPanGauge::drawNumericValue(QPainter *painter)
 {
     if( (!enableNumericIndicator()) )
@@ -160,10 +139,7 @@ void BPanGauge::drawNumericValue(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw needle procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw needle routine.
 void BPanGauge::drawNeedle(QPainter *painter)
 {
     painter->save();
@@ -201,10 +177,7 @@ void BPanGauge::drawNeedle(QPainter *painter)
     painter->drawEllipse(-7, -7, 14, 14);
 }
 
-/**
- * @brief Executes the draw threshold line procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw threshold line routine.
 void BPanGauge::drawThresholdLine(QPainter *painter)
 {
     if( (!enableThreshold()) )
@@ -225,10 +198,7 @@ void BPanGauge::drawThresholdLine(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw cover glass procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw cover glass routine.
 void BPanGauge::drawCoverGlass(QPainter *painter)
 {
     painter->save();
@@ -246,10 +216,7 @@ void BPanGauge::drawCoverGlass(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw label procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw label routine.
 void BPanGauge::drawLabel(QPainter *painter)
 {
     painter->save();
@@ -275,10 +242,7 @@ void BPanGauge::drawLabel(QPainter *painter)
     painter->restore();
 }
 
-/**
- * @brief Executes the draw warning window procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw warning window routine.
 void BPanGauge::drawWarningWindow(QPainter *painter)
 {
     if(enableWarningWindow())
@@ -300,10 +264,7 @@ void BPanGauge::drawWarningWindow(QPainter *painter)
     }
 }
 
-/**
- * @brief Executes the draw valid window procedure for BPanGauge.
- * @param painter Input parameter specifying painter (QPainter).
- */
+// Executes draw valid window routine.
 void BPanGauge::drawValidWindow(QPainter *painter)
 {
     if(enableValidWindow())

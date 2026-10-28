@@ -1,3 +1,9 @@
+// ============================================================================
+// File: led.h
+// Subsystem: eLynxSDR led
+// Description: Subsystem implementation and interface guidance for led.h.
+// ============================================================================
+
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -37,58 +43,46 @@
      
      public:  
      
-     /**
-      * @brief Constructs a new Led instance and initializes subsystem components and UI state.
-      * @param parent Input parameter specifying parent (QWidget).
-      */
+     // Constructor: Initializes Led subsystem components, default parameters, and state.
      Led(QWidget *parent = 0);
      virtual ~Led() {};
      
      /** Zdarzenie obsugujce malowanie kontrolki */ 
+     // Executes paint event routine.
      void paintEvent(QPaintEvent * event);
+	 // Executes mouse press event routine.
 	 void mousePressEvent(QMouseEvent *ev);
+     // Retrieves current hecked state.
      bool isChecked () const ; 
      
      
-     /**
-      * @brief Executes the color procedure for Led.
-      * @return Output value of type QColor.
-      */
+     // Executes color routine.
      QColor color() const; 
-     /**
-      * @brief Sets the color parameter and updates internal state.
-      * @param QColor Input parameter specifying QColor (QColor).
-      */
+     // Sets color value and updates internal subsystem configuration.
      void setColor(QColor); 
      
      public slots: 
      
-     /**
-      * @brief Sets the checked parameter and updates internal state.
-      * @param bool Input parameter specifying bool (bool).
-      */
+     // Sets checked value and updates internal subsystem configuration.
      void setChecked(bool); 
      
      signals: 
      
-     /**
-      * @brief Executes the check changed procedure for Led.
-      * @param val Input parameter specifying val (bool).
-      */
+     // Executes check changed routine.
      void checkChanged(bool val); 
-	 /**
-	  * @brief Slot handler responding to clicked event.
-	  */
+	 // Event/Signal handler for clicked.
 	 void clicked();
      protected:
      
      /** Inicjuje ukad wsprzdnych paintera */
+     // Initializes init coordinate system for Led.
      void initCoordinateSystem(QPainter & painter);
      
      /**
      * Maluje to kontrolki w tym przypadku pierwszy plan czyli odblask wiata kontrolki
      * @param painter Przestrze kontrolki 
      */
+     // Executes paint background routine.
      void paintBackground(QPainter & painter);
     
      protected: 

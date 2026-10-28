@@ -1,11 +1,8 @@
-/**
- * @file adrv9009.cpp
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: adrv9009.cpp
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for adrv9009.cpp.
+// ============================================================================
 
 #include "adrv9009.h"
 #include "qtconcurrentrun.h"
@@ -244,6 +241,7 @@ adrv9009::adrv9009(QApplication *app,QWidget *parent) :
 
 }
 
+// Destructor: Cleans up adrv9009 resources, timers, and allocated memory.
 adrv9009::~adrv9009()
 {
     if (refreshTimer)
@@ -471,6 +469,7 @@ void adrv9009::update_label_with_scale_from(QLabel *label,
 /**
  * @brief adrv9009::glb_settings_update_labels
  */
+// Executes glb settings update labels routine.
 void adrv9009::glb_settings_update_labels()
 {
 
@@ -611,6 +610,7 @@ void adrv9009::save_widget_value(struct iio_widget *iio_w) {
  * Called whenever the P calibration (Pc) changes - the spinboxes keep
  * showing Pa while the board value follows Pb.
  */
+// Executes widget value routine.
 double adrv9009::widgetValue(QWidget *w) const
 {
     if (!w)
@@ -626,11 +626,7 @@ double adrv9009::widgetValue(QWidget *w) const
     return 0.0;
 }
 
-/**
- * @brief Executes the apply widget value procedure for adrv9009.
- * @param w Input parameter specifying w (QWidget).
- * @param v Input parameter specifying v (double).
- */
+// Executes apply widget value routine.
 void adrv9009::applyWidgetValue(QWidget *w, double v)
 {
     if (!w)
@@ -651,10 +647,7 @@ void adrv9009::applyWidgetValue(QWidget *w, double v)
     }
 }
 
-/**
- * @brief Sets the tings widget list parameter and updates internal state.
- * @return Output value of type QVector<QPair<QString, QWidget *> >.
- */
+// Sets tings widget list value and updates internal subsystem configuration.
 QVector<QPair<QString, QWidget *> > adrv9009::settingsWidgetList()
 {
     QVector<QPair<QString, QWidget *> > list;
@@ -738,6 +731,7 @@ bool adrv9009::loadSettingsFromIni(const QString &fileName)
  * Oscilloscope]) and the plugin state keys are not board settings and
  * are skipped.
  */
+// Executes load iio osc settings routine.
 bool adrv9009::loadIioOscSettings(const QString &fileName)
 {
     if (!globals::ctx)
@@ -874,9 +868,7 @@ void adrv9009::firmwareResetOverLan()
         qWarning() << "ADRV9009 firmware reset over LAN: initialize write FAILED:" << (long long)ret;
 }
 
-/**
- * @brief Executes the resave tx gain widgets procedure for adrv9009.
- */
+// Executes resave tx gain widgets routine.
 void adrv9009::resaveTxGainWidgets()
 {
     for (int i = 0; i < subcomponents.size(); i++) {
@@ -1063,6 +1055,7 @@ void adrv9009::make_widget_update_signal_based(struct iio_widget *widgets,
  * Gets all devices that have their name starting with the given sequence.
  * Returns an array of 'struct iio_device *' elements.
  */
+// Retrieves current iio_devices_starting_with state.
 GArray * adrv9009::get_iio_devices_starting_with(struct iio_context *ctx, const char *sequence)
 {
     GArray *devices = g_array_new(FALSE, FALSE, sizeof(struct iio_devices *));
@@ -1922,6 +1915,7 @@ QWidget *adrv9009::init()
  */
 
 
+// Event/Signal handler for on btn reload settings clicked.
 void adrv9009::on_btnReloadSettings_clicked()
 {
     update_widgets();
@@ -1932,9 +1926,7 @@ void adrv9009::on_btnReloadSettings_clicked()
     rx_phase_rotation_update();
 }
 
-/**
- * @brief Executes the print hello procedure for adrv9009.
- */
+// Executes print hello routine.
 void adrv9009::printHello()
 {
     std::cout << "hellooooooooooooooooooo" <<std::endl;
@@ -1944,6 +1936,7 @@ void adrv9009::printHello()
 /**
  * @brief adrv9009::reload_button_clicked
  */
+// Event/Signal handler for reload button clicked.
 void adrv9009::reload_button_clicked()
 {
     update_widgets();
@@ -1958,14 +1951,7 @@ void adrv9009::reload_button_clicked()
 
 #pragma region Hopping {
 
-/**
- * @brief Executes the start hopping procedure for adrv9009.
- * @param status Input parameter specifying status (bool).
- * @param min Input parameter specifying min (double).
- * @param max Input parameter specifying max (double).
- * @param step Input parameter specifying step (double).
- * @param delay Input parameter specifying delay (int).
- */
+// Executes start hopping routine.
 void adrv9009::startHopping(bool status,double min,double max,double step,int delay)
 {
     hopping=status;
@@ -2007,10 +1993,7 @@ void adrv9009::startHopping(bool status,double min,double max,double step,int de
     });
 }
 
-/**
- * @brief Executes the test procedure for adrv9009.
- * @param QString Input parameter specifying QString (QString).
- */
+// Executes test routine.
 void adrv9009::test(QString)
 {
     int i;
@@ -2037,6 +2020,7 @@ void adrv9009::LogValue(QString value){
  * @brief rx_phase_rotation_set
  * @param user_data
  */
+// Executes rx phase rotation set routine.
 void adrv9009::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_data)
 {
     uintptr_t offset = (uintptr_t) user_data;
@@ -2073,6 +2057,7 @@ void adrv9009::rx_phase_rotation_set(QDoubleSpinBox *spinbutton,gpointer user_da
  * @brief adrv9009::tx_sample_rate_changed
  * @param spinbutton
  */
+// Event/Signal handler for tx sample rate changed.
 void adrv9009::tx_sample_rate_changed(const int value)
 {
     gdouble rate;
@@ -2085,6 +2070,7 @@ void adrv9009::tx_sample_rate_changed(const int value)
 /**
  * @brief adrv9009::int_dec_freq_update
  */
+// Executes int dec freq update routine.
 void adrv9009::int_dec_freq_update(void)
 {
     struct iio_channel *ch;
@@ -2109,6 +2095,7 @@ void adrv9009::int_dec_freq_update(void)
 /**
  * @brief adrv9009::int_dec_update_cb
  */
+// Executes int dec update cb routine.
 void adrv9009::int_dec_update_cb()
 {
     //    int_dec_freq_update();
@@ -2119,6 +2106,7 @@ void adrv9009::int_dec_update_cb()
  * @brief adrv9009::get_gui_tx_sampling_freq
  * @return
  */
+// Retrieves current gui_tx_sampling_freq state.
 double adrv9009::get_gui_tx_sampling_freq()
 {
     if(subcomponents[0].tx_widgets[subcomponents[0].tx_sample_freq].widget)
@@ -2134,6 +2122,7 @@ double adrv9009::get_gui_tx_sampling_freq()
 /**
  * @brief adrv9009::rx_phase_rotation_update
  */
+// Executes rx phase rotation update routine.
 void adrv9009::rx_phase_rotation_update()
 {
     struct iio_channel *out[4];
@@ -2205,6 +2194,7 @@ void adrv9009::rx_phase_rotation_update()
 /**
  * @brief adrv9009::profile_update
  */
+// Executes profile update routine.
 void adrv9009::profile_update(void)
 {
     //    if (plugin_osc_running_state() == true) {
@@ -2236,6 +2226,7 @@ static void trigger_advanced_plugin_reload(void)
 }
 
 
+// Executes load tal profile routine.
 int adrv9009::load_tal_profile(QString file_name)
 {
     int ret = -ENOMEM;
@@ -2361,6 +2352,7 @@ err_set_filename:
 //    QDir::setCurrent(fileName.remove(QUrl(fileName).fileName()));
 //}
 
+// Event/Signal handler for on profile config clicked.
 void adrv9009::on_profile_config_clicked(QString fileName)
 {
     fileName = fileName.trimmed();
@@ -2405,14 +2397,7 @@ void adrv9009::on_profile_config_clicked(QString fileName)
 
 
 
-/**
- * @brief Sets the file parameter and updates internal state.
- * @param fileName Input parameter specifying fileName (QString).
- * @param scale Input parameter specifying scale (double).
- * @param pair01 Input parameter specifying pair01 (bool).
- * @param pair23 Input parameter specifying pair23 (bool).
- * @return Output value of type QString.
- */
+// Sets file value and updates internal subsystem configuration.
 QString adrv9009::setFile(QString fileName,double scale,bool pair01,bool pair23)
 {
         if (!pair01 && !pair23)
@@ -2459,6 +2444,7 @@ static double g_cwDdsFrq = 10.0;
 static double g_cwDdsScale = -10.0;
 static double g_cwDdsPhase = 0.0;
 
+// Sets cw dds params value and updates internal subsystem configuration.
 void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
 {
     g_cwDdsFrq = freqMhz;
@@ -2466,11 +2452,7 @@ void adrv9009::setCwDdsParams(double freqMhz, double scaleDbfs, double phaseDeg)
     g_cwDdsPhase = phaseDeg;
 }
 
-/**
- * @brief Executes the changing dac procedure for adrv9009.
- * @param mode Input parameter specifying mode (QString).
- * @return Output value of type QString.
- */
+// Executes changing dac routine.
 QString adrv9009::changingDac(QString mode)
 {
     if (!dac_tx_manager)
@@ -2565,10 +2547,7 @@ QString adrv9009::changeDacToBuffer()
         return "DAC output changed from CW tone to DAC Buffer Output.";
 }
 
-/**
- * @brief Retrieves the current ac buffer running value.
- * @return Output value of type bool.
- */
+// Retrieves current ac buffer running state.
 bool adrv9009::isDacBufferRunning() const
 {
     return dac_tx_manager != nullptr && dac_tx_manager->dds_buffer != nullptr;

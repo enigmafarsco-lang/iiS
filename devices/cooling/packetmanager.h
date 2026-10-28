@@ -1,11 +1,8 @@
-/**
- * @file packetmanager.h
- * @brief Subsystem module for cooling in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: packetmanager.h
+// Subsystem: eLynxSDR cooling
+// Description: Subsystem implementation and interface guidance for packetmanager.h.
+// ============================================================================
 
 #ifndef PACKETMANAGER_H
 #define PACKETMANAGER_H
@@ -19,11 +16,6 @@
 #define _FOOTER_ 0xCCDD
 
 
-/**
- * @class packetManager
- * @brief High-level controller class for packetManager.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class packetManager : public QObject
 {
     Q_OBJECT
@@ -128,9 +120,7 @@ public:
     }CoolingBoard_t;
 
 
-    /**
-     * @brief Constructs a new packetManager instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes packetManager subsystem components, default parameters, and state.
     packetManager();
     static uint8_t LT[50];
     static CoolingBoard_t CoolingBoard;
@@ -139,34 +129,25 @@ public:
 private:
 //    TCPClient tcpClient;
     bool creatPacket(uint8_t slaveNumber,uint8_t *data,uint8_t Packetlen,FC_t fc);
+    // Executes f c  write mult reg  fun routine.
     bool FC_WriteMultReg_Fun(uint8_t data[]);
+    // Executes c r c16  calculate routine.
     uint16_t CRC16_Calculate( uint8_t *buf,uint16_t len );
+    // Executes fill model routine.
     void fillModel();
+    // Executes check input packet routine.
     void checkInputPacket(uint8_t *inPack);
-    /**
-     * @brief Executes the validation input packet procedure for packetManager.
-     * @param inPack Input parameter specifying inPack (uint8_t).
-     * @return Output value of type uint8_t.
-     */
+    // Executes validation input packet routine.
     uint8_t validationInputPacket(uint8_t *inPack);
-    /**
-     * @brief Executes the f c  read mult reg  fun procedure for packetManager.
-     * @param data Input parameter specifying data (uint8_t).
-     */
+    // Executes f c  read mult reg  fun routine.
     void FC_ReadMultReg_Fun(uint8_t *data);
 
 
 public slots:
-    /**
-     * @brief Executes the packet received procedure for packetManager.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Executes packet received routine.
     void packetReceived(QByteArray);
 signals:
-    /**
-     * @brief Executes the new data update procedure for packetManager.
-     * @param CoolingBoard_t Input parameter specifying CoolingBoard_t (CoolingBoard_t).
-     */
+    // Executes new data update routine.
     void newDataUpdate(CoolingBoard_t);
 
 };

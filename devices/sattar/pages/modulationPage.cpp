@@ -1,11 +1,8 @@
-/**
- * @file modulationPage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: modulationPage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for modulationPage.cpp.
+// ============================================================================
 
 #include "modulationPage.h"
 #include "ui_modulationPage.h"
@@ -80,18 +77,13 @@ ModulationPage::ModulationPage(QWidget *parent,
 
 }
 
-/**
- * @brief Destructor for ModulationPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up ModulationPage resources, timers, and allocated memory.
 ModulationPage::~ModulationPage()
 {
     delete ui;
 }
 
-/**
- * @brief Executes the modul info slot procedure for ModulationPage.
- * @param modultype Input parameter specifying modultype (modulSpace::modeTypeEnum).
- */
+// Executes modul info slot routine.
 void ModulationPage::modulInfoSlot(modulSpace::modeTypeEnum modultype)
 {
     if(modulData->type != modultype || firstRun )
@@ -138,6 +130,7 @@ void ModulationPage::modulInfoSlot(modulSpace::modeTypeEnum modultype)
 
 //------------------------xfm----------------------------------
 
+// Executes xfm action routine.
 bool ModulationPage::xfmAction()
 {
     modulData->xfmTargetFrq = ui->xfm_spnFrq->value() - BandA1;
@@ -178,6 +171,7 @@ bool ModulationPage::xfmAction()
 
 //-----------------------fsk-----------------------------------
 
+// Executes fsk action routine.
 bool ModulationPage::fskAction()
 {
     if(ui->fsk_radFskSimple->isChecked())
@@ -210,10 +204,7 @@ bool ModulationPage::fskAction()
     return  true;
 }
 
-/**
- * @brief Executes the bit infi modifier procedure for ModulationPage.
- * @return Output value of type QString.
- */
+// Executes bit infi modifier routine.
 QString ModulationPage::bitInfiModifier()
 {
     QString bitVal = ui->fsk_edtSimpleBitInfo->text();
@@ -253,10 +244,7 @@ QString ModulationPage::bitInfiModifier()
     return  modifiedBitInfo;
 }
 
-/**
- * @brief Executes the costas modifier procedure for ModulationPage.
- * @return Output value of type QString.
- */
+// Executes costas modifier routine.
 QString ModulationPage::costasModifier()
 {
     QString costasVal = ui->fsk_edtStepCoast->text();
@@ -307,9 +295,7 @@ QString ModulationPage::costasModifier()
     return  modifiedCosta;
 }
 
-/**
- * @brief Executes the delta check simple procedure for ModulationPage.
- */
+// Executes delta check simple routine.
 void ModulationPage::deltaCheckSimple()
 {
     for (uint i{}; i < frqData->countFrq; i++)
@@ -324,9 +310,7 @@ void ModulationPage::deltaCheckSimple()
 
 }
 
-/**
- * @brief Executes the delta check step procedure for ModulationPage.
- */
+// Executes delta check step routine.
 void ModulationPage::deltaCheckStep()
 {
     QStringList strTemp = modulData->fskStepCostas.split(",");
@@ -371,10 +355,7 @@ bool ModulationPage::bpskAction()
     return true;
 }
 
-/**
- * @brief Executes the barker modifier procedure for ModulationPage.
- * @return Output value of type QString.
- */
+// Executes barker modifier routine.
 QString ModulationPage::barkerModifier()
 {
     QString barkerVal = ui->bpsk_edtCustomCode->text();
@@ -414,9 +395,7 @@ QString ModulationPage::barkerModifier()
     return  modifiedBarkerVal;
 }
 
-/**
- * @brief Slot handler responding to on bpsk btn random generate clicked event.
- */
+// Event/Signal handler for on bpsk btn random generate clicked.
 void ModulationPage::on_bpsk_btnRandomGenerate_clicked()
 {
     int count = ui->bpsk_spnCount->value();
@@ -437,6 +416,7 @@ void ModulationPage::on_bpsk_btnRandomGenerate_clicked()
 
 //-----------------------qpsk-----------------------------------
 
+// Executes qpsk action routine.
 void ModulationPage::qpskAction()
 {
     modulData->qpskTB = ui->qpsk_spnTb->value(); // bit duration
@@ -457,9 +437,7 @@ void ModulationPage::qpskAction()
     utils->spureGenerateDate(*spureData, *modulData, *radarData, *frqData, *priData, *pwData);
 }
 
-/**
- * @brief Slot handler responding to on qpsk btn random generate clicked event.
- */
+// Event/Signal handler for on qpsk btn random generate clicked.
 void ModulationPage::on_qpsk_btnRandomGenerate_clicked()
 {
     int count = ui->qpsk_spnCustomCount->value();
@@ -478,10 +456,7 @@ void ModulationPage::on_qpsk_btnRandomGenerate_clicked()
     ui->qpsk_edtCustomCode->setText(custom);
 }
 
-/**
- * @brief Executes the custom code modifier procedure for ModulationPage.
- * @return Output value of type QString.
- */
+// Executes custom code modifier routine.
 QString  ModulationPage::customCodeModifier()
 {
     //    QString customVal = ui->qpsk_edtCustomCode->text();
@@ -527,6 +502,7 @@ QString  ModulationPage::customCodeModifier()
 
 //------------------------others----------------------------------
 
+// Event/Signal handler for on xfm rad lfm toggled.
 void ModulationPage::on_xfm_radLfm_toggled(bool checked)
 {
     if(checked){
@@ -540,10 +516,7 @@ void ModulationPage::on_xfm_radLfm_toggled(bool checked)
     }
 }
 
-/**
- * @brief Slot handler responding to on bpsk rad barker code toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on bpsk rad barker code toggled.
 void ModulationPage::on_bpsk_radBarkerCode_toggled(bool checked)
 {
     if (checked)
@@ -558,10 +531,7 @@ void ModulationPage::on_bpsk_radBarkerCode_toggled(bool checked)
     }
 }
 
-/**
- * @brief Slot handler responding to on qpsk rad frank toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on qpsk rad frank toggled.
 void ModulationPage::on_qpsk_radFrank_toggled(bool checked)
 {
 
@@ -578,10 +548,7 @@ void ModulationPage::on_qpsk_radFrank_toggled(bool checked)
     }
 }
 
-/**
- * @brief Slot handler responding to on fsk rad fsk simple toggled event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on fsk rad fsk simple toggled.
 void ModulationPage::on_fsk_radFskSimple_toggled(bool checked)
 {
     //    std::cout << checked << std::endl;
@@ -597,10 +564,7 @@ void ModulationPage::on_fsk_radFskSimple_toggled(bool checked)
     }
 }
 
-/**
- * @brief Slot handler responding to on bpsk cmb barker code activated event.
- * @param index Input parameter specifying index (int).
- */
+// Event/Signal handler for on bpsk cmb barker code activated.
 void ModulationPage::on_bpsk_cmbBarkerCode_activated(int index)
 {
     switch (index)
@@ -640,9 +604,7 @@ void ModulationPage::on_bpsk_cmbBarkerCode_activated(int index)
     }
 }
 
-/**
- * @brief Slot handler responding to on btn ok clicked event.
- */
+// Event/Signal handler for on btn ok clicked.
 void ModulationPage::on_btnOk_clicked()
 {
     if(modulData->type == modulSpace::modeTypeEnum::xFM)

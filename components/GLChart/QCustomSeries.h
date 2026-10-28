@@ -1,11 +1,8 @@
-/**
- * @file QCustomSeries.h
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: QCustomSeries.h
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for QCustomSeries.h.
+// ============================================================================
 
 #pragma once
 
@@ -13,119 +10,59 @@
 #include <QtWidgets/QWidget>
 #include <QVector2D>
 
-/**
- * @class QCustomSeries
- * @brief High-level controller class for QCustomSeries.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class QCustomSeries : public QObject
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QObject).
-     */
+    // Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
     QCustomSeries(QObject *parent = nullptr);
-    /**
-     * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
-     * @param QCustomSeries& Input parameter specifying QCustomSeries& (const).
-     */
+    // Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
     QCustomSeries(const QCustomSeries&);
-    /**
-     * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
-     * @param QCustomSeries* Input parameter specifying QCustomSeries* (QCustomSeries*).
-     */
+    // Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
     QCustomSeries(QCustomSeries*);
-    /**
-     * @brief Destructor for QCustomSeries, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up QCustomSeries resources, timers, and allocated memory.
     ~QCustomSeries();
 
     QCustomSeries operator=(const QCustomSeries&);
 
-    /**
-     * @brief Executes the add series procedure for QCustomSeries.
-     * @param inputSeries Input parameter specifying inputSeries (const QVector<QVector2D>).
-     */
+    // Executes add series routine.
     void addSeries(const QVector<QVector2D> &inputSeries);
-    /**
-     * @brief Executes the add points procedure for QCustomSeries.
-     * @param inputPoints Input parameter specifying inputPoints (const QVector2D).
-     */
+    // Executes add points routine.
     void addPoints(const QVector2D &inputPoints);
 
 
-    /**
-     * @brief Executes the remove all points procedure for QCustomSeries.
-     */
+    // Executes remove all points routine.
     void removeAllPoints();
 
-    /**
-     * @brief Sets the series color parameter and updates internal state.
-     * @param color Input parameter specifying color (const QColor).
-     */
+    // Sets series color value and updates internal subsystem configuration.
     void setSeriesColor(const QColor &color);
-    /**
-     * @brief Executes the series color procedure for QCustomSeries.
-     * @return Output value of type QColor.
-     */
+    // Executes series color routine.
     QColor seriesColor() const;
 
-    /**
-     * @brief Executes the series size procedure for QCustomSeries.
-     * @return Output value of type int.
-     */
+    // Executes series size routine.
     int seriesSize() const;
 
-    /**
-     * @brief Sets the visible parameter and updates internal state.
-     * @param visible Input parameter specifying visible (bool).
-     */
+    // Sets visible value and updates internal subsystem configuration.
     void setVisible(bool visible = true);
-    /**
-     * @brief Retrieves the current isible value.
-     * @return Output value of type bool.
-     */
+    // Retrieves current isible state.
     bool isVisible() const;
 
-    /**
-     * @brief Sets the series name parameter and updates internal state.
-     * @param name Input parameter specifying name (QString).
-     */
+    // Sets series name value and updates internal subsystem configuration.
     void setSeriesName(QString name);
-    /**
-     * @brief Retrieves the current series name value.
-     * @return Output value of type QString.
-     */
+    // Retrieves current series name state.
     QString getSeriesName() const;
 
-    /**
-     * @brief Executes the points vector procedure for QCustomSeries.
-     * @return Output value of type QVector<QVector2D>.
-     */
+    // Executes points vector routine.
     QVector<QVector2D> pointsVector() const;
 
-    /**
-     * @brief Executes the min y procedure for QCustomSeries.
-     * @return Output value of type float.
-     */
+    // Executes min y routine.
     float minY();
-    /**
-     * @brief Executes the max y procedure for QCustomSeries.
-     * @return Output value of type float.
-     */
+    // Executes max y routine.
     float maxY();
-    /**
-     * @brief Executes the min x procedure for QCustomSeries.
-     * @return Output value of type float.
-     */
+    // Executes min x routine.
     float minX();
-    /**
-     * @brief Executes the max x procedure for QCustomSeries.
-     * @return Output value of type float.
-     */
+    // Executes max x routine.
     float maxX();
 
 private:

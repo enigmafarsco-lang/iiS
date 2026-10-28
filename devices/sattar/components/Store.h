@@ -1,11 +1,8 @@
-/**
- * @file Store.h
- * @brief Subsystem module for components in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: Store.h
+// Subsystem: eLynxSDR components
+// Description: Subsystem implementation and interface guidance for Store.h.
+// ============================================================================
 
 #ifndef CONSTANTS_H
 #define CONSTANTS_H

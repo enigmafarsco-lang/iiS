@@ -1,11 +1,8 @@
-/**
- * @file targetdetector.cpp
- * @brief Subsystem module for targetDetector in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: targetdetector.cpp
+// Subsystem: eLynxSDR targetDetector
+// Description: Subsystem implementation and interface guidance for targetdetector.cpp.
+// ============================================================================
 
 #include "targetdetector.h"
 #include "ui_targetdetector.h"
@@ -17,27 +14,19 @@ TargetDetector::TargetDetector(QWidget *parent) :
     ui->setupUi(this);
 }
 
-/**
- * @brief Destructor for TargetDetector, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up TargetDetector resources, timers, and allocated memory.
 TargetDetector::~TargetDetector()
 {
     delete ui;
 }
 
-/**
- * @brief Slot handler responding to on chb auto set clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on chb auto set clicked.
 void TargetDetector::on_chbAutoSet_clicked(bool checked)
 {
 
 }
 
-/**
- * @brief Reads, parses, and decodes incoming receive command from object slot data buffer.
- * @param response Input parameter specifying response (QString).
- */
+// Reads and parses incoming receive command from object slot data.
 void TargetDetector::receiveCommandFromObjectSlot(QString response)
 {
 
@@ -49,10 +38,7 @@ void TargetDetector::receiveCommandFromObjectSlot(QString response)
     }
 }
 
-/**
- * @brief Executes the udp device response slot procedure for TargetDetector.
- * @param response Input parameter specifying response (QByteArray).
- */
+// Executes udp device response slot routine.
 void TargetDetector::udpDeviceResponseSlot(QByteArray response)
 {
     QString packet;
@@ -107,10 +93,7 @@ void TargetDetector::udpDeviceResponseSlot(QByteArray response)
     }
 }
 
-/**
- * @brief Executes the tcp device response slot procedure for TargetDetector.
- * @param response Input parameter specifying response (QByteArray).
- */
+// Executes tcp device response slot routine.
 void TargetDetector::tcpDeviceResponseSlot(QByteArray response)
 {
     if (response.isNull() || response.isEmpty())

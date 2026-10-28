@@ -1,18 +1,12 @@
-/**
- * @file tiltcomponent.cpp
- * @brief Subsystem module for Tilt in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tiltcomponent.cpp
+// Subsystem: eLynxSDR Tilt
+// Description: Subsystem implementation and interface guidance for tiltcomponent.cpp.
+// ============================================================================
 
 #include "tiltcomponent.h"
 
-/**
- * @brief Constructs a new BTiltComponent instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QWidget).
- */
+// Constructor: Initializes BTiltComponent subsystem components, default parameters, and state.
 BTiltComponent::BTiltComponent(QWidget *parent) : QWidget(parent)
 {
     init_labels();
@@ -25,9 +19,7 @@ BTiltComponent::BTiltComponent(QWidget *parent) : QWidget(parent)
     connect(btnSetTiltAngle, SIGNAL(clicked()), this, SLOT(on_btnSetTiltAngle_clicked()));
 }
 
-/**
- * @brief Initializes and configures the init labels for the BTiltComponent subsystem.
- */
+// Initializes init labels for BTiltComponent.
 void BTiltComponent::init_labels()
 {
     lblTiltAngle = new QLabel("Tilt Angle:");
@@ -55,9 +47,7 @@ void BTiltComponent::init_labels()
     lblCurrentTiltAngleValue->setContentsMargins(3, 1, 3, 1);
 }
 
-/**
- * @brief Initializes and configures the init double spin boxes for the BTiltComponent subsystem.
- */
+// Initializes init double spin boxes for BTiltComponent.
 void BTiltComponent::init_doubleSpinBoxes()
 {
     dsbTiltAngle = new QDoubleSpinBox;
@@ -79,9 +69,7 @@ void BTiltComponent::init_doubleSpinBoxes()
     dsbTiltSpeed->setMaximum(60);
 }
 
-/**
- * @brief Initializes and configures the init buttons for the BTiltComponent subsystem.
- */
+// Initializes init buttons for BTiltComponent.
 void BTiltComponent::init_buttons()
 {
     btnSetTiltAngle = new QPushButton("Set Tilt Angle");
@@ -102,9 +90,7 @@ void BTiltComponent::init_buttons()
     }
 }
 
-/**
- * @brief Initializes and configures the init progress bar for the BTiltComponent subsystem.
- */
+// Initializes init progress bar for BTiltComponent.
 void BTiltComponent::init_progressBar()
 {
     pgbTiltAngle = new QProgressBar;
@@ -116,9 +102,7 @@ void BTiltComponent::init_progressBar()
     pgbTiltAngle->setStyleSheet("background-color:white");
 }
 
-/**
- * @brief Initializes and configures the init tilt for the BTiltComponent subsystem.
- */
+// Initializes init tilt for BTiltComponent.
 void BTiltComponent::init_tilt()
 {
     tiltGauge = new BTiltGauge;
@@ -126,9 +110,7 @@ void BTiltComponent::init_tilt()
     tiltGauge->setMinimumSize(240, 240);
 }
 
-/**
- * @brief Sets the components_arrangements parameter and updates internal state.
- */
+// Sets components_arrangements value and updates internal subsystem configuration.
 void BTiltComponent::set_components_arrangements()
 {
     grdMainLayout = new QGridLayout(this);

@@ -1,11 +1,8 @@
-/**
- * @file oscmain.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: oscmain.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for oscmain.cpp.
+// ============================================================================
 
 #include "oscmain.h"
 #include "ui_oscmain.h"
@@ -43,9 +40,7 @@ OSCMain::OSCMain(QApplication *app,QWidget *parent) :
     ClearTabContainer();
 }
 
-/**
- * @brief Destructor for OSCMain, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up OSCMain resources, timers, and allocated memory.
 OSCMain::~OSCMain()
 {
     delete ui;
@@ -55,19 +50,14 @@ OSCMain::~OSCMain()
 
 #pragma region Events {
 
-/**
- * @brief Executes the close event procedure for OSCMain.
- * @param event Input parameter specifying event (QCloseEvent).
- */
+// Executes close event routine.
 void OSCMain::closeEvent(QCloseEvent *event)
 {
     globals::status=false;
     application_quit();
 }
 
-/**
- * @brief Executes the application quit procedure for OSCMain.
- */
+// Executes application quit routine.
 void OSCMain::application_quit()
 {
     mainApp->quit();
@@ -77,26 +67,20 @@ void OSCMain::application_quit()
 
 #pragma region Menu {
 
-/**
- * @brief Slot handler responding to on action quit triggered event.
- */
+// Event/Signal handler for on action quit triggered.
 void OSCMain::on_actionQuit_triggered()
 {
     QApplication::quit();
 }
 
-/**
- * @brief Slot handler responding to on action connect triggered event.
- */
+// Event/Signal handler for on action connect triggered.
 void OSCMain::on_actionConnect_triggered()
 {
     connectDialog *connect_dialog=new connectDialog();
     connect_dialog->exec();
 }
 
-/**
- * @brief Slot handler responding to on action new  plot triggered event.
- */
+// Event/Signal handler for on action new  plot triggered.
 void OSCMain::on_actionNew_Plot_triggered()
 {
     Plot * plot = new Plot(mainApp);
@@ -104,9 +88,7 @@ void OSCMain::on_actionNew_Plot_triggered()
     plot->show();
 }
 
-/**
- * @brief Slot handler responding to on action load  save  profile triggered event.
- */
+// Event/Signal handler for on action load  save  profile triggered.
 void OSCMain::on_actionLoad_Save_Profile_triggered()
 {
     //    FileDialog* fileDialog=new FileDialog(this);
@@ -124,10 +106,7 @@ void OSCMain::on_actionLoad_Save_Profile_triggered()
 
 #pragma region Plot {
 
-/**
- * @brief Executes the new plot cb procedure for OSCMain.
- * @return Output value of type Plot *.
- */
+// Executes new plot cb routine.
 Plot * OSCMain::new_plot_cb()
 {
     Plot * new_plot;
@@ -149,11 +128,7 @@ Plot * OSCMain::new_plot_cb()
 
 }
 
-/**
- * @brief Executes the plot init procedure for OSCMain.
- * @param plot Input parameter specifying plot (Plot).
- * @param mode Input parameter specifying mode (QString).
- */
+// Executes plot init routine.
 void OSCMain::plot_init(Plot *plot, QString mode)
 {
     plot_list = g_list_append(plot_list, plot);
@@ -188,6 +163,7 @@ void OSCMain::plot_init(Plot *plot, QString mode)
 //    plot->show();
 }
 
+// Executes create default plot routine.
 void OSCMain::create_default_plot(void)
 {
     if (globals::ctx && !!iio_context_get_devices_count(globals::ctx) &&
@@ -200,12 +176,7 @@ void OSCMain::create_default_plot(void)
 
 #pragma region Profile {
 
-/**
- * @brief Executes the load profile procedure for OSCMain.
- * @param filename Input parameter specifying filename (const char).
- * @param load_plugins Input parameter specifying load_plugins (bool).
- * @return Output value of type int.
- */
+// Executes load profile routine.
 int OSCMain::load_profile(const char *filename, bool load_plugins)
 {
     int ret = 0;
@@ -344,12 +315,7 @@ nope:
     return ret;
 }
 
-/**
- * @brief Executes the load default profile procedure for OSCMain.
- * @param filename Input parameter specifying filename (char).
- * @param load_plugins Input parameter specifying load_plugins (bool).
- * @return Output value of type int.
- */
+// Executes load default profile routine.
 int OSCMain::load_default_profile(char *filename, bool load_plugins)
 {
     int ret = 0;
@@ -385,19 +351,13 @@ gchar *OSCMain::get_default_profile_name()
 
 #pragma region Plugins {
 
-/**
- * @brief Executes the clear tab container procedure for OSCMain.
- */
+// Executes clear tab container routine.
 void OSCMain::ClearTabContainer(void)
 {
     ui->tab_container->clear();
 }
 
-/**
- * @brief Retrieves the current plugin_from_name value.
- * @param name Input parameter specifying name (const char).
- * @return Output value of type struct osc_plugin *.
- */
+// Retrieves current plugin_from_name state.
 struct osc_plugin * OSCMain::get_plugin_from_name(const char *name)
 {
     GSList *node;
@@ -430,10 +390,7 @@ OscPreferences *OSCMain::aggregate_osc_preferences_from_plugins(GSList *plist)
     return NULL;
 }
 
-/**
- * @brief Executes the add plugin procedure for OSCMain.
- * @param plugin Input parameter specifying plugin (QString).
- */
+// Executes add plugin routine.
 void OSCMain::AddPlugin(QString plugin)
 {
 
@@ -489,12 +446,7 @@ void OSCMain::AddPlugin(QString plugin)
 
 }
 
-/**
- * @brief Executes the plugin restore ini state procedure for OSCMain.
- * @param plugin_name Input parameter specifying plugin_name (const char).
- * @param attribute Input parameter specifying attribute (const char).
- * @param value Input parameter specifying value (int).
- */
+// Executes plugin restore ini state routine.
 void OSCMain::plugin_restore_ini_state(const char *plugin_name, const char *attribute, int value)
 {
     struct detachable_plugin *dplugin;
@@ -529,12 +481,7 @@ void OSCMain::plugin_restore_ini_state(const char *plugin_name, const char *attr
 
 }
 
-/**
- * @brief Executes the plugin names cmp procedure for OSCMain.
- * @param a Input parameter specifying a (gconstpointer).
- * @param b Input parameter specifying b (gconstpointer).
- * @return Output value of type gint.
- */
+// Executes plugin names cmp routine.
 gint OSCMain::plugin_names_cmp(gconstpointer a, gconstpointer b)
 {
     struct detachable_plugin *p = (struct detachable_plugin *)a;
@@ -543,10 +490,7 @@ gint OSCMain::plugin_names_cmp(gconstpointer a, gconstpointer b)
     return strcmp(p->plugin->name, key);
 }
 
-/**
- * @brief Executes the osc plugin context free resources procedure for OSCMain.
- * @param ctx Input parameter specifying ctx (osc_plugin_context).
- */
+// Executes osc plugin context free resources routine.
 void OSCMain::osc_plugin_context_free_resources(osc_plugin_context *ctx)
 {
     if (ctx ->plugin_name)
@@ -555,9 +499,7 @@ void OSCMain::osc_plugin_context_free_resources(osc_plugin_context *ctx)
         g_list_free_full(ctx->required_devices, (GDestroyNotify)g_free);
 }
 
-/**
- * @brief Executes the load plugins procedure for OSCMain.
- */
+// Executes load plugins routine.
 void OSCMain::load_plugins()
 {
     ClearTabContainer();
@@ -576,11 +518,7 @@ void OSCMain::load_plugins()
 
 }
 
-/**
- * @brief Executes the force plugin procedure for OSCMain.
- * @param name Input parameter specifying name (const char).
- * @return Output value of type bool.
- */
+// Executes force plugin routine.
 bool OSCMain::force_plugin(const char *name)
 {
     const char *force_plugin = getenv("OSC_FORCE_PLUGIN");
@@ -610,10 +548,7 @@ bool OSCMain::force_plugin(const char *name)
     return false;
 }
 
-/**
- * @brief Executes the load plugin finish procedure for OSCMain.
- * @param plugin Input parameter specifying plugin (osc_plugin).
- */
+// Executes load plugin finish routine.
 void OSCMain::load_plugin_finish(osc_plugin *plugin)
 {
     struct detachable_plugin *d_plugin;
@@ -629,10 +564,7 @@ void OSCMain::load_plugin_finish(osc_plugin *plugin)
     plugin_make_detachable(d_plugin);
 }
 
-/**
- * @brief Executes the plugin make detachable procedure for OSCMain.
- * @param d_plugin Input parameter specifying d_plugin (detachable_plugin).
- */
+// Executes plugin make detachable routine.
 void OSCMain::plugin_make_detachable(detachable_plugin *d_plugin)
 {
     QWidget *page;
@@ -647,6 +579,7 @@ void OSCMain::plugin_make_detachable(detachable_plugin *d_plugin)
 }
 
 /* Before we really start, let's load the last saved profile */
+// Executes check inifile routine.
 bool OSCMain::check_inifile(const char *filepath)
 {
     struct stat sts;
@@ -678,12 +611,7 @@ bool OSCMain::check_inifile(const char *filepath)
     return TRUE;
 }
 
-/**
- * @brief Executes the plugins get preferred size procedure for OSCMain.
- * @param plist Input parameter specifying plist (GSList).
- * @param width Input parameter specifying width (int).
- * @param height Input parameter specifying height (int).
- */
+// Executes plugins get preferred size routine.
 void OSCMain::plugins_get_preferred_size(GSList *plist, int *width, int *height)
 {
     GSList *node;
@@ -708,9 +636,7 @@ void OSCMain::plugins_get_preferred_size(GSList *plist, int *width, int *height)
 
 #pragma region Initialize {
 
-/**
- * @brief Executes the do init procedure for OSCMain.
- */
+// Executes do init routine.
 void OSCMain::do_init()
 {
     if(!globals::ctx)
@@ -730,10 +656,7 @@ void OSCMain::do_init()
     spect_analyzer_plugin = get_plugin_from_name("Spectrum Analyzer");
 }
 
-/**
- * @brief Initializes and configures the init device list for the OSCMain subsystem.
- * @param iio_context*ctx Input parameter specifying iio_context*ctx (iio_context*ctx).
- */
+// Initializes init device list for OSCMain.
 void OSCMain::init_device_list(iio_context*ctx)
 {
     unsigned int i, j;
@@ -771,13 +694,7 @@ void OSCMain::init_device_list(iio_context*ctx)
     }
 }
 
-/**
- * @brief Executes the rx update device sampling freq procedure for OSCMain.
- * @param ctx Input parameter specifying ctx (iio_context*).
- * @param device Input parameter specifying device (const char).
- * @param freq Input parameter specifying freq (double).
- * @return Output value of type bool.
- */
+// Executes rx update device sampling freq routine.
 bool OSCMain::rx_update_device_sampling_freq(iio_context* ctx,const char *device, double freq)
 {
     struct iio_device *dev;
@@ -824,17 +741,13 @@ bool OSCMain::rx_update_device_sampling_freq(iio_context* ctx,const char *device
     return true;
 }
 
+// Retrieves current input_device state.
 bool OSCMain::is_input_device(const iio_device *dev)
 {
     return device_type_get(dev, 1);
 }
 
-/**
- * @brief Executes the device type get procedure for OSCMain.
- * @param dev Input parameter specifying dev (const iio_device).
- * @param type Input parameter specifying type (int).
- * @return Output value of type bool.
- */
+// Executes device type get routine.
 bool OSCMain::device_type_get(const iio_device *dev, int type)
 {
     struct iio_channel *ch;
@@ -855,11 +768,7 @@ bool OSCMain::device_type_get(const iio_device *dev, int type)
     return false;
 }
 
-/**
- * @brief Reads, parses, and decodes incoming read_sampling_frequency data buffer.
- * @param dev Input parameter specifying dev (const iio_device).
- * @return Output value of type double.
- */
+// Reads and parses incoming read_sampling_frequency data.
 double OSCMain::read_sampling_frequency(const iio_device *dev)
 {
     double freq = 400.0;
@@ -908,12 +817,7 @@ double OSCMain::read_sampling_frequency(const iio_device *dev)
     return freq;
 }
 
-/**
- * @brief Executes the osc iio device get trigger procedure for OSCMain.
- * @param dev Input parameter specifying dev (const iio_device).
- * @param trigger Input parameter specifying trigger (const iio_device).
- * @return Output value of type int.
- */
+// Executes osc iio device get trigger routine.
 int OSCMain::osc_iio_device_get_trigger(const iio_device *dev, const iio_device **trigger)
 {
     int ret;

@@ -1,11 +1,8 @@
-/**
- * @file sattarutils.cpp
- * @brief Subsystem module for components in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: sattarutils.cpp
+// Subsystem: eLynxSDR components
+// Description: Subsystem implementation and interface guidance for sattarutils.cpp.
+// ============================================================================
 
 #include "sattarutils.h"
 
@@ -16,10 +13,7 @@ QString SattarUtils::filePath{};
 int SattarUtils::N{7000};
 int SattarUtils::normalSample{} ;
 
-/**
- * @brief Constructs a new SattarUtils instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QObject).
- */
+// Constructor: Initializes SattarUtils subsystem components, default parameters, and state.
 SattarUtils::SattarUtils(QObject *parent) : QObject(parent)
 {
 
@@ -51,11 +45,7 @@ float SattarUtils::frqToTime(QString priBase)
     return 0;
 }
 
-/**
- * @brief Executes the time to float procedure for SattarUtils.
- * @param priBase Input parameter specifying priBase (QString).
- * @return Output value of type float.
- */
+// Executes time to float routine.
 float SattarUtils::timeToFloat(QString priBase)
 {
 
@@ -78,11 +68,7 @@ float SattarUtils::timeToFloat(QString priBase)
     return 0;
 }
 
-/**
- * @brief Executes the frq to u long procedure for SattarUtils.
- * @param priBase Input parameter specifying priBase (QString).
- * @return Output value of type ulong.
- */
+// Executes frq to u long routine.
 ulong SattarUtils::frqToULong(QString priBase)
 {
     QStringList priSpl = priBase.split(" ");
@@ -106,12 +92,7 @@ ulong SattarUtils::frqToULong(QString priBase)
     return 0;
 }
 
-/**
- * @brief Executes the time to u long procedure for SattarUtils.
- * @param time Input parameter specifying time (const uint).
- * @param measUnit Input parameter specifying measUnit (const QString).
- * @return Output value of type ulong.
- */
+// Executes time to u long routine.
 ulong SattarUtils::timeToULong(const uint &time, const QString &measUnit)
 {
 
@@ -138,12 +119,7 @@ ulong SattarUtils::timeToULong(const uint &time, const QString &measUnit)
     return time;
 }
 
-/**
- * @brief Executes the time to int procedure for SattarUtils.
- * @param time Input parameter specifying time (const uint).
- * @param measUnit Input parameter specifying measUnit (const QString).
- * @return Output value of type uint.
- */
+// Executes time to int routine.
 uint SattarUtils::timeToInt(const uint &time, const QString &measUnit)
 {
     if (measUnit == "nS")
@@ -169,10 +145,7 @@ uint SattarUtils::timeToInt(const uint &time, const QString &measUnit)
     return time;
 }
 
-/**
- * @brief Executes the msg function procedure for SattarUtils.
- * @param msg Input parameter specifying msg (QString).
- */
+// Executes msg function routine.
 void SattarUtils::msgFunction(QString msg)
 {
     QMessageBox msgBox;
@@ -182,11 +155,7 @@ void SattarUtils::msgFunction(QString msg)
 
 }
 
-/**
- * @brief Executes the float to time procedure for SattarUtils.
- * @param val Input parameter specifying val (float).
- * @return Output value of type QString.
- */
+// Executes float to time routine.
 QString SattarUtils::floatToTime(float &val)
 {
     QString tmp{};
@@ -622,10 +591,6 @@ void SattarUtils::simplifiedIQ(std::vector <int16_t> &vecInt)
 
 }
 
-/**
- * @brief Executes the normal iq procedure for SattarUtils.
- * @param vecInt Input parameter specifying vecInt (std::vector <int16_t>).
- */
 void SattarUtils::normalIq(std::vector <int16_t> &vecInt)
 {
     std::ofstream iqFile2("./sattar/"+radarName.toStdString()+".txt");
@@ -665,9 +630,6 @@ void SattarUtils::removeIqFile( QJsonObject &finalData)
     if(existFile) std::remove(c_str2);
 }
 
-/**
- * @brief Executes the minimized iq file procedure for SattarUtils.
- */
 void SattarUtils::minimizedIqFile()
 {
     std::ifstream existFile(fileAdress.toStdString());
@@ -727,10 +689,6 @@ void SattarUtils::createIqIsDone(int finishProcess,QProcess::ExitStatus z)
 
 
 
-/**
- * @brief Executes the show loading bar procedure for SattarUtils.
- * @param status Input parameter specifying status (bool).
- */
 void SattarUtils::showLoadingBar(bool status)
 {
     if (status)
@@ -754,11 +712,6 @@ void SattarUtils::showLoadingBar(bool status)
 
 
 
-/**
- * @brief Executes the save project procedure for SattarUtils.
- * @param jsonVal Input parameter specifying jsonVal (QJsonObject &).
- * @return Output value of type bool.
- */
 bool SattarUtils::saveProject(QJsonObject & jsonVal)
 {
 
@@ -795,11 +748,6 @@ bool SattarUtils::saveProject(QJsonObject & jsonVal)
     return false;
 }
 
-/**
- * @brief Executes the color state procedure for SattarUtils.
- * @param mode Input parameter specifying mode (colorStatus).
- * @param state Input parameter specifying state (bool).
- */
 void SattarUtils::colorState(colorStatus mode,bool state)
 {
     switch (mode)
@@ -950,11 +898,6 @@ bool SattarUtils::setMaxPulseCount(uint count, radarSpace::radarDataStruct &rada
     return  returnValue;
 }
 
-/**
- * @brief Retrieves the current total pulse count value.
- * @param radarData Input parameter specifying radarData (radarSpace::radarDataStruct).
- * @return Output value of type int.
- */
 int SattarUtils::getTotalPulseCount(radarSpace::radarDataStruct &radarData)
 {
     int returnValue{-1};
@@ -970,12 +913,6 @@ int SattarUtils::getTotalPulseCount(radarSpace::radarDataStruct &radarData)
     return  returnValue;
 }
 
-/**
- * @brief Executes the check error procedure for SattarUtils.
- * @param priData Input parameter specifying priData (priSpace::priDataStruct).
- * @param pwData Input parameter specifying pwData (pwSpace::pwDataStruct).
- * @return Output value of type bool.
- */
 bool SattarUtils::checkError(priSpace::priDataStruct &priData, pwSpace::pwDataStruct &pwData)
 {
 
@@ -1020,12 +957,6 @@ bool SattarUtils::spureGenerateDate(spureSpace::spureStruct &spurData,
     return true;
 }
 
-/**
- * @brief Executes the generate spure data procedure for SattarUtils.
- * @param pwData Input parameter specifying pwData (pwSpace::pwDataStruct).
- * @param spurData Input parameter specifying spurData (spureSpace::spureStruct).
- * @return Output value of type bool.
- */
 bool SattarUtils::generateSpureData(pwSpace::pwDataStruct &pwData,spureSpace::spureStruct &spurData)
 {
     spurData.pwSpure.pw.clear();
@@ -1036,13 +967,6 @@ bool SattarUtils::generateSpureData(pwSpace::pwDataStruct &pwData,spureSpace::sp
     return true;
 }
 
-/**
- * @brief Executes the generate spure data procedure for SattarUtils.
- * @param pwVal Input parameter specifying pwVal (uint).
- * @param priData Input parameter specifying priData (priSpace::priDataStruct &).
- * @param spurData Input parameter specifying spurData (spureSpace::spureStruct).
- * @return Output value of type bool.
- */
 bool SattarUtils::generateSpureData(uint &pwVal, priSpace::priDataStruct & priData,spureSpace::spureStruct &spurData)
 {
 
@@ -1056,14 +980,6 @@ bool SattarUtils::generateSpureData(uint &pwVal, priSpace::priDataStruct & priDa
 
 }
 
-/**
- * @brief Executes the generate spure data procedure for SattarUtils.
- * @param pw Input parameter specifying pw (uint).
- * @param freq Input parameter specifying freq (float).
- * @param modulData Input parameter specifying modulData (modulSpace::modulDataStruct).
- * @param spurData Input parameter specifying spurData (spureSpace::spureStruct).
- * @return Output value of type bool.
- */
 bool SattarUtils::generateSpureData(uint &pw,float &freq, modulSpace::modulDataStruct &modulData,spureSpace::spureStruct &spurData)
 {
 
@@ -1123,12 +1039,6 @@ bool SattarUtils::generateSpureData(uint &pw,float &freq, modulSpace::modulDataS
     return true;
 }
 
-/**
- * @brief Executes the generate spure data procedure for SattarUtils.
- * @param frqData Input parameter specifying frqData (frqSpace::frqDataStruct).
- * @param spurData Input parameter specifying spurData (spureSpace::spureStruct).
- * @return Output value of type bool.
- */
 bool SattarUtils::generateSpureData(frqSpace::frqDataStruct &frqData,spureSpace::spureStruct &spurData)
 {
     spurData.frqSpure.baseFrq = static_cast<float>(QRandomGenerator::global()->bounded( 100, 450));
@@ -1140,12 +1050,6 @@ bool SattarUtils::generateSpureData(frqSpace::frqDataStruct &frqData,spureSpace:
     return true;
 }
 
-/**
- * @brief Executes the regenerate pulse p r i procedure for SattarUtils.
- * @param count Input parameter specifying count (uint).
- * @param priVal Input parameter specifying priVal (priSpace::priDataStruct).
- * @return Output value of type int.
- */
 int SattarUtils::regeneratePulsePRI(uint count, priSpace::priDataStruct &priVal)
 {
 
@@ -1185,12 +1089,6 @@ int SattarUtils::regeneratePulsePRI(uint count, priSpace::priDataStruct &priVal)
     return   returnValue ;
 }
 
-/**
- * @brief Executes the regenerate pulse p w procedure for SattarUtils.
- * @param count Input parameter specifying count (uint).
- * @param pwData Input parameter specifying pwData (pwSpace::pwDataStruct).
- * @return Output value of type int.
- */
 int SattarUtils::regeneratePulsePW(uint count, pwSpace::pwDataStruct &pwData)
 {
     int returnValue{-1};

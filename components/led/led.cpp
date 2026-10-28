@@ -1,3 +1,9 @@
+// ============================================================================
+// File: led.cpp
+// Subsystem: eLynxSDR led
+// Description: Subsystem implementation and interface guidance for led.cpp.
+// ============================================================================
+
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -24,10 +30,7 @@
 #include "led.h" 
 
 
-/**
- * @brief Constructs a new Led instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QWidget *).
- */
+// Constructor: Initializes Led subsystem components, default parameters, and state.
 Led::Led(QWidget * parent):WidgetWithBackground(parent)
 {
   m_checked = true; 
@@ -36,20 +39,14 @@ Led::Led(QWidget * parent):WidgetWithBackground(parent)
 }
 
 
-/**
- * @brief Retrieves the current hecked value.
- * @return Output value of type bool.
- */
+// Retrieves current hecked state.
 bool Led::isChecked () const 
 {
   return m_checked; 
 }
 
 
-/**
- * @brief Sets the checked parameter and updates internal state.
- * @param i Input parameter specifying i (bool).
- */
+// Sets checked value and updates internal subsystem configuration.
 void Led::setChecked(bool i) 
 {
   m_checked = i; 
@@ -58,20 +55,14 @@ void Led::setChecked(bool i)
 }
 
 
-/**
- * @brief Executes the color procedure for Led.
- * @return Output value of type QColor.
- */
+// Executes color routine.
 QColor Led::color() const
 {
   return m_color; 
 }
 
 
-/**
- * @brief Sets the color parameter and updates internal state.
- * @param i Input parameter specifying i (QColor).
- */
+// Sets color value and updates internal subsystem configuration.
 void Led::setColor(QColor i)
 { 
   m_color = i; 
@@ -83,7 +74,7 @@ void Led::paintEvent(QPaintEvent * /* event*/ )
 {
   QPainter painter(this); 
   initCoordinateSystem(painter); 
-  // *** Draw circle */ 
+  // *** Draw circle
   int h,s,v,a; 
   QColor c,back = color(); 
   c=back; 
@@ -114,6 +105,7 @@ void Led::paintEvent(QPaintEvent * /* event*/ )
   drawBackground(); // to maluje na tym co dotychczas to co jest w bitmapce 
 }
 
+// Executes mouse press event routine.
 void Led::mousePressEvent(QMouseEvent * ev)
 {
 	emit(clicked());
@@ -137,10 +129,7 @@ void Led::paintBackground(QPainter & painter)
         
 }
 
-/**
- * @brief Initializes and configures the init coordinate system for the Led subsystem.
- * @param painter Input parameter specifying painter (QPainter &).
- */
+// Initializes init coordinate system for Led.
 void Led::initCoordinateSystem(QPainter & painter)
 {
   int side = qMin(width(), height());

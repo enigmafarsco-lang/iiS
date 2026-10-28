@@ -1,18 +1,12 @@
-/**
- * @file QCustomSeries.cpp
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: QCustomSeries.cpp
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for QCustomSeries.cpp.
+// ============================================================================
 
 #include "QCustomSeries.h"
 
-/**
- * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QObject).
- */
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(QObject *parent)
     : QObject(parent)
 {
@@ -21,10 +15,7 @@ QCustomSeries::QCustomSeries(QObject *parent)
     setVisible(true);
 }
 
-/**
- * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
- * @param newSeries Input parameter specifying newSeries (const QCustomSeries&).
- */
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
 {
     m_inputSeries = newSeries.m_inputSeries;
@@ -33,10 +24,7 @@ QCustomSeries::QCustomSeries(const QCustomSeries& newSeries)
     m_seriesName = newSeries.m_seriesName;
 }
 
-/**
- * @brief Constructs a new QCustomSeries instance and initializes subsystem components and UI state.
- * @param newSeries Input parameter specifying newSeries (QCustomSeries*).
- */
+// Constructor: Initializes QCustomSeries subsystem components, default parameters, and state.
 QCustomSeries::QCustomSeries(QCustomSeries* newSeries)
 {
     m_inputSeries = newSeries->m_inputSeries;
@@ -50,117 +38,80 @@ QCustomSeries QCustomSeries::operator=(const QCustomSeries& newSeries)
     return QCustomSeries(newSeries);
 }
 
-/**
- * @brief Destructor for QCustomSeries, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up QCustomSeries resources, timers, and allocated memory.
 QCustomSeries::~QCustomSeries()
 {
 }
 
-/**
- * @brief Executes the add series procedure for QCustomSeries.
- * @param inputSeries Input parameter specifying inputSeries (const QVector<QVector2D>).
- */
+// Executes add series routine.
 void QCustomSeries::addSeries(const QVector<QVector2D> &inputSeries)
 {
     m_inputSeries = inputSeries;
 }
 
-/**
- * @brief Executes the remove all points procedure for QCustomSeries.
- */
+// Executes remove all points routine.
 void QCustomSeries::removeAllPoints()
 {
     if(m_inputSeries.size())
         m_inputSeries.clear();
 }
 
-/**
- * @brief Executes the add points procedure for QCustomSeries.
- * @param inputPoint Input parameter specifying inputPoint (const QVector2D).
- */
+// Executes add points routine.
 void QCustomSeries::addPoints(const QVector2D &inputPoint)
 {
     m_inputSeries.append(inputPoint);
 }
 
 
-/**
- * @brief Executes the points vector procedure for QCustomSeries.
- * @return Output value of type QVector<QVector2D>.
- */
+// Executes points vector routine.
 QVector<QVector2D> QCustomSeries::pointsVector() const
 {
     return m_inputSeries;
 }
 
-/**
- * @brief Sets the series color parameter and updates internal state.
- * @param color Input parameter specifying color (const QColor).
- */
+// Sets series color value and updates internal subsystem configuration.
 void QCustomSeries::setSeriesColor(const QColor &color)
 {
     m_seriesColor = color;
 }
 
-/**
- * @brief Executes the series color procedure for QCustomSeries.
- * @return Output value of type QColor.
- */
+// Executes series color routine.
 QColor QCustomSeries::seriesColor() const
 {
     return m_seriesColor;
 }
 
-/**
- * @brief Executes the series size procedure for QCustomSeries.
- * @return Output value of type int.
- */
+// Executes series size routine.
 int QCustomSeries::seriesSize() const
 {
     return m_inputSeries.count();
 }
 
-/**
- * @brief Sets the visible parameter and updates internal state.
- * @param visible Input parameter specifying visible (bool).
- */
+// Sets visible value and updates internal subsystem configuration.
 void QCustomSeries::setVisible(bool visible)
 {
     m_visible = visible;
 }
 
-/**
- * @brief Retrieves the current isible value.
- * @return Output value of type bool.
- */
+// Retrieves current isible state.
 bool QCustomSeries::isVisible() const
 {
     return m_visible;
 }
 
-/**
- * @brief Sets the series name parameter and updates internal state.
- * @param name Input parameter specifying name (QString).
- */
+// Sets series name value and updates internal subsystem configuration.
 void QCustomSeries::setSeriesName(QString name)
 {
     m_seriesName = name;
 }
 
-/**
- * @brief Retrieves the current series name value.
- * @return Output value of type QString.
- */
+// Retrieves current series name state.
 QString QCustomSeries::getSeriesName() const
 {
     return m_seriesName;
 }
 
-/**
- * @brief Executes the min y procedure for QCustomSeries.
- * @return Output value of type float.
- */
+// Executes min y routine.
 float QCustomSeries::minY()
 {
     float min_Y = 1e100;
@@ -172,10 +123,7 @@ float QCustomSeries::minY()
     return min_Y;
 }
 
-/**
- * @brief Executes the max y procedure for QCustomSeries.
- * @return Output value of type float.
- */
+// Executes max y routine.
 float QCustomSeries::maxY()
 {
     float max_Y = -1e100;
@@ -187,10 +135,7 @@ float QCustomSeries::maxY()
     return max_Y;
 }
 
-/**
- * @brief Executes the min x procedure for QCustomSeries.
- * @return Output value of type float.
- */
+// Executes min x routine.
 float QCustomSeries::minX()
 {
     float min_X = 1e100;
@@ -202,10 +147,7 @@ float QCustomSeries::minX()
     return min_X;
 }
 
-/**
- * @brief Executes the max x procedure for QCustomSeries.
- * @return Output value of type float.
- */
+// Executes max x routine.
 float QCustomSeries::maxX()
 {
     float max_X = -1e100;

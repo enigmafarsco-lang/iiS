@@ -1,11 +1,8 @@
-/**
- * @file calculateplotdata.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: calculateplotdata.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for calculateplotdata.h.
+// ============================================================================
 
 //#ifndef CALCULATEPLOTDATA_H
 //#define CALCULATEPLOTDATA_H

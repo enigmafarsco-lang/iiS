@@ -1,11 +1,8 @@
-/**
- * @file datatypes.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: datatypes.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for datatypes.h.
+// ============================================================================
 
 #ifndef DATATYPES_H
 #define DATATYPES_H
@@ -157,10 +154,7 @@ struct _transform {
     QColor *graph_color;
     bool has_the_marker;
     void *settings;
-    /**
-     * @brief Executes the bool procedure for the module.
-     * @param transform_function Input parameter specifying transform_function (*transform_function).
-     */
+    // Executes bool routine.
     bool (*transform_function)(Transform *tr, gboolean init_transform);
 };
 
@@ -250,92 +244,40 @@ struct _freq_spectrum_settings {
 };
 
 
-/**
- * @class DataTypes
- * @brief High-level controller class for DataTypes.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class DataTypes
 {
 public:
-    /**
-     * @brief Constructs a new DataTypes instance and initializes subsystem components and UI state.
-     */
+    // Constructor: Initializes DataTypes subsystem components, default parameters, and state.
     DataTypes();
 
     Transform *Transform_new(int tr_type);
-    /**
-     * @brief Executes the transform destroy procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes transform destroy routine.
     void Transform_destroy(Transform *tr);
-    /**
-     * @brief Executes the transform resize x axis procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param new_size Input parameter specifying new_size (int).
-     */
+    // Executes transform resize x axis routine.
     void Transform_resize_x_axis(Transform *tr, int new_size);
-    /**
-     * @brief Executes the transform resize y axis procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param new_size Input parameter specifying new_size (int).
-     */
+    // Executes transform resize y axis routine.
     void Transform_resize_y_axis(Transform *tr, int new_size);
-    /**
-     * @brief Executes the transform resize seek x axis procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param new_size Input parameter specifying new_size (int).
-     */
+    // Executes transform resize seek x axis routine.
     void Transform_resize_seek_x_axis(Transform *tr, int new_size);
-    /**
-     * @brief Executes the transform resize seek y axis procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param new_size Input parameter specifying new_size (int).
-     */
+    // Executes transform resize seek y axis routine.
     void Transform_resize_seek_y_axis(Transform *tr, int new_size);
     QVector<double> *Transform_get_x_axis_ref(Transform *tr);
     QVector<double> *Transform_get_y_axis_ref(Transform *tr);
-    /**
-     * @brief Executes the transform attach settings procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param settings Input parameter specifying settings (void).
-     */
+    // Executes transform attach settings routine.
     void Transform_attach_settings(Transform *tr, void *settings);
-    /**
-     * @brief Executes the transform attach function procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @param (*f Input parameter specifying (*f (bool).
-     */
+    // Executes transform attach function routine.
     void Transform_attach_function(Transform *tr, bool (*f)(Transform *tr , gboolean init_transform));
-    /**
-     * @brief Executes the transform setup procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes transform setup routine.
     void Transform_setup(Transform *tr);
-    /**
-     * @brief Executes the transform update output procedure for DataTypes.
-     * @param tr Input parameter specifying tr (Transform).
-     * @return Output value of type bool.
-     */
+    // Executes transform update output routine.
     bool Transform_update_output(Transform *tr);
 
     QList<Transform*> *TrList_new(void);
-    /**
-     * @brief Executes the tr list destroy procedure for DataTypes.
-     * @param list Input parameter specifying list (QList<Transform*>).
-     */
+    // Executes tr list destroy routine.
     void TrList_destroy(QList<Transform*> *list);
-    /**
-     * @brief Executes the tr list add transform procedure for DataTypes.
-     * @param list Input parameter specifying list (QList<Transform*>).
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes tr list add transform routine.
     void TrList_add_transform(QList<Transform*> *list, Transform *tr);
-    /**
-     * @brief Executes the tr list remove transform procedure for DataTypes.
-     * @param list Input parameter specifying list (QList<Transform*>).
-     * @param tr Input parameter specifying tr (Transform).
-     */
+    // Executes tr list remove transform routine.
     void TrList_remove_transform(QList<Transform*> *list, Transform *tr);
 };
 

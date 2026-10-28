@@ -1,11 +1,8 @@
-/**
- * @file tiltcomponent.h
- * @brief Subsystem module for Tilt in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tiltcomponent.h
+// Subsystem: eLynxSDR Tilt
+// Description: Subsystem implementation and interface guidance for tiltcomponent.h.
+// ============================================================================
 
 #ifndef TILTCOMPONENT_H
 #define TILTCOMPONENT_H
@@ -19,44 +16,24 @@
 #include "tiltgauge.h"
 #include "../../constants/project_constans.h"
 
-/**
- * @class BTiltComponent
- * @brief High-level controller class for BTiltComponent.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class BTiltComponent : public QWidget
 {
     Q_OBJECT
 public:
-    /**
-     * @brief Constructs a new BTiltComponent instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes BTiltComponent subsystem components, default parameters, and state.
     explicit BTiltComponent(QWidget *parent = nullptr);
 
-    /**
-     * @brief Initializes and configures the init labels for the BTiltComponent subsystem.
-     */
+    // Initializes init labels for BTiltComponent.
     void init_labels();
-    /**
-     * @brief Initializes and configures the init double spin boxes for the BTiltComponent subsystem.
-     */
+    // Initializes init double spin boxes for BTiltComponent.
     void init_doubleSpinBoxes();
-    /**
-     * @brief Initializes and configures the init buttons for the BTiltComponent subsystem.
-     */
+    // Initializes init buttons for BTiltComponent.
     void init_buttons();
-    /**
-     * @brief Initializes and configures the init progress bar for the BTiltComponent subsystem.
-     */
+    // Initializes init progress bar for BTiltComponent.
     void init_progressBar();
-    /**
-     * @brief Initializes and configures the init tilt for the BTiltComponent subsystem.
-     */
+    // Initializes init tilt for BTiltComponent.
     void init_tilt();
-    /**
-     * @brief Sets the components_arrangements parameter and updates internal state.
-     */
+    // Sets components_arrangements value and updates internal subsystem configuration.
     void set_components_arrangements();
 
     QGridLayout *grdMainLayout;

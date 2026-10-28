@@ -1,11 +1,8 @@
-/**
- * @file tuner.h
- * @brief Subsystem module for tuner in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tuner.h
+// Subsystem: eLynxSDR tuner
+// Description: Subsystem implementation and interface guidance for tuner.h.
+// ============================================================================
 
 #ifndef TUNER_H
 #define TUNER_H
@@ -20,84 +17,46 @@
 #include <QIntValidator>
 
 namespace Ui {
-/**
- * @class Tuner
- * @brief High-level controller class for Tuner.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Tuner;
 }
 
-/**
- * @class Tuner
- * @brief High-level controller class for Tuner.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Tuner : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new Tuner instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes Tuner subsystem components, default parameters, and state.
     explicit Tuner(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for Tuner, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up Tuner resources, timers, and allocated memory.
     ~Tuner();
 
 private:
     Ui::Tuner *ui;
-    /**
-     * @brief Executes the tuner series procedure for Tuner.
-     * @return Output value of type QCustomSeries.
-     */
+    // Executes tuner series routine.
     QCustomSeries tunerSeries();
 
-    /**
-     * @brief Executes the plot init procedure for Tuner.
-     */
+    // Executes plot init routine.
     void plotInit();
     QVector<QGLchart *> vectorOfCharts;
-    /**
-     * @brief Sets the q glcharts parameters parameter and updates internal state.
-     * @param glChart Input parameter specifying glChart (QGLchart).
-     * @param glChartType Input parameter specifying glChartType (ChartType).
-     */
+    // Sets q glcharts parameters value and updates internal subsystem configuration.
     void setQGlchartsParameters(QGLchart *glChart, ChartType glChartType);
     int counter{};
     QTimer timerAutoSend;
     QByteArray temp;
     int sizeCount{};
     int timerCount{};
-    /**
-     * @brief Initializes and configures the init for the Tuner subsystem.
-     */
+    // Initializes init for Tuner.
     void init();
     int yAxiosCounter{};
     bool firstRun{true};
-    /**
-     * @brief Executes the remove all points procedure for Tuner.
-     */
+    // Executes remove all points routine.
     void removeAllPoints();
-    /**
-     * @brief Executes the emit to plot procedure for Tuner.
-     */
+    // Executes emit to plot routine.
     void emitToPlot();
-    /**
-     * @brief Executes the filling plot vector procedure for Tuner.
-     * @param frame Input parameter specifying frame (QStringList).
-     */
+    // Executes filling plot vector routine.
     void fillingPlotVector(QStringList &frame);
     int removeNumber{100};
-    /**
-     * @brief Sets the vector to qcustom parameter and updates internal state.
-     * @param QVector2D& Input parameter specifying QVector2D& (QVector2D&).
-     * @param QCustomSeries& Input parameter specifying QCustomSeries& (QCustomSeries&).
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets vector to qcustom value and updates internal subsystem configuration.
     void setVectorToQcustom(QVector2D&, QCustomSeries&, int);
     int LOmaxou{0};
     bool plotIsAllowed{false};
@@ -184,106 +143,53 @@ private:
 
 
 public slots:
-    /**
-     * @brief Slot handler responding to on  device response slot event.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
-    /**
-     * @brief Retrieves the current evice connected slot value.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Retrieves current evice connected slot state.
     void isDeviceConnectedSlot(bool);
-    /**
-     * @brief Executes the joshan func data slot procedure for Tuner.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes joshan func data slot routine.
     void joshanFuncDataSlot(QString);
 
 
 signals:
-    /**
-     * @brief Executes the create plot signal1 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal1 routine.
     void createPlotSignal1(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal2 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal2 routine.
     void createPlotSignal2(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal3 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal3 routine.
     void createPlotSignal3(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal4 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal4 routine.
     void createPlotSignal4(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal5 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal5 routine.
     void createPlotSignal5(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal6 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal6 routine.
     void createPlotSignal6(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal7 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal7 routine.
     void createPlotSignal7(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal8 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal8 routine.
     void createPlotSignal8(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal9 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal9 routine.
     void createPlotSignal9(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal10 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal10 routine.
     void createPlotSignal10(QCustomSeries);
-    /**
-     * @brief Executes the create plot signal11 procedure for Tuner.
-     * @param QCustomSeries Input parameter specifying QCustomSeries (QCustomSeries).
-     */
+    // Executes create plot signal11 routine.
     void createPlotSignal11(QCustomSeries);
 
 private slots:
-    /**
-     * @brief Slot handler responding to on push button 5 clicked event.
-     */
+    // Event/Signal handler for on push button 5 clicked.
     void on_pushButton_5_clicked();
-    /**
-     * @brief Updates and synchronizes the update auto send data stream and visual indicators.
-     */
+    // Updates and synchronizes update auto send data stream.
     void updateAutoSend();
 
 
-    /**
-     * @brief Slot handler responding to on btn start clicked event.
-     */
+    // Event/Signal handler for on btn start clicked.
     void on_btnStart_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn set frq clicked event.
-     */
+    // Event/Signal handler for on btn set frq clicked.
     void on_btnSetFrq_clicked();
 
 signals:
-    /**
-     * @brief Transmits send command to device signal command/packet over the communication bus.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
 };
 

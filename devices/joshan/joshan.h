@@ -1,11 +1,8 @@
-/**
- * @file joshan.h
- * @brief Subsystem module for joshan in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: joshan.h
+// Subsystem: eLynxSDR joshan
+// Description: Subsystem implementation and interface guidance for joshan.h.
+// ============================================================================
 
 #ifndef JOSHAN_H
 #define JOSHAN_H
@@ -21,64 +18,34 @@
 
 
 namespace Ui {
-/**
- * @class Joshan
- * @brief High-level controller class for Joshan.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Joshan;
 }
 
-/**
- * @class Joshan
- * @brief High-level controller class for Joshan.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class Joshan : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new Joshan instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget *).
-     */
+    // Constructor: Initializes Joshan subsystem components, default parameters, and state.
     explicit Joshan(QWidget     * parent      = nullptr);
 
 
 
 
-    /**
-     * @brief Retrieves the current oshan stop setter value.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Retrieves current oshan stop setter state.
     void isJoshanStopSetter(bool);
 
-    /**
-     * @brief Destructor for Joshan, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up Joshan resources, timers, and allocated memory.
     ~Joshan();
 
 public slots:
-    /**
-     * @brief Slot handler responding to on  device response slot event.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
-    /**
-     * @brief Retrieves the current func data joshan slot value.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Retrieves current func data joshan slot state.
     void getFuncDataJoshanSlot(QJsonObject);
-    /**
-     * @brief Retrieves the current status data joshan slot value.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Retrieves current status data joshan slot state.
     void getStatusDataJoshanSlot(QJsonObject);
-    /**
-     * @brief Executes the joshan is connected procedure for Joshan.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes joshan is connected routine.
     void joshanIsConnected(bool);
 
 private slots:
@@ -93,18 +60,11 @@ private:
     QTimer * joshanStatusTimer;
 
 
-    /**
-     * @brief Initializes and configures the init for the Joshan subsystem.
-     */
+    // Initializes init for Joshan.
     void init();
-    /**
-     * @brief Executes the connections procedure for Joshan.
-     */
+    // Executes connections routine.
     void connections();
-    /**
-     * @brief Executes the handle info procedure for Joshan.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes handle info routine.
     void handle_info(QString);
     int cntFunc{};
     int cntStatus{};
@@ -119,74 +79,39 @@ private:
     Ui::Joshan *ui;
 
 signals:
+    // Executes servo data routine.
     void servoData   (QString);
-    /**
-     * @brief Executes the solid data procedure for Joshan.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes solid data routine.
     void solidData   (QString);
-    /**
-     * @brief Executes the exiter data procedure for Joshan.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes exiter data routine.
     void exiterData  (QString);
-    /**
-     * @brief Executes the cooling data procedure for Joshan.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes cooling data routine.
     void coolingData (QString);
-    /**
-     * @brief Executes the rff data procedure for Joshan.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Executes rff data routine.
     void rffData     (QString);
-    /**
-     * @brief Transmits send func data to joshan signal command/packet over the communication bus.
-     */
+    // Transmits send func data to joshan signal command/packet over communication interface.
     void sendFuncDataToJoshanSignal();
-    /**
-     * @brief Transmits send status data to joshan signal command/packet over the communication bus.
-     */
+    // Transmits send status data to joshan signal command/packet over communication interface.
     void sendStatusDataToJoshanSignal();
-    /**
-     * @brief Transmits send command to device signal command/packet over the communication bus.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
 
-    /**
-     * @brief Executes the joshan data to rff signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to rff signal routine.
     void joshanDataToRffSignal           (QJsonObject);
-    /**
-     * @brief Executes the joshan data to solid signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to solid signal routine.
     void joshanDataToSolidSignal         (QJsonObject);
-    /**
-     * @brief Executes the joshan data to servo signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to servo signal routine.
     void joshanDataToServoSignal         (QJsonObject);
-    /**
-     * @brief Executes the joshan data to cooling signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to cooling signal routine.
     void joshanDataToCoolingSignal       (QJsonObject);
-    /**
-     * @brief Executes the joshan data to exciter set signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to exciter set signal routine.
     void joshanDataToExciterSetSignal    (QJsonObject);
-    /**
-     * @brief Executes the joshan data to exciter enable signal procedure for Joshan.
-     * @param QJsonObject Input parameter specifying QJsonObject (QJsonObject).
-     */
+    // Executes joshan data to exciter enable signal routine.
     void joshanDataToExciterEnableSignal (QJsonObject);
 
 //    void connectionStatusSignal(bool);
     void structFuncDataSignal(joshanFuncStruct*);
+    // Executes struct status data signal routine.
     void structStatusDataSignal(joshanStatusStruct*);
 
 

@@ -1,11 +1,8 @@
-/**
- * @file receivermain.h
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: receivermain.h
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for receivermain.h.
+// ============================================================================
 
 #ifndef RECEIVERMAIN_H
 #define RECEIVERMAIN_H
@@ -29,57 +26,28 @@
 //#include <QSs
 
 namespace Ui {
-/**
- * @class ReceiverMain
- * @brief High-level controller class for ReceiverMain.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ReceiverMain;
 }
 
-/**
- * @class ReceiverMain
- * @brief High-level controller class for ReceiverMain.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ReceiverMain : public QWidget
 {
     Q_OBJECT
 
     int cnt{0};
-    /**
-     * @brief Executes the real time plot procedure for ReceiverMain.
-     * @param customPlot Input parameter specifying customPlot (QCustomPlot).
-     */
+    // Executes real time plot routine.
     void realTimePlot(QCustomPlot *customPlot);
     QCustomPlot * plt;
 
-    /**
-     * @brief Initializes and configures the setup realtime data demo for the ReceiverMain subsystem.
-     * @param customPlot Input parameter specifying customPlot (QCustomPlot).
-     */
+    // Initializes setup realtime data demo for ReceiverMain.
     void setupRealtimeDataDemo(QCustomPlot *customPlot);
 
     QGLchart *freqPlot;
 
-    /**
-     * @brief Executes the creating time plot procedure for ReceiverMain.
-     * @param  Input parameter specifying  (QCustomPlot).
-     */
+    // Executes creating time plot routine.
     void creatingTimePlot     (QCustomPlot *);
-    /**
-     * @brief Executes the creating histogram plot procedure for ReceiverMain.
-     * @param  Input parameter specifying  (QCustomPlot).
-     * @param  Input parameter specifying  (QCPAxisRect).
-     * @param QCPBars* Input parameter specifying QCPBars* (QCPBars*).
-     * @param  Input parameter specifying  (QCPGraph).
-     */
+    // Executes creating histogram plot routine.
     void creatingHistogramPlot(QCustomPlot * , QCPAxisRect *, QCPBars*,  QCPGraph *);
-    /**
-     * @brief Initializes and configures the init g l plot for the ReceiverMain subsystem.
-     * @param glChart Input parameter specifying glChart (QGLchart).
-     * @param glChartType Input parameter specifying glChartType (ChartType).
-     */
+    // Initializes init g l plot for ReceiverMain.
     void initGLPlot(QGLchart *glChart, ChartType glChartType);
 
     QVector2D  vec;
@@ -94,11 +62,7 @@ class ReceiverMain : public QWidget
     plotfunction * t6 ;
     plotfunction * t7 ;
     plotfunction * t8 ;
-    /**
-     * @brief Executes the select channel with frq procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @return Output value of type int.
-     */
+    // Executes select channel with frq routine.
     int selectChannelWithFrq(double);
     QString whichNoiseModeIsActive{};
     double holdFrq{};
@@ -107,80 +71,31 @@ class ReceiverMain : public QWidget
     double frqHold{};
 
 
-    /**
-     * @brief Executes the smart time domain noise procedure for ReceiverMain.
-     */
+    // Executes smart time domain noise routine.
     void smartTimeDomainNoise();
-    /**
-     * @brief Sets the auto amp value parameter and updates internal state.
-     * @param ampVal Input parameter specifying ampVal (double).
-     */
+    // Sets auto amp value value and updates internal subsystem configuration.
     void setAutoAmpValue(double ampVal);
-    /**
-     * @brief Executes the smart table noise procedure for ReceiverMain.
-     */
+    // Executes smart table noise routine.
     void smartTableNoise();
-    /**
-     * @brief Executes the smart selected noise procedure for ReceiverMain.
-     */
+    // Executes smart selected noise routine.
     void smartSelectedNoise();
-    /**
-     * @brief Executes the show noise status procedure for ReceiverMain.
-     * @param activeMode Input parameter specifying activeMode (QString).
-     * @param msg Input parameter specifying msg (QString).
-     */
+    // Executes show noise status routine.
     void showNoiseStatus(QString activeMode, QString msg);
-    /**
-     * @brief Executes the message for auth procedure for ReceiverMain.
-     * @param msg Input parameter specifying msg (QString).
-     */
+    // Executes message for auth routine.
     void messageForAuth(QString msg);
-    /**
-     * @brief Sets the prv frq parameter and updates internal state.
-     * @param double Input parameter specifying double (double).
-     */
+    // Sets prv frq value and updates internal subsystem configuration.
     void setPrvFrq(double);
-    /**
-     * @brief Executes the hash password procedure for ReceiverMain.
-     * @param pass Input parameter specifying pass (const QString).
-     * @return Output value of type QString.
-     */
+    // Executes hash password routine.
     QString hashPassword(const QString &pass);
-    /**
-     * @brief Executes the verify user procedure for ReceiverMain.
-     * @param QString Input parameter specifying QString (const).
-     * @param  Input parameter specifying  (const QString).
-     * @param  Input parameter specifying  (const QString).
-     * @return Output value of type bool.
-     */
+    // Executes verify user routine.
     bool verifyUser(const QString, const QString &, const QString &);
-    /**
-     * @brief Executes the input is not empty procedure for ReceiverMain.
-     * @param inputVal Input parameter specifying inputVal (QString).
-     * @return Output value of type bool.
-     */
+    // Executes input is not empty routine.
     bool inputIsNotEmpty(QString inputVal);
-    /**
-     * @brief Executes the length checker procedure for ReceiverMain.
-     * @param inputVal Input parameter specifying inputVal (QString).
-     * @return Output value of type bool.
-     */
+    // Executes length checker routine.
     bool lengthChecker(QString inputVal);
-    /**
-     * @brief Executes the user input checker procedure for ReceiverMain.
-     * @param val1 Input parameter specifying val1 (QString).
-     * @param val2 Input parameter specifying val2 (QString).
-     * @return Output value of type bool.
-     */
+    // Executes user input checker routine.
     bool userInputChecker(QString val1, QString val2);
-    /**
-     * @brief Transmits write to file command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     * @param QString Input parameter specifying QString (QString).
-     * @param QString Input parameter specifying QString (QString).
-     * @param QString Input parameter specifying QString (QString).
-     * @return Output value of type bool.
-     */
+    // Transmits write to file command/packet over communication interface.
     bool writeToFile(QString,QString, QString,QString);
     QString const fileAuth{dataFilePath(QStringLiteral("upf"))};
     QString superUser{"superadmin"};
@@ -194,54 +109,29 @@ class ReceiverMain : public QWidget
     int cntVecCalib{};
 
 
-    /**
-     * @brief Executes the hidden ui elements procedure for ReceiverMain.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes hidden ui elements routine.
     void hiddenUiElements(bool);
-    /**
-     * @brief Executes the save calibr to file procedure for ReceiverMain.
-     */
+    // Executes save calibr to file routine.
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
-    /**
-     * @brief Executes the check frq in colibr procedure for ReceiverMain.
-     */
+    // Executes check frq in colibr routine.
     void checkFrqInColibr();
-    /**
-     * @brief Executes the calib managment procedure for ReceiverMain.
-     */
+    // Executes calib managment routine.
     void calibManagment();
-    /**
-     * @brief Executes the calib initial procedure for ReceiverMain.
-     */
+    // Executes calib initial routine.
     void calibInitial();
-    /**
-     * @brief Initializes and configures the setup drfm control tab for the ReceiverMain subsystem.
-     */
+    // Initializes setup drfm control tab for ReceiverMain.
     void setupDrfmControlTab();
-    /**
-     * @brief Initializes and configures the setup bit control tab for the ReceiverMain subsystem.
-     */
+    // Initializes setup bit control tab for ReceiverMain.
     void setupBitControlTab();
-    /**
-     * @brief Executes the ensure zero dac buffer file procedure for ReceiverMain.
-     * @return Output value of type QString.
-     */
+    // Executes ensure zero dac buffer file routine.
     QString ensureZeroDacBufferFile();
-    /**
-     * @brief Executes the ensure drfm dac buffer running procedure for ReceiverMain.
-     */
+    // Executes ensure drfm dac buffer running routine.
     void ensureDrfmDacBufferRunning();
 public:
-    /**
-     * @brief Constructs a new ReceiverMain instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes ReceiverMain subsystem components, default parameters, and state.
     explicit ReceiverMain(QWidget *parent = nullptr);
-    /**
-     * @brief Initializes and configures the init for the ReceiverMain subsystem.
-     */
+    // Initializes init for ReceiverMain.
     void init();
     // Called by MainWindow to place the exciter widget in the receiver tabs.
     void addExciterTab(QWidget *exciter);
@@ -252,63 +142,43 @@ public:
     double maxFrqLimit{};
     int cntOutCalib{};
 
-    /**
-     * @brief Destructor for ReceiverMain, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up ReceiverMain resources, timers, and allocated memory.
     ~ReceiverMain();
 
 signals:
-    /**
-     * @brief Retrieves the current onnect signal value.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Retrieves current onnect signal state.
     void isConnectSignal(bool);
-    /**
-     * @brief Executes the in channel signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes in channel signal routine.
     void inChannelSignal(double);
 
 
 
 private slots:
-    /**
-     * @brief Slot handler responding to on btn set clicked event.
-     */
+    // Event/Signal handler for on btn set clicked.
     void on_btnSet_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn set band select clicked event.
-     */
+    // Event/Signal handler for on btn set band select clicked.
     void on_btnSetBandSelect_clicked();
-    /**
-     * @brief Executes the realtime data slot procedure for ReceiverMain.
-     */
+    // Executes realtime data slot routine.
     void realtimeDataSlot();
 
     // Phase 5: Profile tab "Set" button (auto-connected by name).
     void on_btnProfileSet_clicked();
+    // Event/Signal handler for on rdo profile100 toggled.
     void on_rdoProfile100_toggled(bool checked);
+    // Event/Signal handler for on rdo profile200 toggled.
     void on_rdoProfile200_toggled(bool checked);
+    // Event/Signal handler for on rdo profile400 toggled.
     void on_rdoProfile400_toggled(bool checked);
+    // Event/Signal handler for on btn save clicked.
     void on_btnSave_clicked();
-    /**
-     * @brief Slot handler responding to on btn set default clicked event.
-     */
+    // Event/Signal handler for on btn set default clicked.
     void on_btnSetDefault_clicked();
-    /**
-     * @brief Slot handler responding to on btn reset clicked event.
-     */
+    // Event/Signal handler for on btn reset clicked.
     void on_btnReset_clicked();
-    /**
-     * @brief Slot handler responding to on btn default iio osc clicked event.
-     */
+    // Event/Signal handler for on btn default iio osc clicked.
     void on_btnDefaultIioOsc_clicked();
-    /**
-     * @brief Sets the tings ini path parameter and updates internal state.
-     * @param fileName Input parameter specifying fileName (const QString).
-     * @return Output value of type QString.
-     */
+    // Sets tings ini path value and updates internal subsystem configuration.
     QString settingsIniPath(const QString &fileName);
 
     //    QTimer * frqTimer;
@@ -392,22 +262,13 @@ public:
     Plot * timeDomainPlot ;
     Plot * smartTimeDomainPlot ;
     Plot * frqDomainPlot;
-    /**
-     * @brief Executes the frq mode is selected procedure for ReceiverMain.
-     */
+    // Executes frq mode is selected routine.
     void frqModeIsSelected();
-    /**
-     * @brief Executes the default parameters procedure for ReceiverMain.
-     */
+    // Executes default parameters routine.
     void defaultParameters();
-    /**
-     * @brief Updates and synchronizes the update serial number data stream and visual indicators.
-     */
+    // Updates and synchronizes update serial number data stream.
     void updateSerialNumber();
-    /**
-     * @brief Executes the board serial number procedure for ReceiverMain.
-     * @return Output value of type QString.
-     */
+    // Executes board serial number routine.
     QString boardSerialNumber();
     // Apply a Talise profile to the board (the Profile tab Set button and
     // the startup assertion from the first-start IP form both use this).
@@ -425,6 +286,7 @@ public:
     // Keep the Profile tab ORx choices consistent with the TX choice:
     // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
     void syncProfileOrxChoices();
+    // Executes changing plot mode routine.
     void changingPlotMode(int);
     QTimer dataTimer;
 
@@ -471,59 +333,34 @@ public:
 
     //=====================================================================
 
+    // Sets ting min max band value and updates internal subsystem configuration.
     void settingMinMaxBand();
+    // Executes frq and seek stop capturing routine.
     void frqAndSeekStopCapturing(bool);
+    // Executes rebout with s s n routine.
     void reboutWithSSN();
+    // Initializes init plot for ReceiverMain.
     void initPlot();
-    /**
-     * @brief Executes the re scale plot procedure for ReceiverMain.
-     * @param type Input parameter specifying type (int).
-     * @param  Input parameter specifying  (QCustomPlot).
-     * @param  Input parameter specifying  (QCPRange).
-     * @param  Input parameter specifying  (QCPRange).
-     */
+    // Executes re scale plot routine.
     void reScale_plot(int type, QCustomPlot *,QCPRange *,QCPRange *);
-    /**
-     * @brief Executes the plotting values procedure for ReceiverMain.
-     * @param  Input parameter specifying  (const double).
-     * @param  Input parameter specifying  (QCustomPlot).
-     * @param  Input parameter specifying  (QVector<double>).
-     * @param  Input parameter specifying  (QVector<double>).
-     * @param min Input parameter specifying min (double).
-     * @param max Input parameter specifying max (double).
-     * @param int Input parameter specifying int (int).
-     * @return Output value of type int.
-     */
+    // Executes plotting values routine.
     int plottingValues( const double *, QCustomPlot * , QVector<double> *, QVector<double> *, double min, double max,int);
-    /**
-     * @brief Executes the fill historam array procedure for ReceiverMain.
-     * @param int Input parameter specifying int (int).
-     * @param  Input parameter specifying  (QCustomPlot).
-     * @param  Input parameter specifying  (double).
-     * @param int Input parameter specifying int (int).
-     */
+    // Executes fill historam array routine.
     void fillHistoramArray(int, QCustomPlot *, double *, int );
-    /**
-     * @brief Executes the plot histogram procedure for ReceiverMain.
-     * @param  Input parameter specifying  (QCustomPlot).
-     * @param std::unordered_map<double Input parameter specifying std::unordered_map<double (std::unordered_map<double).
-     * @param  Input parameter specifying  (double >).
-     */
+    // Executes plot histogram routine.
     void plotHistogram(QCustomPlot *,std::unordered_map<double, double > *);
-    /**
-     * @brief Executes the plot init procedure for ReceiverMain.
-     */
+    // Executes plot init routine.
     void plotInit();
-    /**
-     * @brief Executes the default settings procedure for ReceiverMain.
-     */
+    // Executes default settings routine.
     void defaultSettings();
     // Phase 6: one-shot ADRV9009 calibration after software start (all
     // calibration items except lol-ext and fhm), then never again.
     void smartNoise();
 
     double centerFrq{};
+    // Executes maximum finder routine.
     double maximumFinder(double *, double *);
+    // Executes minimum finder routine.
     double minimumFinder(double *, double *);
 
     double frqMax{0};
@@ -562,7 +399,9 @@ public:
 
     int currentTabState;
     QTimer* timer;
+    // Executes smart init routine.
     void smartInit();
+    // Executes stop smart noise routine.
     void stopSmartNoise(QString);
     int tabPress{};
     QWidget * wigRecover;
@@ -581,13 +420,9 @@ public:
     QVector<double> frqCardVec    = QVector<double> (700,0);
     QVector<double> powerCardVec  = QVector<double> (700,0);
 
-    /**
-     * @brief Transmits send frq to calib device command/packet over the communication bus.
-     */
+    // Transmits send frq to calib device command/packet over communication interface.
     void sendFrqToCalibDevice();
-    /**
-     * @brief Transmits send power to calib device command/packet over the communication bus.
-     */
+    // Transmits send power to calib device command/packet over communication interface.
     void sendPowerToCalibDevice();
     bool isCalibAllowedToSend{true};
     double newPowerCalib{};
@@ -619,165 +454,97 @@ public:
 
 
 private slots:
-    /**
-     * @brief Slot handler responding to on btn set t h clicked event.
-     */
+    // Event/Signal handler for on btn set t h clicked.
     void on_btnSetTH_clicked();
-    /**
-     * @brief Slot handler responding to on btn set t h c w clicked event.
-     */
+    // Event/Signal handler for on btn set t h c w clicked.
     void on_btnSetTHCW_clicked();
-    /**
-     * @brief Slot handler responding to on tab widget current changed event.
-     * @param index Input parameter specifying index (int).
-     */
+    // Event/Signal handler for on tab widget current changed.
     void on_tabWidget_currentChanged(int index);
-    /**
-     * @brief Slot handler responding to on btn frq seek clicked event.
-     */
+    // Event/Signal handler for on btn frq seek clicked.
     void on_btnFrqSeek_clicked();
-    /**
-     * @brief Slot handler responding to on label 43 link activated event.
-     * @param link Input parameter specifying link (const QString).
-     */
+    // Event/Signal handler for on label 43 link activated.
     void on_label_43_linkActivated(const QString &link);
-    /**
-     * @brief Slot handler responding to on cmb transmit activated event.
-     * @param index Input parameter specifying index (int).
-     */
+    // Event/Signal handler for on cmb transmit activated.
     void on_cmbTransmit_activated(int index);
 
-    /**
-     * @brief Slot handler responding to on chb en  p a t t e r n clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on chb en  p a t t e r n clicked.
     void on_chbEn_PATTERN_clicked(bool checked);
 
     //    void on_tabWidgetSetting_tabBarClicked(int index);
 
+    // Event/Signal handler for on btn reboot clicked.
     void on_btnReboot_clicked(bool checked);
 
+    // Event/Signal handler for on table widget 2 cell clicked.
     void on_tableWidget_2_cellClicked(int row, int column);
 
 
-    /**
-     * @brief Slot handler responding to on push button clicked event.
-     */
+    // Event/Signal handler for on push button clicked.
     void on_pushButton_clicked();
 
-    /**
-     * @brief Slot handler responding to on tbl c w cell clicked event.
-     * @param row Input parameter specifying row (int).
-     * @param column Input parameter specifying column (int).
-     */
+    // Event/Signal handler for on tbl c w cell clicked.
     void on_tblCW_cellClicked(int row, int column);
 
 
-    /**
-     * @brief Slot handler responding to on btn new user clicked event.
-     */
+    // Event/Signal handler for on btn new user clicked.
     void on_btnNewUser_clicked();
 
-    /**
-     * @brief Slot handler responding to on tab widget tab bar clicked event.
-     * @param index Input parameter specifying index (int).
-     */
+    // Event/Signal handler for on tab widget tab bar clicked.
     void on_tabWidget_tabBarClicked(int index);
 
-    /**
-     * @brief Slot handler responding to on btn login clicked event.
-     */
+    // Event/Signal handler for on btn login clicked.
     void on_btnLogin_clicked();
 
-    /**
-     * @brief Slot handler responding to on btn logout clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn logout clicked.
     void on_btnLogout_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn recovery clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn recovery clicked.
     void on_btnRecovery_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn new admin clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn new admin clicked.
     void on_btnNewAdmin_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn save limit clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn save limit clicked.
     void on_btnSaveLimit_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn show user clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn show user clicked.
     void on_btnShowUser_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn calib clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn calib clicked.
     void on_btnCalib_clicked(bool checked);
 
-    /**
-     * @brief Slot handler responding to on btn calib rff clicked event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on btn calib rff clicked.
     void on_btnCalibRff_clicked(bool checked);
 
 //    void on_btnLimitation_clicked();
     void checkingCalibResponseInSpectromSlot(double, double);
 
 
+    // Event/Signal handler for on btn stop calib clicked.
     void on_btnStopCalib_clicked();
 
 //    void on_chbCalib_stateChanged(int arg1);
 
 public slots:
+    // Executes connection routine.
     void connection();
+    // Executes value slot routine.
     void ValueSlot (Pulse);
+    // Executes frq value chenged routine.
     void frqValueChenged(QString);
-    /**
-     * @brief Transmits send spot file to cart command/packet over the communication bus.
-     * @param QString Input parameter specifying QString (QString).
-     */
+    // Transmits send spot file to cart command/packet over communication interface.
     void sendSpotFileToCart(QString);
-    /**
-     * @brief Retrieves the current plot data from thread value.
-     */
+    // Retrieves current plot data from thread state.
     void getPlotDataFromThread();
-    /**
-     * @brief Executes the histo main plot slot procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes histo main plot slot routine.
     void histoMainPlotSlot(double, double);
-    /**
-     * @brief Executes the stop smart noise slot procedure for ReceiverMain.
-     */
+    // Executes stop smart noise slot routine.
     void stopSmartNoiseSlot();
-    /**
-     * @brief Executes the stop exciter slot procedure for ReceiverMain.
-     */
+    // Executes stop exciter slot routine.
     void stopExciterSlot();
-    /**
-     * @brief Executes the calculating cw table slot procedure for ReceiverMain.
-     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
-     * @param QVector<double> Input parameter specifying QVector<double> (QVector<double>).
-     * @param QVector<QString> Input parameter specifying QVector<QString> (QVector<QString>).
-     * @param int> Input parameter specifying int> (QVector<long long).
-     */
+    // Executes calculating cw table slot routine.
     void calculatingCwTableSlot(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
-    /**
-     * @brief Slot handler responding to on  device response slot event.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Event/Signal handler for on  device response slot.
     void on_DeviceResponseSlot(QByteArray);
 
 
@@ -787,19 +554,15 @@ public slots:
 
 
 signals:
+    // Executes create plot signal1 routine.
     void createPlotSignal1(QCustomSeries);
+    // Executes seeking status signal routine.
     void seekingStatusSignal(QString);
-    /**
-     * @brief Executes the frq domain is on procedure for ReceiverMain.
-     */
+    // Executes frq domain is on routine.
     void frqDomainIsOn();
-    /**
-     * @brief Executes the start exciter signal procedure for ReceiverMain.
-     */
+    // Executes start exciter signal routine.
     void startExciterSignal();
-    /**
-     * @brief Executes the frq plt signal procedure for ReceiverMain.
-     */
+    // Executes frq plt signal routine.
     void frqPltSignal();
 
     // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
@@ -811,183 +574,85 @@ signals:
     void txCalibChangedSignal(double);
 
 
+    // Executes frq values routine.
     void frqValues      (QCustomSeries a);
+    // Executes frq value signal routine.
     void frqValueSignal      (double,double);
-    /**
-     * @brief Executes the p a peak value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes p a peak value signal routine.
     void PAPeakValueSignal   (double,double);
-    /**
-     * @brief Executes the p a sum max value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes p a sum max value signal routine.
     void PASumMaxValueSignal (double,double);
-    /**
-     * @brief Executes the pri value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes pri value signal routine.
     void priValueSignal      (double,double);
-    /**
-     * @brief Executes the pw one value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes pw one value signal routine.
     void pwOneValueSignal    (double,double);
-    /**
-     * @brief Executes the pw two value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes pw two value signal routine.
     void pwTwoValueSignal    (double,double);
-    /**
-     * @brief Executes the toa value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes toa value signal routine.
     void toaValueSignal      (double,double);
-    /**
-     * @brief Executes the channel value signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes channel value signal routine.
     void ChannelValueSignal  (double,double);
-    /**
-     * @brief Executes the smart noise is active signal procedure for ReceiverMain.
-     */
+    // Executes smart noise is active signal routine.
     void smartNoiseIsActiveSignal  ();
 
 
 
-    /**
-     * @brief Executes the hi procedure for ReceiverMain.
-     */
+    // Executes hi routine.
     void hi();
-    /**
-     * @brief Executes the cw frq signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes cw frq signal routine.
     void cwFrqSignal        (double);
-    /**
-     * @brief Executes the cw power signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes cw power signal routine.
     void cwPowerSignal      (double);
-    /**
-     * @brief Executes the spot frq signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes spot frq signal routine.
     void spotFrqSignal      (double);
-    /**
-     * @brief Executes the spot power signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes spot power signal routine.
     void spotPowerSignal    (double);
-    /**
-     * @brief Executes the sweep start frq signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes sweep start frq signal routine.
     void sweepStartFrqSignal(double);
-    /**
-     * @brief Executes the sweep stop frq signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes sweep stop frq signal routine.
     void sweepStopFrqSignal (double);
-    /**
-     * @brief Executes the sweep step signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes sweep step signal routine.
     void sweepStepSignal    (double);
-    /**
-     * @brief Executes the sweep power signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes sweep power signal routine.
     void sweepPowerSignal   (double);
-    /**
-     * @brief Executes the sweep delay signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes sweep delay signal routine.
     void sweepDelaySignal   (double);
-    /**
-     * @brief Executes the imp frq signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes imp frq signal routine.
     void impFrqSignal       (double);
-    /**
-     * @brief Executes the imp power signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes imp power signal routine.
     void impPowerSignal     (double);
-    /**
-     * @brief Executes the imp pw signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes imp pw signal routine.
     void impPwSignal        (double);
-    /**
-     * @brief Executes the imp pri signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes imp pri signal routine.
     void impPriSignal       (double);
-    /**
-     * @brief Executes the wb power signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes wb power signal routine.
     void wbPowerSignal      (double);
 
 
-    /**
-     * @brief Executes the cw on btn signal procedure for ReceiverMain.
-     */
+    // Executes cw on btn signal routine.
     void cwOnBtnSignal     ();
-    /**
-     * @brief Executes the cw off btn signal procedure for ReceiverMain.
-     */
+    // Executes cw off btn signal routine.
     void cwOffBtnSignal    ();
-    /**
-     * @brief Executes the spot on btn signal procedure for ReceiverMain.
-     */
+    // Executes spot on btn signal routine.
     void spotOnBtnSignal   ();
-    /**
-     * @brief Executes the spot off btn signal procedure for ReceiverMain.
-     */
+    // Executes spot off btn signal routine.
     void spotOffBtnSignal  ();
-    /**
-     * @brief Executes the sweep on btn signal procedure for ReceiverMain.
-     */
+    // Executes sweep on btn signal routine.
     void sweepOnBtnSignal  ();
-    /**
-     * @brief Executes the sweep off btn signal procedure for ReceiverMain.
-     */
+    // Executes sweep off btn signal routine.
     void sweepOffBtnSignal ();
-    /**
-     * @brief Executes the imp on btn signal procedure for ReceiverMain.
-     */
+    // Executes imp on btn signal routine.
     void impOnBtnSignal    ();
-    /**
-     * @brief Executes the imp off btn signal procedure for ReceiverMain.
-     */
+    // Executes imp off btn signal routine.
     void impOffBtnSignal   ();
-    /**
-     * @brief Executes the wb on btn signal procedure for ReceiverMain.
-     */
+    // Executes wb on btn signal routine.
     void wbOnBtnSignal     ();
-    /**
-     * @brief Executes the wb off btn signal procedure for ReceiverMain.
-     */
+    // Executes wb off btn signal routine.
     void wbOffBtnSignal    ();
 
-    /**
-     * @brief Executes the user logged in signal procedure for ReceiverMain.
-     * @param double Input parameter specifying double (double).
-     */
+    // Executes user logged in signal routine.
     void userLoggedInSignal(double);
-    /**
-     * @brief Transmits send command to device signal command/packet over the communication bus.
-     * @param QByteArray Input parameter specifying QByteArray (QByteArray).
-     */
+    // Transmits send command to device signal command/packet over communication interface.
     void sendCommandToDeviceSignal(QByteArray);
     //    void cwTabletoPlotSignal(qvdouble,double,QString);
 

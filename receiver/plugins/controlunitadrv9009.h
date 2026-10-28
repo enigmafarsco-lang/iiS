@@ -1,11 +1,8 @@
-/**
- * @file controlunitadrv9009.h
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: controlunitadrv9009.h
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for controlunitadrv9009.h.
+// ============================================================================
 
 #ifndef CONTROLUNITADRV9009_H
 #define CONTROLUNITADRV9009_H
@@ -22,37 +19,20 @@
 #include <receiver/plugins/drfmregisterio.h>
 
 namespace Ui {
-/**
- * @class ControlUnitADRV9009
- * @brief High-level controller class for ControlUnitADRV9009.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ControlUnitADRV9009;
 }
 
-/**
- * @class ControlUnitADRV9009
- * @brief High-level controller class for ControlUnitADRV9009.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ControlUnitADRV9009 : public QWidget
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new ControlUnitADRV9009 instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes ControlUnitADRV9009 subsystem components, default parameters, and state.
     explicit ControlUnitADRV9009(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for ControlUnitADRV9009, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up ControlUnitADRV9009 resources, timers, and allocated memory.
     ~ControlUnitADRV9009();
 
-    /**
-     * @brief Initializes and configures the init for the ControlUnitADRV9009 subsystem.
-     */
+    // Initializes init for ControlUnitADRV9009.
     void init();
     //saeid raziani
     QSpinBox * TH1 = new QSpinBox;
@@ -86,18 +66,12 @@ private:
     struct iio_device *readDev = nullptr;
     struct iio_device *writeDev = nullptr;
 
-    /**
-     * @brief Executes the enable write procedure for ControlUnitADRV9009.
-     */
+    // Executes enable write routine.
     void EnableWrite();
-    /**
-     * @brief Executes the disable write procedure for ControlUnitADRV9009.
-     */
+    // Executes disable write routine.
     void DisableWrite();
 
-    /**
-     * @brief Executes the resolve register devices procedure for ControlUnitADRV9009.
-     */
+    // Executes resolve register devices routine.
     void resolveRegisterDevices();
     bool writeRegisterVerified(quint32 offset, quint32 value,
                                const QString &label, QString *details);
@@ -116,7 +90,9 @@ private:
     // board console (picocom).
     bool writeRegisterToHw(quint32 offset, quint32 value,
                            const QString &label, QString *details = nullptr);
+    // Executes try read register routine.
     bool tryReadRegister(quint32 offset, quint32 *value);
+    // Executes device display name routine.
     QString deviceDisplayName(struct iio_device *dev) const;
 
     DrfmRegisterIO registerIo;
@@ -148,12 +124,6 @@ public:
                                                     double intrinsicNs = SYSTEM_INTRINSIC_LATENCY_NS,
                                                     double c = SPEED_OF_LIGHT)
     {
-        /**
-         * @brief Calculates and returns the mathematical calculate delay us formulation.
-         * @param rangeMeters Input parameter specifying rangeMeters (rangeMeters).
-         * @param c Input parameter specifying c (c).
-         * @return Output value of type return.
-         */
         return calculateDelayUs(rangeMeters, c) + (intrinsicNs * 1.0e-3);
     }
 
@@ -210,9 +180,13 @@ public:
     // register transaction in details. Nothing is written until the user
     // presses Set in the DRFM control tab.
     bool setDrfmEnabled(bool enabled, QString *details = nullptr);
+    // Sets amplify value value and updates internal subsystem configuration.
     bool setAmplifyValue(quint16 value, bool enabled = true, QString *details = nullptr);
+    // Sets vgpo enabled value and updates internal subsystem configuration.
     bool setVgpoEnabled(bool enabled, QString *details = nullptr);
+    // Sets vgpo parameters value and updates internal subsystem configuration.
     bool setVgpoParameters(quint32 phaseOffset, qint32 phaseStep, QString *details = nullptr);
+    // Sets vgpo value value and updates internal subsystem configuration.
     bool setVgpoValue(quint32 phaseOffset, qint32 phaseStep, bool enabled = true, QString *details = nullptr);
     // Compatibility overload: phase offset defaults to zero.
     bool setVgpoValue(qint32 phaseStep, bool enabled = true, QString *details = nullptr)
@@ -220,108 +194,62 @@ public:
 
     // Set Target Range & Propagation Delay
     bool setTargetRange(double rangeMeters, QString *details = nullptr);
+    // Sets target delay value and updates internal subsystem configuration.
     bool setTargetDelay(double delayUs, QString *details = nullptr);
 
     // Set Target Radial Velocity & Doppler Shift
     bool setTargetVelocity(double velocityMps, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
+    // Sets target doppler value and updates internal subsystem configuration.
     bool setTargetDoppler(double dopplerHz, double centerFreqMhz, bool enabled = true, QString *details = nullptr);
 
     // Scan report: every led-count IIO debug attribute (name = value) and the
     // register it represents (th0/dacsel/...).  Pure IIO - no UART.
     QString scanIioRegisters() { return registerIo.scanReport(); }
+    // Executes register backend info routine.
     QString registerBackendInfo();
 
 public slots:
+    // Executes write all routine.
     void WriteAll();
 
 private slots:
-    /**
-     * @brief Executes the read all procedure for ControlUnitADRV9009.
-     */
+    // Executes read all routine.
     void ReadAll();
 
-    /**
-     * @brief Executes the write procedure for ControlUnitADRV9009.
-     * @param address Input parameter specifying address (uint32_t).
-     * @param val Input parameter specifying val (uint32_t).
-     */
+    // Executes write routine.
     void Write(uint32_t address,uint32_t val);
 
 signals:
-    /**
-     * @brief Transmits send transmit signal command/packet over the communication bus.
-     * @param int Input parameter specifying int (int).
-     */
+    // Transmits send transmit signal command/packet over communication interface.
     void sendTransmitSignal(int);
-    /**
-     * @brief Sets the noise signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets noise signal value and updates internal subsystem configuration.
     void setNoiseSignal(int);
-    /**
-     * @brief Transmits send file to dac signal command/packet over the communication bus.
-     */
+    // Transmits send file to dac signal command/packet over communication interface.
     void sendFileToDacSignal();
-    /**
-     * @brief Sets the auto amp signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets auto amp signal value and updates internal subsystem configuration.
     void setAutoAmpSignal(int);
-    /**
-     * @brief Sets the channel signal parameter and updates internal state.
-     * @param double Input parameter specifying double (double).
-     */
+    // Sets channel signal value and updates internal subsystem configuration.
     void setChannelSignal(double);
-    /**
-     * @brief Sets the channel from table parameter and updates internal state.
-     * @param double Input parameter specifying double (double).
-     */
+    // Sets channel from table value and updates internal subsystem configuration.
     void setChannelFromTable(double);
-    /**
-     * @brief Sets the inchannel signal parameter and updates internal state.
-     * @param double Input parameter specifying double (double).
-     */
+    // Sets inchannel signal value and updates internal subsystem configuration.
     void setInchannelSignal(double);
 
-    /**
-     * @brief Sets the pdiv signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets pdiv signal value and updates internal subsystem configuration.
     void setPdivSignal     (int);
-    /**
-     * @brief Sets the te ta_az signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets te ta_az signal value and updates internal subsystem configuration.
     void setteTa_azSignal  (int);
-    /**
-     * @brief Sets the num_ side signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets num_ side signal value and updates internal subsystem configuration.
     void setNum_SideSignal (int);
-    /**
-     * @brief Sets the num_ back signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets num_ back signal value and updates internal subsystem configuration.
     void setNum_BackSignal (int);
-    /**
-     * @brief Sets the p_to_ b signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets p_to_ b signal value and updates internal subsystem configuration.
     void setP_to_BSignal   (int);
-    /**
-     * @brief Sets the n p s signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets n p s signal value and updates internal subsystem configuration.
     void setNPSSignal      (int);
-    /**
-     * @brief Sets the p_to_ s signal parameter and updates internal state.
-     * @param int Input parameter specifying int (int).
-     */
+    // Sets p_to_ s signal value and updates internal subsystem configuration.
     void setP_to_SSignal   (int);
-    /**
-     * @brief Executes the en pattern signal procedure for ControlUnitADRV9009.
-     * @param int Input parameter specifying int (int).
-     */
+    // Executes en pattern signal routine.
     void enPatternSignal   (int);
 };
 

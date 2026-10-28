@@ -1,11 +1,8 @@
-/**
- * @file pwPage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pwPage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for pwPage.cpp.
+// ============================================================================
 
 ﻿#include "pwPage.h"
 #include "ui_pwPage.h"
@@ -44,10 +41,7 @@ PWPage::PWPage(QWidget *parent,
 
 }
 
-/**
- * @brief Executes the pw info slot procedure for PWPage.
- * @param pwType Input parameter specifying pwType (pwSpace::pwTypeEnum).
- */
+// Executes pw info slot routine.
 void PWPage::pwInfoSlot(pwSpace::pwTypeEnum pwType)
 {
     if(pwData->Type != pwType || firstRun)
@@ -78,9 +72,7 @@ void PWPage::pwInfoSlot(pwSpace::pwTypeEnum pwType)
     }
 }
 
-/**
- * @brief Executes the change lable procedure for PWPage.
- */
+// Executes change lable routine.
 void PWPage::changeLable()
 {
     float maxVal = priData->maxPri;
@@ -100,9 +92,7 @@ void PWPage::changeLable()
 
 
 
-/**
- * @brief Slot handler responding to on btn add clicked event.
- */
+// Event/Signal handler for on btn add clicked.
 void PWPage::on_btnAdd_clicked()
 {
     ui->tblPW->insertRow(ui->tblPW->rowCount());
@@ -123,9 +113,7 @@ void PWPage::on_btnAdd_clicked()
     connect(btn, SIGNAL(clicked()),this, SLOT(btnSlot()));
 }
 
-/**
- * @brief Executes the btn slot procedure for PWPage.
- */
+// Executes btn slot routine.
 void PWPage::btnSlot()
 {
     row--;
@@ -134,9 +122,7 @@ void PWPage::btnSlot()
     btnRed();
 }
 
-/**
- * @brief Slot handler responding to on btn clear clicked event.
- */
+// Event/Signal handler for on btn clear clicked.
 void PWPage::on_btnClear_clicked()
 {
     row =0;
@@ -146,9 +132,7 @@ void PWPage::on_btnClear_clicked()
     btnRed();
 }
 
-/**
- * @brief Slot handler responding to on btn ok clicked event.
- */
+// Event/Signal handler for on btn ok clicked.
 void PWPage::on_btnOk_clicked()
 {
 
@@ -200,11 +184,7 @@ void PWPage::on_btnOk_clicked()
     btnGreen();
 }
 
-/**
- * @brief Executes the pw table value procedure for PWPage.
- * @param status Input parameter specifying status (QString).
- * @return Output value of type bool.
- */
+// Executes pw table value routine.
 bool PWPage::pwTableValue(QString status)
 {
 
@@ -264,11 +244,7 @@ bool PWPage::pwRange(float &pw){
     return true;
 }
 
-/**
- * @brief Executes the pw compare procedure for PWPage.
- * @param float&pw Input parameter specifying float&pw (float&pw).
- * @return Output value of type bool.
- */
+// Executes pw compare routine.
 bool PWPage::pwCompare(float&pw)
 {
     if(pw >= priData->minPri)
@@ -279,9 +255,7 @@ bool PWPage::pwCompare(float&pw)
     return true;
 }
 
-/**
- * @brief Destructor for PWPage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up PWPage resources, timers, and allocated memory.
 PWPage::~PWPage()
 {
     delete ui;
@@ -291,6 +265,7 @@ PWPage::~PWPage()
 
 }
 
+// Event/Signal handler for on tbl p w cell changed.
 void PWPage::on_tblPW_cellChanged(int row, int column)
 {
 
@@ -323,6 +298,7 @@ void PWPage::btnGreen(){
 
 //====================================================================
 
+// Executes generate p w data routine.
 bool PWPage::generatePWData(pwSpace::pwDataStruct &data )
 {
     if(data.Type == pwSpace::pwTypeEnum::constant)

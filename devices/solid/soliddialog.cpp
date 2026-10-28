@@ -1,11 +1,8 @@
-/**
- * @file soliddialog.cpp
- * @brief Subsystem module for solid in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: soliddialog.cpp
+// Subsystem: eLynxSDR solid
+// Description: Subsystem implementation and interface guidance for soliddialog.cpp.
+// ============================================================================
 
 #include "soliddialog.h"
 #include "ui_soliddialog.h"
@@ -23,18 +20,13 @@ SolidDialog::SolidDialog(QWidget *parent) :
     connections();
 }
 
-/**
- * @brief Destructor for SolidDialog, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up SolidDialog resources, timers, and allocated memory.
 SolidDialog::~SolidDialog()
 {
     delete ui;
 }
 
-/**
- * @brief Slot handler responding to on  device response slot event.
- * @param response Input parameter specifying response (QByteArray).
- */
+// Event/Signal handler for on  device response slot.
 void SolidDialog::on_DeviceResponseSlot(QByteArray response)
 {
     QString packet;
@@ -55,10 +47,7 @@ void SolidDialog::on_DeviceResponseSlot(QByteArray response)
 
 }
 
-/**
- * @brief Executes the handle info procedure for SolidDialog.
- * @param response Input parameter specifying response (QString).
- */
+// Executes handle info routine.
 void SolidDialog::handle_info(QString response)
 {
     QString cmd = "";
@@ -333,10 +322,7 @@ void SolidDialog::handle_info(QString response)
     }
     ui->pgbSolid->setValue(temp);
 }
-/**
- * @brief Reads, parses, and decodes incoming receive command from other object slot data buffer.
- * @param cmd Input parameter specifying cmd (QString).
- */
+// Reads and parses incoming receive command from other object slot data.
 void SolidDialog::receiveCommandFromOtherObjectSlot(QString cmd)
 {
     QStringList frame;
@@ -354,9 +340,7 @@ void SolidDialog::receiveCommandFromOtherObjectSlot(QString cmd)
     }
 }
 
-/**
- * @brief Executes the joshan status data slot procedure for SolidDialog.
- */
+// Executes joshan status data slot routine.
 void SolidDialog::joshanStatusDataSlot()
 {
 
@@ -382,10 +366,7 @@ void SolidDialog::joshanStatusDataSlot()
 
 }
 
-/**
- * @brief Retrieves the current evice connected slot value.
- * @param val Input parameter specifying val (bool).
- */
+// Retrieves current evice connected slot state.
 void SolidDialog::isDeviceConnectedSlot(bool val)
 {
     isDeviceConnected = val;
@@ -393,9 +374,7 @@ void SolidDialog::isDeviceConnectedSlot(bool val)
 
 
 
-/**
- * @brief Slot handler responding to on blinking timer time out event.
- */
+// Event/Signal handler for on blinking timer time out.
 void SolidDialog::on_blinkingTimer_timeOut()
 {
     if(vswr_blinking)
@@ -418,9 +397,7 @@ void SolidDialog::on_blinkingTimer_timeOut()
     }
 }
 
-/**
- * @brief Initializes and configures the init blinking timer for the SolidDialog subsystem.
- */
+// Initializes init blinking timer for SolidDialog.
 void SolidDialog::initBlinkingTimer()
 {
     blinking_timer = new QTimer(this);
@@ -428,17 +405,13 @@ void SolidDialog::initBlinkingTimer()
     blinking_timer->start();
 }
 
-/**
- * @brief Executes the connections procedure for SolidDialog.
- */
+// Executes connections routine.
 void SolidDialog::connections()
 {
     connect(blinking_timer, &QTimer::timeout, this, &SolidDialog::on_blinkingTimer_timeOut);
 }
 
-/**
- * @brief Initializes and configures the init leds icon for the SolidDialog subsystem.
- */
+// Initializes init leds icon for SolidDialog.
 void SolidDialog::initLedsIcon()
 {
     ui->ledActivateLight->setColor(Qt::yellow);
@@ -453,26 +426,19 @@ void SolidDialog::initLedsIcon()
 
 
 
-/**
- * @brief Slot handler responding to on btn start report clicked event.
- */
+// Event/Signal handler for on btn start report clicked.
 void SolidDialog::on_btnStartReport_clicked()
 {
     emit sendToMainSig("SOLID_STOP_REPORT,FALSE");
 }
 
-/**
- * @brief Slot handler responding to on btn stop report clicked event.
- */
+// Event/Signal handler for on btn stop report clicked.
 void SolidDialog::on_btnStopReport_clicked()
 {
     emit sendToMainSig("SOLID_STOP_REPORT,TRUE");
 }
 
-/**
- * @brief Slot handler responding to on  solid dialog finished event.
- * @param result Input parameter specifying result (int).
- */
+// Event/Signal handler for on  solid dialog finished.
 void SolidDialog::on_SolidDialog_finished(int result)
 {
     emit(sendCommandToOtherObjectSignal("SOLID DIALOG IS,"+QString::number(false)));///*this->isVisible()*/

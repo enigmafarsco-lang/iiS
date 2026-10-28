@@ -1,11 +1,8 @@
-/**
- * @file ad9371_adv.cpp
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: ad9371_adv.cpp
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for ad9371_adv.cpp.
+// ============================================================================
 
 #include "ad9371_adv.h"
 #include "ui_ad9371_adv.h"
@@ -376,21 +373,13 @@ ad9371_adv::ad9371_adv(QWidget *parent) :
     ui->mainTabContainer->setTabPosition(QTabWidget::West);
 }
 
-/**
- * @brief Destructor for ad9371_adv, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up ad9371_adv resources, timers, and allocated memory.
 ad9371_adv::~ad9371_adv()
 {
     delete ui;
 }
 
-/**
- * @brief Executes the add widget to list procedure for ad9371_adv.
- * @param widget Input parameter specifying widget (QWidget).
- * @param name Input parameter specifying name (char).
- * @param lut Input parameter specifying lut (unsigned char * const).
- * @param lut_len Input parameter specifying lut_len (unsigned char).
- */
+// Executes add widget to list routine.
 void ad9371_adv::AddWidgetToList(QWidget *widget, char *name, unsigned char * const lut,  unsigned char lut_len)
 {
 
@@ -857,6 +846,7 @@ QWidget * ad9371_adv::init()
     return NULL;
 }
 
+// Event/Signal handler for on btn save settings clicked.
 void ad9371_adv::on_btn_save_settings_clicked()
 {
     iio_device_debug_attr_write_longlong(globals::dev, "initialize", 1);

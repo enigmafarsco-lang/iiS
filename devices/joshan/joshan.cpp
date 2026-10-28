@@ -1,11 +1,8 @@
-/**
- * @file joshan.cpp
- * @brief Subsystem module for joshan in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: joshan.cpp
+// Subsystem: eLynxSDR joshan
+// Description: Subsystem implementation and interface guidance for joshan.cpp.
+// ============================================================================
 
 #include "joshan.h"
 #include "ui_joshan.h"
@@ -21,10 +18,7 @@ Joshan::Joshan(QWidget *parent) :
     connections();
 }
 
-/**
- * @brief Retrieves the current oshan stop setter value.
- * @param val Input parameter specifying val (bool).
- */
+// Retrieves current oshan stop setter state.
 void Joshan::isJoshanStopSetter(bool val)
 {
     isJoshanStop = val;
@@ -37,10 +31,7 @@ void Joshan::isJoshanStopSetter(bool val)
     on_DeviceResponseSlot(f);
 }
 
-/**
- * @brief Executes the joshan is connected procedure for Joshan.
- * @param connected Input parameter specifying connected (bool).
- */
+// Executes joshan is connected routine.
 void Joshan::joshanIsConnected(bool connected)
 {
     if(connected)
@@ -56,17 +47,13 @@ void Joshan::joshanIsConnected(bool connected)
 }
 
 
-/**
- * @brief Destructor for Joshan, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up Joshan resources, timers, and allocated memory.
 Joshan::~Joshan()
 {
     delete ui;
 }
 
-/**
- * @brief Initializes and configures the init for the Joshan subsystem.
- */
+// Initializes init for Joshan.
 void Joshan::init()
 {
     //    /*joshanFuncData*/ = new joshanFuncStruct;
@@ -81,9 +68,7 @@ void Joshan::init()
 
 }
 
-/**
- * @brief Executes the connections procedure for Joshan.
- */
+// Executes connections routine.
 void Joshan::connections()
 {
 
@@ -92,10 +77,7 @@ void Joshan::connections()
 
 }
 
-/**
- * @brief Slot handler responding to on  device response slot event.
- * @param response Input parameter specifying response (QByteArray).
- */
+// Event/Signal handler for on  device response slot.
 void Joshan::on_DeviceResponseSlot(QByteArray response)
 {
     if (isJoshanStop)
@@ -156,10 +138,7 @@ void Joshan::on_DeviceResponseSlot(QByteArray response)
     }
 }
 
-/**
- * @brief Retrieves the current func data joshan slot value.
- * @param deviceData Input parameter specifying deviceData (QJsonObject).
- */
+// Retrieves current func data joshan slot state.
 void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");
@@ -189,10 +168,7 @@ void Joshan::getFuncDataJoshanSlot(QJsonObject deviceData)
     }
 }
 
-/**
- * @brief Retrieves the current status data joshan slot value.
- * @param deviceData Input parameter specifying deviceData (QJsonObject).
- */
+// Retrieves current status data joshan slot state.
 void Joshan::getStatusDataJoshanSlot(QJsonObject deviceData)
 {
     deviceData.remove("device");
@@ -229,6 +205,7 @@ void Joshan::getStatusDataJoshanSlot(QJsonObject deviceData)
 //    this->lnaStatus=lnaStatus;
 //}
 
+// Executes handle info routine.
 void Joshan::handle_info(QString response)
 {
 

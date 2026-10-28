@@ -1,11 +1,8 @@
-/**
- * @file pulsePage.cpp
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: pulsePage.cpp
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for pulsePage.cpp.
+// ============================================================================
 
 #include "pulsePage.h"
 #include "ui_pulsePage.h"
@@ -44,9 +41,7 @@ PulsePage::PulsePage(QWidget *parent, radarSpace::radarDataStruct * radarData) :
 
 
 
-/**
- * @brief Slot handler responding to on btn ok clicked event.
- */
+// Event/Signal handler for on btn ok clicked.
 void PulsePage::on_btnOk_clicked()
 {
 
@@ -176,9 +171,7 @@ void PulsePage::on_btnOk_clicked()
 
 
 
-/**
- * @brief Destructor for PulsePage, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up PulsePage resources, timers, and allocated memory.
 PulsePage::~PulsePage()
 {
     delete  radarData;
@@ -186,9 +179,7 @@ PulsePage::~PulsePage()
 }
 
 
-/**
- * @brief Executes the btn red procedure for PulsePage.
- */
+// Executes btn red routine.
 void PulsePage::btnRed()
 {
     ui->btnOk->setStyleSheet("background-color:red");

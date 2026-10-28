@@ -1,11 +1,8 @@
-/**
- * @file solid.cpp
- * @brief Subsystem module for solid in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: solid.cpp
+// Subsystem: eLynxSDR solid
+// Description: Subsystem implementation and interface guidance for solid.cpp.
+// ============================================================================
 
 #include "solid.h"
 #include "ui_solid.h"
@@ -34,27 +31,20 @@ Solid::Solid(QWidget *parent) :
     connect(&blinkingTimer, &QTimer::timeout, this, &Solid::timeout);
 }
 
-/**
- * @brief Destructor for Solid, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up Solid resources, timers, and allocated memory.
 Solid::~Solid()
 {
     delete movie;
     delete ui;
 }
 
-/**
- * @brief Slot handler responding to on  device response slot event.
- * @param QByteArray Input parameter specifying QByteArray (QByteArray).
- */
+// Event/Signal handler for on  device response slot.
 void Solid::on_DeviceResponseSlot(QByteArray)
 {
 
 }
 
-/**
- * @brief Executes the joshan func data slot procedure for Solid.
- */
+// Executes joshan func data slot routine.
 void Solid::joshanFuncDataSlot()
 {
     QJsonObject solidData;
@@ -63,9 +53,7 @@ void Solid::joshanFuncDataSlot()
     emit sendFuncDataToJoshanSignal(solidData);
 }
 
-/**
- * @brief Executes the joshan status data slot procedure for Solid.
- */
+// Executes joshan status data slot routine.
 void Solid::joshanStatusDataSlot()
 {
     QJsonObject solidData;
@@ -78,10 +66,7 @@ void Solid::joshanStatusDataSlot()
 
 
 
-/**
- * @brief Reads, parses, and decodes incoming receive command from other object slot data buffer.
- * @param response Input parameter specifying response (QString).
- */
+// Reads and parses incoming receive command from other object slot data.
 void Solid::receiveCommandFromOtherObjectSlot(QString response)
 {
     QStringList frame;
@@ -283,10 +268,7 @@ void Solid::receiveCommandFromOtherObjectSlot(QString response)
     }
 }
 
-/**
- * @brief Retrieves the current evice connected slot value.
- * @param conncted Input parameter specifying conncted (bool).
- */
+// Retrieves current evice connected slot state.
 void Solid::isDeviceConnectedSlot(bool conncted)
 {
     isDeviceConnected = conncted;
@@ -296,10 +278,7 @@ void Solid::isDeviceConnectedSlot(bool conncted)
     }
 }
 
-/**
- * @brief Executes the joshan control data slot procedure for Solid.
- * @param val Input parameter specifying val (QJsonObject).
- */
+// Executes joshan control data slot routine.
 void Solid::joshanControlDataSlot(QJsonObject val)
 {
 
@@ -336,18 +315,13 @@ void Solid::joshanControlDataSlot(QJsonObject val)
     }
 }
 
-/**
- * @brief Slot handler responding to timeout event.
- */
+// Event/Signal handler for timeout.
 void Solid::timeout()
 {
     ui->btnSolidStatus->setChecked( (!ui->btnSolidStatus->isChecked()) );
 }
 
-/**
- * @brief Slot handler responding to on chk alc mode clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on chk alc mode clicked.
 void Solid::on_chkAlcMode_clicked(bool checked)
 {
     if(checked)
@@ -363,10 +337,7 @@ void Solid::on_chkAlcMode_clicked(bool checked)
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on chk err lacth mode clicked event.
- * @param checked Input parameter specifying checked (bool).
- */
+// Event/Signal handler for on chk err lacth mode clicked.
 void Solid::on_chkErrLacthMode_clicked(bool checked)
 {
     if(checked)
@@ -382,9 +353,7 @@ void Solid::on_chkErrLacthMode_clicked(bool checked)
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on btn enable clicked event.
- */
+// Event/Signal handler for on btn enable clicked.
 void Solid::on_btnEnable_clicked()
 {
     //    ui->btnEnable->setChecked(false);
@@ -398,9 +367,7 @@ void Solid::on_btnEnable_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on btn disable clicked event.
- */
+// Event/Signal handler for on btn disable clicked.
 void Solid::on_btnDisable_clicked()
 {
     ui->btnDisable->setChecked(false);
@@ -411,9 +378,7 @@ void Solid::on_btnDisable_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on btn reset clicked event.
- */
+// Event/Signal handler for on btn reset clicked.
 void Solid::on_btnReset_clicked()
 {
     m_commandString = "@JamSolidReset$";
@@ -422,9 +387,7 @@ void Solid::on_btnReset_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on btn solid status clicked event.
- */
+// Event/Signal handler for on btn solid status clicked.
 void Solid::on_btnSolidStatus_clicked()
 {
     ui->btnSolidStatus->setChecked(true);
@@ -433,9 +396,7 @@ void Solid::on_btnSolidStatus_clicked()
     emit(sendCommandToOtherObjectSignal(m_commandString));
 }
 
-/**
- * @brief Slot handler responding to on rdb high clicked event.
- */
+// Event/Signal handler for on rdb high clicked.
 void Solid::on_rdbHigh_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,H$";
@@ -444,9 +405,7 @@ void Solid::on_rdbHigh_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on rdb medium clicked event.
- */
+// Event/Signal handler for on rdb medium clicked.
 void Solid::on_rdbMedium_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,M$";
@@ -455,9 +414,7 @@ void Solid::on_rdbMedium_clicked()
     emit(sendCommandToDeviceSignal(m_commandBytes));
 }
 
-/**
- * @brief Slot handler responding to on rdb low clicked event.
- */
+// Event/Signal handler for on rdb low clicked.
 void Solid::on_rdbLow_clicked()
 {
     m_commandString = "@JamSolidPowerLvl,L$";

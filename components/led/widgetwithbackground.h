@@ -1,3 +1,9 @@
+// ============================================================================
+// File: widgetwithbackground.h
+// Subsystem: eLynxSDR led
+// Description: Subsystem implementation and interface guidance for widgetwithbackground.h.
+// ============================================================================
+
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -25,26 +31,18 @@
 
 #include <QWidget>
 
-/**
- * @class QPixmap
- * @brief High-level controller class for QPixmap.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class QPixmap;
 
-/**
- * @class WidgetWithBackground
- * @brief High-level controller class for WidgetWithBackground.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class WidgetWithBackground : public QWidget
 {
 	Q_OBJECT
   public:
      /** Konstruktor */
+     // Constructor: Initializes WidgetWithBackground subsystem components, default parameters, and state.
      WidgetWithBackground(QWidget * parent = 0);
 
      /** Destruktor - usuwa bitmapk.  */
+     // Destructor: Cleans up WidgetWithBackground resources, timers, and allocated memory.
      ~WidgetWithBackground ();
 
      /**
@@ -52,9 +50,11 @@ class WidgetWithBackground : public QWidget
       * wkleja bitmap z tem na kontrolk -
       * generuj j wczeniej jeeli zajdzie taka potrzeba.
       */
+     // Executes draw background routine.
      void  drawBackground ();
 
      /** Odmalowywuje kontrolk bezwarunkowo odmalowywujc to. */
+     // Updates and synchronizes update with background data stream.
      void  updateWithBackground ();
     
      /** 
@@ -63,10 +63,12 @@ class WidgetWithBackground : public QWidget
      * to znaczy zmienia si rozmiar komponentu lub istnieje 
      * potrzeba przemalowania ta. 
      */ 
+     // Executes do repaint background routine.
      bool doRepaintBackground(); 
      
   protected:
     /** Wywouje paintBackground - odmalowywujc to na nowo */
+    // Executes repaint background routine.
     void repaintBackground();
 
     /**

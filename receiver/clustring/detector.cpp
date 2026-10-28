@@ -1,11 +1,8 @@
-/**
- * @file detector.cpp
- * @brief Subsystem module for clustring in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: detector.cpp
+// Subsystem: eLynxSDR clustring
+// Description: Subsystem implementation and interface guidance for detector.cpp.
+// ============================================================================
 
 #include "detector.h"
 #include "receiver/globals.h"
@@ -15,6 +12,7 @@
 /**
  * @brief Detector::Detector
  */
+// Constructor: Initializes Detector subsystem components, default parameters, and state.
 Detector::Detector()
 {
     //    dataExtractor=new DataExtractor();
@@ -49,24 +47,19 @@ Detector::Detector()
  * @brief Detector::setTunerFrequency
  * @param newTunerFrequency
  */
+// Sets tuner frequency value and updates internal subsystem configuration.
 void Detector::setTunerFrequency(double newTunerFrequency)
 {
     ft = newTunerFrequency;
 }
 
-/**
- * @brief Sets the stop parameter and updates internal state.
- * @param newStop Input parameter specifying newStop (bool).
- */
+// Sets stop value and updates internal subsystem configuration.
 void Detector::setStop(bool newStop)
 {
     stop = newStop;
 }
 
-/**
- * @brief Executes the calculating p r i procedure for Detector.
- * @param pls Input parameter specifying pls (Pulse).
- */
+// Executes calculating p r i routine.
 void Detector::calculatingPRI(Pulse pls)
 {
     int chNo = int(pls.Channel);
@@ -139,6 +132,7 @@ void Detector::calculatingPRI(Pulse pls)
  * @param pulse
  * @param updateFreqMap
  */
+// Executes check pulse routine.
 bool Detector::CheckPulse(Pulse *pulse,bool updateFreqMap=false)
 {
     //     qInfo()<<"----->4 " << pulse->Freq;
@@ -199,6 +193,7 @@ bool CountLessThan(const Pulse *p1, const Pulse *p2)
 /**
  * @brief Detector::ClearUnusedFreqs
  */
+// Executes clear unused freqs routine.
 void Detector::ClearUnusedFreqs()
 {
     mutex.lock();
@@ -240,6 +235,7 @@ void Detector::ClearUnusedFreqs()
  * @brief Detector::AddToBuffer
  * @param yItems
  */
+// Executes add to queue routine.
 void Detector::AddToQueue(QVector<double> yItems)
 {
     mutex.lock();
@@ -255,6 +251,7 @@ void Detector::AddToQueue(QVector<double> yItems)
  * @param tunerFrequency
  */
 
+// Executes read block data x routine.
 void Detector::ReadBlockDataX(QVector<double> yItems)
 {
     // Hold pattern Items
@@ -693,6 +690,7 @@ void Detector::ReadBlockDataX(QVector<double> yItems)
 /**
  * @brief Thread main function
  */
+// Executes run routine.
 void Detector::run()
 {
     pulseList->clear();

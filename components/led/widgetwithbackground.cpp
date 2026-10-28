@@ -1,3 +1,9 @@
+// ============================================================================
+// File: widgetwithbackground.cpp
+// Subsystem: eLynxSDR led
+// Description: Subsystem implementation and interface guidance for widgetwithbackground.cpp.
+// ============================================================================
+
 /***************************************************************************
  *   Copyright (C) 2006-2008 by Tomasz Ziobrowski                          *
  *   http://www.3electrons.com                                             *
@@ -23,15 +29,14 @@
 #include <QtGui>
 #include "widgetwithbackground.h"
 
+// Constructor: Initializes WidgetWithBackground subsystem components, default parameters, and state.
 WidgetWithBackground::WidgetWithBackground(QWidget * parent) : QWidget(parent)
 {
   m_pixmap = new QPixmap(size());
   m_modified = false;
 }
 
-/**
- * @brief Destructor for WidgetWithBackground, releasing allocated hardware resources, timers, and buffers.
- */
+// Destructor: Cleans up WidgetWithBackground resources, timers, and allocated memory.
 WidgetWithBackground::~WidgetWithBackground()
 {
    if (m_pixmap)
@@ -41,9 +46,7 @@ WidgetWithBackground::~WidgetWithBackground()
      }
 }
 
-/**
- * @brief Executes the draw background procedure for WidgetWithBackground.
- */
+// Executes draw background routine.
 void WidgetWithBackground::drawBackground()
 {
   if (m_pixmap->size() != size() || m_modified )
@@ -58,27 +61,20 @@ void WidgetWithBackground::drawBackground()
     painter.drawPixmap(0,0,*m_pixmap);
 }
 
-/**
- * @brief Updates and synchronizes the update with background data stream and visual indicators.
- */
+// Updates and synchronizes update with background data stream.
 void WidgetWithBackground::updateWithBackground()
 {
   m_modified=true;
   update();
 }
 
-/**
- * @brief Executes the do repaint background procedure for WidgetWithBackground.
- * @return Output value of type bool.
- */
+// Executes do repaint background routine.
 bool WidgetWithBackground::doRepaintBackground()
 {
   return m_modified;
 }
 
-/**
- * @brief Executes the repaint background procedure for WidgetWithBackground.
- */
+// Executes repaint background routine.
 void WidgetWithBackground::repaintBackground()
 {
   m_pixmap->fill(QColor(0,0,0,0));

@@ -1,11 +1,8 @@
-/**
- * @file modulationPage.h
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: modulationPage.h
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for modulationPage.h.
+// ============================================================================
 
 #ifndef MODULATIONPAGE_H
 #define MODULATIONPAGE_H
@@ -18,19 +15,9 @@
 #include "../components/sattarutils.h"
 
 namespace Ui {
-/**
- * @class ModulationPage
- * @brief High-level controller class for ModulationPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ModulationPage;
 }
 
-/**
- * @class ModulationPage
- * @brief High-level controller class for ModulationPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class ModulationPage : public QWidget
 {
     Q_OBJECT
@@ -55,127 +42,67 @@ public:
     projectDataSpace::projectDataStruct * prjData ;
 
 
-    /**
-     * @brief Destructor for ModulationPage, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up ModulationPage resources, timers, and allocated memory.
     ~ModulationPage();
 
 private:
     Ui::ModulationPage *ui;
 
-    /**
-     * @brief Executes the bpsk action procedure for ModulationPage.
-     * @return Output value of type bool.
-     */
+    // Executes bpsk action routine.
     bool bpskAction ();
-    /**
-     * @brief Executes the qpsk action procedure for ModulationPage.
-     */
+    // Executes qpsk action routine.
     void qpskAction ();
-    /**
-     * @brief Executes the xfm action procedure for ModulationPage.
-     * @return Output value of type bool.
-     */
+    // Executes xfm action routine.
     bool xfmAction ();
-    /**
-     * @brief Executes the fsk action procedure for ModulationPage.
-     * @return Output value of type bool.
-     */
+    // Executes fsk action routine.
     bool fskAction ();
 
     SattarUtils * utils = new SattarUtils;
-    /**
-     * @brief Executes the custom code modifier procedure for ModulationPage.
-     * @return Output value of type QString.
-     */
+    // Executes custom code modifier routine.
     QString customCodeModifier();
-    /**
-     * @brief Executes the bit infi modifier procedure for ModulationPage.
-     * @return Output value of type QString.
-     */
+    // Executes bit infi modifier routine.
     QString bitInfiModifier();
-    /**
-     * @brief Executes the barker modifier procedure for ModulationPage.
-     * @return Output value of type QString.
-     */
+    // Executes barker modifier routine.
     QString barkerModifier();
-    /**
-     * @brief Executes the costas modifier procedure for ModulationPage.
-     * @return Output value of type QString.
-     */
+    // Executes costas modifier routine.
     QString costasModifier();
-    /**
-     * @brief Executes the delta check simple procedure for ModulationPage.
-     */
+    // Executes delta check simple routine.
     void deltaCheckSimple();
-    /**
-     * @brief Executes the delta check step procedure for ModulationPage.
-     */
+    // Executes delta check step routine.
     void deltaCheckStep();
     bool firstRun{false};
 
 public slots:
-    /**
-     * @brief Executes the modul info slot procedure for ModulationPage.
-     * @param modulSpace::modeTypeEnum Input parameter specifying modulSpace::modeTypeEnum (modulSpace::modeTypeEnum).
-     */
+    // Executes modul info slot routine.
     void modulInfoSlot(modulSpace::modeTypeEnum);
 
 private slots:
 
-    /**
-     * @brief Slot handler responding to on bpsk cmb barker code activated event.
-     * @param index Input parameter specifying index (int).
-     */
+    // Event/Signal handler for on bpsk cmb barker code activated.
     void on_bpsk_cmbBarkerCode_activated(int index);
-    /**
-     * @brief Slot handler responding to on bpsk rad barker code toggled event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on bpsk rad barker code toggled.
     void on_bpsk_radBarkerCode_toggled(bool checked);
-    /**
-     * @brief Slot handler responding to on fsk rad fsk simple toggled event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on fsk rad fsk simple toggled.
     void on_fsk_radFskSimple_toggled(bool checked);
-    /**
-     * @brief Slot handler responding to on qpsk rad frank toggled event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on qpsk rad frank toggled.
     void on_qpsk_radFrank_toggled(bool checked);
-    /**
-     * @brief Slot handler responding to on xfm rad lfm toggled event.
-     * @param checked Input parameter specifying checked (bool).
-     */
+    // Event/Signal handler for on xfm rad lfm toggled.
     void on_xfm_radLfm_toggled(bool checked);
-    /**
-     * @brief Slot handler responding to on bpsk btn random generate clicked event.
-     */
+    // Event/Signal handler for on bpsk btn random generate clicked.
     void on_bpsk_btnRandomGenerate_clicked();
-    /**
-     * @brief Slot handler responding to on qpsk btn random generate clicked event.
-     */
+    // Event/Signal handler for on qpsk btn random generate clicked.
     void on_qpsk_btnRandomGenerate_clicked();
-    /**
-     * @brief Executes the btn green procedure for ModulationPage.
-     */
+    // Executes btn green routine.
     void btnGreen();
-    /**
-     * @brief Executes the btn red procedure for ModulationPage.
-     */
+    // Executes btn red routine.
     void btnRed();
 
-    /**
-     * @brief Slot handler responding to on btn ok clicked event.
-     */
+    // Event/Signal handler for on btn ok clicked.
     void on_btnOk_clicked();
 
 
 signals:
-    /**
-     * @brief Executes the show menu option signal procedure for ModulationPage.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes show menu option signal routine.
     void showMenuOptionSignal(bool);
     void showSelectedRadarInfo(modulSpace::modulDataStruct         &,
                                radarSpace::radarDataStruct         &,

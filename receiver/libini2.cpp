@@ -1,11 +1,8 @@
-/**
- * @file libini2.cpp
- * @brief Subsystem module for receiver in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: libini2.cpp
+// Subsystem: eLynxSDR receiver
+// Description: Subsystem implementation and interface guidance for libini2.cpp.
+// ============================================================================
 
 #include "libini2.h"
 #include <errno.h>
@@ -88,22 +85,13 @@ struct loops_parse_params {
     bool unclosed_loops;
 };
 
-/**
- * @brief Constructs a new libini2 instance and initializes subsystem components and UI state.
- */
+// Constructor: Initializes libini2 subsystem components, default parameters, and state.
 libini2::libini2()
 {
 
 }
 
-/**
- * @brief Updates and synchronizes the update_from_ini data stream and visual indicators.
- * @param ini_file Input parameter specifying ini_file (const char).
- * @param driver_name Input parameter specifying driver_name (const char).
- * @param dev Input parameter specifying dev (iio_device).
- * @param whitelist Input parameter specifying whitelist (const char * const).
- * @param list_len Input parameter specifying list_len (size_t).
- */
+// Updates and synchronizes update_from_ini data stream.
 void libini2::update_from_ini(const char *ini_file, const char *driver_name, iio_device *dev, const char * const *whitelist, size_t list_len)
 {
     bool found = false;
@@ -151,14 +139,7 @@ void libini2::update_from_ini(const char *ini_file, const char *driver_name, iio
     libini.ini_close(ini);
 }
 
-/**
- * @brief Executes the save to ini procedure for libini2.
- * @param f Input parameter specifying f (FILE).
- * @param driver_name Input parameter specifying driver_name (const char).
- * @param dev Input parameter specifying dev (iio_device).
- * @param whitelist Input parameter specifying whitelist (const char * const).
- * @param list_len Input parameter specifying list_len (size_t).
- */
+// Executes save to ini routine.
 void libini2::save_to_ini(FILE *f, const char *driver_name, iio_device *dev, const char * const *whitelist, size_t list_len)
 {
     unsigned int i;
@@ -211,12 +192,7 @@ char *libini2::read_token_from_ini(const char *ini_file, const char *driver_name
     return dup;
 }
 
-/**
- * @brief Executes the loops params init procedure for libini2.
- * @param p Input parameter specifying p (loops_parse_params).
- * @param i Input parameter specifying i (FILE).
- * @param o Input parameter specifying o (FILE).
- */
+// Executes loops params init routine.
 void libini2::loops_params_init(loops_parse_params *p, FILE *i, FILE *o)
 {
     if (p) {
@@ -229,12 +205,7 @@ void libini2::loops_params_init(loops_parse_params *p, FILE *i, FILE *o)
     }
 }
 
-/**
- * @brief Executes the ini line begins with keyword procedure for libini2.
- * @param line Input parameter specifying line (char).
- * @param extracted_keyword Input parameter specifying extracted_keyword (char).
- * @return Output value of type bool.
- */
+// Executes ini line begins with keyword routine.
 bool libini2::ini_line_begins_with_keyword(char *line, char *extracted_keyword)
 {
     char *keyword_start = strstr(line, "<");
@@ -252,13 +223,7 @@ bool libini2::ini_line_begins_with_keyword(char *line, char *extracted_keyword)
     return ret;
 }
 
-/**
- * @brief Executes the loop expand procedure for libini2.
- * @param parse_params Input parameter specifying parse_params (loops_parse_params).
- * @param buf_with_loop Input parameter specifying buf_with_loop (char).
- * @param loop_name Input parameter specifying loop_name (char).
- * @return Output value of type int.
- */
+// Executes loop expand routine.
 int libini2::loop_expand(loops_parse_params *parse_params, char *buf_with_loop, char *loop_name)
 {
     char *replace, *eol;
@@ -434,15 +399,7 @@ char *libini2::ini_loop_get_iteration(ini_loop *loop)
     return iteration;
 }
 
-/**
- * @brief Updates and synchronizes the update_from_ini_chn_cb data stream and visual indicators.
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr Input parameter specifying attr (const char).
- * @param buf Input parameter specifying buf (void).
- * @param len Input parameter specifying len (size_t).
- * @param d Input parameter specifying d (void).
- * @return Output value of type ssize_t.
- */
+// Updates and synchronizes update_from_ini_chn_cb data stream.
 ssize_t libini2::update_from_ini_chn_cb(iio_channel *chn, const char *attr, void *buf, size_t len, void *d)
 {
     struct load_store_params *params = (struct load_store_params *) d;
@@ -468,15 +425,7 @@ ssize_t libini2::update_from_ini_chn_cb(iio_channel *chn, const char *attr, void
     return 0;
 }
 
-/**
- * @brief Updates and synchronizes the update_from_ini_dev_cb data stream and visual indicators.
- * @param dev Input parameter specifying dev (iio_device).
- * @param attr Input parameter specifying attr (const char).
- * @param buf Input parameter specifying buf (void).
- * @param len Input parameter specifying len (size_t).
- * @param d Input parameter specifying d (void).
- * @return Output value of type ssize_t.
- */
+// Updates and synchronizes update_from_ini_dev_cb data stream.
 ssize_t libini2::update_from_ini_dev_cb(iio_device *dev, const char *attr, void *buf, size_t len, void *d)
 {
     struct load_store_params *params = (struct load_store_params *) d;
@@ -490,16 +439,7 @@ ssize_t libini2::update_from_ini_dev_cb(iio_device *dev, const char *attr, void 
     return 0;
 }
 
-/**
- * @brief Executes the attr in whitelist procedure for libini2.
- * @param attr Input parameter specifying attr (const char).
- * @param dev_name Input parameter specifying dev_name (const char).
- * @param dev_len Input parameter specifying dev_len (size_t).
- * @param is_debug Input parameter specifying is_debug (bool).
- * @param whitelist Input parameter specifying whitelist (const char * const).
- * @param list_len Input parameter specifying list_len (size_t).
- * @return Output value of type bool.
- */
+// Executes attr in whitelist routine.
 bool libini2::attr_in_whitelist(const char *attr, const char *dev_name, size_t dev_len, bool is_debug, const char * const *whitelist, size_t list_len)
 {
     unsigned int i;
@@ -513,16 +453,7 @@ bool libini2::attr_in_whitelist(const char *attr, const char *dev_name, size_t d
     return false;
 }
 
-/**
- * @brief Reads, parses, and decodes incoming read_from_ini data buffer.
- * @param params Input parameter specifying params (load_store_params).
- * @param dev_name Input parameter specifying dev_name (const char).
- * @param name_len Input parameter specifying name_len (size_t).
- * @param attr Input parameter specifying attr (const char).
- * @param buf Input parameter specifying buf (void).
- * @param len Input parameter specifying len (size_t).
- * @return Output value of type ssize_t.
- */
+// Reads and parses incoming read_from_ini data.
 ssize_t libini2::read_from_ini(load_store_params *params, const char *dev_name, size_t name_len, const char *attr, void *buf, size_t len)
 {
     bool found = false;
@@ -548,17 +479,7 @@ ssize_t libini2::read_from_ini(load_store_params *params, const char *dev_name, 
     return (ssize_t) len;
 }
 
-/**
- * @brief Executes the attr matches procedure for libini2.
- * @param dev_name Input parameter specifying dev_name (const char).
- * @param dev_len Input parameter specifying dev_len (size_t).
- * @param attr Input parameter specifying attr (const char).
- * @param attr_len Input parameter specifying attr_len (size_t).
- * @param key Input parameter specifying key (const char).
- * @param len Input parameter specifying len (size_t).
- * @param debug Input parameter specifying debug (bool).
- * @return Output value of type bool.
- */
+// Executes attr matches routine.
 bool libini2::attr_matches(const char *dev_name, size_t dev_len, const char *attr, size_t attr_len, const char *key, size_t len, bool debug)
 {
     return (!debug && (len == dev_len + 1 + attr_len) &&
@@ -570,13 +491,7 @@ bool libini2::attr_matches(const char *dev_name, size_t dev_len, const char *att
              !strncmp(key + sizeof("debug.") + dev_len, attr, attr_len));
 }
 
-/**
- * @brief Executes the ini next section procedure for libini2.
- * @param ini Input parameter specifying ini (INI).
- * @param name Input parameter specifying name (const char).
- * @param name_len Input parameter specifying name_len (size_t).
- * @return Output value of type int.
- */
+// Executes ini next section routine.
 int libini2::ini_next_section(INI *ini, const char **name, size_t *name_len)
 {
     const char *_name;
@@ -612,11 +527,7 @@ int libini2::ini_next_section(INI *ini, const char **name, size_t *name_len)
     return 1;
 }
 
-/**
- * @brief Executes the skip comments procedure for libini2.
- * @param ini Input parameter specifying ini (INI).
- * @return Output value of type bool.
- */
+// Executes skip comments routine.
 bool libini2::skip_comments(INI *ini)
 {
     const char *curr = ini->curr;
@@ -635,11 +546,7 @@ bool libini2::skip_comments(INI *ini)
     return curr == end;
 }
 
-/**
- * @brief Executes the skip line procedure for libini2.
- * @param ini Input parameter specifying ini (INI).
- * @return Output value of type bool.
- */
+// Executes skip line routine.
 bool libini2::skip_line(INI *ini)
 {
     const char *curr = ini->curr;
@@ -655,15 +562,7 @@ bool libini2::skip_line(INI *ini)
     }
 }
 
-/**
- * @brief Executes the save to ini chn cb procedure for libini2.
- * @param chn Input parameter specifying chn (iio_channel).
- * @param attr Input parameter specifying attr (const char).
- * @param val Input parameter specifying val (const char).
- * @param len Input parameter specifying len (size_t).
- * @param d Input parameter specifying d (void).
- * @return Output value of type int.
- */
+// Executes save to ini chn cb routine.
 int libini2::save_to_ini_chn_cb(iio_channel *chn, const char *attr, const char *val, size_t len, void *d)
 {
     struct load_store_params *params = (struct load_store_params *) d;
@@ -677,15 +576,7 @@ int libini2::save_to_ini_chn_cb(iio_channel *chn, const char *attr, const char *
     return 0;
 }
 
-/**
- * @brief Executes the save to ini dev cb procedure for libini2.
- * @param dev Input parameter specifying dev (iio_device).
- * @param attr Input parameter specifying attr (const char).
- * @param val Input parameter specifying val (const char).
- * @param len Input parameter specifying len (size_t).
- * @param d Input parameter specifying d (void).
- * @return Output value of type int.
- */
+// Executes save to ini dev cb routine.
 int libini2::save_to_ini_dev_cb(iio_device *dev, const char *attr, const char *val, size_t len, void *d)
 {
     struct load_store_params *params = (struct load_store_params *) d;
@@ -698,15 +589,7 @@ int libini2::save_to_ini_dev_cb(iio_device *dev, const char *attr, const char *v
     return 0;
 }
 
-/**
- * @brief Transmits write_to_ini command/packet over the communication bus.
- * @param params Input parameter specifying params (load_store_params).
- * @param dev_name Input parameter specifying dev_name (const char).
- * @param name_len Input parameter specifying name_len (size_t).
- * @param attr Input parameter specifying attr (const char).
- * @param val Input parameter specifying val (const char).
- * @param len Input parameter specifying len (size_t).
- */
+// Transmits write_to_ini command/packet over communication interface.
 void libini2::write_to_ini(load_store_params *params, const char *dev_name, size_t name_len, const char *attr, const char *val, size_t len)
 {
     FILE *f = params->f;
@@ -721,12 +604,7 @@ void libini2::write_to_ini(load_store_params *params, const char *dev_name, size
     fwrite("\n", 1, 1, f);
 }
 
-/**
- * @brief Executes the foreach in ini procedure for libini2.
- * @param ini_file Input parameter specifying ini_file (const char).
- * @param (*cb Input parameter specifying (*cb (int).
- * @return Output value of type int.
- */
+// Executes foreach in ini routine.
 int libini2::foreach_in_ini(const char *ini_file, int (*cb)(int, const char *, const char *, const char *))
 {
     int ret = 0;
@@ -792,12 +670,7 @@ err_ini_close:
     return ret;
 }
 
-/**
- * @brief Executes the ini unroll procedure for libini2.
- * @param input Input parameter specifying input (const char).
- * @param output Input parameter specifying output (const char).
- * @return Output value of type int.
- */
+// Executes ini unroll routine.
 int libini2::ini_unroll(const char *input, const char *output)
 {
     FILE *in, *out;
@@ -854,11 +727,7 @@ err_close:
     return ret;
 }
 
-/**
- * @brief Transmits write_driver_name_to_ini command/packet over the communication bus.
- * @param f Input parameter specifying f (FILE).
- * @param driver_name Input parameter specifying driver_name (const char).
- */
+// Transmits write_driver_name_to_ini command/packet over communication interface.
 void libini2::write_driver_name_to_ini(FILE *f, const char *driver_name)
 {
     if (driver_name) {

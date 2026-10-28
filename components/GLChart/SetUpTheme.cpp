@@ -1,18 +1,12 @@
-/**
- * @file SetUpTheme.cpp
- * @brief Subsystem module for GLChart in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: SetUpTheme.cpp
+// Subsystem: eLynxSDR GLChart
+// Description: Subsystem implementation and interface guidance for SetUpTheme.cpp.
+// ============================================================================
 
 #include "SetUpTheme.h"
 
-/**
- * @brief Constructs a new SetUpTheme instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QWidget).
- */
+// Constructor: Initializes SetUpTheme subsystem components, default parameters, and state.
 SetUpTheme::SetUpTheme(QWidget *parent) : QWidget(parent)
 {
     initRadioButton();
@@ -37,18 +31,13 @@ SetUpTheme *SetUpTheme::getInstance(QWidget *parent)
     return instance;
 }
 
-/**
- * @brief Sets the a parameter and updates internal state.
- * @param value Input parameter specifying value (QApplication).
- */
+// Sets a value and updates internal subsystem configuration.
 void SetUpTheme::setA(QApplication *value)
 {
     a = value;
 }
 
-/**
- * @brief Initializes and configures the init radio button for the SetUpTheme subsystem.
- */
+// Initializes init radio button for SetUpTheme.
 void SetUpTheme::initRadioButton()
 {
     rdbDefault      = new QRadioButton("Default");
@@ -62,27 +51,21 @@ void SetUpTheme::initRadioButton()
     rdbFa           = new QRadioButton("Fa");
 }
 
-/**
- * @brief Initializes and configures the init push button for the SetUpTheme subsystem.
- */
+// Initializes init push button for SetUpTheme.
 void SetUpTheme::initPushButton()
 {
     btnStart = new QPushButton("Next");
     btnStart->setCursor(Qt::PointingHandCursor);
 }
 
-/**
- * @brief Initializes and configures the init group box for the SetUpTheme subsystem.
- */
+// Initializes init group box for SetUpTheme.
 void SetUpTheme::initGroupBox()
 {
     grbThem = new QGroupBox("Select Them");
 }
 
 
-/**
- * @brief Sets the group box them parameter and updates internal state.
- */
+// Sets group box them value and updates internal subsystem configuration.
 void SetUpTheme::setGroupBoxThem()
 {
     QVBoxLayout* vblThem = new QVBoxLayout();
@@ -109,9 +92,7 @@ void SetUpTheme::setGroupBoxThem()
 
 
 
-/**
- * @brief Executes the se form procedure for SetUpTheme.
- */
+// Executes se form routine.
 void SetUpTheme::seForm()
 {
     QVBoxLayout* vblForm = new QVBoxLayout();
@@ -121,9 +102,7 @@ void SetUpTheme::seForm()
     this->setLayout(vblForm);
 }
 
-/**
- * @brief Sets the style for application parameter and updates internal state.
- */
+// Sets style for application value and updates internal subsystem configuration.
 void SetUpTheme::setStyleForApplication()
 {
     QFile styleFile(qssAddress);
@@ -134,9 +113,7 @@ void SetUpTheme::setStyleForApplication()
     this->setStyleSheet(style);
 }
 
-/**
- * @brief Sets the connection parameter and updates internal state.
- */
+// Sets connection value and updates internal subsystem configuration.
 void SetUpTheme::setConnection()
 {
     connect(btnStart       , SIGNAL(clicked()), this, SLOT(slot_start()));
@@ -153,26 +130,20 @@ void SetUpTheme::setConnection()
 }
 
 
-/**
- * @brief Executes the slot start procedure for SetUpTheme.
- */
+// Executes slot start routine.
 void SetUpTheme::slot_start()
 {
     this->close();
 }
 
-/**
- * @brief Sets the default parameter and updates internal state.
- */
+// Sets default value and updates internal subsystem configuration.
 void SetUpTheme::set_Default()
 {
     qssAddress = "";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the a m o l e d parameter and updates internal state.
- */
+// Sets a m o l e d value and updates internal subsystem configuration.
 void SetUpTheme::set_AMOLED()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/AMOLED.qss";
@@ -180,9 +151,7 @@ void SetUpTheme::set_AMOLED()
 
 }
 
-/**
- * @brief Sets the aqua parameter and updates internal state.
- */
+// Sets aqua value and updates internal subsystem configuration.
 void SetUpTheme::set_Aqua()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/Aqua.qss";
@@ -190,63 +159,49 @@ void SetUpTheme::set_Aqua()
 
 }
 
-/**
- * @brief Sets the aref parameter and updates internal state.
- */
+// Sets aref value and updates internal subsystem configuration.
 void SetUpTheme::set_Aref()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/aref.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the console style parameter and updates internal state.
- */
+// Sets console style value and updates internal subsystem configuration.
 void SetUpTheme::set_ConsoleStyle()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/ConsoleStyle.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the elegant dark parameter and updates internal state.
- */
+// Sets elegant dark value and updates internal subsystem configuration.
 void SetUpTheme::set_ElegantDark()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/MaterialDark.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the manjaro mix parameter and updates internal state.
- */
+// Sets manjaro mix value and updates internal subsystem configuration.
 void SetUpTheme::set_ManjaroMix()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/ManjaroMix.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the ubuntu parameter and updates internal state.
- */
+// Sets ubuntu value and updates internal subsystem configuration.
 void SetUpTheme::set_Ubuntu()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/Ubuntu.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Sets the fa parameter and updates internal state.
- */
+// Sets fa value and updates internal subsystem configuration.
 void SetUpTheme::set_Fa()
 {
     qssAddress = ":/Resources/Resources_Folder/QSS-master/fa.qss";
     setStyleForApplication();
 }
 
-/**
- * @brief Executes the slot show form procedure for SetUpTheme.
- */
+// Executes slot show form routine.
 void SetUpTheme::slotShowForm()
 {
     this->setWindowTitle("Select Them");

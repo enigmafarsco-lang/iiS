@@ -1,11 +1,8 @@
-/**
- * @file tiltgauge.cpp
- * @brief Subsystem module for Tilt in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: tiltgauge.cpp
+// Subsystem: eLynxSDR Tilt
+// Description: Subsystem implementation and interface guidance for tiltgauge.cpp.
+// ============================================================================
 
 #include "tiltgauge.h"
 #include <QtGlobal>
@@ -13,19 +10,14 @@
 #include <QPainter>
 #include <QFont>
 
-/**
- * @brief Constructs a new BTiltGauge instance and initializes subsystem components and UI state.
- * @param parent Input parameter specifying parent (QWidget).
- */
+// Constructor: Initializes BTiltGauge subsystem components, default parameters, and state.
 BTiltGauge::BTiltGauge(QWidget *parent)
     : QWidget(parent)
 {
     init_panGauge();
 }
 
-/**
- * @brief Initializes and configures the init pan gauge for the BTiltGauge subsystem.
- */
+// Initializes init pan gauge for BTiltGauge.
 void BTiltGauge::init_panGauge()
 {
     this->setFont(QFont("Arial", 5));
@@ -55,10 +47,7 @@ void BTiltGauge::init_panGauge()
     setEndWarningValue(-5);
 }
 
-/**
- * @brief Sets the value parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets value value and updates internal subsystem configuration.
 void BTiltGauge::setValue(double value)
 {
     if(value>m_maxValue)
@@ -80,40 +69,28 @@ void BTiltGauge::setValue(double value)
     update();
 }
 
-/**
- * @brief Sets the value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets value value and updates internal subsystem configuration.
 void BTiltGauge::setValue(int value)
 {
     setValue((double)value);
     update();
 }
 
-/**
- * @brief Sets the min value parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets min value value and updates internal subsystem configuration.
 void BTiltGauge::setMinValue(double value)
 {
     m_minValue=value;
     update();
 }
 
-/**
- * @brief Sets the min value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets min value value and updates internal subsystem configuration.
 void BTiltGauge::setMinValue(int value)
 {
     setMinValue((double)value);
 }
 
 
-/**
- * @brief Sets the max value parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets max value value and updates internal subsystem configuration.
 void BTiltGauge::setMaxValue(double value)
 {
     if(value > m_minValue)
@@ -125,20 +102,14 @@ void BTiltGauge::setMaxValue(double value)
         emit errorSignal(MaxValueError);
 }
 
-/**
- * @brief Sets the max value parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets max value value and updates internal subsystem configuration.
 void BTiltGauge::setMaxValue(int value)
 {
     setMaxValue((double)value);
 }
 
 
-/**
- * @brief Sets the threshold parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets threshold value and updates internal subsystem configuration.
 void BTiltGauge::setThreshold(double value)
 {
     if(value > m_minValue && value < m_maxValue)
@@ -150,58 +121,40 @@ void BTiltGauge::setThreshold(double value)
         emit errorSignal(ThresholdError);
 }
 
-/**
- * @brief Sets the threshold parameter and updates internal state.
- * @param value Input parameter specifying value (int).
- */
+// Sets threshold value and updates internal subsystem configuration.
 void BTiltGauge::setThreshold(int value)
 {
     setThreshold((double)value);
 }
 
-/**
- * @brief Sets the precision parameter and updates internal state.
- * @param precision Input parameter specifying precision (int).
- */
+// Sets precision value and updates internal subsystem configuration.
 void BTiltGauge::setPrecision(int precision)
 {
     m_precision=precision;
     update();
 }
 
-/**
- * @brief Sets the precision numeric parameter and updates internal state.
- * @param precision Input parameter specifying precision (int).
- */
+// Sets precision numeric value and updates internal subsystem configuration.
 void BTiltGauge::setPrecisionNumeric(int precision)
 {
     m_precisionNumeric=precision;
     update();
 }
 
-/**
- * @brief Sets the units parameter and updates internal state.
- * @param units Input parameter specifying units (QString).
- */
+// Sets units value and updates internal subsystem configuration.
 void BTiltGauge::setUnits(QString units)
 {
     m_units=units;
     update();
 }
 
-/**
- * @brief Sets the label parameter and updates internal state.
- * @param label Input parameter specifying label (QString).
- */
+// Sets label value and updates internal subsystem configuration.
 void BTiltGauge::setLabel(QString label)
 {
     m_label=label;
 }
 
-/**
- * @brief Executes the paint event procedure for BTiltGauge.
- * @param event Input parameter specifying event (QPaintEvent).
- */
+// Executes paint event routine.
 void BTiltGauge::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -227,50 +180,35 @@ void BTiltGauge::paintEvent(QPaintEvent *event)
     drawCrown(&painter);
 }
 
-/**
- * @brief Sets the steps parameter and updates internal state.
- * @param nSteps Input parameter specifying nSteps (int).
- */
+// Sets steps value and updates internal subsystem configuration.
 void BTiltGauge::setSteps(int nSteps)
 {
     m_steps=nSteps;
     update();
 }
 
-/**
- * @brief Sets the start angle parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets start angle value and updates internal subsystem configuration.
 void BTiltGauge::setStartAngle(double value)
 {
     m_startAngle=value;
     update();
 }
 
-/**
- * @brief Sets the end angle parameter and updates internal state.
- * @param value Input parameter specifying value (double).
- */
+// Sets end angle value and updates internal subsystem configuration.
 void BTiltGauge::setEndAngle(double value)
 {
     m_endAngle=value;
     update();
 }
 
-/**
- * @brief Sets the foreground parameter and updates internal state.
- * @param newForeColor Input parameter specifying newForeColor (QColor).
- */
+// Sets foreground value and updates internal subsystem configuration.
 void BTiltGauge::setForeground(QColor newForeColor)
 {
     m_foreground=newForeColor;
     update();
 }
 
-/**
- * @brief Sets the background parameter and updates internal state.
- * @param newBackColor Input parameter specifying newBackColor (QColor).
- */
+// Sets background value and updates internal subsystem configuration.
 void BTiltGauge::setBackground(QColor newBackColor)
 {
     m_background=newBackColor;
@@ -278,9 +216,7 @@ void BTiltGauge::setBackground(QColor newBackColor)
 }
 
 
-/**
- * @brief Executes the threshold manager procedure for BTiltGauge.
- */
+// Executes threshold manager routine.
 void BTiltGauge::thresholdManager()
 {
     if(m_value > m_threshold && (!m_thresholdFlag) )
@@ -296,60 +232,42 @@ void BTiltGauge::thresholdManager()
         }
 }
 
-/**
- * @brief Sets the threshold enabled parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets threshold enabled value and updates internal subsystem configuration.
 void BTiltGauge::setThresholdEnabled(bool enable)
 {
     m_thresholdEnabled=enable;
     update();
 }
 
-/**
- * @brief Sets the numeric indicator enabled parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets numeric indicator enabled value and updates internal subsystem configuration.
 void BTiltGauge::setNumericIndicatorEnabled(bool enable)
 {
     m_numericIndicatorEnabled=enable;
     update();
 }
 
-/**
- * @brief Sets the begin valid value parameter and updates internal state.
- * @param beginValue Input parameter specifying beginValue (double).
- */
+// Sets begin valid value value and updates internal subsystem configuration.
 void BTiltGauge::setBeginValidValue(double beginValue)
 {
     m_beginValidValue=beginValue;
     update();
 }
 
-/**
- * @brief Sets the end valid value parameter and updates internal state.
- * @param endValue Input parameter specifying endValue (double).
- */
+// Sets end valid value value and updates internal subsystem configuration.
 void BTiltGauge::setEndValidValue(double endValue)
 {
     m_endValidValue=endValue;
     update();
 }
 
-/**
- * @brief Sets the enable valid window parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets enable valid window value and updates internal subsystem configuration.
 void BTiltGauge::setEnableValidWindow(bool enable)
 {
     m_enableValidWindow=enable;
     update();
 }
 
-/**
- * @brief Sets the begin warning value parameter and updates internal state.
- * @param beginValue Input parameter specifying beginValue (double).
- */
+// Sets begin warning value value and updates internal subsystem configuration.
 void BTiltGauge::setBeginWarningValue(double beginValue)
 {
     m_beginWarningValue=beginValue;
@@ -357,20 +275,14 @@ void BTiltGauge::setBeginWarningValue(double beginValue)
 
 }
 
-/**
- * @brief Sets the end warning value parameter and updates internal state.
- * @param endValue Input parameter specifying endValue (double).
- */
+// Sets end warning value value and updates internal subsystem configuration.
 void BTiltGauge::setEndWarningValue(double endValue)
 {
     m_endWarningValue=endValue;
     update();
 }
 
-/**
- * @brief Sets the enable warning window parameter and updates internal state.
- * @param enable Input parameter specifying enable (bool).
- */
+// Sets enable warning window value and updates internal subsystem configuration.
 void BTiltGauge::setEnableWarningWindow(bool enable)
 {
     m_enableWarningWindow=enable;

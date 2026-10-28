@@ -1,11 +1,8 @@
-/**
- * @file adrv9009_adv.cpp
- * @brief Subsystem module for plugins in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: adrv9009_adv.cpp
+// Subsystem: eLynxSDR plugins
+// Description: Subsystem implementation and interface guidance for adrv9009_adv.cpp.
+// ============================================================================
 
 #include "adrv9009_adv.h"
 #include "ui_adrv9009_adv.h"
@@ -416,6 +413,7 @@ adrv9009_adv::adrv9009_adv(QWidget *parent) :
     //end
 }
 
+// Destructor: Cleans up adrv9009_adv resources, timers, and allocated memory.
 adrv9009_adv::~adrv9009_adv()
 {
     delete ui;
@@ -428,6 +426,7 @@ adrv9009_adv::~adrv9009_adv()
  * @param lut
  * @param lut_len
  */
+// Executes add widget to list routine.
 void adrv9009_adv::AddWidgetToList(QWidget *widget, char *name, unsigned char * const lut,  unsigned char lut_len)
 {
     w_info *temp=new w_info();
@@ -862,6 +861,7 @@ void adrv9009_adv::InitializeWidgets(){
  * @brief adrv9009_adv::init
  * @return
  */
+// Initializes init for adrv9009_adv.
 QWidget * adrv9009_adv::init()
 {
 
@@ -917,6 +917,7 @@ QWidget * adrv9009_adv::init()
 /**
  * @brief adrv9009_adv::on_btn_save_settings_clicked
  */
+// Event/Signal handler for on btn save settings clicked.
 void adrv9009_adv::on_btn_save_settings_clicked()
 {
 
@@ -976,6 +977,7 @@ void adrv9009_adv::on_btn_save_settings_clicked()
 /**
  * @brief adrv9009_adv::bist_tone_cb
  */
+// Executes bist tone cb routine.
 void adrv9009_adv::bist_tone_cb()
 {
     unsigned enable, tx1_freq, tx2_freq;
@@ -994,10 +996,7 @@ void adrv9009_adv::bist_tone_cb()
 
 
 
-/**
- * @brief Slot handler responding to on fhm chk trigger mode state changed event.
- * @param arg1 Input parameter specifying arg1 (int).
- */
+// Event/Signal handler for on fhm chk trigger mode state changed.
 void adrv9009_adv::on_fhm_chk_trigger_mode_stateChanged(int arg1)
 {
 

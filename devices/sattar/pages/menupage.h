@@ -1,11 +1,8 @@
-/**
- * @file menupage.h
- * @brief Subsystem module for pages in eLynxSDR system.
- * @details Provides comprehensive operational guidance, signal processing,
- *          hardware register interaction, and UI control workflows.
- * @author eLynxSDR Technical & Maintenance Engineering Team
- * @date 2026-10-28
- */
+// ============================================================================
+// File: menupage.h
+// Subsystem: eLynxSDR pages
+// Description: Subsystem implementation and interface guidance for menupage.h.
+// ============================================================================
 
 #ifndef MENUPAGE_H
 #define MENUPAGE_H
@@ -30,32 +27,17 @@
 
 
 namespace Ui {
-/**
- * @class MenuPage
- * @brief High-level controller class for MenuPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class MenuPage;
 }
 
-/**
- * @class MenuPage
- * @brief High-level controller class for MenuPage.
- * @details Manages state, algorithms, signals, and hardware interfaces.
- */
 class MenuPage : public QMenuBar
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Constructs a new MenuPage instance and initializes subsystem components and UI state.
-     * @param parent Input parameter specifying parent (QWidget).
-     */
+    // Constructor: Initializes MenuPage subsystem components, default parameters, and state.
     explicit MenuPage(QWidget *parent = nullptr);
-    /**
-     * @brief Destructor for MenuPage, releasing allocated hardware resources, timers, and buffers.
-     */
+    // Destructor: Cleans up MenuPage resources, timers, and allocated memory.
     ~MenuPage();
 
     QAction * actionNewProject;
@@ -81,64 +63,37 @@ private:
 
 
 private:
-    /**
-     * @brief Initializes and configures the init function for the MenuPage subsystem.
-     */
+    // Initializes init function for MenuPage.
     void initFunction();
-    /**
-     * @brief Executes the create menus procedure for MenuPage.
-     */
+    // Executes create menus routine.
     void createMenus();
-    /**
-     * @brief Initializes and configures the init tool bar for the MenuPage subsystem.
-     */
+    // Initializes init tool bar for MenuPage.
     void initToolBar();
-    /**
-     * @brief Executes the new project procedure for MenuPage.
-     */
+    // Executes new project routine.
     void newProject();
-    /**
-     * @brief Executes the save project procedure for MenuPage.
-     */
+    // Executes save project routine.
     void saveProject();
-    /**
-     * @brief Executes the save project as procedure for MenuPage.
-     */
+    // Executes save project as routine.
     void saveProjectAs();
-    /**
-     * @brief Executes the load project procedure for MenuPage.
-     * @return Output value of type bool.
-     */
+    // Executes load project routine.
     bool loadProject();
-    /**
-     * @brief Executes the close procedure for MenuPage.
-     */
+    // Executes close routine.
     void close();
-    /**
-     * @brief Executes the save file procedure for MenuPage.
-     * @return Output value of type bool.
-     */
+    // Executes save file routine.
     bool saveFile();
 
 
 private slots:
-    /**
-     * @brief Executes the generate radar procedure for MenuPage.
-     */
+    // Executes generate radar routine.
     void generateRadar();
 
 
 public slots:
-    /**
-     * @brief Executes the show menu option slot procedure for MenuPage.
-     * @param bool Input parameter specifying bool (bool).
-     */
+    // Executes show menu option slot routine.
     void showMenuOptionSlot(bool);
 
 signals:
-    /**
-     * @brief Executes the menu generate signal procedure for MenuPage.
-     */
+    // Executes menu generate signal routine.
     void menuGenerateSignal();
 };
 
