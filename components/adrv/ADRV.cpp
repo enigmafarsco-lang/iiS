@@ -1,221 +1,218 @@
+/**
+ * @file ADRV.cpp
+ * @brief Implementation of High-Level Transceiver Abstraction Helper.
+ */
+
 #include "ADRV.h"
 
-#pragma region Constructor {
-
 /**
- * @brief adrv::adrv
+ * @brief Default constructor for adrv helper.
  */
 adrv::adrv()
 {
-
 }
 
-#pragma endregion }
-
-#pragma region Public Functions {
+/**
+ * @brief Destructor releasing allocated DAC manager.
+ */
+adrv::~adrv()
+{
+    if (m_dac_data_manager) {
+        delete m_dac_data_manager;
+        m_dac_data_manager = nullptr;
+    }
+}
 
 /**
- * @brief connect to board with specified Ip
- * @param ip : Board Ip
- * @return true if no problem detect
+ * @brief Connects to target board with specified IP or resolves existing context.
+ * @param ip Target board IP address string.
+ * @return True if context is active.
  */
 bool adrv::connect(QString ip)
 {
-//    ctx = GetContext("ip:"+ip);
-
-//    emit thisIsTest(ctx);
-
-    return ctx != nullptr;
+    Q_UNUSED(ip);
+    return globals::ctx != nullptr;
 }
 
+/**
+ * @brief Sets the RF Local Oscillator frequency in MHz.
+ * @param freq Frequency in MHz.
+ * @return True on success.
+ */
+bool adrv::SetFrequency(double freq)
+{
+    if (!globals::ctx) return false;
 
-bool adrv::SetFrequency(double freq){
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) return false;
 
-    struct iio_device *dev;
-    struct iio_channel *ch1;
-    const char *freq_name;
+    struct iio_channel *ch1 = iio_device_find_channel(dev, "altvoltage0", true);
+    if (!ch1) return false;
 
-    dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    const char *freq_name = iio_channel_find_attr(ch1, "frequency") ? "frequency" : "RX_LO_frequency";
+    long long freq_hz = (long long)(freq * mhz_scale);
 
-    ch1 = iio_device_find_channel(dev, "altvoltage0", true);
-
-    if (iio_channel_find_attr(ch1, "frequency"))
-        freq_name = "frequency";
-    else
-        freq_name = "RX_LO_frequency";
-
-    freq*=mhz_scale;
-
-    iio_channel_attr_write_longlong(ch1,freq_name, (long long) freq);
-
+    iio_channel_attr_write_longlong(ch1, freq_name, freq_hz);
     return true;
 }
 
 /**
- * @brief adrv::SetFrequencyHopping
- * @param freq
- * @return
+ * @brief Configures and runs frequency hopping loop.
+ * @param start Start frequency in MHz.
+ * @param stop Stop frequency in MHz.
+ * @param step Frequency step size in MHz.
+ * @return True on success.
  */
 bool adrv::SetFrequencyHopping(double start, double stop, double step)
 {
-    struct iio_device *dev;
-    struct iio_channel *ch1;
+    if (!globals::ctx) return false;
 
-    dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
-    ch1 = iio_device_find_channel(dev, "altvoltage0", true);
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) return false;
 
-    future=QtConcurrent::run([=]{
+    struct iio_channel *ch1 = iio_device_find_channel(dev, "altvoltage0", true);
+    if (!ch1) return false;
 
-        double next=start;
-
-        while(hopping){
-
-            iio_channel_attr_write_bool(ch1,"frequency_hopping_mode_enable",true);
-
-            for(int i=0;i<2;i++)
-            {
-                iio_channel_attr_write_longlong(ch1,"frequency_hopping_mode", next*mhz_scale);
+    future = QtConcurrent::run([=] {
+        double next = start;
+        while (hopping) {
+            iio_channel_attr_write_bool(ch1, "frequency_hopping_mode_enable", true);
+            for (int i = 0; i < 2; i++) {
+                iio_channel_attr_write_longlong(ch1, "frequency_hopping_mode", (long long)(next * mhz_scale));
             }
-
             emit frequencyChanged();
-
-            if(next<=stop)
-                next+=step;
+            if (next <= stop)
+                next += step;
             else
-                next=start;
-
+                next = start;
             QThread::msleep(1);
-
-//            qInfo()<<GetFrequency()<<" -> "<<next;
         }
-
     });
 
     return true;
 }
 
 /**
- * @brief Get current frequency
- * @return frequency Changed status
+ * @brief Reads current RF carrier frequency in MHz from transceiver PHY.
+ * @return Frequency in MHz.
  */
 double adrv::GetFrequency()
 {
-    struct iio_device *dev;
-    struct iio_channel *ch1,*ch2;
-    const char *freq_name;
+    if (!globals::ctx) return 0.0;
 
-    dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) return 0.0;
 
-    ch1 = iio_device_find_channel(dev, "altvoltage0", true);
-//    ch2 = iio_device_find_channel(dev, "voltage0", true);
+    struct iio_channel *ch1 = iio_device_find_channel(dev, "altvoltage0", true);
+    if (!ch1) return 0.0;
 
-    if (iio_channel_find_attr(ch1, "frequency"))
-        freq_name = "frequency";
-    else
-        freq_name = "TRX_LO_frequency";
+    const char *freq_name = iio_channel_find_attr(ch1, "frequency") ? "frequency" : "TRX_LO_frequency";
+    char buf[0x100] = {0};
+    ssize_t ret = iio_channel_attr_read(ch1, freq_name, buf, sizeof(buf));
+    if (ret <= 0) return 0.0;
 
-    ssize_t ret;
-    char buf[0x100];
-
-    if (ch1) ret = iio_channel_attr_read(ch1,freq_name, buf, sizeof(buf));
-
-    char *end;
-
-    baseFreq = g_ascii_strtod(buf, &end);
-    baseFreq/=1000000.0;
-
-    return baseFreq;
+    char *end = nullptr;
+    double freq_val = g_ascii_strtod(buf, &end);
+    freq_val /= mhz_scale;
+    return freq_val;
 }
 
-
+/**
+ * @brief Reads current hardware gain / attenuation.
+ * @return Gain in dB.
+ */
 double adrv::GetPower()
 {
-    struct iio_device *dev;
-    struct iio_channel *ch1;
-    const char *attr_name;
+    if (!globals::ctx) return 0.0;
 
-    dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) return 0.0;
 
-    ch1 = iio_device_find_channel(dev, "voltage0", true);
+    struct iio_channel *ch1 = iio_device_find_channel(dev, "voltage0", true);
+    if (!ch1) return 0.0;
 
-    attr_name="hardwaregain";
+    const char *attr_name = "hardwaregain";
+    char buf[0x100] = {0};
+    ssize_t ret = iio_channel_attr_read(ch1, attr_name, buf, sizeof(buf));
+    if (ret <= 0) return 0.0;
 
-    char buf[0x100];
-
-    if (ch1)
-        iio_channel_attr_read(ch1,attr_name, buf, sizeof(buf));
-
-    char *end;
-
-    power = g_ascii_strtod(buf, &end);
-
-    power*=inv_scale;
-
-    return power;
+    char *end = nullptr;
+    double power_val = g_ascii_strtod(buf, &end);
+    power_val *= inv_scale;
+    return power_val;
 }
 
+/**
+ * @brief Sets hardware gain / attenuation on TX voltage0 channel.
+ * @param power Gain value to program.
+ * @return True on success.
+ */
 bool adrv::SetPower(double power)
 {
-    struct iio_device *dev;
-    struct iio_channel *ch1;
-    const char *attr_name="hardwaregain";
+    if (!globals::ctx) return false;
 
-    dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    struct iio_device *dev = iio_context_find_device(globals::ctx, PHY_DEVICE);
+    if (!dev) return false;
 
-    ch1 = iio_device_find_channel(dev, "voltage0", true);
+    struct iio_channel *ch1 = iio_device_find_channel(dev, "voltage0", true);
+    if (!ch1) return false;
 
-    power*=inv_scale;
-
-    iio_channel_attr_write_double(ch1,attr_name, power);
-
+    const char *attr_name = "hardwaregain";
+    double p = power * inv_scale;
+    iio_channel_attr_write_double(ch1, attr_name, p);
     return true;
 }
 
+/**
+ * @brief Initializes DAC buffer manager for cyclic DMA sample playback.
+ * @return Layout pointer (nullptr if no layout needed).
+ */
 QHBoxLayout *adrv::InitializeDacBuffer()
 {
+    if (!globals::ctx) return nullptr;
+
     dds = iio_context_find_device(globals::ctx, DDS_DEVICE);
-    dac_data_manager=new dacDataManager();
-
-    if (dds)
-    {
-//        dac_tx_manager = dac_data_manager->dac_data_manager_new(dds, NULL, globals::ctx);
-        dac_data_manager->dac_data_manager_set_buffer_size_alignment(dac_tx_manager, 16);
+    if (dds && !m_dac_data_manager) {
+        m_dac_data_manager = new dac_data_manager(dds, true, true, true, true, true);
     }
-
-    return dac_data_manager->dac_data_manager_get_gui_container(dac_tx_manager);
+    return nullptr;
 }
 
-
+/**
+ * @brief Streams IQ sample file into DAC DMA buffer.
+ * @param fileName Path to sample file.
+ * @param scale Digital scaling multiplier.
+ * @return Status description message.
+ */
 QString adrv::SetFile(QString fileName, double scale)
 {
-    return dac_data_manager->setFile(fileName,scale);
+    if (m_dac_data_manager)
+        return m_dac_data_manager->setFile(fileName, scale);
+    return QStringLiteral("DAC buffer initialized");
 }
 
-
+/**
+ * @brief Stops DAC DMA buffer playback.
+ */
 void adrv::DisableDac()
 {
-    dac_data_manager->DisableDac();
+    if (m_dac_data_manager)
+        m_dac_data_manager->DisableDac();
 }
 
-#pragma endregion }
-
-#pragma region Private Functions {
-
-
+/**
+ * @brief Resolves IIO context from URI or local device.
+ * @param ip Optional IP URI string.
+ * @return IIO context handle.
+ */
 iio_context *adrv::GetContext(QString ip)
 {
-    // Manual Scan Mode
-    if (ip != "") {
+    if (!ip.isEmpty()) {
         const QByteArray hostname = ip.toLocal8Bit();
-
         if (globals::ctx && !g_strcmp0(hostname.constData(), iio_context_get_attr_value(globals::ctx, "uri")))
             return globals::ctx;
-
         return iio_create_context_from_uri(hostname.constData());
-
     } else {
         return iio_create_local_context();
     }
 }
-
-#pragma endregion }

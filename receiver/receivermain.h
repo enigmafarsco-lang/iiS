@@ -115,6 +115,11 @@ class ReceiverMain : public QWidget
     void setupDrfmControlTab();
 
     /**
+     * @brief Configures Built-In Test (BIT) tab under DRFM for automated hardware & software diagnostics.
+     */
+    void setupBitControlTab();
+
+    /**
      * @brief Generates or verifies existence of 4-sample dummy zero DAC buffer file ('0 0 0 0').
      * @return Absolute file path to zero DAC buffer file.
      */

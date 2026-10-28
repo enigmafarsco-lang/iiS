@@ -153,20 +153,20 @@ QLabel {
     background: transparent;
     border: 1px solid transparent;
     padding: 1px;
-        /*font-weight:bold;*/
-        font: 87 9pt "Segoe UI Black";
+    color: #FFFFFF;
+    font: 87 9pt "Segoe UI Black";
 }
 /* A QLabel is a QFrame ... */
 /* A QToolTip is a QLabel ... */
 QToolTip {
-        background:#000000;
+    background:#000000;
     border: 1px solid #0a0;
     padding: 5px;
     border-radius: 3px;
     opacity:210;
-        font-size:7pt;
-        font-weight:bold;
-        color:#FFFFFF;
+    font-size:7pt;
+    font-weight:bold;
+    color:#FFFFFF;
 }
 
 /* =============================================== */
@@ -706,14 +706,16 @@ QTableWidget QComboBox{
 
 
 QTabBar::tab {
-   background-color: #2f544d;
-
-
+    background-color: #2f544d;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 6px 12px;
 }
-
 
 QTabBar::tab:selected {
-
-
+    background-color: #1abc9c;
+    color: #FFFFFF;
+    font-weight: bold;
 }
+
 

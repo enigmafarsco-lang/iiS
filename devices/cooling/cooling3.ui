@@ -102,14 +102,14 @@
          <item>
           <widget class="QLabel" name="lblComp_2">
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="lblCompError">
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
@@ -126,18 +126,15 @@
          </item>
          <item>
           <widget class="QLabel" name="lblFan_2">
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="lblFanError">
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
@@ -155,14 +152,14 @@
          <item>
           <widget class="QLabel" name="lblMotor_2">
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="lblMotorError">
            <property name="text">
-            <string/>
+            <string></string>
            </property>
           </widget>
          </item>
@@ -176,7 +173,7 @@
             <number>24</number>
            </property>
            <property name="alignment">
-            <set>Qt::AlignBottom|Qt::AlignJustify</set>
+            <set>Qt::AlignCenter</set>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
