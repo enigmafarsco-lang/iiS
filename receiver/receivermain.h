@@ -1,28 +1,47 @@
+/**
+ * @file receivermain.h
+ * @brief Master Receiver Window, Real-Time Plotting, and DRFM Controller for eLynxSDR.
+ *
+ * ReceiverMain manages the primary operational interface:
+ * 1. Hosts the high-performance spectrum analyzer and waterfall spectrogram (`oscmain`, `plot.cpp`).
+ * 2. Manages Digital Radio Frequency Memory (DRFM) AXI register IO (`setupDrfmControlTab()`, `drfmregisterio.cpp`).
+ * 3. Handles profile switching, calibration curves (Profile 100/200 vs 400), and RF switch matrices.
+ * 4. Integrates the Exciter subsystem directly as an embedded tab for single-window operation.
+ * 5. Controls multi-user authentication, roles, and administrative limits.
+ *
+ * @author eLynxSDR Development Team
+ * @version 0.0.2
+ */
+
 #ifndef RECEIVERMAIN_H
 #define RECEIVERMAIN_H
+
 #include <QWidget>
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QLabel>
-#include <receiver/oscmain.h>
-#include <receiver/datafiles.h>
-#include <unordered_map>
-#include "components/GLChart/QGLchart.h"
 #include <QSystemTrayIcon>
-#include "plotfunction.h"
-#include <QRandomGenerator>
-#include <QComboBox>
-#include "calculateplotdata.h"
 #include <QProcess>
 #include <QTextStream>
-//#include <QSs
+#include <QTimer>
+#include <unordered_map>
+
+#include "receiver/oscmain.h"
+#include "receiver/datafiles.h"
+#include "components/GLChart/QGLchart.h"
+#include "plotfunction.h"
+#include "calculateplotdata.h"
 
 namespace Ui {
 class ReceiverMain;
 }
 
+/**
+ * @class ReceiverMain
+ * @brief Main GUI and DSP coordinator for SDR reception, spectrum plotting, and DRFM control.
+ */
 class ReceiverMain : public QWidget
 {
     Q_OBJECT
@@ -35,29 +54,28 @@ class ReceiverMain : public QWidget
 
     QGLchart *freqPlot;
 
-    void creatingTimePlot     (QCustomPlot *);
-    void creatingHistogramPlot(QCustomPlot * , QCPAxisRect *, QCPBars*,  QCPGraph *);
+    void creatingTimePlot(QCustomPlot *);
+    void creatingHistogramPlot(QCustomPlot *, QCPAxisRect *, QCPBars*, QCPGraph *);
     void initGLPlot(QGLchart *glChart, ChartType glChartType);
 
-    QVector2D  vec;
-
+    QVector2D vec;
     QCustomSeries a;
 
-    plotfunction * t1 ;
-    plotfunction * t2 ;
-    plotfunction * t3 ;
-    plotfunction * t4 ;
-    plotfunction * t5 ;
-    plotfunction * t6 ;
-    plotfunction * t7 ;
-    plotfunction * t8 ;
+    plotfunction * t1;
+    plotfunction * t2;
+    plotfunction * t3;
+    plotfunction * t4;
+    plotfunction * t5;
+    plotfunction * t6;
+    plotfunction * t7;
+    plotfunction * t8;
+
     int selectChannelWithFrq(double);
     QString whichNoiseModeIsActive{};
     double holdFrq{};
     int selectedRow{-2};
     bool frqChanged{false};
     double frqHold{};
-
 
     void smartTimeDomainNoise();
     void setAutoAmpValue(double ampVal);
@@ -71,7 +89,8 @@ class ReceiverMain : public QWidget
     bool inputIsNotEmpty(QString inputVal);
     bool lengthChecker(QString inputVal);
     bool userInputChecker(QString val1, QString val2);
-    bool writeToFile(QString,QString, QString,QString);
+    bool writeToFile(QString, QString, QString, QString);
+
     QString const fileAuth{dataFilePath(QStringLiteral("upf"))};
     QString superUser{"superadmin"};
     QString passSuper{"sadefa@1402"};
@@ -83,433 +102,166 @@ class ReceiverMain : public QWidget
     QTimer * cwTableTimer;
     int cntVecCalib{};
 
-
     void hiddenUiElements(bool);
     void saveCalibrToFile();
     QString const calibFile{dataFilePath(QStringLiteral("Calibration.txt"))};
     void checkFrqInColibr();
     void calibManagment();
     void calibInitial();
-    void setupDrfmControlTab();
-    QString ensureZeroDacBufferFile();
-    void ensureDrfmDacBufferRunning();
-public:
-    explicit ReceiverMain(QWidget *parent = nullptr);
-    void init();
-    // Called by MainWindow to place the exciter widget in the receiver tabs.
-    void addExciterTab(QWidget *exciter);
-    QString timeDomain{""};
-    QString frqDomain{};
-    bool isConnect{false};
-    double minFrqLimit{};
-    double maxFrqLimit{};
-    int cntOutCalib{};
 
-    ~ReceiverMain();
+    /**
+     * @brief Configures DRFM GUI controls and binds events to non-blocking AXI register updates.
+     */
+    void setupDrfmControlTab();
+
+    /**
+     * @brief Generates or verifies existence of 4-sample dummy zero DAC buffer file ('0 0 0 0').
+     * @return Absolute file path to zero DAC buffer file.
+     */
+    QString ensureZeroDacBufferFile();
+
+    /**
+     * @brief Ensures DAC DMA buffer clock is running on DRFM startup without interrupting active exciter.
+     */
+    void ensureDrfmDacBufferRunning();
+
+public:
+    /**
+     * @brief Constructs ReceiverMain widget.
+     * @param parent Optional parent QWidget pointer.
+     */
+    explicit ReceiverMain(QWidget *parent = nullptr);
+
+    /**
+     * @brief Initializes sub-modules, plots, and hardware links.
+     */
+    void init();
+
+    /**
+     * @brief Embeds the Exciter UI into the tabbed receiver interface.
+     * @param exciter Pointer to Exciter widget.
+     */
+    void addExciterTab(QWidget *exciter);
+
+    /**
+     * @brief Controls seeking and hopping status.
+     * @param status True to stop capturing, false to resume.
+     */
+    void frqAndSeekStopCapturing(bool status);
+
+    bool isConnect{false};                 ///< Transceiver hardware connection state.
+    bool receiverIsConnected{true};        ///< Receiver operational status.
+    oscmain * oscMain{nullptr};            ///< IIO Oscilloscope main controller.
+    CalculatePlotData * frqDomainPlot;    ///< Real-time frequency domain plot data calculator.
+
+    QDoubleSpinBox * frqSpn;               ///< RF Carrier Center Frequency spinbox.
+    QDoubleSpinBox * att_TX1_Spn;          ///< TX1 digital attenuation control.
+    QDoubleSpinBox * att_TX2_Spn;          ///< TX2 digital attenuation control.
+    QCheckBox      * power_TX1_DownChk;    ///< TX1 powerdown / mute control.
+    QCheckBox      * power_TX2_DownChk;    ///< TX2 powerdown / mute control.
+
+    // Synchronized Exciter parameter spinboxes
+    QDoubleSpinBox * spnCWFrq;
+    QDoubleSpinBox * spnCWPower;
+    QDoubleSpinBox * spnSpotFrq;
+    QDoubleSpinBox * spnSpotPower;
+    QDoubleSpinBox * spnImpulseFrq;
+    QDoubleSpinBox * spnImpulsePower;
+    QDoubleSpinBox * spnSweepPower;
+    QDoubleSpinBox * spnWBPower;
+    QSpinBox       * spnDelay;
+
+    double minFrqLimit{};                  ///< Minimum RF tuning limit.
+    double maxFrqLimit{};                  ///< Maximum RF tuning limit.
 
 signals:
-    void isConnectSignal(bool);
-    void inChannelSignal(double);
-
-
-
-private slots:
-    void on_btnSet_clicked();
-
-    void on_btnSetBandSelect_clicked();
-    void realtimeDataSlot();
-
-    // Phase 5: Profile tab "Set" button (auto-connected by name).
-    void on_btnProfileSet_clicked();
-    void on_rdoProfile100_toggled(bool checked);
-    void on_rdoProfile200_toggled(bool checked);
-    void on_rdoProfile400_toggled(bool checked);
-    void on_btnSave_clicked();
-    void on_btnSetDefault_clicked();
-    void on_btnReset_clicked();
-    void on_btnDefaultIioOsc_clicked();
-    QString settingsIniPath(const QString &fileName);
-
-    //    QTimer * frqTimer;
-
-public:
-    Ui::ReceiverMain *ui;
-
-    //for test
-
-
-    QTimer mTimer;
-    /////////////////////////////////////////
-
-
-
-
-
-
-    // saeid raziani ==> here we define some ui pointer in order to using and showing them in receiver main.
-    //--- Global --------------------------------------------------------
-    QComboBox* ensmCmb;
-    QDoubleSpinBox * frqSpn{};
-    QComboBox * ensm_mode_available;
-    //--- Hopping -------------------------------------------------------
-    QCheckBox      * chk_trigger_mode;
-    QCheckBox      * chk_exit_mode;
-    QCheckBox      * chk_msc_sync;
-    QCheckBox      * chk_enable;
-    QDoubleSpinBox * txt_init_frequency;
-    QSpinBox       * txt_gpio_pin;
-    QSpinBox       * txt_min_freq;
-    QSpinBox       * txt_max_freq;
-    QPushButton    * save_settings;
-
-    QDoubleSpinBox * nextFrqSpn;
-    QDoubleSpinBox * minSpn;
-    QDoubleSpinBox * maxSpn;
-    QDoubleSpinBox * stepSpn;
-    QDoubleSpinBox * delaySpn;
-    QPushButton    * startBtn;
-    QCheckBox      * modeChk;
-    //--- TX1 -----------------------------------------------------------
-    QCheckBox      * pinn_TX1_Chk;
-    QCheckBox      * track_TX1_Chk;
-    QCheckBox      * power_TX1_DownChk = nullptr;
-    QCheckBox      * lo_TX1_Chk;
-    QDoubleSpinBox * att_TX1_Spn = nullptr;
-    QLabel         * rfBandlbl;
-    QLabel         * sampleRatelbl;
-    //--- TX1 -----------------------------------------------------------
-    QCheckBox      * pinn_TX2_Chk;
-    QCheckBox      * track_TX2_Chk;
-    QCheckBox      * powerTX2DownChk;
-    QCheckBox      * lo_TX2_Chk;
-    QDoubleSpinBox * att_TX2_Spn;
-    //--- OBSRX ---------------------------------------------------------
-    QCheckBox      * power_OBSRX_Spn;
-    QCheckBox      * track_OBSRX_Chk;
-    QDoubleSpinBox * hardwareGain;
-    QLabel         * rfBandOBSlbl;
-    QLabel         * sampleRateOBSlbl;
-    //--- THCW ----------------------------------------------------------
-    QDoubleSpinBox * THCW1 = new QDoubleSpinBox;
-    QSpinBox * THCW2 = new QSpinBox;
-    QSpinBox * THCW3 = new QSpinBox;
-    QPushButton * btnWrite;
-
-    //===================================================================
-    QCPRange *rangeXChart = new QCPRange[10];
-    QCPRange *rangeYChart = new QCPRange[10];
-
-    QVector<double> xFrq,     yFrq;
-    QVector<double> xPW1,     yPW1;
-    QVector<double> xPW2,     yPW2;
-    QVector<double> xPAPEAK,  yPAPEAK;
-    QVector<double> xPASUM,   yPASUM;
-    QVector<double> xTOA,     yTOA;
-    QVector<double> xCHANNEL, yCHANNEL;
-    QVector<double> xPRI,     yPRI;
-
-    Plot * timeDomainPlot ;
-    Plot * smartTimeDomainPlot ;
-    Plot * frqDomainPlot;
-    void frqModeIsSelected();
-    void defaultParameters();
-    void updateSerialNumber();
-    QString boardSerialNumber();
-    // Apply a Talise profile to the board (the Profile tab Set button and
-    // the startup assertion from the first-start IP form both use this).
-    // Returns false when nothing was written (serial rule / missing file).
-    bool applyProfileBw(int bw);
-    // Compose the Talise profile from the section files
-    // (files/filters/adrv9009/sections/general_<TX>.txt + orx_<ORx>.txt +
-    // tx_<TX>.txt + "</profile>") and write it to the board.  The first-start
-    // IP form provides both the TX and the ORx choice; the Profile tab Set
-    // button uses the diagonal (ORx == TX).
-    bool applyComposedProfile(int txBw, int orxBw);
-    // Sync the software UI (Profile tab TX/ORx radios, exciter profile,
-    // spectrum window) to the given profile without writing to the board.
-    void syncProfileUi(int txBw, int orxBw);
-    // Keep the Profile tab ORx choices consistent with the TX choice:
-    // TX 100 -> ORx 100; TX 200 -> ORx 100/200; TX 400 -> ORx 200/400.
-    void syncProfileOrxChoices();
-    void changingPlotMode(int);
-    QTimer dataTimer;
-
-    QString spotPath = "spot/spot10mhz.txt";
-    bool isSending{};
-    bool isSettingShow{};
-
-
-    //----------
-    QDoubleSpinBox * spnCWFrq;           ;
-    QDoubleSpinBox * spnCWPower;         ;
-    QDoubleSpinBox * spnSpotFrq          ;
-    QDoubleSpinBox * spnSpotPower        ;
-    QDoubleSpinBox * spnSweepStartFrq    ;
-    QDoubleSpinBox * spnSweepStopFrq     ;
-    QDoubleSpinBox * spnSweepStep        ;
-    QDoubleSpinBox * spnSweepPower       ;
-    QDoubleSpinBox * spnDelay            ;
-    QDoubleSpinBox * spnImpulseFrq       ;
-    QDoubleSpinBox * spnImpulsePower     ;
-    QDoubleSpinBox * spnWBPower          ;
-    //---------
-
-
-    bool state{false};
-    bool pwIsOn{};
-
-    const QString fileAddress{resourceFilePath(QStringLiteral("filters/adrv9009/Tx_BW400_IR491p52_Rx_BW100_OR122p88_ORx_BW400_OR491p52_DC245p76.txt"))};
-    // TX and ORx bandwidths the user chose in the first-start IP form;
-    // asserted on the board once at first startup (the board itself boots
-    // at profile 100 = TX100 + ORx100).
-    int startupTxBw{200};
-    int startupOrxBw{100};
-
-    // Board serial number cache (SN001 gates the ORx 400 option in the
-    // Profile tab); filled once the IIO context is up.
-    QString boardSerialCache;
-
-    //    QMap
-    std::unordered_map<double, double> frqMap;
-    std::unordered_map<double, double> pwMap;
-    std::unordered_map<double, double> priMap;
-    std::unordered_map<double, double> piSumMap;
-
-    //=====================================================================
-
-    void settingMinMaxBand();
-    void frqAndSeekStopCapturing(bool);
-    void reboutWithSSN();
-    void initPlot();
-    void reScale_plot(int type, QCustomPlot *,QCPRange *,QCPRange *);
-    int plottingValues( const double *, QCustomPlot * , QVector<double> *, QVector<double> *, double min, double max,int);
-    void fillHistoramArray(int, QCustomPlot *, double *, int );
-    void plotHistogram(QCustomPlot *,std::unordered_map<double, double > *);
-    void plotInit();
-    void defaultSettings();
-    // Phase 6: one-shot ADRV9009 calibration after software start (all
-    // calibration items except lol-ext and fhm), then never again.
-    void smartNoise();
-
-    double centerFrq{};
-    double maximumFinder(double *, double *);
-    double minimumFinder(double *, double *);
-
-    double frqMax{0};
-    double PAPeakMax{0};
-    double PASumMax{0};
-    double PRIMax{0};
-    double PRIMin{9999999999};
-    double PW1Max{0};
-    double PW2Max{0};
-    double TOAMax{0};
-    double ChannelMax{0};
-
-    double xMax{};
-    double xMin{9999999999};
-    double yMax{};
-    double yMin{};
-
-    int frqCnt{};
-    int PAPeakCnt{-1};
-    int PASumCnt{};
-    int PRICnt{};
-    int PW1Cnt{};
-    int PW2Cnt{-1};
-    int TOACnt{-1};
-    int ChannelCnt{-1};
-    int clickCnt{};
-    int frqValue{};
-
-    OSCMain *oscMain = nullptr;
-    int arrayOne[100];
-    int arrayTwo[100];
-    int arrayCount{};
-    bool isExciterOn{false};
-    bool receiverIsConnected{false};
-    //    int frqVal{};
-
-    int currentTabState;
-    QTimer* timer;
-    void smartInit();
-    void stopSmartNoise(QString);
-    int tabPress{};
-    QWidget * wigRecover;
-    bool firstTime{true};
-    QVector<long long int>    frqTimeVec;
-    QVector<double>  frqValVec;
-    QVector<double>  powerValVec;
-    QVector<QString> modValVec;
-    int counter{};
-
-    bool isShow{false};
-    bool isRffCalibOn{false};
-
-    QVector<double> frqCalibVec   = QVector<double> (700,0);
-    QVector<double> powerCalibVec = QVector<double> (700,0);
-    QVector<double> frqCardVec    = QVector<double> (700,0);
-    QVector<double> powerCardVec  = QVector<double> (700,0);
-
-    void sendFrqToCalibDevice();
-    void sendPowerToCalibDevice();
-    bool isCalibAllowedToSend{true};
-    double newPowerCalib{};
-    double newFrqCalib{};
-    double calibVal{};
-    int cntCalib{};
-    QTimer * checkIfValuesSetOnSG;
-    QTimer * calibPowerTimer;
-    int holdIndexFrqCalib{};
-    int holdIndexTblUser{-10};
-    QString userNameInFile{};
-//    int cntFrqCalib{};
-//    int cntPowerCalib{};
-    double frqCalibHold{};
-
-
-    //calibration
-    void startCalibSending();
-    bool isCalibAllowed {false};
-
-    QString modeCalib{};
-    bool isFrqSetOnCalib{false};
-    bool isPowerSetOnCalib{false};
-    double powNw{};
-    QVector<double> sgFrqInCalibFile;
-    QVector<double> sgPowerInCalibFile;
-    QVector<double> cardPowerInCalibFile;
-    double minFrqVal{50000};
-
-
-private slots:
-    void on_btnSetTH_clicked();
-    void on_btnSetTHCW_clicked();
-    void on_tabWidget_currentChanged(int index);
-    void on_btnFrqSeek_clicked();
-    void on_label_43_linkActivated(const QString &link);
-    void on_cmbTransmit_activated(int index);
-
-    void on_chbEn_PATTERN_clicked(bool checked);
-
-    //    void on_tabWidgetSetting_tabBarClicked(int index);
-
-    void on_btnReboot_clicked(bool checked);
-
-    void on_tableWidget_2_cellClicked(int row, int column);
-
-
-    void on_pushButton_clicked();
-
-    void on_tblCW_cellClicked(int row, int column);
-
-
-    void on_btnNewUser_clicked();
-
-    void on_tabWidget_tabBarClicked(int index);
-
-    void on_btnLogin_clicked();
-
-    void on_btnLogout_clicked(bool checked);
-
-    void on_btnRecovery_clicked(bool checked);
-
-    void on_btnNewAdmin_clicked(bool checked);
-
-    void on_btnSaveLimit_clicked(bool checked);
-
-    void on_btnShowUser_clicked(bool checked);
-
-    void on_btnCalib_clicked(bool checked);
-
-    void on_btnCalibRff_clicked(bool checked);
-
-//    void on_btnLimitation_clicked();
-    void checkingCalibResponseInSpectromSlot(double, double);
-
-
-    void on_btnStopCalib_clicked();
-
-//    void on_chbCalib_stateChanged(int arg1);
+    /**
+     * @brief Emitted when active profile bandwidth changes (100, 200, 400 MHz).
+     * @param bwMhz Bandwidth in MHz.
+     */
+    void profileBandwidthChanged(int bwMhz);
+
+    /**
+     * @brief Emitted when TX calibration or attenuation changes.
+     * @param rfFrqMhz Current RF frequency.
+     * @param tx1AttenDb TX1 attenuation in dB.
+     * @param tx2AttenDb TX2 attenuation in dB.
+     */
+    void txCalibChangedSignal(double rfFrqMhz, double tx1AttenDb, double tx2AttenDb);
+
+    /**
+     * @brief Emitted when user logs in with authenticated role.
+     * @param isLoggedIn True if logged in.
+     * @param role User permission role.
+     */
+    void userLoggedInSignal(bool isLoggedIn, QString role);
+
+    /**
+     * @brief Emitted to transmit command byte array to peripheral device.
+     * @param cmd Byte array command.
+     */
+    void sendCommandToDeviceSignal(QByteArray cmd);
+
+    /**
+     * @brief Emitted when seeking status changes.
+     * @param msg Status message string.
+     */
+    void seekingStatusSignal(QString msg);
+
+    /**
+     * @brief Emitted when smart noise tracking is active.
+     * @param active True if active.
+     */
+    void smartNoiseIsActiveSignal(bool active);
+
+    // Waveform synchronization signals
+    void cwFrqSignal(double);
+    void cwPowerSignal(double);
+    void spotFrqSignal(double);
+    void spotPowerSignal(double);
+    void sweepStartFrqSignal(double);
+    void sweepStopFrqSignal(double);
+    void sweepStepSignal(double);
+    void sweepPowerSignal(double);
+    void sweepDelaySignal(int);
+    void impFrqSignal(double);
+    void impPowerSignal(double);
+    void impPwSignal(double);
+    void impPriSignal(double);
+    void wbPowerSignal(double);
+    void cwOnBtnSignal();
+    void cwOffBtnSignal();
+    void spotOnBtnSignal();
+    void spotOffBtnSignal();
+    void sweepOnBtnSignal();
+    void sweepOffBtnSignal();
+    void impOnBtnSignal();
+    void impOffBtnSignal();
+    void wbOnBtnSignal();
+    void wbOffBtnSignal();
 
 public slots:
-    void connection();
-    void ValueSlot (Pulse);
-    void frqValueChenged(QString);
-    void sendSpotFileToCart(QString);
-    void getPlotDataFromThread();
-    void histoMainPlotSlot(double, double);
-    void stopSmartNoiseSlot();
+    /**
+     * @brief Handles response byte array from peripheral devices.
+     * @param data Raw response payload.
+     */
+    void on_DeviceResponseSlot(QByteArray data);
+
+    /**
+     * @brief Handles RF frequency modifications from Exciter or UI.
+     * @param val New RF carrier frequency in MHz.
+     */
+    void frqValueChenged(double val);
+
+    /**
+     * @brief Stops all active exciter transmissions.
+     */
     void stopExciterSlot();
-    void calculatingCwTableSlot(QVector<double>,QVector<double>,QVector<QString>,QVector<long long int>);
-    void on_DeviceResponseSlot(QByteArray);
 
-
-    //    void sendLimitFrqSlot();
-    //    void histoBarPlotSlot (double, double);
-    //    void test(modesConst );
-
-
-signals:
-    void createPlotSignal1(QCustomSeries);
-    void seekingStatusSignal(QString);
-    void frqDomainIsOn();
-    void startExciterSignal();
-    void frqPltSignal();
-
-    // Phase 5: the Profile tab picked an ADRV9009 TX profile (100/200/400 MHz).
-    // Routed to the exciter so spot noise files match the active profile.
-    void profileBandwidthChanged(int bwMHz);
-
-    // Phase 6: TX calibration (Calibrated mismatch power, dB) of the
-    // Calibration tab changed - refresh every calibrated TX power display.
-    void txCalibChangedSignal(double);
-
-
-    void frqValues      (QCustomSeries a);
-    void frqValueSignal      (double,double);
-    void PAPeakValueSignal   (double,double);
-    void PASumMaxValueSignal (double,double);
-    void priValueSignal      (double,double);
-    void pwOneValueSignal    (double,double);
-    void pwTwoValueSignal    (double,double);
-    void toaValueSignal      (double,double);
-    void ChannelValueSignal  (double,double);
-    void smartNoiseIsActiveSignal  ();
-
-
-
-    void hi();
-    void cwFrqSignal        (double);
-    void cwPowerSignal      (double);
-    void spotFrqSignal      (double);
-    void spotPowerSignal    (double);
-    void sweepStartFrqSignal(double);
-    void sweepStopFrqSignal (double);
-    void sweepStepSignal    (double);
-    void sweepPowerSignal   (double);
-    void sweepDelaySignal   (double);
-    void impFrqSignal       (double);
-    void impPowerSignal     (double);
-    void impPwSignal        (double);
-    void impPriSignal       (double);
-    void wbPowerSignal      (double);
-
-
-    void cwOnBtnSignal     ();
-    void cwOffBtnSignal    ();
-    void spotOnBtnSignal   ();
-    void spotOffBtnSignal  ();
-    void sweepOnBtnSignal  ();
-    void sweepOffBtnSignal ();
-    void impOnBtnSignal    ();
-    void impOffBtnSignal   ();
-    void wbOnBtnSignal     ();
-    void wbOffBtnSignal    ();
-
-    void userLoggedInSignal(double);
-    void sendCommandToDeviceSignal(QByteArray);
-    //    void cwTabletoPlotSignal(qvdouble,double,QString);
-
+    /**
+     * @brief Disables smart noise tracking mode.
+     */
+    void stopSmartNoiseSlot();
 };
 
 #endif // RECEIVERMAIN_H

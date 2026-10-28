@@ -1,3 +1,17 @@
+/**
+ * @file dacDataManager.h
+ * @brief High-Speed DAC Buffer Management & DDS Direct Digital Synthesis for IIO Transceivers.
+ *
+ * dacDataManager manages high-speed baseband sample streams uploaded to DAC DMA cores:
+ * - Direct memory-mapped cyclic DMA buffer transfers via libiio (`iio_buffer_create`).
+ * - Formatted text and binary IQ sample parsing (signed 16-bit integers, interleaved I/Q).
+ * - Multi-tone Direct Digital Synthesis (DDS) carrier generation on hardware transceivers.
+ * - Multi-channel selection (Voltage 0/1 for TX1, Voltage 2/3 for TX2).
+ *
+ * @author eLynxSDR Development Team
+ * @version 0.0.2
+ */
+
 #ifndef DAC_DATA_MANAGER_H
 #define DAC_DATA_MANAGER_H
 
@@ -7,7 +21,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <glib.h>
-#include <receiver/iio_widget.h>
 #include <stdarg.h>
 #include <matio.h>
 #include <QTextEdit>
@@ -32,13 +45,13 @@
 #endif
 #include <unistd.h>
 
+#include "receiver/iio_widget.h"
 
 #define DDS_DISABLED  0
 #define DDS_ONE_TONE  1
 #define DDS_TWO_TONE  2
 #define DDS_INDEPDENT 3
 #define DDS_BUFFER    4
-
 
 static const gdouble abs_mhz_scale = -1000000.0;
 static const gdouble khz_scale = 1000.0;
@@ -55,7 +68,6 @@ static char * dma_devices[] = {
 
 #define DMA_DEVICES_COUNT (sizeof(dma_devices) / sizeof(dma_devices[0]))
 
-
 enum dds_tone_type {
     TONE_I,
     TONE_Q
@@ -68,234 +80,97 @@ enum dds_tone_index {
 
 enum dds_widget_type {
     WIDGET_FREQUENCY,
+    WIDGET_PHASE,
     WIDGET_SCALE,
-    WIDGET_PHASE
+    WIDGET_RAW,
+    WIDGET_SAMPLING_FREQ,
+    WIDGET_COUNT
 };
 
-
-struct _complex_ref {
-    double *re;
-    double *im;
+struct dds_widget {
+    QDoubleSpinBox * spin;
+    gdouble scale;
+    gdouble default_value;
+    struct iio_channel * chn;
+    const char * attr_name;
+    const char * channel_name;
 };
-
-
-
-#define I_CHANNEL 'I'
-#define Q_CHANNEL 'Q'
-
-#define FREQUENCY_SPIN_DIGITS 6
-#define SCALE_SPIN_DIGITS 0
-#define PHASE_SPIN_DIGITS 3
-
-#define SCALE_MINUS_INFINITE -91
-
-#define TX_NB_TONES 4
-#define CHANNEL_NB_TONES 2
-
-#define TX_T1_I 0
-#define TX_T2_I 1
-#define TX_T1_Q 2
-#define TX_T2_Q 3
-
-
-#define IIO_SPIN_SIGNAL "value-changed"
-#define IIO_COMBO_SIGNAL "changed"
-
-#define TX_CHANNEL_NAME 0
-#define TX_CHANNEL_ACTIVE 1
-#define TX_CHANNEL_REF_INDEX 2
-
-#define WAVEFORM_TXT_INVALID_FORMAT 1
-#define WAVEFORM_MAT_INVALID_FORMAT 2
-
-
-#define TONE_ID "altvoltage"
-#define TONE_ID_SIZE (sizeof(TONE_ID) - 1)
-
-
 
 struct dds_tone {
-    struct dds_channel *parent;
-
-    unsigned number;
-    struct iio_device *iio_dac;
-    struct iio_channel *iio_ch;
-
-    struct iio_widget iio_freq;
-    struct iio_widget iio_scale;
-    struct iio_widget iio_phase;
-
-    double scale_state;
-
-    gint dds_freq_hid;
-    gint dds_scale_hid;
-    gint dds_phase_hid;
-
-    QDoubleSpinBox *freq;
-    QDoubleSpinBox *scale;
-    QDoubleSpinBox *phase;
-    QGroupBox *frame;
+    struct dds_widget widgets[WIDGET_COUNT];
+    int index;
+    int type;
 };
 
 struct dds_channel {
-    struct dds_tx *parent;
-
-    char type;
-    struct dds_tone t1;
-    struct dds_tone t2;
-
-    QGroupBox *frame;
-};
-
-struct dds_tx {
-    struct dds_dac *parent;
-
-    unsigned index;
-    struct dds_channel ch_i;
-    struct dds_channel ch_q;
-    struct dds_tone *dds_tones[4];
-
-    QGroupBox *frame;
-    QComboBox *dds_mode_widget;
-};
-
-struct dds_dac {
-    struct dac_data_manager *parent;
-
-    unsigned index;
-    const char *name;
-    struct iio_device *iio_dac;
-    unsigned tx_count;
-    struct dds_tx *txs;
+    struct dds_tone tones[2];
+    int index;
+    const char * name;
+    QGroupBox * dds_group;
+    QGroupBox * data_group;
     int dds_mode;
-    unsigned tones_count;
-
-    QGroupBox *frame;
+    QComboBox * dds_mode_combo;
+    QDoubleSpinBox * sampling_freq;
+    QTextEdit * dac_buffer_file;
+    bool is_tx;
 };
 
-struct dac_buffer {
-    struct dac_data_manager *parent;
-
-    QString *dac_buf_filename;
-    int scan_elements_count;
-    struct iio_device *dac_with_scanelems;
-
-    QGroupBox *frame;
-    QWidget *buffer_fchooser_btn;
-    QTreeWidget *tx_channels_view;
-    QDoubleSpinBox *scale;
-    QTextEdit *load_status_buf;
-};
-
-struct dac_data_manager {
-    struct dds_dac dac1;
-    struct dds_dac dac2;
-    struct dac_buffer dac_buffer_module;
-
-    struct iio_context *ctx;
-    unsigned dacs_count;
-    unsigned tones_count;
-    unsigned alignment;
-    bool hw_reported_alignment;
-    GSList *dds_tones;
-    bool scale_available_mode;
-    double lowest_scale_point;
-    bool dds_activated;
-    bool dds_disabled;
-    struct iio_buffer *dds_buffer;
-    bool is_local;
-
-    QHBoxLayout *container;
-
-};
-
-class dacDataManager : public QObject
+/**
+ * @class dac_data_manager
+ * @brief High-speed DAC DMA buffer and Direct Digital Synthesis manager for ADRV9009.
+ */
+class dac_data_manager : public iio_widget
 {
-
     Q_OBJECT
 
-private:
-
-
-    QComboBox *mode = new QComboBox();
-//struct dac_data_manager *manager;
-
-    int dac_channels_assign(struct dds_dac *ddac);
-    char *get_tone_name(struct iio_channel *ch);
-    char *build_default_channel_name_from_index(guint ch_index);
-    void gui_manager_create(struct dac_data_manager *manager);
-    void manager_iio_setup(struct dac_data_manager *manager);
-    void dac_data_manager_free(struct dac_data_manager *manager);
-    void dac_buffer_init(struct dac_data_manager *manager, struct dac_buffer *d_buffer);
-    int device_scan_elements_count(struct iio_device *dev);
-    unsigned get_iio_tones_count(struct iio_device *dev);
-    void dds_non_iq_tx_init(struct dds_dac *ddac, struct dds_tx *tx, unsigned dds_index);
-    void dds_tx_init(struct dds_dac *ddac, struct dds_tx *tx, unsigned dds_index);
-    void enable_dds(dac_data_manager *manager, bool on_off);
-
-    QGroupBox *gui_dac_create(dds_dac *ddac);
-    QGroupBox *gui_tx_create(dds_tx *tx);
-    QGroupBox *gui_channel_create(dds_channel *ch);
-    QGroupBox *gui_tone_create(dds_tone *tone);
-    QFrame *gui_dds_mode_chooser_create(dds_tx *tx);
-    QGroupBox *frame_with_table_create(const char *frm_title);
-    int parse_wavefile_line(const char *line, double *vals, unsigned int max_num_vals);
-    int analyse_wavefile(dac_data_manager *manager, const char *file_name, char **buf, int *count, int tx_channels, double full_scale);
-    double dac_offset_get_value(iio_device *dac);
-    bool tx_channels_check_valid_setup(dac_buffer *dbuf);
-    bool dma_valid_selection(const char *device, unsigned int mask, unsigned int channel_count);
-    const char *get_adi_part_code(const char *device_name);
-    int tx_enabled_channels_count(QTreeWidget *treeview, unsigned int *enabled_mask);
-    unsigned short convert(double scale, float val, double offset);
-    void replicate_tx_data_channels(_complex_ref *data, int count);
-    void freq_spin_range_update(dds_tone *tone, double tx_sample_rate);
-    void freeChannel(char *ch_name);
-
-    void enable_dds_channels(dac_buffer *db);
-    static double db_full_scale_convert(double value, bool inverse);
-    static int compare_gain(const char *a, const char *b);
-    static void save_scale_widget_value(void *data);
-    void dds_scale_set_value(QWidget *scale, gdouble value);
-    double dds_scale_get_value(QWidget *scale);
-    void tone_setup(dds_tone *tone);
-    void dds_tone_iio_widgets_update(dds_tone *tone);
 public:
+    /**
+     * @brief Constructs dac_data_manager widget.
+     * @param dev IIO device handle for DAC / TX core.
+     * @param can_change_mode Whether DDS mode can be altered dynamically.
+     * @param is_tx True if managing transmit channels.
+     * @param has_buffer Whether device supports cyclic DMA sample buffers.
+     * @param has_independent_dds Whether channel supports dual independent DDS tones.
+     * @param has_cw_mode Whether channel supports single CW tone mode.
+     */
+    dac_data_manager(struct iio_device * dev,
+                     bool can_change_mode,
+                     bool is_tx,
+                     bool has_buffer,
+                     bool has_independent_dds,
+                     bool has_cw_mode);
 
-    explicit dacDataManager(QObject *parent = nullptr);
-    struct dac_data_manager *dac_data_manager_new(struct iio_device *dac,
-                                                  struct iio_device *second_dac, struct iio_context *ctx);
-    void dac_data_manager_set_buffer_size_alignment(struct dac_data_manager *manager, unsigned align);
-    int dac_manager_init(struct dac_data_manager *manager,
-                         struct iio_device *dac, struct iio_device *second_dac, struct iio_context *ctx);
-    int dds_dac_init(struct dac_data_manager *manager,
-                     struct dds_dac *ddac, struct iio_device *iio_dac);
-    int manager_channels_assign(struct dac_data_manager *manager);
-    void dac_data_manager_update_iio_widgets(struct dac_data_manager *manager);
-    QHBoxLayout *dac_data_manager_get_gui_container(struct dac_data_manager *manager);
+    ~dac_data_manager();
 
-    void manage_dds_mode(QComboBox *box,dds_tx *tx);
-    void dds_locked_scale_cb(dds_tx *tx);
-    void dds_locked_phase_cb(dds_tx *tx);
-    void dds_locked_freq_cb(dds_tx *tx);
-    gboolean scale_spin_button_output_cb(QDoubleSpinBox *spin, gpointer data);
-    QGroupBox *gui_dac_buffer_create(dac_buffer *d_buffer);
-    void waveform_load_button_clicked_cb(dac_buffer *dbuf);
-    int process_dac_buffer_file(dac_data_manager *manager, const char *file_name, char **stat_msg);
-    void dac_buffer_config_file_set_cb(QString fileName, dac_buffer &dbuf);
-    QScrollArea *gui_dac_channels_tree_create(dac_buffer *d_buffer);
-    void dac_data_manager_freq_widgets_range_update(dac_data_manager *manager, double tx_sample_rate);
-    QString setFile(QString fileName,double scale );
+    /**
+     * @brief Loads an IQ sample file and streams it to the cyclic DAC DMA buffer.
+     * @param file Path to IQ sample file.
+     * @param scale Digital scaling multiplier.
+     * @param voltage01 Route to TX1 (voltage0 / voltage1).
+     * @param voltage23 Route to TX2 (voltage2 / voltage3).
+     * @return Status description message.
+     */
+    QString setFile(QString file, double scale = 1.0,
+                    bool voltage01 = true, bool voltage23 = true);
+
+    /**
+     * @brief Disables DAC transmission and destroys active DMA buffers.
+     */
     void DisableDac();
-//    dac_data_manager *manager;
-    QComboBox * dfdf;
 
-//    QPushButton *fchooser_btn;
+    /**
+     * @brief Configures DDS tone parameters across transmit channels.
+     * @param freqMHz Tone frequency in MHz.
+     * @param scaleDbfs Tone scale in dBFS.
+     * @param phaseDeg Tone phase in degrees.
+     */
+    void setCwDdsParams(double freqMHz, double scaleDbfs, double phaseDeg);
 
-public slots:
-    void getData(bool);
-    void getVal(QComboBox*, bool);
-
-
+private:
+    struct iio_device * dac_device;
+    struct iio_buffer * dac_buf;
+    bool m_is_tx;
+    bool m_has_buffer;
 };
 
 #endif // DAC_DATA_MANAGER_H

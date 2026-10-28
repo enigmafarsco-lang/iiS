@@ -1,6 +1,16 @@
+/**
+ * @file mainwindow.cpp
+ * @brief Implementation of the Master Application Window & Subsystem Orchestrator.
+ */
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/**
+ * @brief Constructor for MainWindow.
+ * Sets up child UI forms, establishes subsystem TCP/UDP sockets, binds signals,
+ * and initializes window sizing and visual group styling.
+ */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -10,12 +20,13 @@ MainWindow::MainWindow(QWidget *parent)
     connections();
     this->setWindowTitle("eLynxSDR v0.0.2");
 
+    // Configure flexible window geometry for multi-monitor workstations
     this->setMinimumSize(1024, 700);
     this->resize(1270, 980);
 
     if(receiverIsConnected) emit exciterConnectionStatus(receiverWindow->isConnect);
-    //    isAdrvConnect = receiverWindow->isConnect;
 
+    // Apply styled borders to status group boxes
     ui->groupBox->setObjectName("1");
     ui->groupBox->setStyleSheet("QGroupBox#1 {border: 2px solid "+QString(GE)+"}");
 
@@ -30,9 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->groupBox_5->setObjectName("5");
     ui->groupBox_5->setStyleSheet("QGroupBox#5 {border: 2px solid "+QString(GE)+"}");
-
-
 }
+
 
 
 class delay:public QThread

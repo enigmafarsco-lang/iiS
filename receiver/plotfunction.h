@@ -1,31 +1,57 @@
-﻿#ifndef PLOTFUNCTION_H
+/**
+ * @file plotfunction.h
+ * @brief Threaded DSP Plot & Histogram Processor for Radar Pulse Parameter Visualizations.
+ *
+ * plotfunction provides real-time time-domain, frequency-domain, and statistical
+ * histogram calculations for radar pulse characteristics (TOA, PW, PRI, Peak Power, Frequency).
+ * It runs in a dedicated worker thread to prevent GUI latency during high PRF signal streams.
+ *
+ * @author eLynxSDR Development Team
+ * @version 0.0.2
+ */
+
+#ifndef PLOTFUNCTION_H
 #define PLOTFUNCTION_H
 
 #include <QObject>
 #include <QThread>
-#include "components/chart/qcustomplot.h"
+#include <QMap>
+#include <QVector>
 #include <unordered_map>
-#include "iostream"
+#include <iostream>
+
+#include "components/chart/qcustomplot.h"
 #include "components/GLChart/QGLchart.h"
 
+/**
+ * @class plotfunction
+ * @brief Multi-threaded radar pulse parameter calculator and histogram renderer.
+ */
 class plotfunction : public QThread
 {
     Q_OBJECT
+
     int plottingValues(const double *val, QCustomPlot *plot, QVector<double> *x, QVector<double> *y, double min, double max, int count);
     void fillHistoramArray(int type, QCustomPlot *plot, double *val, int cnt);
     void plotHistogram(QCustomPlot *plot, std::unordered_map<double, double> *histogramData);
-
 
     QCPAxisRect * wideAxisRect = nullptr;
     QCPBars     * bars1        = nullptr;
     QCPGraph    * mainGraph;
     QCustomPlot * plot;
 
-
-
 public:
-    explicit plotfunction(QObject *parent =      nullptr);
+    /**
+     * @brief Constructs plotfunction worker.
+     * @param parent Optional parent QObject pointer.
+     */
+    explicit plotfunction(QObject *parent = nullptr);
+
+    /**
+     * @brief Destructor.
+     */
     ~plotfunction();
+
     double centerFrq{};
     double maximumFinder(double *, double *);
     double minimumFinder(double *, double *);
@@ -39,7 +65,6 @@ public:
     double PW2Max{0};
     double TOAMax{0};
     double ChannelMax{0};
-
 
     double xMax{};
     double xMin{9999999999};
@@ -58,69 +83,49 @@ public:
     int clickCnt{};
     int frqValue{};
 
-    void setPlot(QCustomPlot *);
+    /**
+     * @brief Binds target QCustomPlot canvas.
+     * @param p Pointer to QCustomPlot widget.
+     */
+    void setPlot(QCustomPlot *p);
 
-    void setHistoPlot(QCustomPlot *);
+    /**
+     * @brief Binds target histogram QCustomPlot canvas.
+     * @param p Pointer to QCustomPlot widget.
+     */
+    void setHistoPlot(QCustomPlot *p);
+
+    /**
+     * @brief Creates time-domain plot setup.
+     */
     void creatingTimePlot();
-    void creatingHistogramPlot();
 
+    /**
+     * @brief Creates histogram plot setup.
+     */
+    void creatingHistogramPlot();
 
     QMap<double, int> tmpMap;
     QMap<double, double> tmp2Map;
-    //    QMap<double, int>::const_iterator it;
-//    std::unordered_map<int, double> tmp2Map;
-    //    std::unordered_map<double, double> priMap;
-    //    std::unordered_map<double, double> piSumMap;
 
-    QVector<double> xAxisVal,     yAxisVal;
-    QVector<double*> PW1,     yPW1;
-    QVector<double*> PW2,     yPW2;
-    QVector<double*> PAPEAK,  yPAPEAK;
-    QVector<double*> PASUM,   yPASUM;
-    QVector<double*> TOA,     yTOA;
-    QVector<double*> CHANNEL, yCHANNEL;
-    QVector<double*> PRI,     yPRI;
-    QTimer dataTimer;
-    QCustomPlot * customPlot = nullptr;
-    QCustomPlot * histogramPlot = nullptr;
-
-    QTime timeStart = QTime::currentTime();
-    double lastPointKey = 0;
-    double lastFpsKey;
-    int frameCount;
-    //    QVector<double>
-    QString plotName;
-
-
-    QVector2D  vec;
-    QCustomSeries a;
-    int cnt{};
-
-
-
-
-    void calculateHistogram(double *);
-    //    void histPlot();
 public slots:
-    //    void realtimeDataSlot();
-    //    void ValueSlot(double,QCustomPlot *);
-    //    void ValueSlot();
+    /**
+     * @brief Main slot ingesting incoming pulse telemetry data.
+     * @param val Raw value string.
+     * @param mode Measurement type (1=FRQ, 2=PAPeak, 3=PASum, 4=PRI, 5=PW, 6=PW2, 7=TOA, 8=Channel).
+     */
+    void ValueSlot(QString val, int mode);
 
+    /**
+     * @brief Clears accumulated plot buffers.
+     */
+    void clearPlot();
 
-    void mainPlot(double,double);
-    //    void histoPlot(double,double);
-    void pltGetDataSlot(double x, double y);
 signals:
-    void pltShow(QCustomPlot*);
-    void histoMainPlotSignal( double, double);
-    void histoBarPlotSignal (QVector<double>, QVector<double>);
-
-    void pltUpdateSignal(QCustomSeries);
-
-
-    // QThread interface
-protected:
-    void run();
+    /**
+     * @brief Emitted to trigger UI repaint.
+     */
+    void replotSignal();
 };
 
 #endif // PLOTFUNCTION_H
